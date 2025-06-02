@@ -1,14 +1,18 @@
+
 "use client";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Dumbbell, CheckCircle, Activity } from "lucide-react";
+import { useWorkout } from "@/contexts/WorkoutContext";
+import { EXERCISES } from "@/lib/constants";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import * as z from "zod";
 import {
   Form,
@@ -20,7 +24,7 @@ import {
 } from "@/components/ui/form";
 
 const workoutSchema = z.object({
-  exercise: z.string().min(2, { message: "Must be at least 2 characters."}).max(50, { message: "Must be 50 characters or less."}),
+  exerciseId: z.string().min(1, { message: "Please select an exercise." }),
   sets: z.coerce.number().min(1, { message: "Min 1 set."}).max(100, {message: "Max 100 sets."}),
   reps: z.coerce.number().min(1, { message: "Min 1 rep."}).max(100, {message: "Max 100 reps."}),
   weight: z.coerce.number().min(0, { message: "Min 0 weight."}).max(1000, {message: "Max 1000 weight."}),
@@ -28,22 +32,16 @@ const workoutSchema = z.object({
 
 type WorkoutFormValues = z.infer<typeof workoutSchema>;
 
-const exampleExercises = ["Bench Press", "Squat", "Deadlift", "Overhead Press", "Bicep Curl", "Tricep Extension", "Lat Pulldown", "Row"];
-const exampleMuscles = ["Chest", "Triceps", "Shoulders", "Quads", "Hamstrings", "Glutes", "Back", "Biceps", "Lats"];
-
-function getRandomElement<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
 export function WorkoutLogger() {
   const [feedback, setFeedback] = useState<string | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const { toast } = useToast();
+  const { addWorkout, getExerciseById } = useWorkout();
 
   const form = useForm<WorkoutFormValues>({
     resolver: zodResolver(workoutSchema),
     defaultValues: {
-      exercise: "",
+      exerciseId: "",
       sets: 3,
       reps: 10,
       weight: 0,
@@ -59,19 +57,36 @@ export function WorkoutLogger() {
   }, [feedback]);
 
   function onSubmit(data: WorkoutFormValues) {
-    const targetedMuscles = `${getRandomElement(exampleMuscles)}, ${getRandomElement(exampleMuscles)} (Simulated)`;
-    setFeedback(`Logged: ${data.exercise}. Targeted: ${targetedMuscles}. Diagram updated!`);
+    addWorkout(data);
+    const exercise = getExerciseById(data.exerciseId);
+    const exerciseName = exercise ? exercise.name : "Selected exercise";
+    
+    const primaryMuscles = exercise?.primaryMuscles.join(', ') || 'target muscles';
+    const secondaryMuscles = exercise?.secondaryMuscles.join(', ') || '';
+    let targetedMusclesString = `Primary: ${primaryMuscles}`;
+    if (secondaryMuscles) {
+      targetedMusclesString += `; Secondary: ${secondaryMuscles}`;
+    }
+
+    setFeedback(`Logged: ${exerciseName}. Targeted: ${targetedMusclesString}. Diagram updated!`);
     toast({
       title: "Workout Logged!",
       description: (
         <div className="flex items-center">
           <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-          <span>{data.exercise} added successfully.</span>
+          <span>{exerciseName} added successfully.</span>
         </div>
       ),
       duration: 3000,
     });
-    form.reset({ exercise: getRandomElement(exampleExercises), sets: Math.floor(Math.random()*3)+2, reps: Math.floor(Math.random()*8)+5, weight: Math.floor(Math.random()*50)+10 });
+    
+    const randomExercise = EXERCISES[Math.floor(Math.random() * EXERCISES.length)];
+    form.reset({ 
+        exerciseId: randomExercise.id, 
+        sets: Math.floor(Math.random()*3)+2, 
+        reps: Math.floor(Math.random()*8)+5, 
+        weight: Math.floor(Math.random()*50)+10 
+    });
   }
 
   return (
@@ -88,13 +103,24 @@ export function WorkoutLogger() {
           <CardContent className="space-y-4 p-4 flex-grow">
             <FormField
               control={form.control}
-              name="exercise"
+              name="exerciseId"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Exercise Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., Bench Press" {...field} className="bg-background/50"/>
-                  </FormControl>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="bg-background/50">
+                        <SelectValue placeholder="Select an exercise" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {EXERCISES.map((exercise) => (
+                        <SelectItem key={exercise.id} value={exercise.id}>
+                          {exercise.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
