@@ -6,7 +6,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { BarChart3, TrendingUp, AlertTriangleIcon } from "lucide-react";
 import Image from "next/image";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
-import { Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, BarChart as RechartsBarChart } from "recharts";
+import { Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, BarChart as RechartsBarChart, Cell } from "recharts";
 import { useWorkout } from "@/contexts/WorkoutContext";
 import { Muscle, MAJOR_MUSCLE_GROUPS, MUSCLE_VOLUME_THRESHOLDS } from "@/lib/constants";
 
@@ -85,7 +85,7 @@ export function ProgressAnalytics() {
                 <ChartLegend content={<ChartLegendContent />} />
                 <Bar dataKey="volume" layout="vertical" radius={[0, 4, 4, 0]}>
                   {chartData.map((entry) => (
-                     <RechartsPrimitive.Cell key={`cell-${entry.group}`} fill={`var(--color-${entry.group})`} />
+                     <Cell key={`cell-${entry.group}`} fill={chartConfig[entry.group as keyof typeof chartConfig]?.color || 'hsl(var(--muted))'} />
                   ))}
                 </Bar>
               </RechartsBarChart>
@@ -121,4 +121,3 @@ export function ProgressAnalytics() {
     </Card>
   );
 }
-
