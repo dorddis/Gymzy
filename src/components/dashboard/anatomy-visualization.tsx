@@ -35,8 +35,8 @@ const AnatomyFigureSvg = ({ muscleVolumes, view }: { muscleVolumes: ReturnType<t
   const bodyStrokeColor = "hsl(var(--foreground) / 0.3)";
   const bodyFillColor = "hsl(var(--muted) / 0.1)";
 
-  // Simplified path for a generic body outline
-  const bodyOutlinePath = "M150,50 Q140,30 120,30 Q80,30 70,70 Q70,110 90,130 L90,270 Q90,310 70,330 L70,450 Q70,480 100,480 L200,480 Q230,480 230,450 L230,330 Q210,310 210,270 L210,130 Q230,110 230,70 Q220,30 180,30 Q160,30 150,50 Z";
+  // Slightly refined body outline path
+  const bodyOutlinePath = "M150,40 Q140,25 120,25 Q80,25 65,65 Q60,110 85,135 L85,270 Q85,310 65,335 L65,455 Q70,485 100,485 L200,485 Q230,485 235,455 L235,335 Q215,310 215,270 L215,135 Q240,110 235,65 Q220,25 180,25 Q160,25 150,40 Z";
 
   return (
     <svg viewBox="0 0 300 500" width="100%" height="100%" aria-labelledby="anatomy-title" role="img">
@@ -45,42 +45,56 @@ const AnatomyFigureSvg = ({ muscleVolumes, view }: { muscleVolumes: ReturnType<t
 
       {view === 'front' && (
         <>
-          {/* Pectoralis Major */}
-          <path d="M115,135 Q150,125 185,135 Q190,180 150,195 Q110,180 115,135 Z" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.PectoralisMajor])} stroke={bodyStrokeColor} strokeWidth="1" />
-          {/* Rectus Abdominis */}
-          <rect x="130" y="200" width="40" height="70" rx="5" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.RectusAbdominis])} stroke={bodyStrokeColor} strokeWidth="1" />
-          {/* Anterior Deltoid */}
-          <ellipse cx="105" cy="135" rx="25" ry="30" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.AnteriorDeltoid])} stroke={bodyStrokeColor} strokeWidth="1" />
-          <ellipse cx="195" cy="135" rx="25" ry="30" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.AnteriorDeltoid])} stroke={bodyStrokeColor} strokeWidth="1" />
-          {/* Biceps Brachii */}
-          <ellipse cx="100" cy="190" rx="15" ry="35" transform="rotate(-10 100 190)" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.BicepsBrachii])} stroke={bodyStrokeColor} strokeWidth="1" />
-          <ellipse cx="200" cy="190" rx="15" ry="35" transform="rotate(10 200 190)" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.BicepsBrachii])} stroke={bodyStrokeColor} strokeWidth="1" />
-          {/* Quadriceps */}
-          <path d="M100,275 Q100,350 120,420 L135,420 Q150,350 150,275 Z" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.Quadriceps])} stroke={bodyStrokeColor} strokeWidth="1" />
-          <path d="M150,275 Q150,350 165,420 L180,420 Q200,350 200,275 Z" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.Quadriceps])} stroke={bodyStrokeColor} strokeWidth="1" />
+          {/* Pectoralis Major - refined shape */}
+          <path d="M115,135 C120,130 180,130 185,135 C195,150 190,175 185,185 C170,195 130,195 115,185 C110,175 105,150 115,135 Z" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.PectoralisMajor])} stroke={bodyStrokeColor} strokeWidth="1" />
+          
+          {/* Rectus Abdominis - more detailed "abs" */}
+          <path d="M132,200 C130,200 130,225 132,225 L132,228 C130,228 130,250 132,250 L132,253 C130,253 130,270 132,270 L168,270 C170,270 170,253 168,253 L168,250 C170,250 170,228 168,228 L168,225 C170,225 170,200 168,200 Z 
+                   M132,225 L168,225 M132,250 L168,250" 
+                fill={getMuscleSvgFillColor(muscleVolumes[Muscle.RectusAbdominis])} stroke={bodyStrokeColor} strokeWidth="1" />
+          <line x1="150" y1="200" x2="150" y2="270" stroke={bodyStrokeColor} strokeWidth="0.5" />
+
+
+          {/* Anterior Deltoid - more shoulder-like */}
+          <path d="M95,125 C85,130 80,150 90,160 C95,165 110,160 115,145 C118,135 110,125 95,125 Z" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.AnteriorDeltoid])} stroke={bodyStrokeColor} strokeWidth="1" />
+          <path d="M205,125 C215,130 220,150 210,160 C205,165 190,160 185,145 C182,135 190,125 205,125 Z" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.AnteriorDeltoid])} stroke={bodyStrokeColor} strokeWidth="1" />
+          
+          {/* Biceps Brachii - more defined */}
+          <path d="M90,170 C85,180 85,210 95,220 C105,225 110,210 105,190 C100,175 95,170 90,170 Z" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.BicepsBrachii])} stroke={bodyStrokeColor} strokeWidth="1" />
+          <path d="M210,170 C215,180 215,210 205,220 C195,225 190,210 195,190 C200,175 205,170 210,170 Z" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.BicepsBrachii])} stroke={bodyStrokeColor} strokeWidth="1" />
+
+          {/* Quadriceps - more detailed thigh muscles */}
+          <path d="M100,280 C95,320 100,380 115,425 L130,425 C135,380 145,320 145,280 Q125,270 100,280 Z" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.Quadriceps])} stroke={bodyStrokeColor} strokeWidth="1" />
+          <path d="M155,280 C155,320 165,380 170,425 L185,425 C200,380 205,320 200,280 Q175,270 155,280 Z" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.Quadriceps])} stroke={bodyStrokeColor} strokeWidth="1" />
         </>
       )}
 
       {view === 'back' && (
         <>
-          {/* Trapezius */}
-          <path d="M130,115 Q150,105 170,115 L180,170 L150,190 L120,170 Z" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.Trapezius])} stroke={bodyStrokeColor} strokeWidth="1" />
-          {/* Latissimus Dorsi */}
-          <path d="M110,170 Q90,250 125,280 L175,280 Q210,250 190,170 Z" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.LatissimusDorsi])} stroke={bodyStrokeColor} strokeWidth="1" />
-           {/* Erector Spinae */}
-          <rect x="135" y="190" width="30" height="90" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.ErectorSpinae])} stroke={bodyStrokeColor} strokeWidth="1"/>
-          {/* Posterior Deltoid */}
-          <ellipse cx="105" cy="135" rx="25" ry="30" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.PosteriorDeltoid])} stroke={bodyStrokeColor} strokeWidth="1" />
-          <ellipse cx="195" cy="135" rx="25" ry="30" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.PosteriorDeltoid])} stroke={bodyStrokeColor} strokeWidth="1" />
-          {/* Triceps Brachii */}
-          <ellipse cx="100" cy="195" rx="15" ry="40" transform="rotate(-5 100 195)" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.TricepsBrachii])} stroke={bodyStrokeColor} strokeWidth="1" />
-          <ellipse cx="200" cy="195" rx="15" ry="40" transform="rotate(5 200 195)" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.TricepsBrachii])} stroke={bodyStrokeColor} strokeWidth="1" />
-          {/* Gluteus Maximus */}
-          <ellipse cx="125" cy="300" rx="35" ry="30" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.GluteusMaximus])} stroke={bodyStrokeColor} strokeWidth="1" />
-          <ellipse cx="175" cy="300" rx="35" ry="30" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.GluteusMaximus])} stroke={bodyStrokeColor} strokeWidth="1" />
-          {/* Hamstrings */}
-          <path d="M105,330 Q110,400 125,430 L135,430 Q145,400 150,330 Z" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.Hamstrings])} stroke={bodyStrokeColor} strokeWidth="1" />
-           <path d="M150,330 Q155,400 165,430 L175,430 Q190,400 195,330 Z" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.Hamstrings])} stroke={bodyStrokeColor} strokeWidth="1" />
+          {/* Trapezius - refined shape */}
+          <path d="M130,110 C125,120 120,150 135,175 L150,190 L165,175 C180,150 175,120 170,110 Q150,100 130,110 Z" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.Trapezius])} stroke={bodyStrokeColor} strokeWidth="1" />
+          
+          {/* Latissimus Dorsi - "wings" */}
+          <path d="M105,175 C90,200 90,260 120,290 L180,290 C210,260 210,200 195,175 L180,185 Q150,195 120,185 Z" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.LatissimusDorsi])} stroke={bodyStrokeColor} strokeWidth="1" />
+          
+          {/* Erector Spinae - refined */}
+          <path d="M138,195 C135,230 135,270 138,290 L162,290 C165,270 165,230 162,195 Z" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.ErectorSpinae])} stroke={bodyStrokeColor} strokeWidth="1"/>
+          
+          {/* Posterior Deltoid - more shoulder-like */}
+          <path d="M95,125 C85,130 80,150 90,160 C95,165 110,160 115,145 C118,135 110,125 95,125 Z" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.PosteriorDeltoid])} stroke={bodyStrokeColor} strokeWidth="1" />
+          <path d="M205,125 C215,130 220,150 210,160 C205,165 190,160 185,145 C182,135 190,125 205,125 Z" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.PosteriorDeltoid])} stroke={bodyStrokeColor} strokeWidth="1" />
+          
+          {/* Triceps Brachii - more defined */}
+          <path d="M90,175 C88,185 90,215 100,225 C108,230 110,215 105,195 C100,180 95,175 90,175 Z" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.TricepsBrachii])} stroke={bodyStrokeColor} strokeWidth="1" />
+          <path d="M210,175 C212,185 210,215 200,225 C192,230 190,215 195,195 C200,180 205,175 210,175 Z" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.TricepsBrachii])} stroke={bodyStrokeColor} strokeWidth="1" />
+          
+          {/* Gluteus Maximus - more rounded */}
+          <path d="M100,290 C90,300 90,330 110,340 C130,345 140,330 140,310 C140,295 125,285 100,290 Z" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.GluteusMaximus])} stroke={bodyStrokeColor} strokeWidth="1" />
+          <path d="M200,290 C210,300 210,330 190,340 C170,345 160,330 160,310 C160,295 175,285 200,290 Z" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.GluteusMaximus])} stroke={bodyStrokeColor} strokeWidth="1" />
+          
+          {/* Hamstrings - more detailed */}
+          <path d="M105,340 C100,370 105,410 120,435 L130,435 C135,410 145,370 145,340 Q125,335 105,340 Z" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.Hamstrings])} stroke={bodyStrokeColor} strokeWidth="1" />
+          <path d="M155,340 C155,370 165,410 170,435 L180,435 C195,410 200,370 195,340 Q175,335 155,340 Z" fill={getMuscleSvgFillColor(muscleVolumes[Muscle.Hamstrings])} stroke={bodyStrokeColor} strokeWidth="1" />
         </>
       )}
     </svg>
