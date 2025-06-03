@@ -1,65 +1,30 @@
-// src/lib/constants.ts
 
-/**
- * ────────────────────────────────────────────────────────────────────────────
- * 1) Exported enum `Muscle`: every muscle you reference in your app.
- *    We give each enum member a string value (exactly how it should be displayed).
- *
- *    You must export it so that other files (e.g. your Anatomy components)
- *    can import `Muscle` directly from "@/lib/constants".
- * ────────────────────────────────────────────────────────────────────────────
- */
 export enum Muscle {
   // Chest
-  PectoralisMajor   = "Pectoralis Major",
-
+  PectoralisMajor = "Pectoralis Major",
   // Shoulders
-  AnteriorDeltoid   = "Anterior Deltoid",
-  LateralDeltoid    = "Lateral Deltoid",
-  PosteriorDeltoid  = "Posterior Deltoid",
-
+  AnteriorDeltoid = "Anterior Deltoid",
+  LateralDeltoid = "Lateral Deltoid",
+  PosteriorDeltoid = "Posterior Deltoid",
   // Back
-  LatissimusDorsi   = "Latissimus Dorsi",
-  Trapezius         = "Trapezius",
-  Rhomboids         = "Rhomboids",
-  ErectorSpinae     = "Erector Spinae",
-
+  LatissimusDorsi = "Latissimus Dorsi",
+  Trapezius = "Trapezius",
+  Rhomboids = "Rhomboids",
+  ErectorSpinae = "Erector Spinae",
   // Arms
-  BicepsBrachii     = "Biceps Brachii",
-  TricepsBrachii    = "Triceps Brachii",
-  Forearms          = "Forearms",
-
+  BicepsBrachii = "Biceps Brachii",
+  TricepsBrachii = "Triceps Brachii",
+  Forearms = "Forearms",
   // Legs
-  Quadriceps        = "Quadriceps",
-  Hamstrings        = "Hamstrings",
-  GluteusMaximus    = "Gluteus Maximus",
-  Calves            = "Calves",
-
+  Quadriceps = "Quadriceps",
+  Hamstrings = "Hamstrings",
+  GluteusMaximus = "Gluteus Maximus",
+  Calves = "Calves",
   // Core
-  RectusAbdominis        = "Rectus Abdominis",
-  Obliques               = "Obliques",
-  Brachialis             = "Brachialis",
-  Brachioradialis        = "Brachioradialis",
-  LowerTrapezius         = "Lower Trapezius",
-  SerratusAnterior       = "Serratus Anterior",
-  Soleus                 = "Soleus",
-  Sternocleidomastoid    = "Sternocleidomastoid",
-  TensorFasciaeLatae     = "Tensor Fasciae Latae",
-  TeresMajor             = "Teres Major",
-  ThoracolumbarFascia    = "Thoracolumbar Fascia",
-  AdductorMagnus         = "Adductor Magnus",
-  Semitendinosus         = "Semitendinosus",
-  Gracilis               = "Gracilis",
-  PeroneusLongus         = "Peroneus Longus",
+  RectusAbdominis = "Rectus Abdominis",
+  Obliques = "Obliques",
 }
 
-/**
- * ────────────────────────────────────────────────────────────────────────────
- * 2) Interface for an Exercise (used by your WorkoutContext).
- *
- *    Each exercise has an id, display name, list of primary muscles, list of secondary muscles.
- * ────────────────────────────────────────────────────────────────────────────
- */
 export interface Exercise {
   id: string;
   name: string;
@@ -67,12 +32,6 @@ export interface Exercise {
   secondaryMuscles: Muscle[];
 }
 
-/**
- * ────────────────────────────────────────────────────────────────────────────
- * 3) A hard-coded list of Exercises.  Each one refers to `Muscle.<Enum>`.
- *    Make sure that any `Muscle.*` you reference here actually exists in the enum above.
- * ────────────────────────────────────────────────────────────────────────────
- */
 export const EXERCISES: Exercise[] = [
   {
     id: "bench-press",
@@ -136,27 +95,18 @@ export const EXERCISES: Exercise[] = [
   },
 ];
 
-/**
- * ────────────────────────────────────────────────────────────────────────────
- * 4) Major muscle‐group grouping (for convenience).
- * ────────────────────────────────────────────────────────────────────────────
- */
 export const MAJOR_MUSCLE_GROUPS = {
-  CHEST:      [Muscle.PectoralisMajor],
-  BACK:       [Muscle.LatissimusDorsi, Muscle.Trapezius, Muscle.Rhomboids, Muscle.ErectorSpinae],
-  SHOULDERS:  [Muscle.AnteriorDeltoid, Muscle.LateralDeltoid, Muscle.PosteriorDeltoid],
-  LEGS:       [Muscle.Quadriceps, Muscle.Hamstrings, Muscle.GluteusMaximus, Muscle.Calves],
-  ARMS:       [Muscle.BicepsBrachii, Muscle.TricepsBrachii, Muscle.Forearms],
-  CORE:       [Muscle.RectusAbdominis, Muscle.Obliques],
+  CHEST: [Muscle.PectoralisMajor],
+  BACK: [Muscle.LatissimusDorsi, Muscle.Trapezius, Muscle.Rhomboids, Muscle.ErectorSpinae],
+  SHOULDERS: [Muscle.AnteriorDeltoid, Muscle.LateralDeltoid, Muscle.PosteriorDeltoid],
+  LEGS: [Muscle.Quadriceps, Muscle.Hamstrings, Muscle.GluteusMaximus, Muscle.Calves],
+  ARMS: [Muscle.BicepsBrachii, Muscle.TricepsBrachii, Muscle.Forearms],
+  CORE: [Muscle.RectusAbdominis, Muscle.Obliques],
 };
 
-/**
- * ────────────────────────────────────────────────────────────────────────────
- * 5) Arbitrary thresholds for muscle‐volume alerts/overlays.
- * ────────────────────────────────────────────────────────────────────────────
- */
+// Arbitrary thresholds for muscle volume to trigger alerts or visual cues
 export const MUSCLE_VOLUME_THRESHOLDS = {
-  LOW:    500,
+  LOW: 500,
   MEDIUM: 1500,
-  HIGH:   3000, // for example: overtraining threshold for chest
+  HIGH: 3000, // Example: Overtraining threshold for chest
 };
