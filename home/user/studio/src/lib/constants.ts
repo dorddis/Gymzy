@@ -20,6 +20,7 @@ export enum Muscle {
   Trapezius        = "Trapezius",
   Rhomboids        = "Rhomboids",
   ErectorSpinae    = "Erector Spinae",
+  Infraspinatus    = "Infraspinatus",        // ← Newly added
 
   // Arms
   BicepsBrachii    = "Biceps Brachii",
@@ -147,7 +148,13 @@ export const EXERCISES: Exercise[] = [
  */
 export const MAJOR_MUSCLE_GROUPS = {
   CHEST:     [Muscle.PectoralisMajor],
-  BACK:      [Muscle.LatissimusDorsi, Muscle.Trapezius, Muscle.Rhomboids, Muscle.ErectorSpinae],
+  BACK:      [
+    Muscle.LatissimusDorsi,
+    Muscle.Trapezius,
+    Muscle.Rhomboids,
+    Muscle.ErectorSpinae,
+    Muscle.Infraspinatus,    // ← Added here
+  ],
   SHOULDERS: [Muscle.AnteriorDeltoid, Muscle.LateralDeltoid, Muscle.PosteriorDeltoid],
   LEGS:      [Muscle.Quadriceps, Muscle.Hamstrings, Muscle.GluteusMaximus, Muscle.Calves],
   ARMS:      [Muscle.BicepsBrachii, Muscle.TricepsBrachii, Muscle.Forearms],

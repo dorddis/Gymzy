@@ -1,7 +1,7 @@
 // src/components/dashboard/anatomy-visualization.tsx
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { SVGProps } from 'react';
 
 import {
@@ -20,56 +20,12 @@ import { useWorkout } from '@/contexts/WorkoutContext';
 import { Muscle, MUSCLE_VOLUME_THRESHOLDS } from '@/lib/constants';
 
 /* ───────────────────────────────────────────────────────────────────────────
-   1) Import the two body‐outline SVGs as default React components.
-      (Your SVGR loader must convert each `.svg` into a React component.)
+   1) Import the two full‐body SVGs (front & back) as React components.
+      These single SVGs each already contain all of the muscle‐group <g> IDs
+      that we’ll dynamically show/hide via opacity.
 ──────────────────────────────────────────────────────────────────────────── */
-import FrontOutline from '@/assets/images/all/muscles/front/body-black-outline.svg';
-import BackOutline from '@/assets/images/all/muscles/back/body-black-outline.svg';
-
-/* ───────────────────────────────────────────────────────────────────────────
-   2) Import each individual muscle SVG as a default React component.
-      Only the files you showed in "front/" and "back/" folders are used.
-──────────────────────────────────────────────────────────────────────────── */
-/*  Front‐view muscle SVGs  */
-import DeltoidsFront from '@/assets/images/all/musclegroups/front/deltoids.svg';
-import BicepsBrachiiFront from '@/assets/images/all/musclegroups/front/biceps-brachii.svg';
-import BrachialisFront from '@/assets/images/all/musclegroups/front/brachialis.svg';
-import BrachioradialisFront from '@/assets/images/all/musclegroups/front/brachioradialis.svg';
-import PectoralisMajorFront from '@/assets/images/all/musclegroups/front/pectoralis-major.svg';
-import TricepsBrachiiLongHeadFront from '@/assets/images/all/musclegroups/front/triceps-brachii-long-head.svg';
-import RectusAbdominusFront from '@/assets/images/all/musclegroups/front/rectus-abdominus.svg';
-import ExternalObliquesFront from '@/assets/images/all/musclegroups/front/external-obliques.svg';
-import SerratusAnteriorFront from '@/assets/images/all/musclegroups/front/serratus-anterior.svg';
-import SoleusFront from '@/assets/images/all/musclegroups/front/soleus.svg';
-import SternocleidomastoidFront from '@/assets/images/all/musclegroups/front/sternocleidomastoid.svg';
-import TensorFasciaeLataeFront from '@/assets/images/all/musclegroups/front/tensor-fasciae-latae.svg';
-import TrapeziusFront from '@/assets/images/all/musclegroups/front/trapezius.svg';
-import PeroneusLongusFront from '@/assets/images/all/musclegroups/front/peroneus-longus.svg';
-import GastrocnemiusCalfFront from '@/assets/images/all/musclegroups/front/gastrocnemius-calf.svg';
-import RectusFemorisFront from '@/assets/images/all/musclegroups/front/rectus-femoris.svg';
-import VastusLateralisFront from '@/assets/images/all/musclegroups/front/vastus-lateralis.svg';
-import VastusMedialisFront from '@/assets/images/all/musclegroups/front/vastus-medialis.svg';
-
-/*  Back‐view muscle SVGs  */
-import DeltoidsBack from '@/assets/images/all/musclegroups/back/deltoids.svg';
-import LattisimusDorsiBack from '@/assets/images/all/musclegroups/back/lattisimus-dorsi.svg';
-import TrapeziusBack from '@/assets/images/all/musclegroups/back/trapezius.svg';
-import RhomboidMajorBack from '@/assets/images/all/musclegroups/back/rhomboid-major.svg';
-import BicepsFemorisBack from '@/assets/images/all/musclegroups/back/biceps-femoris.svg';
-import GluteusMaximusBack from '@/assets/images/all/musclegroups/back/gluteus-maximus.svg';
-import GastrocnemiusMedialHeadBack from '@/assets/images/all/musclegroups/back/gastrocnemius-medial-head.svg';
-import ExternalObliquesBack from '@/assets/images/all/musclegroups/back/external-obliques.svg';
-import BrachioradialisBack from '@/assets/images/all/musclegroups/back/brachioradialis.svg';
-import LowerTrapeziusBack from '@/assets/images/all/musclegroups/back/lower-trapezius.svg';
-import SerratusAnteriorBack from '@/assets/images/all/musclegroups/back/serratus-anterior.svg';
-import TensorFascieLataeBack from '@/assets/images/all/musclegroups/back/tensor-fascie-latae.svg';
-import TeresMajorBack from '@/assets/images/all/musclegroups/back/teres-major.svg';
-import ThoracolumbarFasciaBack from '@/assets/images/all/musclegroups/back/thoracolumbar-fascia.svg';
-import AdductorMagnusBack from '@/assets/images/all/musclegroups/back/adductor-magnus.svg';
-import SemitendinosusBack from '@/assets/images/all/musclegroups/back/semitendinosus.svg';
-import GracilisBack from '@/assets/images/all/musclegroups/back/gracilis.svg';
-import PeroneusLongusBack from '@/assets/images/all/musclegroups/back/peroneus-longus.svg';
-import TricepsBrachiiLongHeadLateralHeadBack from '@/assets/images/all/musclegroups/back/triceps-brachii-long-head-lateral-head.svg';
+import FrontFullBody from '@/assets/images/front-full-body-with-all-muscles-showing.svg';
+import BackFullBody from '@/assets/images/back-full-body-with-all-muscles-showing.svg';
 
 /**
  * Given a numeric volume, return activation level + Tailwind‐class color.
@@ -91,7 +47,9 @@ const getMuscleActivationLevel = (
 
 /**
  * AnatomyFigureSvg
- *  - Renders the body outline (front/back) and overlays muscle SVGs based on activation.
+ *  - Renders either the front or back full‐body SVG (imported above),
+ *    then, via a ref + useEffect, toggles the opacity of each <g id="...">
+ *    inside that SVG according to its activation level.
  */
 const AnatomyFigureSvg = (props: {
   view: 'front' | 'back';
@@ -99,105 +57,98 @@ const AnatomyFigureSvg = (props: {
   relevantMuscles: Muscle[];
 }) => {
   const { view, muscleVolumes, relevantMuscles } = props;
-  const svgContainerRef = useRef<HTMLDivElement>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
 
-  // 1) Pick the correct body‐outline component:
-  const BodyOutlineSvg = view === 'front' ? FrontOutline : BackOutline;
+  // 1) Pick the correct full‐body component:
+  const BodySvg = view === 'front' ? FrontFullBody : BackFullBody;
 
-  // 2) Build the “front” map (Muscle → corresponding front SVG):
-  let frontMuscleSvgs: Partial<Record<Muscle, React.FC<SVGProps<SVGSVGElement>>>> = {};
-  if (typeof Muscle === 'object' && Muscle !== null) {
-    frontMuscleSvgs = {
-      [Muscle.PectoralisMajor]: PectoralisMajorFront,
-      [Muscle.AnteriorDeltoid]: DeltoidsFront,
-      [Muscle.LateralDeltoid]: DeltoidsFront,
-      [Muscle.PosteriorDeltoid]: DeltoidsFront,
-      [Muscle.BicepsBrachii]: BicepsBrachiiFront,
-      [Muscle.TricepsBrachii]: TricepsBrachiiLongHeadFront,
-      [Muscle.Brachialis]: BrachialisFront,
-      [Muscle.Brachioradialis]: BrachioradialisFront,
-      [Muscle.RectusAbdominis]: RectusAbdominusFront,
-      [Muscle.Obliques]: ExternalObliquesFront,
-      [Muscle.SerratusAnterior]: SerratusAnteriorFront,
-      [Muscle.Soleus]: SoleusFront,
-      [Muscle.Sternocleidomastoid]: SternocleidomastoidFront,
-      [Muscle.TensorFasciaeLatae]: TensorFasciaeLataeFront,
-      [Muscle.Trapezius]: TrapeziusFront,
-      [Muscle.PeroneusLongus]: PeroneusLongusFront,
-      [Muscle.Calves]: GastrocnemiusCalfFront,
-      [Muscle.Quadriceps]: RectusFemorisFront,      // Use Rectus Femoris as quadriceps
-      // (Optionally override with Vastus Lateralis/Medialis if desired)
-    };
-  }
+  /* ───────────────────────────────────────────────────────────────
+     2) Build a map from Muscle enum → the exact <g id="..."> string
+        for the back‐view SVG.  Each of those IDs comes from the
+        provided <svg> text.  Only “groups present in that SVG”
+        get mapped here.  (Any muscle not in this list is simply
+        omitted—its id won’t exist in the back SVG.)
+  ─────────────────────────────────────────────────────────────── */
+  const backMuscleIdMap: Partial<Record<Muscle, string>> = {
+    [Muscle.Rhomboids]:
+      'Rhomboid_major_00000153702420119838252620000014513967375993411263_',
+    [Muscle.Hamstrings]:
+      'Semimembranosis_00000165197940537239056910000018339456362161962915_',
+    [Muscle.Trapezius]:
+      'Trapz_00000086658569290832975040000006959360490215844261_',
+    [Muscle.LowerTrapezius]:
+      'Middle_and_lower_trapz_00000011030372104423980000000004308217814190120081_',
+    [Muscle.Soleus]:
+      'Soleus_00000162330102282724997570000015371067798349489349489321_',
+    [Muscle.Calves]:
+      'Claves_00000142896635816991424760000005189009876859777974_',
+    [Muscle.AnteriorDeltoid]:
+      'Delts_00000037683310307467639390000007902456789317736638_',
+    [Muscle.LateralDeltoid]:
+      'Delts_00000037683310307467639390000007902456789317736638_',
+    [Muscle.PosteriorDeltoid]:
+      'Delts_00000037683310307467639390000007902456789317736638_',
+    [Muscle.TeresMajor]:
+      'Teres_Major_00000116932973775553672460000017841647355507566270_',
+    [Muscle.Infraspinatus]:
+      'Infraspinatus_00000055693351133629568060000011005395473393824395_',
+  };
 
-  // 3) Build the “back” map (Muscle → corresponding back SVG):
-  let backMuscleSvgs: Partial<Record<Muscle, React.FC<SVGProps<SVGSVGElement>>>> = {};
-  if (typeof Muscle === 'object' && Muscle !== null) {
-    backMuscleSvgs = {
-      [Muscle.AnteriorDeltoid]: DeltoidsBack,
-      [Muscle.LateralDeltoid]: DeltoidsBack,
-      [Muscle.PosteriorDeltoid]: DeltoidsBack,
-      [Muscle.LatissimusDorsi]: LattisimusDorsiBack,
-      [Muscle.Trapezius]: TrapeziusBack,
-      [Muscle.Rhomboids]: RhomboidMajorBack,
-      [Muscle.TricepsBrachii]: TricepsBrachiiLongHeadLateralHeadBack,
-      [Muscle.Forearms]: BrachioradialisBack,            // approximate
-      [Muscle.Hamstrings]: BicepsFemorisBack,
-      [Muscle.GluteusMaximus]: GluteusMaximusBack,
-      [Muscle.Calves]: GastrocnemiusMedialHeadBack,
-      [Muscle.Obliques]: ExternalObliquesBack,
-      [Muscle.Brachioradialis]: BrachioradialisBack,
-      [Muscle.LowerTrapezius]: LowerTrapeziusBack,
-      [Muscle.SerratusAnterior]: SerratusAnteriorBack,
-      [Muscle.TensorFasciaeLatae]: TensorFascieLataeBack,
-      [Muscle.TeresMajor]: TeresMajorBack,
-      [Muscle.ThoracolumbarFascia]: ThoracolumbarFasciaBack,
-      [Muscle.AdductorMagnus]: AdductorMagnusBack,
-      [Muscle.Semitendinosus]: SemitendinosusBack,
-      [Muscle.Gracilis]: GracilisBack,
-      [Muscle.PeroneusLongus]: PeroneusLongusBack,
-    };
-  }
+  /* ───────────────────────────────────────────────────────────────
+     3) (Placeholder) Front‐view map would go here once the front SVG
+        is provided.  For now we leave it empty, to be filled in later.
+  ─────────────────────────────────────────────────────────────── */
+  const frontMuscleIdMap: Partial<Record<Muscle, string>> = {
+    /* fill in after front SVG is shared */
+  };
 
   // 4) Choose which map to use based on `view`
-  const currentMuscleSvgs = view === 'front' ? frontMuscleSvgs : backMuscleSvgs;
+  const currentMuscleIdMap =
+    view === 'front' ? frontMuscleIdMap : backMuscleIdMap;
+
+  // 5) Whenever `view` or `muscleVolumes` change, loop through each mapped
+  //    muscle, find its <g id="..."> inside the SVG, and adjust `style.opacity`.
+  useEffect(() => {
+    if (!svgRef.current) return;
+
+    relevantMuscles.forEach((muscle) => {
+      const groupId = currentMuscleIdMap[muscle];
+      if (!groupId) return;
+
+      // Use `getElementById` on the SVG root to find the group
+      const groupElem = svgRef.current.querySelector<SVGGElement>(
+        `#${groupId}`
+      );
+      if (!groupElem) return;
+
+      const volume = muscleVolumes[muscle];
+      const activation = getMuscleActivationLevel(volume);
+
+      let opacityValue = 0;
+      switch (activation.level) {
+        case 'Low':
+          opacityValue = 0.3;
+          break;
+        case 'Medium':
+          opacityValue = 0.6;
+          break;
+        case 'High':
+          opacityValue = 1.0;
+          break;
+        default:
+          opacityValue = 0;
+      }
+
+      groupElem.style.opacity = `${opacityValue}`;
+    });
+  }, [view, muscleVolumes, relevantMuscles, currentMuscleIdMap]);
 
   return (
-    <div ref={svgContainerRef} className="relative w-full h-full">
-      {/* Render the body outline */}
-      <BodyOutlineSvg className="pointer-events-none absolute top-0 left-0 w-full h-full" />
-
-      {/* Overlay each relevant muscle if it has activation > 0 */}
-      {relevantMuscles.map((muscleName) => {
-        const volume = muscleVolumes[muscleName];
-        const activation = getMuscleActivationLevel(volume);
-
-        // Only attempt to render if activation is not “None” and we have a matching SVG
-        const MuscleSvgComponent = currentMuscleSvgs[muscleName];
-        if (activation.level !== 'None' && MuscleSvgComponent) {
-          let opacity = 0;
-          switch (activation.level) {
-            case 'Low':
-              opacity = 0.3;
-              break;
-            case 'Medium':
-              opacity = 0.6;
-              break;
-            case 'High':
-              opacity = 1.0;
-              break;
-          }
-
-          return (
-            <MuscleSvgComponent
-              key={muscleName}
-              className="pointer-events-none absolute top-0 left-0 w-full h-full"
-              style={{ opacity }}
-            />
-          );
-        }
-        return null;
-      })}
+    <div className="relative w-full h-full">
+      <BodySvg
+        ref={svgRef}
+        className="pointer-events-none absolute top-0 left-0 w-full h-full"
+      />
     </div>
   );
 };
@@ -234,7 +185,6 @@ export function AnatomyVisualization() {
 
       <CardContent className="flex-grow flex flex-col p-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-
           {/* — Left column: full‐body SVG + toggle buttons — */}
           <div className="flex flex-col items-center">
             <div className="relative w-full aspect-[3/5] max-w-xs sm:max-w-sm mb-4 rounded-lg overflow-hidden bg-muted/10 border border-border">
@@ -319,7 +269,6 @@ export function AnatomyVisualization() {
               )}
             </ScrollArea>
           </div>
-
         </div>
       </CardContent>
     </Card>

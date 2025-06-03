@@ -1,7 +1,13 @@
 // src/contexts/WorkoutContext.tsx
 'use client';
 
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  ReactNode,
+} from 'react';
 import { Muscle, EXERCISES, Exercise } from '@/lib/constants';
 
 interface LoggedWorkout {
