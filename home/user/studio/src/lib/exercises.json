@@ -1,0 +1,207 @@
+[
+    {
+      "id": "bench-press",
+      "name": "Bench Press",
+      "primaryMuscles": ["Pectoralis Major"],
+      "secondaryMuscles": ["Triceps Brachii", "Anterior Deltoid"]
+    },
+    {
+      "id": "incline-dumbbell-press",
+      "name": "Incline Dumbbell Press",
+      "primaryMuscles": ["Pectoralis Major"],
+      "secondaryMuscles": ["Anterior Deltoid", "Triceps Brachii"]
+    },
+    {
+      "id": "bar-dips",
+      "name": "Bar Dips",
+      "primaryMuscles": ["Pectoralis Major", "Triceps Brachii"],
+      "secondaryMuscles": ["Anterior Deltoid"]
+    },
+    {
+      "id": "standing-cable-chest-fly",
+      "name": "Standing Cable Chest Fly",
+      "primaryMuscles": ["Pectoralis Major"],
+      "secondaryMuscles": []
+    },
+    {
+      "id": "overhead-press",
+      "name": "Overhead Press",
+      "primaryMuscles": ["Anterior Deltoid", "Lateral Deltoid"],
+      "secondaryMuscles": ["Triceps Brachii", "Trapezius"]
+    },
+    {
+      "id": "seated-dumbbell-shoulder-press",
+      "name": "Seated Dumbbell Shoulder Press",
+      "primaryMuscles": ["Anterior Deltoid", "Lateral Deltoid"],
+      "secondaryMuscles": ["Triceps Brachii", "Trapezius"]
+    },
+    {
+      "id": "dumbbell-lateral-raise",
+      "name": "Dumbbell Lateral Raise",
+      "primaryMuscles": ["Lateral Deltoid"],
+      "secondaryMuscles": []
+    },
+    {
+      "id": "reverse-dumbbell-fly",
+      "name": "Reverse Dumbbell Fly",
+      "primaryMuscles": ["Posterior Deltoid"],
+      "secondaryMuscles": ["Trapezius"]
+    },
+    {
+      "id": "deadlift",
+      "name": "Deadlift",
+      "primaryMuscles": ["Hamstrings", "Gluteus Maximus", "Erector Spinae"],
+      "secondaryMuscles": ["Latissimus Dorsi", "Trapezius", "Forearms", "Quadriceps"]
+    },
+    {
+      "id": "lat-pulldown",
+      "name": "Lat Pulldown",
+      "primaryMuscles": ["Latissimus Dorsi"],
+      "secondaryMuscles": ["Biceps Brachii", "Trapezius", "Forearms"]
+    },
+    {
+      "id": "pull-up",
+      "name": "Pull-Up / Lat Pulldown",
+      "primaryMuscles": ["Latissimus Dorsi"],
+      "secondaryMuscles": ["Biceps Brachii", "Trapezius", "Forearms"]
+    },
+    {
+      "id": "barbell-row",
+      "name": "Barbell Row",
+      "primaryMuscles": ["Latissimus Dorsi", "Trapezius", "Rhomboids"],
+      "secondaryMuscles": ["Biceps Brachii", "Posterior Deltoid"]
+    },
+    {
+      "id": "dumbbell-row",
+      "name": "Dumbbell Row",
+      "primaryMuscles": ["Latissimus Dorsi"],
+      "secondaryMuscles": ["Biceps Brachii", "Posterior Deltoid"]
+    },
+    {
+      "id": "barbell-curl",
+      "name": "Barbell Curl",
+      "primaryMuscles": ["Biceps Brachii"],
+      "secondaryMuscles": ["Forearms"]
+    },
+    {
+      "id": "dumbbell-curl",
+      "name": "Dumbbell Curl",
+      "primaryMuscles": ["Biceps Brachii"],
+      "secondaryMuscles": ["Forearms"]
+    },
+    {
+      "id": "hammer-curl",
+      "name": "Hammer Curl",
+      "primaryMuscles": ["Brachialis"],
+      "secondaryMuscles": ["Biceps Brachii", "Forearms"]
+    },
+    {
+      "id": "barbell-lying-triceps-extension",
+      "name": "Barbell Lying Triceps Extension",
+      "primaryMuscles": ["Triceps Brachii"],
+      "secondaryMuscles": []
+    },
+    {
+      "id": "overhead-cable-triceps-extension",
+      "name": "Overhead Cable Triceps Extension",
+      "primaryMuscles": ["Triceps Brachii"],
+      "secondaryMuscles": []
+    },
+    {
+      "id": "tricep-pushdown",
+      "name": "Tricep Pushdown",
+      "primaryMuscles": ["Triceps Brachii"],
+      "secondaryMuscles": ["Forearms"]
+    },
+    {
+      "id": "close-grip-bench-press",
+      "name": "Close-Grip Bench Press",
+      "primaryMuscles": ["Pectoralis Major", "Triceps Brachii"],
+      "secondaryMuscles": ["Anterior Deltoid"]
+    },
+    {
+      "id": "squat",
+      "name": "Squat",
+      "primaryMuscles": ["Quadriceps", "Gluteus Maximus"],
+      "secondaryMuscles": ["Hamstrings", "Erector Spinae"]
+    },
+    {
+      "id": "hack-squats",
+      "name": "Hack Squats",
+      "primaryMuscles": ["Quadriceps"],
+      "secondaryMuscles": ["Gluteus Maximus"]
+    },
+    {
+      "id": "leg-extension",
+      "name": "Leg Extension",
+      "primaryMuscles": ["Quadriceps"],
+      "secondaryMuscles": []
+    },
+    {
+      "id": "bulgarian-split-squat",
+      "name": "Bulgarian Split Squat",
+      "primaryMuscles": ["Quadriceps", "Gluteus Maximus"],
+      "secondaryMuscles": ["Hamstrings"]
+    },
+    {
+      "id": "seated-leg-curl",
+      "name": "Seated Leg Curl",
+      "primaryMuscles": ["Hamstrings"],
+      "secondaryMuscles": ["Gluteus Maximus"]
+    },
+    {
+      "id": "lying-leg-curl",
+      "name": "Lying Leg Curl",
+      "primaryMuscles": ["Hamstrings"],
+      "secondaryMuscles": []
+    },
+    {
+      "id": "romanian-deadlift",
+      "name": "Romanian Deadlift",
+      "primaryMuscles": ["Hamstrings", "Gluteus Maximus"],
+      "secondaryMuscles": ["Erector Spinae"]
+    },
+    {
+      "id": "hip-thrust",
+      "name": "Hip Thrust",
+      "primaryMuscles": ["Gluteus Maximus"],
+      "secondaryMuscles": ["Hamstrings"]
+    },
+    {
+      "id": "cable-crunch",
+      "name": "Cable Crunch",
+      "primaryMuscles": ["Rectus Abdominis"],
+      "secondaryMuscles": ["Obliques"]
+    },
+    {
+      "id": "hanging-leg-raise",
+      "name": "Hanging Leg Raise",
+      "primaryMuscles": ["Rectus Abdominis"],
+      "secondaryMuscles": ["Obliques"]
+    },
+    {
+      "id": "high-to-low-wood-chop",
+      "name": "High to Low Wood Chop",
+      "primaryMuscles": ["Obliques"],
+      "secondaryMuscles": ["Serratus Anterior", "Rectus Abdominis"]
+    },
+    {
+      "id": "crunch",
+      "name": "Crunch",
+      "primaryMuscles": ["Rectus Abdominis"],
+      "secondaryMuscles": []
+    },
+    {
+      "id": "standing-calf-raise",
+      "name": "Standing Calf Raise",
+      "primaryMuscles": ["Calves"],
+      "secondaryMuscles": ["Soleus"]
+    },
+    {
+      "id": "seated-calf-raise",
+      "name": "Seated Calf Raise",
+      "primaryMuscles": ["Soleus"],
+      "secondaryMuscles": ["Calves"]
+    }
+  ]
+  

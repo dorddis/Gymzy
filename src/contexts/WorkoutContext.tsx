@@ -1,4 +1,3 @@
-// src/contexts/WorkoutContext.tsx
 'use client';
 
 import React, {
@@ -53,6 +52,13 @@ export const WorkoutProvider = ({ children }: { children: ReactNode }) => {
   /**
    * addWorkout
    *  - Logs a new workout and updates muscleVolumes accordingly.
+   *
+   *  Because we split “Rectus Abdominis” into two enum members,
+   *  any exercise whose primary/secondary included UpperRectusAbdominis
+   *  or LowerRectusAbdominis will be handled naturally.  Volume is calculated
+   *  exactly as before (sets × reps × (weight || 1)).  If an exercise originally
+   *  listed “Rectus Abdominis” in JSON, that was already expanded into
+   *  [UpperRectusAbdominis, LowerRectusAbdominis] in constants.ts.
    */
   const addWorkout = useCallback(
     (workoutData: { exerciseId: string; sets: number; reps: number; weight: number }) => {

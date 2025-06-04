@@ -1,4 +1,3 @@
-// src/components/dashboard/anatomy-visualization.tsx
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
@@ -50,6 +49,13 @@ const getMuscleActivationLevel = (
  *  - Renders either the front or back full‐body SVG (imported above),
  *    then, via a ref + useEffect, toggles the opacity of each <g id="...">
  *    inside that SVG according to its activation level.
+ *
+ * Implementation detail for “Option B”:
+ *   • We build two maps (front & back), each keyed by `Muscle` and pointing to
+ *     either a single `string` (one `<g>` ID) or an array of `string[]` (multiple sub‐IDs).
+ *   • In the effect, we first force‐hide every single ID in the current map (by setting
+ *     `opacity=0`). Then, for each “relevantMuscle” that has volume>0, we re‐set
+ *     its opacity to 0.3 / 0.6 / 1.0.
  */
 const AnatomyFigureSvg = (props: {
   view: 'front' | 'back';
@@ -63,67 +69,244 @@ const AnatomyFigureSvg = (props: {
   const BodySvg = view === 'front' ? FrontFullBody : BackFullBody;
 
   /* ───────────────────────────────────────────────────────────────
-     2) Build a map from Muscle enum → the exact <g id="..."> string
-        for the back‐view SVG.  Each of those IDs comes from the
-        provided <svg> text.  Only “groups present in that SVG”
-        get mapped here.  (Any muscle not in this list is simply
-        omitted—its id won’t exist in the back SVG.)
+     2) Build a map from Muscle enum → one or more `<g id="...">` strings
+        for the *back*‐view SVG.  Each key is a Muscle enum, and each RHS is
+        either a single string (one `<g>`) or an array of strings (if the
+        “muscle” is actually split into multiple sub‐<g> groups in the SVG).
   ─────────────────────────────────────────────────────────────── */
-  const backMuscleIdMap: Partial<Record<Muscle, string>> = {
+  const backMuscleIdMap: Partial<Record<Muscle, string | string[]>> = {
     [Muscle.Rhomboids]:
       'Rhomboid_major_00000153702420119838252620000014513967375993411263_',
-    [Muscle.Hamstrings]:
+
+    // HAMSTRINGS: multiple sub‐groups
+    [Muscle.Hamstrings]: [
       'Semimembranosis_00000165197940537239056910000018339456362161962915_',
+      'Semi_Tendinosis_00000142172608923587160350000008002679039365734793_',
+      'Upper_inner_hamstring_00000155141996103184447130000003953608675083121284_',
+      'Biceps_Femoris_00000110447600570690947540000000638541115458994341_',
+    ],
+
     [Muscle.Trapezius]:
       'Trapz_00000086658569290832975040000006959360490215844261_',
     [Muscle.LowerTrapezius]:
-      'Middle_and_lower_trapz_00000011030372104423980000000004308217814190120081_',
-    [Muscle.Soleus]:
+    'Middle_and_lower_trapz_00000011030372104423980000000004308217814190120081_',
+    
+    [Muscle.LatissimusDorsi]:
+    'Lats_00000133492815442984477070000001790843316009520005_',
+    
+    [Muscle.Soleus]:[
+      'Soleus_00000162330102282724997570000015371067798349489321_',
       'Soleus_00000162330102282724997570000015371067798349489349489321_',
+    ],
+    
     [Muscle.Calves]:
-      'Claves_00000142896635816991424760000005189009876859777974_',
+    'Claves_00000142896635816991424760000005189009876859777974_',
+
+    /*TODO: All these are just delts in the svg and there is no separation in the
+    delt heads. Please make merge all of these.*/
+
+    // DELTOIDS (all three heads share the same “Delts_…” ID on the back)
     [Muscle.AnteriorDeltoid]:
       'Delts_00000037683310307467639390000007902456789317736638_',
     [Muscle.LateralDeltoid]:
       'Delts_00000037683310307467639390000007902456789317736638_',
     [Muscle.PosteriorDeltoid]:
       'Delts_00000037683310307467639390000007902456789317736638_',
+
     [Muscle.TeresMajor]:
       'Teres_Major_00000116932973775553672460000017841647355507566270_',
+
     [Muscle.Infraspinatus]:
       'Infraspinatus_00000055693351133629568060000011005395473393824395_',
+
+    [Muscle.TricepsBrachii]:
+      'Triceps_00000058563430122785195830000004356675806786654858_',
+
+    /*TODO: These two tricep heads do not exist in the svgs, please remove them
+    along with related activations*/
+    [Muscle.TricepsLongHead]:
+      'Triceps_long_head_00000083776378062729911360000007780280132728440204_',
+    [Muscle.TricepsLateralHead]:
+      'triceps_lateral_head_00000114039035336761946620000010495095347100091037_',
+
+    [Muscle.Obliques]: [
+      'Obliques_00000144307680268788205310000005818624216599975297_',
+      'Upper_obliques_00000163063841218330492000000005773978221908945313_',
+    ],
+
+    [Muscle.Forearms]: [
+      'Extensor_carpi_00000116200407099860938660000003262073282377889712_',
+      'Extensor_digitorum_00000071523930808613392550000017694714289508163976_',
+      'Extensor_carpi_ulnaris_00000134217785543749064480000005604883019983209609_',
+    ],
+
+    [Muscle.GluteusMaximus]:
+      'Gluteus_maximus_00000168110655002960868070000014188754410659059374_',
+    [Muscle.GluteusMedius]:
+      'Gluteus_medius_00000112621038774864745760000016539011443425383349_',
+
+    [Muscle.ThoracolumbarFascia]:
+      'Thoracolumbar_00000067950730854538543580000014263760795646897319_',
+
+    [Muscle.Quadriceps]:
+      'Outer_quads_00000121269285701693319920000012886749065288244405_',
   };
 
   /* ───────────────────────────────────────────────────────────────
-     3) (Placeholder) Front‐view map would go here once the front SVG
-        is provided.  For now we leave it empty, to be filled in later.
+     3) Front‐view map—using the `<g id="…">` strings from your *front* SVG.
+     Each key is the same `Muscle` enum value, but the RHS is either a single
+     string or an array of strings (if that muscle’s shape is split into multiple
+     <g> sub‐groups in the SVG).  Here we explicitly separate “upper vs. lower abs,”
+     “gluteus medius,” and split out the two heads of the triceps.
   ─────────────────────────────────────────────────────────────── */
-  const frontMuscleIdMap: Partial<Record<Muscle, string>> = {
-    /* fill in after front SVG is shared */
+  const frontMuscleIdMap: Partial<Record<Muscle, string | string[]>> = {
+    // ───────────────────────────────────────────────────────────
+    // 1) CHEST
+    [Muscle.PectoralisMajor]:
+      'Pecs_00000113330972391601112060000005331138571180189576_',
+
+    // ───────────────────────────────────────────────────────────
+    // 2) CORE: split into two separate keys
+    [Muscle.UpperRectusAbdominis]:
+      'Upper_abs_00000046315355844623453780000011985032790848095113_',
+
+    [Muscle.LowerRectusAbdominis]: [
+      'Lower_abs_upper_00000119081192880914562810000012168525010772388750_',
+      'Lower_abs_00000109003454546266000020000013768254758986680995_',
+    ],
+
+    [Muscle.Obliques]:
+      'Obliques_external_00000132808153117246191410000008142061127064473252_',
+
+    /*TODO: Add this id
+    Serratus_Anterior_00000078742877783113189840000003461162299842308526_
+    */
+
+    // ───────────────────────────────────────────────────────────
+    // 3) GLUTES / UPPER LEG
+    [Muscle.GluteusMedius]:
+      'Gluteus_medius_00000080201568885703178310000010756533600557290409_',
+    [Muscle.GluteusMaximus]:
+      'Gluteus_maximus_00000168110655002960868070000014188754410659059374_',
+
+    /* ───────────────────────────────────────────────────────────
+       TODO: “Add separation in the heads of quads.”  
+       We already have four sub‐groups for `Muscle.Quadriceps`:
+    */
+    [Muscle.Quadriceps]: [
+      'Outer_quads_00000121269285701693319920000012886749065288244405_',
+      'Inner_quads_00000130614576889879192780000002899524873876548237_',
+      'Inner_quads_00000132084545112020286850000018311130309988591026_',
+      'Mid_quad_00000159455298854971660020000007518134995342161842_',
+    ],
+
+    [Muscle.Sartorius]:
+      'Sartorius__x28_inner_leg_x29__00000060747210191620450210000000874795006996621474_',
+    [Muscle.AdductorMagnus]:
+      'Pectinius__x28_Inner_groin_muscle_x29__00000139279253852462966920000017582585951695724936_',
+
+    // ───────────────────────────────────────────────────────────
+    // 4) LOWER LEG / CALVES / ANKLES
+    [Muscle.PeroneusLongus]:
+      'Peroneus_longus_00000062179120547177543840000016909121641372359095_',
+    [Muscle.Soleus]:
+      'Soleus_00000181065268647695928680000018209480433536768399_',
+    [Muscle.Calves]: [
+      'Calves__x28_medial_head_x29__00000152234539263550023980000009007724782308122012_',
+      'Calves__x28_medial_head_x29__00000144309093221848954800000014225574352369808823_',
+      'Calves__x28_medial_head_x29__00000034059829512782314760000010611914542469866172_',
+      'Calves__x28_medial_head_x29__00000116931660906523261270000008161269292030177950_',
+      'Calves__x28_medial_head_x29__00000165214869862005764650000008485716200638106512_',
+    ],
+
+    // ───────────────────────────────────────────────────────────
+    // 5) ARMS / FOREARMS
+    [Muscle.Forearms]:
+      'Extensor__x28_fore_arm_lower_x29__00000012468373894602770780000006966979348039066248_',
+    [Muscle.Brachioradialis]:
+      'Brachioradialis__x28_fore_arm_upper_x29__00000132086081680176933160000000575656365073902269_',
+    [Muscle.Brachialis]:
+      'Biceps_Brachialis_00000003086861433688303320000017820228468836316309_',
+
+    /*TODO: Add id 
+    Flexor_digitorium__x28_Under_arm_x29__00000159435954906204878840000011072027011836770979_
+    */
+
+    // ───────────────────────────────────────────────────────────
+    // 6) NECK / TRAPS / DELTS / BISEPS / TRICEPS
+    [Muscle.Sternocleidomastoid]: [
+      'Sternocleids_00000000901235046718923910000008305278881673465734_',
+      'Scm_00000050638738960208808000000011068059099103715510_',
+    ],
+    [Muscle.Trapezius]:
+      'Front_traps_00000021839012028885905390000000215930882222765978_',
+
+    /* ───────────────────────────────────────────────────────────
+       We have “separated” the triceps heads on the front:
+    */
+    [Muscle.TricepsLongHead]:
+      'Triceps_long_head_00000083776378062729911360000007780280132728440204_',
+    [Muscle.TricepsLateralHead]:
+      'triceps_lateral_head_00000114039035336761946620000010495095347100091037_',
+
+    /* If you still want “TricepsBrachii” (the umbrella term) to light up
+       both heads together, you could do:
+    [Muscle.TricepsBrachii]: [
+      'Triceps_long_head_00000083776378062729911360000007780280132728440204_',
+      'triceps_lateral_head_00000114039035336761946620000010495095347100091037_',
+    ],
+    but here we chose to split them out. */
+    
+    [Muscle.BicepsBrachii]:
+      'Biceps_brachii_00000165913426772514415860000005830889273115133587_',
+    [Muscle.AnteriorDeltoid]:
+      'Deltoids_front_00000075869929722435460100000017330691835694619786_',
   };
 
+  // ───────────────────────────────────────────────────────────────
   // 4) Choose which map to use based on `view`
   const currentMuscleIdMap =
     view === 'front' ? frontMuscleIdMap : backMuscleIdMap;
 
-  // 5) Whenever `view` or `muscleVolumes` change, loop through each mapped
-  //    muscle, find its <g id="..."> inside the SVG, and adjust `style.opacity`.
+  // ───────────────────────────────────────────────────────────────
+  // 5) Whenever `view`, `muscleVolumes`, or `relevantMuscles` changes,
+  //    we:
+  //    • First “hide” every single <g> in `currentMuscleIdMap` by forcing
+  //      opacity=0
+  //    • Then loop over each `relevantMuscle` (from the enum) and set its
+  //      correct opacity based on volume.
+  // ───────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!svgRef.current) return;
 
-    relevantMuscles.forEach((muscle) => {
-      const groupId = currentMuscleIdMap[muscle];
-      if (!groupId) return;
+    // --- STEP 1: Force-hide all mapped <g> IDs (so nothing is “pre‐lit”)
+    const allGroupIds: string[] = Object.values(currentMuscleIdMap).reduce<
+      string[]
+    >((acc, maybeId) => {
+      if (!maybeId) return acc;
+      // If it's an array of IDs, flatten; if string, wrap in array:
+      return acc.concat(Array.isArray(maybeId) ? maybeId : [maybeId]);
+    }, []);
 
-      // Use `getElementById` on the SVG root to find the group
-      const groupElem = svgRef.current.querySelector<SVGGElement>(
-        `#${groupId}`
-      );
-      if (!groupElem) return;
+    allGroupIds.forEach((groupId) => {
+      const g = svgRef.current!.querySelector<SVGGElement>(`#${groupId}`);
+      if (g) {
+        g.style.opacity = '0';
+      }
+    });
+
+    // --- STEP 2: Now “light up” each muscle that actually has a volume > 0
+    relevantMuscles.forEach((muscle) => {
+      const maybeId = currentMuscleIdMap[muscle];
+      if (!maybeId) return; // This muscle isn’t in the map → skip.
+
+      // Normalize to array‐of‐strings so we can set opacity on each sub‐group:
+      const groupIds: string[] = Array.isArray(maybeId)
+        ? maybeId
+        : [maybeId];
 
       const volume = muscleVolumes[muscle];
       const activation = getMuscleActivationLevel(volume);
-
       let opacityValue = 0;
       switch (activation.level) {
         case 'Low':
@@ -139,10 +322,18 @@ const AnatomyFigureSvg = (props: {
           opacityValue = 0;
       }
 
-      groupElem.style.opacity = `${opacityValue}`;
+      groupIds.forEach((groupId) => {
+        const g = svgRef.current!.querySelector<SVGGElement>(
+          `#${groupId}`
+        );
+        if (g) {
+          g.style.opacity = `${opacityValue}`;
+        }
+      });
     });
   }, [view, muscleVolumes, relevantMuscles, currentMuscleIdMap]);
 
+  // ───────────────────────────────────────────────────────────────
   return (
     <div className="relative w-full h-full">
       <BodySvg
@@ -164,7 +355,7 @@ export function AnatomyVisualization() {
   const [currentView, setCurrentView] = useState<'front' | 'back'>('front');
   const { muscleVolumes } = useWorkout();
 
-  // Safely collect all enum values (e.g. ["Pectoralis Major", "Anterior Deltoid", …])
+  // Safely collect all enum values (e.g. ["Pectoralis Major", "Upper Rectus Abdominis", …])
   const relevantMuscles =
     typeof Muscle === 'object' && Muscle !== null
       ? (Object.values(Muscle) as Muscle[])
@@ -175,7 +366,9 @@ export function AnatomyVisualization() {
       <CardHeader className="pb-4">
         <div className="flex items-center gap-2">
           <Scan className="w-6 h-6 text-primary" />
-          <CardTitle className="font-headline text-xl">Interactive Anatomy</CardTitle>
+          <CardTitle className="font-headline text-xl">
+            Interactive Anatomy
+          </CardTitle>
         </div>
         <CardDescription>
           Visualize muscle engagement. Switch views and see activation levels from
