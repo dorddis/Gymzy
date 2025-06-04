@@ -89,28 +89,23 @@ const AnatomyFigureSvg = (props: {
     [Muscle.Trapezius]:
       'Trapz_00000086658569290832975040000006959360490215844261_',
     [Muscle.LowerTrapezius]:
-    'Middle_and_lower_trapz_00000011030372104423980000000004308217814190120081_',
-    
+      'Middle_and_lower_trapz_00000011030372104423980000000004308217814190120081_',
+
     [Muscle.LatissimusDorsi]:
-    'Lats_00000133492815442984477070000001790843316009520005_',
-    
-    [Muscle.Soleus]:[
-      'Soleus_00000162330102282724997570000015371067798349489321_',
-      'Soleus_00000162330102282724997570000015371067798349489349489321_',
-    ],
-    
-    [Muscle.Calves]:
-    'Claves_00000142896635816991424760000005189009876859777974_',
+      'Lats_00000133492815442984477070000001790843316009520005_',
 
-    /*TODO: All these are just delts in the svg and there is no separation in the
-    delt heads. Please make merge all of these.*/
+    /*
+      DELTOIDS (all three heads share the same “Delts_…” ID on the back)
+      => merged into a single entry here (these are kept for future implementation):
+      [Muscle.AnteriorDeltoid]: // we’ll use this one key for all three heads on the back
+      [Muscle.LateralDeltoid]:
+      [Muscle.PosteriorDeltoid]:
+    */
 
-    // DELTOIDS (all three heads share the same “Delts_…” ID on the back)
-    [Muscle.AnteriorDeltoid]:
-      'Delts_00000037683310307467639390000007902456789317736638_',
-    [Muscle.LateralDeltoid]:
-      'Delts_00000037683310307467639390000007902456789317736638_',
-    [Muscle.PosteriorDeltoid]:
+    /*TODO: make changes in constants and context files to map activation to
+    deltiods muscle 
+    */
+    [Muscle.Deltoid]:
       'Delts_00000037683310307467639390000007902456789317736638_',
 
     [Muscle.TeresMajor]:
@@ -119,15 +114,12 @@ const AnatomyFigureSvg = (props: {
     [Muscle.Infraspinatus]:
       'Infraspinatus_00000055693351133629568060000011005395473393824395_',
 
+    /*
+      On the back, the SVG only has one <g> for “TricepsBrachii.”
+      The separate heads do NOT exist here. We therefore map the umbrella term.
+    */
     [Muscle.TricepsBrachii]:
       'Triceps_00000058563430122785195830000004356675806786654858_',
-
-    /*TODO: These two tricep heads do not exist in the svgs, please remove them
-    along with related activations*/
-    [Muscle.TricepsLongHead]:
-      'Triceps_long_head_00000083776378062729911360000007780280132728440204_',
-    [Muscle.TricepsLateralHead]:
-      'triceps_lateral_head_00000114039035336761946620000010495095347100091037_',
 
     [Muscle.Obliques]: [
       'Obliques_00000144307680268788205310000005818624216599975297_',
@@ -138,11 +130,7 @@ const AnatomyFigureSvg = (props: {
       'Extensor_carpi_00000116200407099860938660000003262073282377889712_',
       'Extensor_digitorum_00000071523930808613392550000017694714289508163976_',
       'Extensor_carpi_ulnaris_00000134217785543749064480000005604883019983209609_',
-
-      /*TODO: I have added this new id for forarm muscle it is the same muscle that can be seen 
-      in front as well as back so add this to constants and workoutcontext files as 
-      required*/
-      'Flexor_digitorium__x28_Under_arm_x29__00000159435954906204878840000011072027011836770979_'
+      'Flexor_digitorium__x28_Under_arm_x29__00000159435954906204878840000011072027011836770979_',
     ],
 
     [Muscle.GluteusMaximus]:
@@ -153,6 +141,14 @@ const AnatomyFigureSvg = (props: {
     [Muscle.ThoracolumbarFascia]:
       'Thoracolumbar_00000067950730854538543580000014263760795646897319_',
 
+    [Muscle.Soleus]: [
+      'Soleus_00000162330102282724997570000015371067798349489321_',
+      'Soleus_00000162330102282724997570000015371067798349489349489321_',
+    ],
+
+    [Muscle.Calves]:
+      'Claves_00000142896635816991424760000005189009876859777974_',
+
     [Muscle.Quadriceps]:
       'Outer_quads_00000121269285701693319920000012886749065288244405_',
   };
@@ -162,7 +158,7 @@ const AnatomyFigureSvg = (props: {
      Each key is the same `Muscle` enum value, but the RHS is either a single
      string or an array of strings (if that muscle’s shape is split into multiple
      <g> sub‐groups in the SVG).  Here we explicitly separate “upper vs. lower abs,”
-     “gluteus medius,” and split out the two heads of the triceps.
+     “gluteus medius vs. maximus,” etc.
   ─────────────────────────────────────────────────────────────── */
   const frontMuscleIdMap: Partial<Record<Muscle, string | string[]>> = {
     // ───────────────────────────────────────────────────────────
@@ -183,9 +179,8 @@ const AnatomyFigureSvg = (props: {
     [Muscle.Obliques]:
       'Obliques_external_00000132808153117246191410000008142061127064473252_',
 
-    /*TODO: Add this id
-    Serratus_Anterior_00000078742877783113189840000003461162299842308526_
-    */
+    [Muscle.SerratusAnterior]:
+      'Serratus_Anterior_00000078742877783113189840000003461162299842308526_',
 
     // ───────────────────────────────────────────────────────────
     // 3) GLUTES / UPPER LEG
@@ -194,9 +189,8 @@ const AnatomyFigureSvg = (props: {
     [Muscle.GluteusMaximus]:
       'Gluteus_maximus_00000168110655002960868070000014188754410659059374_',
 
-    /* ───────────────────────────────────────────────────────────
-       TODO: “Add separation in the heads of quads.”  
-       We already have four sub‐groups for `Muscle.Quadriceps`:
+    /*
+      QUADRICEPS: four separate sub‐IDs (no further changes needed here).
     */
     [Muscle.Quadriceps]: [
       'Outer_quads_00000121269285701693319920000012886749065288244405_',
@@ -218,7 +212,7 @@ const AnatomyFigureSvg = (props: {
       'Soleus_00000181065268647695928680000018209480433536768399_',
     [Muscle.Calves]: [
       'Calves__x28_medial_head_x29__00000152234539263550023980000009007724782308122012_',
-      'Calves__x28_medial_head_x29__00000144309093221848954800000014225574352369808823_',
+      'Calves__x28_medial_head_x29__00000144309093221821848954800000014225574352369808823_',
       'Calves__x28_medial_head_x29__00000034059829512782314760000010611914542469866172_',
       'Calves__x28_medial_head_x29__00000116931660906523261270000008161269292030177950_',
       'Calves__x28_medial_head_x29__00000165214869862005764650000008485716200638106512_',
@@ -226,16 +220,14 @@ const AnatomyFigureSvg = (props: {
 
     // ───────────────────────────────────────────────────────────
     // 5) ARMS / FOREARMS
-    [Muscle.Forearms]:
+    [Muscle.Forearms]: [
       'Extensor__x28_fore_arm_lower_x29__00000012468373894602770780000006966979348039066248_',
+      'Flexor_digitorium__x28_Under_arm_x29__00000159435954906204878840000011072027011836770979_',
+    ],
     [Muscle.Brachioradialis]:
       'Brachioradialis__x28_fore_arm_upper_x29__00000132086081680176933160000000575656365073902269_',
     [Muscle.Brachialis]:
       'Biceps_Brachialis_00000003086861433688303320000017820228468836316309_',
-
-    /*TODO: Add id 
-    Flexor_digitorium__x28_Under_arm_x29__00000159435954906204878840000011072027011836770979_
-    */
 
     // ───────────────────────────────────────────────────────────
     // 6) NECK / TRAPS / DELTS / BISEPS / TRICEPS
@@ -246,22 +238,21 @@ const AnatomyFigureSvg = (props: {
     [Muscle.Trapezius]:
       'Front_traps_00000021839012028885905390000000215930882222765978_',
 
-    /* ───────────────────────────────────────────────────────────
-       We have “separated” the triceps heads on the front:
+    /*
+      On the front, the triceps heads do exist separately:
+      If you want to highlight “TricepsBrachii” as both heads, you can add:
+      [Muscle.TricepsBrachii]: [<both IDs>] 
+      but we’ll keep them split:
     */
+    [Muscle.TricepsBrachii]: [
+      'Triceps_long_head_00000083776378062729911360000007780280132728440204_',
+      'triceps_lateral_head_00000114039035336761946620000010495095347100091037_',
+    ],
     [Muscle.TricepsLongHead]:
       'Triceps_long_head_00000083776378062729911360000007780280132728440204_',
     [Muscle.TricepsLateralHead]:
       'triceps_lateral_head_00000114039035336761946620000010495095347100091037_',
 
-    /* If you still want “TricepsBrachii” (the umbrella term) to light up
-       both heads together, you could do:
-    [Muscle.TricepsBrachii]: [
-      'Triceps_long_head_00000083776378062729911360000007780280132728440204_',
-      'triceps_lateral_head_00000114039035336761946620000010495095347100091037_',
-    ],
-    but here we chose to split them out. */
-    
     [Muscle.BicepsBrachii]:
       'Biceps_brachii_00000165913426772514415860000005830889273115133587_',
     [Muscle.AnteriorDeltoid]:
@@ -305,7 +296,7 @@ const AnatomyFigureSvg = (props: {
       const maybeId = currentMuscleIdMap[muscle];
       if (!maybeId) return; // This muscle isn’t in the map → skip.
 
-      // Normalize to array‐of‐strings so we can set opacity on each sub‐group:
+      // Normalize to array-of-strings so we can set opacity on each sub-group:
       const groupIds: string[] = Array.isArray(maybeId)
         ? maybeId
         : [maybeId];

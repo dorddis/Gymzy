@@ -56,9 +56,11 @@ export const WorkoutProvider = ({ children }: { children: ReactNode }) => {
    *  Because we split “Rectus Abdominis” into two enum members,
    *  any exercise whose primary/secondary included UpperRectusAbdominis
    *  or LowerRectusAbdominis will be handled naturally.  Volume is calculated
-   *  exactly as before (sets × reps × (weight || 1)).  If an exercise originally
-   *  listed “Rectus Abdominis” in JSON, that was already expanded into
-   *  [UpperRectusAbdominis, LowerRectusAbdominis] in constants.ts.
+   *  exactly as before (sets × reps × (weight || 1)).  
+   *
+   *  We have also added logic so that if any of the three deltoid‐head keys
+   *  (AnteriorDeltoid / LateralDeltoid / PosteriorDeltoid) appear in
+   *  targetedMuscles, we also add that same share to `Muscle.Deltoid` (umbrella).
    */
   const addWorkout = useCallback(
     (workoutData: { exerciseId: string; sets: number; reps: number; weight: number }) => {
@@ -82,14 +84,32 @@ export const WorkoutProvider = ({ children }: { children: ReactNode }) => {
 
       setLoggedWorkouts((prev) => [...prev, newWorkout]);
 
-      // Update muscleVolumes: primary muscles get full, secondary get half
+      // Update muscleVolumes: primary muscles get full, secondary get half.
+      // Then—if any of the three deltoid heads were used—we also add that share
+      // into the umbrella Deltoid bucket.
       setMuscleVolumes((prevVolumes) => {
         const updated: MuscleVolumes = { ...prevVolumes };
-        const allTargets = [...exercise.primaryMuscles, ...exercise.secondaryMuscles];
-        allTargets.forEach((m) => {
-          const share = exercise.primaryMuscles.includes(m) ? volume : volume * 0.5;
+
+        // Loop through every targeted muscle (primary or secondary)
+        newWorkout.targetedMuscles.forEach((m) => {
+          // Primary = full volume, Secondary = half
+          const isPrimary = exercise.primaryMuscles.includes(m);
+          const share = isPrimary ? volume : volume * 0.5;
+
+          // Add share to m itself
           updated[m] = (updated[m] || 0) + share;
+
+          // If this m is one of the three deltoid heads, also
+          // add that same share into the umbrella Deltoid key:
+          if (
+            m === Muscle.AnteriorDeltoid ||
+            m === Muscle.LateralDeltoid ||
+            m === Muscle.PosteriorDeltoid
+          ) {
+            updated[Muscle.Deltoid] = (updated[Muscle.Deltoid] || 0) + share;
+          }
         });
+
         return updated;
       });
     },
