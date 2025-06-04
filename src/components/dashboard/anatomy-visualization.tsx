@@ -138,6 +138,11 @@ const AnatomyFigureSvg = (props: {
       'Extensor_carpi_00000116200407099860938660000003262073282377889712_',
       'Extensor_digitorum_00000071523930808613392550000017694714289508163976_',
       'Extensor_carpi_ulnaris_00000134217785543749064480000005604883019983209609_',
+
+      /*TODO: I have added this new id for forarm muscle it is the same muscle that can be seen 
+      in front as well as back so add this to constants and workoutcontext files as 
+      required*/
+      'Flexor_digitorium__x28_Under_arm_x29__00000159435954906204878840000011072027011836770979_'
     ],
 
     [Muscle.GluteusMaximus]:
