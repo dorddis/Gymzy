@@ -8,7 +8,7 @@ import Image from "next/image";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
 import { Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, BarChart as RechartsBarChart, Cell } from "recharts";
 import { useWorkout } from "@/contexts/WorkoutContext";
-import { Muscle, MAJOR_MUSCLE_GROUPS, MUSCLE_VOLUME_THRESHOLDS } from "@/lib/constants";
+import { Muscle, MAJOR_MUSCLE_GROUPS, MUSCLE_VOLUME_THRESHOLDS } from "../../../home/user/studio/src/lib/constants";
 
 const initialChartConfig = {
   CHEST: { label: "Chest", color: "hsl(var(--primary))" },

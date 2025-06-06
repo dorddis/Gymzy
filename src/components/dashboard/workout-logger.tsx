@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Dumbbell, CheckCircle, Activity } from "lucide-react";
 import { useWorkout } from "@/contexts/WorkoutContext";
-import { EXERCISES } from "@/lib/constants";
+import { EXERCISES } from "../../../home/user/studio/src/lib/constants";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";

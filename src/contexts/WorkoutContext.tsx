@@ -7,7 +7,7 @@ import React, {
   useCallback,
   ReactNode,
 } from 'react';
-import { Muscle, EXERCISES, Exercise } from '@/lib/constants';
+import { Muscle, EXERCISES, Exercise } from '../../home/user/studio/src/lib/constants';
 
 interface LoggedWorkout {
   id: string;

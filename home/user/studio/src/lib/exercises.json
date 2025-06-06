@@ -15,7 +15,7 @@
     "id": "bar-dips",
     "name": "Bar Dips",
     "primaryMuscles": ["Pectoralis Major", "Triceps Brachii"],
-    "secondaryMuscles": ["Anterior Deltoid"]
+    "secondaryMuscles": ["Anterior Deltoid", "Serratus Anterior"]
   },
   {
     "id": "standing-cable-chest-fly",

@@ -16,7 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { Scan, UserRound, RotateCcwSquare, Zap } from 'lucide-react';
 
 import { useWorkout } from '@/contexts/WorkoutContext';
-import { Muscle, MUSCLE_VOLUME_THRESHOLDS } from '@/lib/constants';
+import { Muscle, MUSCLE_VOLUME_THRESHOLDS } from '../../../home/user/studio/src/lib/constants';
 
 /* ───────────────────────────────────────────────────────────────────────────
    1) Import the two full‐body SVGs (front & back) as React components.
