@@ -13,13 +13,21 @@ import {
   Timestamp 
 } from 'firebase/firestore';
 import { z } from 'zod';
+import { Muscle } from '@/lib/constants';
 
 // Zod schema for workout validation
 const exerciseSchema = z.object({
+  exerciseId: z.string(),
   name: z.string().min(1),
-  sets: z.number().min(1),
-  reps: z.number().min(1),
-  weight: z.number().min(0)
+  sets: z.array(z.object({
+    weight: z.number().min(0),
+    reps: z.number().min(0),
+    rpe: z.number().min(1).max(10).optional(),
+    isWarmup: z.boolean().optional(),
+  })),
+  targetedMuscles: z.array(z.nativeEnum(Muscle)),
+  notes: z.string().optional(),
+  order: z.number().optional(),
 });
 
 const workoutSchema = z.object({
@@ -27,8 +35,8 @@ const workoutSchema = z.object({
   title: z.string().min(1),
   date: z.instanceof(Timestamp),
   exercises: z.array(exerciseSchema),
-  totalVolume: z.number().min(0),
-  rpe: z.number().min(1).max(10),
+  totalVolume: z.number().min(0).optional(),
+  rpe: z.number().min(1).max(10).optional(),
   createdAt: z.instanceof(Timestamp),
   updatedAt: z.instanceof(Timestamp)
 });
@@ -36,9 +44,10 @@ const workoutSchema = z.object({
 export type Workout = z.infer<typeof workoutSchema> & { id: string };
 
 // Helper function to calculate total volume
-const calculateTotalVolume = (exercises: Workout['exercises']): number => {
+const calculateTotalVolume = (exercises: z.infer<typeof exerciseSchema>[]): number => {
   return exercises.reduce((total, exercise) => {
-    return total + (exercise.sets * exercise.reps * exercise.weight);
+    const exerciseVolume = exercise.sets.reduce((setSum, set) => setSum + (set.weight * set.reps), 0);
+    return total + exerciseVolume;
   }, 0);
 };
 
@@ -55,8 +64,8 @@ export const createWorkout = async (workoutData: Omit<Workout, 'id' | 'createdAt
     // Validate workout data
     workoutSchema.parse(workout);
 
-    // Calculate total volume if not provided
-    if (!workout.totalVolume) {
+    // Calculate total volume if not provided or if exercises are updated
+    if (workout.exercises && workout.totalVolume === undefined) {
       workout.totalVolume = calculateTotalVolume(workout.exercises);
     }
 

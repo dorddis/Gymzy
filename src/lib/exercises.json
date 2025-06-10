@@ -1,0 +1,32 @@
+[
+  {
+    "id": "bench-press",
+    "name": "Bench Press",
+    "primaryMuscles": ["Pectoralis Major"],
+    "secondaryMuscles": ["Anterior Deltoid", "Triceps Brachii"]
+  },
+  {
+    "id": "squat",
+    "name": "Squat",
+    "primaryMuscles": ["Quadriceps", "Gluteus Maximus"],
+    "secondaryMuscles": ["Hamstrings", "Erector Spinae"]
+  },
+  {
+    "id": "deadlift",
+    "name": "Deadlift",
+    "primaryMuscles": ["Erector Spinae", "Gluteus Maximus"],
+    "secondaryMuscles": ["Hamstrings", "Trapezius", "Forearms"]
+  },
+  {
+    "id": "overhead-press",
+    "name": "Overhead Press",
+    "primaryMuscles": ["Anterior Deltoid", "Lateral Deltoid"],
+    "secondaryMuscles": ["Triceps Brachii", "Upper Rectus Abdominis"]
+  },
+  {
+    "id": "pull-up",
+    "name": "Pull Up",
+    "primaryMuscles": ["Latissimus Dorsi"],
+    "secondaryMuscles": ["Biceps Brachii", "Trapezius"]
+  }
+] 

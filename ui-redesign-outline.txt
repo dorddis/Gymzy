@@ -12,13 +12,13 @@ This document is the single source of truth for the AI agent. It contains:
 ## 1. Progress Tracker  
 Mark each step complete by changing `[ ]` to `[x]`.
 
-[ ] 0. Integrate AI Agent Chat Interface 
+[x] 0. Integrate AI Agent Chat Interface 
 [x] 1. Analyze Codebase  
 [x] 2. Configure Design System  
 [x] 3. Build Header (Status Bar)  
 [x] 4. Weekly Muscle Heatmap Card  
 [x] 5. Stats Cards Row  
-[x] **6. Add Workout CTA**  
+[x] 6. Add Workout CTA  
 &nbsp;&nbsp;&nbsp;&nbsp;[x] 6.1. See saved home-dashboard HTML → `design/home-dashboard.html.txt`  
 &nbsp;&nbsp;&nbsp;&nbsp;[x] 6.2. See saved add-workout HTML → `design/add-workout.html.txt`  
 &nbsp;&nbsp;&nbsp;&nbsp;[x] 6.3. Hook button click to open modal  
@@ -28,8 +28,35 @@ Mark each step complete by changing `[ ]` to `[x]`.
 &nbsp;&nbsp;&nbsp;&nbsp;[x] 9.1. Implement CommunityFeed component (frontend)  
 &nbsp;&nbsp;&nbsp;&nbsp;[x] 9.2. Design and implement backend data structure/API for community posts  
 &nbsp;&nbsp;&nbsp;&nbsp;[x] 9.3. Integrate frontend with backend  
-[ ] 10. Bottom Navigation Bar  
+[x] 10. Bottom Navigation Bar  
 [ ] 11. Add Workout Modal  
+&nbsp;&nbsp;&nbsp;&nbsp;[ ] 11.1. Exercise Selection Screen
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Implement search functionality with debounce
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Add "Most Used" exercises section with actual usage data
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Implement exercise selection with proper state management
+&nbsp;&nbsp;&nbsp;&nbsp;[ ] 11.2. Exercise Details Screen
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Create exercise details view with sets/reps/weight/RPE inputs
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Add "Add Set" and "Add Warmup Set" functionality
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Implement plate calculator widget
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Add exercise notes and tips section
+&nbsp;&nbsp;&nbsp;&nbsp;[ ] 11.3. Workout Summary Screen
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Show total volume calculation
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Display targeted muscle groups
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Add ability to reorder exercises
+&nbsp;&nbsp;&nbsp;&nbsp;[ ] 11.4. Finish Workout Modal
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Add date/time picker
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Implement notes textarea
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Add media upload functionality
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Add public/private toggle
+&nbsp;&nbsp;&nbsp;&nbsp;[ ] 11.5. State Management & Data Flow
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Implement proper state management for multi-step flow
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Add validation for all inputs
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Handle "Copy last session" functionality
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Implement proper error handling
+&nbsp;&nbsp;&nbsp;&nbsp;[ ] 11.6. Integration with Backend
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Connect with workout service
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Implement proper data saving
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Add loading states and error handling
 [ ] 12. Log Workout Screen  
 [ ] 13. Finish Workout Modal  
 [ ] 14. Stats & Trends Screen  
@@ -139,11 +166,233 @@ Mark each step complete by changing `[ ]` to `[x]`.
 - **Output:** Fixed navigation component visible on dashboard
 
 ### Step 11: Add Workout Modal
-- **Goal:** Exercise selection interface  
-- **Inputs:** Exercise list, last-session data  
-- **Tasks:**  
-  - Modal with title, date/time, "Copy last session" option, search bar, "Most Used" pills, grouped exercise list with "+" buttons.  
-- **Output:** Interactive selection modal.
+- **Goal:** Create a comprehensive workout logging system with multi-step flow
+- **Inputs:** 
+  - Exercise database
+  - User's workout history
+  - Design specs from `design/add-workout.html.txt`
+  - Firebase configuration
+
+#### Frontend Implementation
+
+1. **Exercise Selection Screen**
+   - **Components:**
+     - `ExerciseSearch.tsx`: Search input with debounced filtering
+     - `MostUsedExercises.tsx`: Horizontal scrollable list of frequently used exercises
+     - `ExerciseList.tsx`: Scrollable list of filtered exercises
+   - **Features:**
+     - Real-time search with debounce (300ms)
+     - Exercise categorization (Chest, Back, Legs, etc.)
+     - Exercise details preview on hover
+     - Muscle group indicators
+     - "Copy last session" toggle with last workout data
+
+2. **Exercise Details Screen**
+   - **Components:**
+     - `SetInput.tsx`: Individual set input with weight/reps/RPE
+     - `PlateCalculator.tsx`: Visual plate calculator widget
+     - `ExerciseNotes.tsx`: Tips and form guidance
+   - **Features:**
+     - Dynamic set addition/removal
+     - Warmup set differentiation
+     - RPE input (1-10 scale)
+     - Plate calculator with common weight configurations
+     - Exercise-specific tips and form guidance
+     - Volume calculation per set and total
+
+3. **Workout Summary Screen**
+   - **Components:**
+     - `WorkoutSummary.tsx`: Overview of selected exercises
+     - `MuscleHeatmap.tsx`: Visual representation of targeted muscles
+     - `ExerciseReorder.tsx`: Drag-and-drop exercise reordering
+   - **Features:**
+     - Total volume calculation
+     - Muscle group distribution
+     - Exercise reordering
+     - Quick edit capabilities
+     - Workout duration estimation
+
+4. **Muscle Activation Visualization Redesign**
+   - **Components:**
+     - `MuscleActivationSVG.tsx`: Dedicated component for displaying the muscle activation SVG.
+   - **Features:**
+     - Display only the muscle activation SVG at the top of the screen.
+     - Remove muscle names and individual volume displays from the initial view.
+     - Implement a scroll-blur effect for the SVG, where it blurs and allows content to scroll over it.
+     - Make the blurred SVG tappable to reveal a detailed, full-screen muscle activation view (e.g., a modal).
+     - Reuse and adapt logic from `src/components/dashboard/anatomy-visualization.tsx` and `src/components/dashboard/heatmap-card.tsx` for muscle activation tracking and display.
+
+5. **Exercise Display & Input Styling**
+   - Apply a rounded border around each added exercise block.
+   - Remove borders from the weight, reps, and RPE text inputs.
+   - Reduce the space taken by the weight, reps, and RPE text inputs.
+
+4. **Finish Workout Modal**
+   - **Components:**
+     - `DateTimePicker.tsx`: Date and time selection
+     - `MediaUpload.tsx`: Photo/video upload interface
+     - `PrivacyToggle.tsx`: Public/private workout toggle
+   - **Features:**
+     - Date/time selection with timezone support
+     - Media upload with preview
+     - Workout notes with markdown support
+     - Privacy settings
+     - Share options
+
+#### Backend Implementation
+
+1. **Firebase Data Structure**
+   ```typescript
+   // workouts collection
+   interface Workout {
+     id: string;
+     userId: string;
+     title: string;
+     date: Timestamp;
+     exercises: {
+       id: string;
+       name: string;
+       sets: {
+         weight: number;
+         reps: number;
+         rpe: number;
+         isWarmup: boolean;
+       }[];
+       notes: string;
+       order: number;
+     }[];
+     totalVolume: number;
+     duration: number;
+     notes: string;
+     mediaUrls: string[];
+     isPublic: boolean;
+     createdAt: Timestamp;
+     updatedAt: Timestamp;
+   }
+
+   // user_workout_stats collection
+   interface UserWorkoutStats {
+     userId: string;
+     totalWorkouts: number;
+     totalVolume: number;
+     exerciseFrequency: {
+       [exerciseId: string]: number;
+     };
+     lastWorkout: Timestamp;
+     streak: number;
+   }
+   ```
+
+2. **Firebase Security Rules**
+   ```javascript
+   rules_version = '2';
+   service cloud.firestore {
+     match /databases/{database}/documents {
+       match /workouts/{workoutId} {
+         allow read: if request.auth != null && 
+           (resource.data.userId == request.auth.uid || resource.data.isPublic);
+         allow create: if request.auth != null && 
+           request.resource.data.userId == request.auth.uid;
+         allow update, delete: if request.auth != null && 
+           resource.data.userId == request.auth.uid;
+       }
+       
+       match /user_workout_stats/{userId} {
+         allow read: if request.auth != null;
+         allow write: if request.auth != null && 
+           request.auth.uid == userId;
+       }
+     }
+   }
+   ```
+
+3. **API Endpoints**
+   ```typescript
+   // src/services/workout-service.ts
+   export const workoutService = {
+     // Create new workout
+     createWorkout: async (workoutData: Omit<Workout, 'id'>) => {
+       // Implementation
+     },
+     
+     // Get user's recent workouts
+     getRecentWorkouts: async (userId: string, limit: number = 10) => {
+       // Implementation
+     },
+     
+     // Update workout
+     updateWorkout: async (workoutId: string, data: Partial<Workout>) => {
+       // Implementation
+     },
+     
+     // Delete workout
+     deleteWorkout: async (workoutId: string) => {
+       // Implementation
+     },
+     
+     // Get workout statistics
+     getWorkoutStats: async (userId: string) => {
+       // Implementation
+     }
+   };
+   ```
+
+4. **State Management**
+   ```typescript
+   // src/contexts/WorkoutContext.tsx
+   interface WorkoutContextType {
+     currentWorkout: Workout | null;
+     recentWorkouts: Workout[];
+     workoutStats: UserWorkoutStats | null;
+     loading: boolean;
+     error: Error | null;
+     addExercise: (exercise: Exercise) => void;
+     updateExercise: (exerciseId: string, data: Partial<Exercise>) => void;
+     removeExercise: (exerciseId: string) => void;
+     reorderExercises: (newOrder: string[]) => void;
+     saveWorkout: () => Promise<void>;
+     loadRecentWorkouts: () => Promise<void>;
+   }
+   ```
+
+#### Integration Points
+
+1. **Dashboard Integration**
+   - Update `RecentWorkoutsCarousel` to use real data
+   - Implement workout deletion
+   - Add workout details view
+   - Show workout statistics
+
+2. **Analytics Integration**
+   - Track workout completion
+   - Monitor exercise frequency
+   - Calculate volume trends
+   - Update muscle heatmap
+
+3. **Social Features**
+   - Share public workouts
+   - Like/comment functionality
+   - Workout templates
+
+#### Testing Strategy
+
+1. **Unit Tests**
+   - Component rendering
+   - State management
+   - Form validation
+   - API calls
+
+2. **Integration Tests**
+   - Workflow completion
+   - Data persistence
+   - Error handling
+
+3. **E2E Tests**
+   - Complete workout flow
+   - Social interactions
+   - Data synchronization
+
+- **Output:** Fully functional workout logging system with proper data persistence and social features
 
 ### Step 12: Dedicated AI Chat Screen
 - **Goal:** Implement a full-screen, ChatGPT-like conversational AI interface accessible from the bottom navigation bar.

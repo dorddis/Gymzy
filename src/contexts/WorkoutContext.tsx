@@ -9,7 +9,7 @@ import React, {
   useEffect,
 } from 'react';
 import { Muscle, EXERCISES, Exercise } from '../../home/user/studio/src/lib/constants';
-import { useAuth } from './AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Workout, getRecentWorkouts, createWorkout, updateWorkout, deleteWorkout } from '@/services/workout-service';
 
 interface LoggedWorkout {
@@ -33,15 +33,46 @@ interface WorkoutContextType {
   updateWorkout: (workoutId: string, workoutData: Partial<Workout>) => Promise<void>;
   deleteWorkout: (workoutId: string) => Promise<void>;
   refreshWorkouts: () => Promise<void>;
+  muscleVolumes: MuscleVolumes;
 }
 
 const WorkoutContext = createContext<WorkoutContextType | undefined>(undefined);
+
+// Helper to calculate muscle volumes from a list of workouts
+const calculateMuscleVolumes = (workouts: Workout[]): MuscleVolumes => {
+  const volumes: MuscleVolumes = {};
+
+  workouts.forEach(workout => {
+    workout.exercises.forEach(exercise => {
+      const exerciseDetails = EXERCISES.find(e => e.id === exercise.exerciseId);
+      if (exerciseDetails) {
+        const totalExerciseVolume = exercise.sets.reduce((sum, set) => sum + (set.weight * set.reps), 0);
+        
+        // Add volume to primary muscles
+        if (exerciseDetails.primaryMuscles) {
+          exerciseDetails.primaryMuscles.forEach(muscle => {
+            volumes[muscle] = (volumes[muscle] || 0) + totalExerciseVolume;
+          });
+        }
+        
+        // Add volume to secondary muscles
+        if (exerciseDetails.secondaryMuscles) {
+          exerciseDetails.secondaryMuscles.forEach(muscle => {
+            volumes[muscle] = (volumes[muscle] || 0) + (totalExerciseVolume * 0.5); // Secondary muscles get 50% of the volume
+          });
+        }
+      }
+    });
+  });
+  return volumes;
+};
 
 export function WorkoutProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [recentWorkouts, setRecentWorkouts] = useState<Workout[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [calculatedMuscleVolumes, setCalculatedMuscleVolumes] = useState<MuscleVolumes>({});
 
   const fetchWorkouts = async () => {
     if (!user) return;
@@ -50,6 +81,7 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       const workouts = await getRecentWorkouts(user.uid);
       setRecentWorkouts(workouts);
+      setCalculatedMuscleVolumes(calculateMuscleVolumes(workouts));
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to fetch workouts'));
@@ -108,7 +140,8 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
     addWorkout,
     updateWorkout: updateWorkoutHandler,
     deleteWorkout: deleteWorkoutHandler,
-    refreshWorkouts: fetchWorkouts
+    refreshWorkouts: fetchWorkouts,
+    muscleVolumes: calculatedMuscleVolumes,
   };
 
   return (
