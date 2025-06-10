@@ -14,7 +14,7 @@ Mark each step complete by changing `[ ]` to `[x]`.
 
 [x] 1. Analyze Codebase  
 [x] 2. Configure Design System  
-[ ] 3. Build Header (Status Bar)  
+[x] 3. Build Header (Status Bar)  
 [ ] 4. Weekly Muscle Heatmap Card  
 [ ] 5. Stats Cards Row  
 [ ] **6. Add Workout CTA**  

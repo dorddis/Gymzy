@@ -1,15 +1,18 @@
-import { Dumbbell } from "lucide-react";
-import Link from "next/link";
+import { Bell } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
-export function AppHeader() {
+export function StatusBar() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 max-w-screen-2xl items-center">
-        <Link href="/" className="mr-6 flex items-center space-x-2">
-          <Dumbbell className="h-7 w-7 text-primary" />
-          <span className="text-2xl font-bold text-primary font-headline">Gymzy</span>
-        </Link>
-        {/* Future navigation items can go here */}
+    <header className="w-full bg-background px-4 pt-12 pb-4 flex justify-between items-center border-b border-carbon-300">
+      <h1 className="text-2xl font-semibold text-primary font-inter">Fitness Track</h1>
+      <div className="flex items-center space-x-3">
+        <button className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+          <Bell className="text-primary" />
+        </button>
+        <Avatar>
+          <AvatarImage src="/avatars/default.png" alt="Profile" />
+          <AvatarFallback>U</AvatarFallback>
+        </Avatar>
       </div>
     </header>
   );

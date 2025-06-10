@@ -1,4 +1,4 @@
-import { AppHeader } from "@/components/layout/header";
+import { StatusBar } from "@/components/layout/header";
 import { AnatomyVisualization } from "@/components/dashboard/anatomy-visualization";
 import { WorkoutLogger } from "@/components/dashboard/workout-logger";
 import { ProgressAnalytics } from "@/components/dashboard/progress-analytics";
@@ -6,7 +6,7 @@ import { ProgressAnalytics } from "@/components/dashboard/progress-analytics";
 export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
-      <AppHeader />
+      <StatusBar />
       <main className="flex-grow container mx-auto p-4 sm:p-6 lg:p-8">
         <div className="grid grid-cols-1 xl:grid-cols-5 gap-6 items-stretch">
           {/* Anatomy visualization takes 2/5ths width on extra large screens, full width on smaller */}
