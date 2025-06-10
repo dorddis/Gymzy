@@ -1,0 +1,44 @@
+<!-- design/chat-screen.html.txt -->
+<!-- Mimics ChatGPT-like full-screen chat UI -->
+
+<div style="display: flex; flex-direction: column; height: 100vh; background-color: #FDFFFC; font-family: 'Inter', sans-serif;">
+
+  <!-- Header -->
+  <div style="padding: 16px; background-color: #34113F; color: #FDFFFC; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h2 style="margin: 0; font-size: 1.25rem; font-weight: 600;">Gymzy AI</h2>
+    <!-- New Chat / Settings button could go here -->
+    <button style="background: none; border: none; color: #FDFFFC; font-size: 1rem; cursor: pointer;">New Chat</button>
+  </div>
+
+  <!-- Chat Messages Area -->
+  <div style="flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-end;">
+    <!-- Example AI Message -->
+    <div style="background-color: #E2E8F0; padding: 12px 16px; border-radius: 18px; margin-bottom: 12px; max-width: 75%; align-self: flex-start;">
+      <p style="margin: 0; line-height: 1.5;">Hello! I am your personalized Gymzy AI assistant. How can I help you with your fitness journey today?</p>
+    </div>
+    <!-- Example User Message -->
+    <div style="background-color: #34113F; color: #FDFFFC; padding: 12px 16px; border-radius: 18px; margin-bottom: 12px; max-width: 75%; align-self: flex-end;">
+      <p style="margin: 0; line-height: 1.5;">I want to log a new workout. It was a strength training session, 3 sets of 10 reps, RPE 7.</p>
+    </div>
+    <!-- Another AI Message -->
+    <div style="background-color: #E2E8F0; padding: 12px 16px; border-radius: 18px; margin-bottom: 12px; max-width: 75%; align-self: flex-start;">
+      <p style="margin: 0; line-height: 1.5;">Great! What exercises did you do, and what weights did you lift for each?</p>
+    </div>
+  </div>
+
+  <!-- Input Area -->
+  <div style="padding: 16px 20px; border-top: 1px solid #E2E8F0; background-color: #FFFFFF; display: flex; align-items: center; box-shadow: 0 -2px 5px rgba(0,0,0,0.05);">
+    <textarea
+      placeholder="Message Gymzy AI..."
+      rows="1"
+      style="flex-grow: 1; padding: 12px 16px; border: 1px solid #CBD5E0; border-radius: 25px; margin-right: 12px; font-size: 1rem; resize: none; overflow-y: hidden; background-color: #F8FAFC;"
+    ></textarea>
+    <button style="background-color: #73AB84; color: #FDFFFC; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; transition: background-color 0.2s;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-send">
+        <path d="m22 2-7 20-4-9-9-4 20-7z"/>
+        <path d="M9.3 15.3 14.7 9.7"/>
+      </svg>
+    </button>
+  </div>
+
+</div> 

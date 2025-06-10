@@ -1,15 +1,17 @@
 import React from 'react';
-import { Home, BarChart2, Users, Dumbbell } from 'lucide-react';
+import { Home, BarChart2, Users, Dumbbell, MessageSquare } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export function BottomNav() {
-  // Placeholder for active tab state - will be replaced with actual routing later
-  const [activeTab, setActiveTab] = React.useState('home');
+  const pathname = usePathname();
 
   const navItems = [
-    { id: 'home', label: 'Home', icon: Home },
-    { id: 'stats', label: 'Stats', icon: BarChart2 },
-    { id: 'social', label: 'Social', icon: Users },
-    { id: 'workout', label: 'Workout', icon: Dumbbell }
+    { id: 'home', label: 'Home', icon: Home, href: '/' },
+    { id: 'stats', label: 'Stats', icon: BarChart2, href: '/stats' },
+    { id: 'social', label: 'Social', icon: Users, href: '/social' },
+    { id: 'workout', label: 'Workout', icon: Dumbbell, href: '/workout' },
+    { id: 'chat', label: 'Chat', icon: MessageSquare, href: '/chat' },
   ];
 
   return (
@@ -17,19 +19,19 @@ export function BottomNav() {
       <div className="flex justify-between items-center max-w-md mx-auto">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = activeTab === item.id;
+          const isActive = pathname === item.href;
           
           return (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={`flex flex-col items-center justify-center w-16 ${
-                isActive ? 'text-secondary' : 'text-gray-500'
-              }`}
-            >
-              <Icon className={`w-6 h-6 ${isActive ? 'text-secondary' : 'text-gray-500'}`} />
-              <span className="text-xs mt-1">{item.label}</span>
-            </button>
+            <Link href={item.href} key={item.id} passHref>
+              <button
+                className={`flex flex-col items-center justify-center w-16 ${
+                  isActive ? 'text-secondary' : 'text-gray-500'
+                }`}
+              >
+                <Icon className={`w-6 h-6 ${isActive ? 'text-secondary' : 'text-gray-500'}`} />
+                <span className="text-xs mt-1">{item.label}</span>
+              </button>
+            </Link>
           );
         })}
       </div>

@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { auth } from '@/lib/firebase';
-import { User } from 'firebase/auth';
+import { User, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 
 interface AuthContextType {
   user: User | null;
@@ -25,13 +25,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    const unsubscribe = auth.onAuthStateChanged(
-      (user) => {
-        setUser(user);
+    let retryCount = 0;
+    const maxRetries = 3;
+    const retryDelay = 1000; // 1 second
+
+    const attemptAnonymousSignIn = async () => {
+      try {
+        const { user: anonUser } = await signInAnonymously(auth);
+        console.log('AuthContext: Anonymous user created:', anonUser.uid);
+        setUser(anonUser);
+        setError(null);
+      } catch (authError) {
+        console.error('AuthContext: Failed to sign in anonymously:', authError);
+        if (retryCount < maxRetries) {
+          retryCount++;
+          console.log(`AuthContext: Retrying anonymous sign in (attempt ${retryCount}/${maxRetries})...`);
+          setTimeout(attemptAnonymousSignIn, retryDelay);
+        } else {
+          setError(authError instanceof Error ? authError : new Error('Failed to sign in anonymously after multiple attempts'));
+        }
+      }
+    };
+
+    const unsubscribe = onAuthStateChanged(
+      auth,
+      (firebaseUser) => {
+        if (firebaseUser) {
+          console.log('AuthContext: User detected:', firebaseUser.uid);
+          setUser(firebaseUser);
+          setError(null);
+        } else {
+          console.log('AuthContext: No user detected, attempting anonymous sign in');
+          attemptAnonymousSignIn();
+        }
         setLoading(false);
       },
-      (error) => {
-        setError(error);
+      (authError) => {
+        console.error('AuthContext: Firebase auth error:', authError);
+        setError(authError);
         setLoading(false);
       }
     );

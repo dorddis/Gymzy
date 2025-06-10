@@ -12,6 +12,7 @@ This document is the single source of truth for the AI agent. It contains:
 ## 1. Progress Tracker  
 Mark each step complete by changing `[ ]` to `[x]`.
 
+[ ] 0. Integrate AI Agent Chat Interface 
 [x] 1. Analyze Codebase  
 [x] 2. Configure Design System  
 [x] 3. Build Header (Status Bar)  
@@ -37,6 +38,8 @@ Mark each step complete by changing `[ ]` to `[x]`.
 ---
 
 ## 2. Step-by-Step Outline
+
+### Step 0: [REMOVED - Replaced by Dedicated AI Chat Screen]
 
 ### Step 1: Analyze Codebase
 - **Goal:** Map existing files and identify reusable components  
@@ -126,11 +129,11 @@ Mark each step complete by changing `[ ]` to `[x]`.
 - **Output:** Styled feed with real data
 
 ### Step 10: Bottom Navigation Bar
-- **Goal:** Persistent footer with Home, Stats, Social, <Something else not profile>
+- **Goal:** Persistent footer with Home, Stats, Social, Chat (replaces <Something else not profile>)
 - **Inputs:** Routing config, lucide-react icons
 - **Tasks:**
   1. Create `<BottomNav />` component.
-  2. Include four navigation items (Home, Stats, Social, <Something else not profile>) with appropriate icons and labels.
+  2. Include four navigation items (Home, Stats, Social, Chat) with appropriate icons and labels.
   3. Highlight the active tab (placeholder logic for now, actual routing later).
   4. Ensure fixed positioning at the bottom and responsive behavior.
 - **Output:** Fixed navigation component visible on dashboard
@@ -142,13 +145,51 @@ Mark each step complete by changing `[ ]` to `[x]`.
   - Modal with title, date/time, "Copy last session" option, search bar, "Most Used" pills, grouped exercise list with "+" buttons.  
 - **Output:** Interactive selection modal.
 
-### Step 12: Log Workout Screen
-- **Goal:** Enter sets/reps/weights and view heatmap background  
-- **Inputs:** Selected exercises  
-- **Tasks:**  
-  - Top SVG heatmap background, sliding panel with accordion for each exercise.  
-  - Inputs for warm-up and working sets, RPE selector, checkboxes, plate calculator, add-set actions.  
-- **Output:** Complete logging UI.
+### Step 12: Dedicated AI Chat Screen
+- **Goal:** Implement a full-screen, ChatGPT-like conversational AI interface accessible from the bottom navigation bar.
+- **Inputs:**
+  - OpenAI API key (or other LLM endpoint)
+  - User profile & workout history from app context
+  - Design specs for a full-screen chat UI
+- **Tasks:**
+  1. **Design & save Chat Screen UI prototype**
+     - Create `design/chat-screen.html.txt` with the full-screen markup for the chat interface.
+  2. **Front-end: Chat Screen Components**
+     - Create a new page `src/app/chat/page.tsx`.
+     - Build `<ChatScreen />` component with:
+       - Header (e.g., "Gymzy AI" or "New Chat")
+       - Scrollable message list (`<ChatBubble />` - reuse if adaptable, otherwise create new)
+       - Text input box + send button
+       - Loading / error states
+     - Reuse or adapt `ChatContext` (from previous iteration) to store `messages: { role, content }[]` and `sendMessage()` API call.
+     - Implement autoscroll to bottom for new messages.
+  3. **Backend: AI API Route (Re-implementation)**
+     - Re-create `src/app/api/ai/chat/route.ts` (or `app/api/ai/chat/route.ts`).
+     - Receives `{ userId, messages }`.
+     - Looks up user's recent workouts & profile → formats into a "system" prompt.
+     - Calls OpenAI Chat Completion with combined prompts.
+     - Streams response back (or returns full text).
+     - Secure route: only authenticated users.
+  4. **Persist chat history (Firestore)**
+     - Define a `chats` collection in Firestore with documents:
+       - `chatId`, `userId`, `timestamp`, `messages[]`
+     - On each message send/receive, write to DB.
+     - Load recent conversations on screen open.
+  5. **Context injection & personalization**
+     - In `chat.ts` API, prepend a system prompt:
+       > "You are Gymzy's AI assistant for user {name}. Their profile: {age, goals}. Recent workouts: {summary}. Use this to answer or execute tasks."
+     - Allow the agent to modify workout data via additional API endpoints (e.g., `/api/workouts`).
+  6. **Error handling & rate limits**
+     - Gracefully show "AI is unavailable" if API fails or rate-limit reached.
+  7. **Testing**
+     - Unit tests for API route (mock OpenAI).
+     - Integration tests: front-end chat flow.
+     - Manual QA: ensure chat UI is responsive on 390×844.
+- **Output:**
+  - `design/chat-screen.html.txt` in `/design`
+  - New page `src/app/chat/page.tsx` and components in `src/components/chat/`
+  - Re-implemented API route under `/api/ai/chat`
+  - Persisted chat history and context injection for personalization
 
 ### Step 13: Finish Workout Modal
 - **Goal:** Finalize and save workout  
@@ -285,7 +326,7 @@ Mark each step complete by changing `[ ]` to `[x]`.
 
 ## 3. Context-Extension Instructions
 
-If the AI agent needs to add new implementation details or reminders, it should:
+If you need to add new implementation details or reminders, it should:
 
 1. Append under a new heading `## Context Extensions`  
 2. Use the same structure: **Goal**, **Inputs**, **Tasks**, **Output**  
@@ -349,3 +390,5 @@ layout.tsx (global layout, can be updated)
 globals.css (global styles, to be updated)
 Refactor/Build New:
 page.tsx (main dashboard, will need to be rebuilt for new layout)
+
+_End of Guide_ 
