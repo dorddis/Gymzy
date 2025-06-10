@@ -8,7 +8,7 @@ import { ChatBubble } from '@/components/chat/chat-bubble';
 import { ModelSelector } from '@/components/ModelSelector';
 
 export default function ChatPage() {
-  const { messages, sendMessage, isLoading, error } = useChat();
+  const { messages, sendMessage, isLoading, error, startNewChat } = useChat();
   const [input, setInput] = useState('');
   const [selectedModel, setSelectedModel] = useState('gpt-4');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -59,41 +59,36 @@ export default function ChatPage() {
         </button>
         
         {/* Center: Gymzy Title and Model Selector */}
-        <div className="flex flex-col items-center flex-grow">
+        <div className="flex items-center flex-grow justify-center space-x-2">
           <h2 className="text-lg font-semibold text-primary">Gymzy</h2>
-          <div className="w-40 mt-1">
+          <div className="w-32">
             <ModelSelector selectedModel={selectedModel} onModelChange={setSelectedModel} />
           </div>
         </div>
         
         {/* Right: Refresh icon */}
         <button
+          onClick={startNewChat}
           className="text-primary hover:text-secondary transition-colors focus:outline-none p-1"
-          aria-label="Refresh chat"
+          aria-label="Start new chat"
         >
           <RefreshCcw className="w-5 h-5" />
         </button>
       </div>
 
       {/* Chat Messages Area */}
-      <div className="flex-grow overflow-y-auto p-4 flex flex-col justify-end relative">
-        {messages.length === 1 && messages[0].role === 'ai' && messages[0].content.startsWith('Hello! I am your personalized Gymzy AI') ? (
-          <div className="flex-grow flex items-center justify-center p-4 text-center text-primary text-2xl font-bold max-w-2xl mx-auto leading-relaxed">
-            What's on the agenda today?
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {messages.map((msg, index) => (
-              <ChatBubble key={index} role={msg.role} content={msg.content} />
-            ))}
-            {isLoading && (
-              <div className="bg-primary/10 text-primary p-3 rounded-lg max-w-[75%] animate-pulse self-start mr-auto">
-                <Loader2 className="w-4 h-4 inline mr-2 animate-spin" />Typing...
-              </div>
-            )}
-            <div ref={messagesEndRef} /> {/* Scroll target */}
-          </div>
-        )}
+      <div className="flex-grow overflow-y-auto p-4 flex flex-col relative">
+        <div className="space-y-3">
+          {messages.map((msg, index) => (
+            <ChatBubble key={index} role={msg.role} content={msg.content} />
+          ))}
+          {isLoading && (
+            <div className="bg-primary/10 text-primary p-3 rounded-lg max-w-[75%] animate-pulse self-start mr-auto">
+              <Loader2 className="w-4 h-4 inline mr-2 animate-spin" />Typing...
+            </div>
+          )}
+          <div ref={messagesEndRef} /> {/* Scroll target */}
+        </div>
       </div>
 
       {/* Input Area */}

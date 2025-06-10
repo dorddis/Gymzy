@@ -55,17 +55,22 @@ interface ModelSelectorProps {
 }
 
 export function ModelSelector({ selectedModel, onModelChange }: ModelSelectorProps) {
+  // Find the selected model object to display its name
+  const currentModel = AVAILABLE_MODELS.find(model => model.id === selectedModel);
+
   return (
     <div className="flex flex-col gap-2">
       <Select value={selectedModel} onValueChange={onModelChange}>
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder="Select a model" />
+        <SelectTrigger className="w-full bg-background text-primary border-primary/20 hover:border-primary/50">
+          <SelectValue placeholder="Select a model">
+            {currentModel ? currentModel.name : "Select a model"}
+          </SelectValue>
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="bg-background text-primary border-primary/20">
           {AVAILABLE_MODELS.map((model) => (
-            <SelectItem key={model.id} value={model.id}>
+            <SelectItem key={model.id} value={model.id} className="hover:bg-primary/10 data-[state=checked]:bg-primary/20">
               <div className="flex flex-col">
-                <span className="font-medium">{model.name}</span>
+                <span className="font-medium text-primary">{model.name}</span>
                 <span className="text-xs text-muted-foreground">
                   {model.provider} - {model.description}
                 </span>

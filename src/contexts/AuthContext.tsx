@@ -1,11 +1,16 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
 import { User, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+
+interface CustomUser extends User {
+  hasChatted?: boolean;
+}
 
 interface AuthContextType {
-  user: User | null;
+  user: CustomUser | null;
   loading: boolean;
   error: Error | null;
 }
@@ -13,7 +18,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<CustomUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -33,8 +38,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const { user: anonUser } = await signInAnonymously(auth);
         console.log('AuthContext: Anonymous user created:', anonUser.uid);
-        setUser(anonUser);
+
+        // Fetch or create user profile in Firestore
+        const userProfileRef = doc(db, 'users', anonUser.uid);
+        const userProfileSnap = await getDoc(userProfileRef);
+        let customUser: CustomUser = anonUser;
+
+        if (!userProfileSnap.exists()) {
+          // Create new user profile if it doesn't exist
+          await setDoc(userProfileRef, { uid: anonUser.uid, hasChatted: false });
+          customUser.hasChatted = false;
+          console.log('AuthContext: New user profile created for', anonUser.uid);
+        } else {
+          // Load existing hasChatted status
+          customUser.hasChatted = userProfileSnap.data()?.hasChatted || false;
+          console.log('AuthContext: Existing user profile loaded for', anonUser.uid, ', hasChatted:', customUser.hasChatted);
+        }
+
+        setUser(customUser);
         setError(null);
+
       } catch (authError) {
         console.error('AuthContext: Failed to sign in anonymously:', authError);
         if (retryCount < maxRetries) {
@@ -49,10 +72,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const unsubscribe = onAuthStateChanged(
       auth,
-      (firebaseUser) => {
+      async (firebaseUser) => {
         if (firebaseUser) {
           console.log('AuthContext: User detected:', firebaseUser.uid);
-          setUser(firebaseUser);
+
+          // Fetch or create user profile in Firestore for existing users
+          const userProfileRef = doc(db, 'users', firebaseUser.uid);
+          const userProfileSnap = await getDoc(userProfileRef);
+          let customUser: CustomUser = firebaseUser;
+
+          if (!userProfileSnap.exists()) {
+            await setDoc(userProfileRef, { uid: firebaseUser.uid, hasChatted: false });
+            customUser.hasChatted = false;
+            console.log('AuthContext: New user profile created for', firebaseUser.uid);
+          } else {
+            customUser.hasChatted = userProfileSnap.data()?.hasChatted || false;
+            console.log('AuthContext: Existing user profile loaded for', firebaseUser.uid, ', hasChatted:', customUser.hasChatted);
+          }
+          setUser(customUser);
           setError(null);
         } else {
           console.log('AuthContext: No user detected, attempting anonymous sign in');

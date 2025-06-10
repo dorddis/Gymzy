@@ -1,9 +1,9 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext'; // Corrected import path
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 import { db } from '@/lib/firebase';
-import { collection, query, orderBy, limit, getDocs, addDoc, Timestamp, doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, orderBy, limit, getDocs, addDoc, Timestamp, doc, getDoc, setDoc, serverTimestamp, deleteDoc } from 'firebase/firestore';
 
 interface ChatMessage {
   role: 'user' | 'ai';
@@ -15,22 +15,26 @@ interface ChatContextType {
   sendMessage: (content: string, modelId?: string) => Promise<void>;
   isLoading: boolean;
   error: Error | null;
+  startNewChat: () => Promise<void>;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 export function ChatProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: 'ai', content: 'Hello! I am your personalized Gymzy AI assistant. How can I help you with your fitness journey today?' },
-  ]);
+  const initialFirstChatPrompt: ChatMessage = { role: 'ai', content: 'Hello! I am your personalized Gymzy AI assistant. How can I help you with your fitness journey today?' };
+  const initialSubsequentChatPrompt: ChatMessage = { role: 'ai', content: 'Ask about your health or track a workout...' };
+
+  const [messages, setMessages] = useState<ChatMessage[]>([initialFirstChatPrompt]); // Default to first-time message
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
+  const hasLoadedHistory = useRef(false);
+
   // Function to load chat history
   const loadChatHistory = useCallback(async () => {
-    if (isLoading || !user) {
-      console.log('ChatContext: loadChatHistory skipped. Loading:', isLoading, 'User:', user);
+    if (isLoading || !user || hasLoadedHistory.current) {
+      console.log('ChatContext: loadChatHistory skipped. Loading:', isLoading, 'User:', user, 'Has Loaded History:', hasLoadedHistory.current);
       return;
     }
 
@@ -38,34 +42,67 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     setError(null);
     try {
-      const chatDocRef = doc(db, 'chats', user.uid); // Reference to a single chat document per user
+      const chatDocRef = doc(db, 'chats', user.uid);
       const chatDocSnap = await getDoc(chatDocRef);
 
+      let actualInitialMessage = user.hasChatted ? initialSubsequentChatPrompt : initialFirstChatPrompt;
+
       if (chatDocSnap.exists()) {
-        const chatData = chatDocSnap.data();
-        setMessages(chatData.messages || []);
+        let loadedMessages = chatDocSnap.data().messages || [];
+
+        // Ensure the correct initial AI message is always present at the beginning
+        if (loadedMessages.length === 0 || loadedMessages[0].content !== actualInitialMessage.content) {
+          loadedMessages = [actualInitialMessage, ...loadedMessages.filter((msg: ChatMessage) => msg.content !== initialFirstChatPrompt.content && msg.content !== initialSubsequentChatPrompt.content)];
+        }
+        setMessages(loadedMessages);
       } else {
-        // If no chat exists, initialize with a welcome message and create the document
-        const initialMessage = { role: 'ai', content: 'Hello! I am your personalized Gymzy AI assistant. How can I help you with your fitness journey today?' } as ChatMessage;
-        setMessages([initialMessage]);
-        await setDoc(chatDocRef, {
-          userId: user.uid,
-          messages: [initialMessage],
-          timestamp: Timestamp.now(),
-        });
+        // If no chat exists in Firestore, set the messages to the appropriate initial prompt
+        setMessages([actualInitialMessage]);
+        console.log('ChatContext: No existing chat history found. Initial message from state will be set to:', actualInitialMessage.content);
       }
+      hasLoadedHistory.current = true;
     } catch (err) {
       console.error('Error loading chat history:', err);
       setError(err instanceof Error ? err : new Error('Failed to load chat history'));
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, user]);
+  }, [user, initialFirstChatPrompt, initialSubsequentChatPrompt]);
 
   // Load history on component mount (or when user changes)
   useEffect(() => {
     loadChatHistory();
   }, [user, loadChatHistory]);
+
+  // Function to start a new chat
+  const startNewChat = useCallback(async () => {
+    if (!user) {
+      console.warn('ChatContext: Cannot start new chat, user not available.');
+      setError(new Error('Cannot start new chat: User not logged in.'));
+      return;
+    }
+
+    console.log('ChatContext: Attempting to start a new chat for user:', user.uid);
+    setIsLoading(true);
+    setError(null);
+    try {
+      const chatDocRef = doc(db, 'chats', user.uid);
+      await deleteDoc(chatDocRef);
+      console.log('ChatContext: Previous chat history deleted from Firestore.');
+      
+      // Set messages to the appropriate initial prompt for a new session
+      const newSessionInitialMessage = user.hasChatted ? initialSubsequentChatPrompt : initialFirstChatPrompt;
+      setMessages([newSessionInitialMessage]);
+
+      hasLoadedHistory.current = false;
+      setIsLoading(false);
+      console.log('ChatContext: New chat started successfully.');
+    } catch (err) {
+      console.error('Error starting new chat:', err);
+      setError(err instanceof Error ? err : new Error('Failed to start new chat'));
+      setIsLoading(false);
+    }
+  }, [user, initialFirstChatPrompt, initialSubsequentChatPrompt]);
 
   const sendMessage = useCallback(async (content: string, modelId: string = 'gpt-4') => {
     if (content.trim() === '') return;
@@ -77,7 +114,16 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
 
     console.log('ChatContext: sendMessage for user:', user.uid, 'with message:', content, 'using model:', modelId);
     const newUserMessage: ChatMessage = { role: 'user', content };
-    const updatedMessages = [...messages, newUserMessage];
+
+    // Determine the actual initial message for this context, considering if it's a fresh start or ongoing.
+    // This ensures that even if history loaded, the first message is there. Also handle if this is the FIRST EVER message.
+    const actualInitialMessageForPersist = user.hasChatted ? initialSubsequentChatPrompt : initialFirstChatPrompt;
+
+    const currentMessagesWithoutInitial = messages.filter((msg: ChatMessage) => 
+      msg.content !== initialFirstChatPrompt.content && msg.content !== initialSubsequentChatPrompt.content
+    );
+
+    const updatedMessages = [actualInitialMessageForPersist, ...currentMessagesWithoutInitial, newUserMessage];
     setMessages(updatedMessages); // Optimistic update
     setIsLoading(true);
     setError(null);
@@ -106,36 +152,44 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       setMessages(finalMessages);
 
       // 2. Persist chat history to Firestore for the user
-      const chatDocRef = doc(db, 'chats', user.uid); // Use user.uid as document ID
+      const chatDocRef = doc(db, 'chats', user.uid);
       await setDoc(chatDocRef, {
         userId: user.uid,
         messages: finalMessages,
         timestamp: Timestamp.now(),
         lastModelUsed: modelId,
-      }, { merge: true }); // Use merge: true to only update specified fields
+      }, { merge: true });
 
-      console.log('ChatContext: Attempting to save chat history for user:', user.uid);
-      // Save chat history to Firestore
-      await setDoc(chatDocRef, { messages: finalMessages, lastUpdated: serverTimestamp() }, { merge: true });
       console.log('ChatContext: Chat history saved to Firestore.');
+
+      // Mark user as having chatted for the first time
+      if (!user.hasChatted) {
+        const userProfileRef = doc(db, 'users', user.uid);
+        await setDoc(userProfileRef, { hasChatted: true }, { merge: true });
+        console.log('ChatContext: User marked as having chatted for the first time.');
+        // Update the user object in AuthContext if possible, or trigger a re-fetch
+        // For now, assume AuthContext will re-fetch or is updated elsewhere.
+      }
 
     } catch (err) {
       console.error('Error sending message or saving chat:', err);
       setError(err instanceof Error ? err : new Error('Failed to get AI response or save chat.'));
-      setMessages((prev) => [
-        ...prev.filter(msg => msg !== newUserMessage), // Remove optimistic update if it failed
-        { role: 'ai', content: 'Sorry, I encountered an error. Please try again.' },
-      ]);
+      setMessages((prev) => {
+        const revertedMessages = prev.filter((msg: ChatMessage) => msg !== newUserMessage && msg.content !== initialFirstChatPrompt.content && msg.content !== initialSubsequentChatPrompt.content);
+        const fallbackMessage = user.hasChatted ? initialSubsequentChatPrompt : initialFirstChatPrompt;
+        return [fallbackMessage, ...revertedMessages, { role: 'ai', content: 'Sorry, I encountered an error. Please try again.' }];
+      });
     } finally {
       setIsLoading(false);
     }
-  }, [messages, user]);
+  }, [messages, user, initialFirstChatPrompt, initialSubsequentChatPrompt]); 
 
   const value = {
     messages,
     sendMessage,
     isLoading,
     error,
+    startNewChat,
   };
 
   return (
