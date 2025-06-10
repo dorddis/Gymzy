@@ -12,14 +12,14 @@ This document is the single source of truth for the AI agent. It contains:
 ## 1. Progress Tracker  
 Mark each step complete by changing `[ ]` to `[x]`.
 
-[ ] 1. Analyze Codebase  
-[ ] 2. Configure Design System  
+[x] 1. Analyze Codebase  
+[x] 2. Configure Design System  
 [ ] 3. Build Header (Status Bar)  
 [ ] 4. Weekly Muscle Heatmap Card  
 [ ] 5. Stats Cards Row  
 [ ] **6. Add Workout CTA**  
-&nbsp;&nbsp;&nbsp;&nbsp;[ ] 6.1. Save home-dashboard HTML → `design/home-dashboard.html.txt`  
-&nbsp;&nbsp;&nbsp;&nbsp;[ ] 6.2. Save add-workout HTML → `design/add-workout.html.txt`  
+&nbsp;&nbsp;&nbsp;&nbsp;[ ] 6.1. See saved home-dashboard HTML → `design/home-dashboard.html.txt`  
+&nbsp;&nbsp;&nbsp;&nbsp;[ ] 6.2. See saved add-workout HTML → `design/add-workout.html.txt`  
 &nbsp;&nbsp;&nbsp;&nbsp;[ ] 6.3. Hook button click to open modal  
 [ ] 7. Recent Workouts Carousel  
 [ ] 8. Community Feed Section  
@@ -39,8 +39,8 @@ Mark each step complete by changing `[ ]` to `[x]`.
 - **Inputs:** `src/app/`, `src/components/`, `src/contexts/`  
 - **Tasks:**  
   - List all UI components, hooks, SVGs, and utility functions.  
-  - Categorize each as “Reuse” or “Refactor/Build New.”  
-- **Output:** Bullet list under **“## Reuse vs Refactor”** section in this file.
+  - Categorize each as "Reuse" or "Refactor/Build New."  
+- **Output:** Bullet list under **"## Reuse vs Refactor"** section in this file.
 
 ### Step 2: Configure Design System
 - **Goal:** Set global colors and typography  
@@ -59,7 +59,7 @@ Mark each step complete by changing `[ ]` to `[x]`.
 - **Inputs:** Design tokens, existing icon components  
 - **Tasks:**  
   - Create `<StatusBar />` component.  
-  - Include text “Fitness Track”, notification button, avatar.  
+  - Include text "Fitness Track", notification button, avatar.  
   - Verify responsive padding and background color.  
 - **Output:** `StatusBar` ready for integration.
 
@@ -79,7 +79,7 @@ Mark each step complete by changing `[ ]` to `[x]`.
 - **Output:** Responsive stats row.
 
 ### Step 6: Add Workout CTA
-- **Goal:** Prominent “+ Add Workout” button that opens the workout flow  
+- **Goal:** Prominent "+" Add Workout" button that opens the workout flow  
 - **Inputs:**  
   - **Design specs** saved as text files  
   - Existing workout logic/context  
@@ -100,7 +100,7 @@ Mark each step complete by changing `[ ]` to `[x]`.
 - **Inputs:** Recent workouts data  
 - **Tasks:**  
   - Create scrollable `<WorkoutCard />` list.  
-  - Include “See All” link.  
+  - Include "See All" link.  
 - **Output:** Functional carousel.
 
 ### Step 8: Community Feed Section
@@ -122,7 +122,7 @@ Mark each step complete by changing `[ ]` to `[x]`.
 - **Goal:** Exercise selection interface  
 - **Inputs:** Exercise list, last-session data  
 - **Tasks:**  
-  - Modal with title, date/time, “Copy last session” option, search bar, “Most Used” pills, grouped exercise list with “+” buttons.  
+  - Modal with title, date/time, "Copy last session" option, search bar, "Most Used" pills, grouped exercise list with "+" buttons.  
 - **Output:** Interactive selection modal.
 
 ### Step 11: Log Workout Screen
@@ -137,7 +137,7 @@ Mark each step complete by changing `[ ]` to `[x]`.
 - **Goal:** Finalize and save workout  
 - **Inputs:** Workout summary  
 - **Tasks:**  
-  - Modal with date/time picker, notes textarea, media upload, public/private toggle, “Save Workout” button.  
+  - Modal with date/time picker, notes textarea, media upload, public/private toggle, "Save Workout" button.  
 - **Output:** Ready finish modal.
 
 ### Step 13: Stats & Trends Screen

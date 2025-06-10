@@ -4,15 +4,15 @@
 
 @layer base {
   :root {
-    --background: 240 2% 17%; /* Dark Gray #262629 */
-    --foreground: 0 0% 95%; /* Light Gray/White */
+    --background: 0 0% 99%; /* #FDFFFC */
+    --foreground: 270 50% 12%; /* #34113F */
     --card: 240 2% 20%;
     --card-foreground: 0 0% 95%;
     --popover: 240 2% 15%;
     --popover-foreground: 0 0% 95%;
-    --primary: 355 79% 56%; /* Vibrant Red #E63946 */
+    --primary: 270 50% 12%; /* #34113F */
     --primary-foreground: 0 0% 98%; /* White */
-    --secondary: 240 2% 25%;
+    --secondary: 146 25% 56%; /* #73AB84 */
     --secondary-foreground: 0 0% 98%;
     --muted: 240 2% 22%;
     --muted-foreground: 0 0% 70%; /* Adjusted for better readability on dark bg */
@@ -48,6 +48,7 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
