@@ -4,7 +4,7 @@ This document is the single source of truth for the AI agent. It contains:
 
 1. **Step-by-step implementation outline**  
 2. **General and extension instructions**  
-3. **Complete HTML/CSS/JS code** that must render exactly as specified  
+3. **Complete HTML/CSS/JS code snippets** saved as `.txt` design files  
 4. **Context-extension guidelines** so the agent can update this file as needed
 
 ---
@@ -17,7 +17,10 @@ Mark each step complete by changing `[ ]` to `[x]`.
 [ ] 3. Build Header (Status Bar)  
 [ ] 4. Weekly Muscle Heatmap Card  
 [ ] 5. Stats Cards Row  
-[ ] 6. Add Workout CTA  
+[ ] **6. Add Workout CTA**  
+&nbsp;&nbsp;&nbsp;&nbsp;[ ] 6.1. Save home-dashboard HTML → `design/home-dashboard.html.txt`  
+&nbsp;&nbsp;&nbsp;&nbsp;[ ] 6.2. Save add-workout HTML → `design/add-workout.html.txt`  
+&nbsp;&nbsp;&nbsp;&nbsp;[ ] 6.3. Hook button click to open modal  
 [ ] 7. Recent Workouts Carousel  
 [ ] 8. Community Feed Section  
 [ ] 9. Bottom Navigation Bar  
@@ -76,12 +79,21 @@ Mark each step complete by changing `[ ]` to `[x]`.
 - **Output:** Responsive stats row.
 
 ### Step 6: Add Workout CTA
-- **Goal:** Prominent “+ Add Workout” button  
-- **Inputs:** Workout logic  
+- **Goal:** Prominent “+ Add Workout” button that opens the workout flow  
+- **Inputs:**  
+  - **Design specs** saved as text files  
+  - Existing workout logic/context  
 - **Tasks:**  
-  - Render full-width secondary-colored button.  
-  - Hook up click to open workout modal.  
-- **Output:** Clickable CTA.
+  1. **Save the Home Dashboard design HTML**  
+     - Copy the `<iframe srcdoc="…">` block from the main dashboard prototype and save it verbatim as `design/home-dashboard.html.txt`.  
+  2. **Save the Add Workout design HTML**  
+     - Copy the `<iframe srcdoc="…">` block from the Add Workout prototype and save it verbatim as `design/add-workout.html.txt`.  
+  3. **Render the CTA**  
+     - In `HomeDashboard.tsx`, add the secondary-colored full-width button.  
+     - Hook its `onClick` to toggle `isWorkoutModalOpen` state.  
+- **Output:**  
+  - Two `.txt` files under `design/` folder containing raw HTML prototypes  
+  - Clickable Add Workout CTA in the dashboard
 
 ### Step 7: Recent Workouts Carousel
 - **Goal:** Horizontal scroll list of recent workouts  
@@ -156,470 +168,59 @@ If the AI agent needs to add new implementation details or reminders, it should:
 
 ---
 
-## 4. Complete HTML/CSS/JS Code to Implement
+## 4. Design Files Saved as TXT
 
-Place the following snippet in your preview iframe or HTML file. It must render the exact mobile-first UI:
+- **`design/home-dashboard.html.txt`**  
+  Contains the full `<html>…</html>` from the main dashboard iframe `srcdoc`.
 
-```html
-<div class="preview-element border-4 bg-neutral-100 overflow-hidden flex-shrink-0 text-carbon-800 w-[390px] max-w-[390px] min-w-[390px] min-h-[844px]  
-            h-full flex flex-col mt-4 rounded-[6px] font-[Inter] mx-auto  
-            border-carbon-300" style="height: 1465px;">
-  <iframe title="wireframe-0" srcdoc="<!DOCTYPE html>
-<html>
-<head>
-  <meta charset='UTF-8'>
-  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-  <script src='https://cdn.tailwindcss.com'></script>
-  <script> window.FontAwesomeConfig = { autoReplaceSvg: 'nest'};</script>
-  <script src='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js' crossorigin='anonymous' referrerpolicy='no-referrer'></script>
-  <script src='https://cdn.jsdelivr.net/npm/chart.js'></script>
-  <style>::-webkit-scrollbar { display: none;}</style>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            inter: ['Inter','sans-serif'],
-            sans:   ['Inter','sans-serif']
-          },
-          colors: {
-            primary:   '#34113F',
-            secondary: '#73AB84',
-            background:'#FDFFFC'
-          }
-        }
-      }
-    };
-  </script>
-  <link rel='preconnect' href='https://fonts.googleapis.com'>
-  <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
-  <link href='https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;500;600;700;800;900&display=swap' rel='stylesheet'>
-  <style>
-    body { font-family:'Inter',sans-serif!important; }
-    .fa, .fas, .far, .fal, .fab {
-      font-family:'Font Awesome 6 Free','Font Awesome 6 Brands'!important;
-    }
-    .highlighted-section { outline:2px solid #3F20FB; background:rgba(63,32,251,0.1); }
-    .edit-button { position:absolute; z-index:1000; }
-    html, body { -ms-overflow-style:none; scrollbar-width:none; }
-  </style>
-</head>
-<body class="bg-background font-inter text-primary">
-  <!-- Home Dashboard -->
-  <div id="home-dashboard" class="h-full pb-20">
-    <!-- Status Bar -->
-    <div id="status-bar" class="px-4 pt-12 pb-4 flex justify-between items-center">
-      <h1 class="text-2xl font-semibold">Fitness Track</h1>
-      <div class="flex items-center space-x-3">
-        <button class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-          <i class="fa-regular fa-bell text-primary"></i>
-        </button>
-        <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-3.jpg"
-             class="w-10 h-10 rounded-full" alt="Profile">
-      </div>
-    </div>
-    <!-- Heatmap Card -->
-    <div id="heatmap-card" class="mx-4 bg-white rounded-xl shadow-md p-4 mb-4">
-      <div class="flex justify-between items-center mb-3">
-        <h2 class="text-lg font-semibold">Weekly Muscle Activation</h2>
-        <button id="toggle-view"
-                class="bg-primary text-white px-4 py-1.5 rounded-full text-sm font-medium">
-          Show Back
-        </button>
-      </div>
-      <div id="heatmap-placeholder"
-           class="bg-white rounded-lg h-[280px] w-full flex items-center justify-center mb-3">
-        <div class="text-center text-gray-400">
-          <i class="fa-solid fa-dumbbell text-3xl mb-2"></i>
-          <p>SVG Heatmap will be inserted here</p>
-        </div>
-      </div>
-      <div id="heatmap-legend" class="flex items-center justify-between px-2">
-        <div class="flex items-center">
-          <div class="w-4 h-4 bg-red-100 rounded-sm mr-1"></div><span class="text-xs">Low</span>
-        </div>
-        <div class="flex items-center">
-          <div class="w-4 h-4 bg-red-300 rounded-sm mr-1"></div><span class="text-xs">Medium</span>
-        </div>
-        <div class="flex items-center">
-          <div class="w-4 h-4 bg-red-500 rounded-sm mr-1"></div><span class="text-xs">High</span>
-        </div>
-      </div>
-    </div>
-    <!-- Stats Cards -->
-    <div id="stats-row" class="flex justify-between mx-4 mb-4">
-      <div class="bg-white rounded-xl shadow-sm p-3 w-[31%]">
-        <div class="flex items-center justify-center mb-1">
-          <i class="fa-solid fa-weight-hanging text-secondary"></i>
-        </div>
-        <p class="text-center text-xl font-semibold">12.4k</p>
-        <p class="text-xs text-center text-gray-500">Total Volume</p>
-      </div>
-      <div class="bg-white rounded-xl shadow-sm p-3 w-[31%]">
-        <div class="flex items-center justify-center mb-1">
-          <i class="fa-solid fa-fire text-secondary"></i>
-        </div>
-        <p class="text-center text-xl font-semibold">7.2</p>
-        <p class="text-xs text-center text-gray-500">Average RPE</p>
-      </div>
-      <div class="bg-white rounded-xl shadow-sm p-3 w-[31%]">
-        <div class="flex items-center justify-center mb-1">
-          <i class="fa-solid fa-calendar-check text-secondary"></i>
-        </div>
-        <p class="text-center text-xl font-semibold">85%</p>
-        <p class="text-xs text-center text-gray-500">Consistency</p>
-      </div>
-    </div>
-    <!-- Add Workout Button -->
-    <div id="add-workout" class="mx-4 mb-4">
-      <button class="w-full bg-secondary text-white py-3 rounded-xl font-semibold shadow-sm flex items-center justify-center">
-        <i class="fa-solid fa-plus mr-2"></i> Add Workout
-      </button>
-    </div>
-    <!-- Recent Workouts Carousel -->
-    <div id="recent-workouts" class="mb-4">
-      <div class="flex justify-between items-center px-4 mb-2">
-        <h2 class="text-lg font-semibold">Recent Workouts</h2>
-        <span class="text-secondary text-sm cursor-pointer">See All</span>
-      </div>
-      <div class="overflow-x-auto px-4 flex space-x-3 pb-2">
-        <!-- Workout Cards (repeat for each) -->
-        <div class="bg-white rounded-xl shadow-sm p-3 min-w-[200px] flex-shrink-0">
-          <div class="flex justify-between items-start mb-2">
-            <div>
-              <h3 class="font-medium">Upper Body</h3>
-              <p class="text-xs text-gray-500">Yesterday</p>
-            </div>
-            <span class="bg-red-100 text-red-600 text-xs px-2 py-0.5 rounded-full">High</span>
-          </div>
-          <div class="text-xs text-gray-600">
-            <p>5 exercises • 45 min</p>
-            <p>Chest, Shoulders, Triceps</p>
-          </div>
-        </div>
-        <!-- Add the other two cards similarly -->
-      </div>
-    </div>
-    <!-- Community Feed -->
-    <div id="social-feed" class="px-4">
-      <div class="flex justify-between items-center mb-3">
-        <h2 class="text-lg font-semibold">Community</h2>
-        <span class="text-secondary text-sm cursor-pointer">View All</span>
-      </div>
-      <!-- Social Post 1 -->
-      <div class="bg-white rounded-xl shadow-sm p-4 mb-4">
-        <div class="flex items-center mb-3">
-          <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-1.jpg"
-               class="w-10 h-10 rounded-full mr-3" alt="User">
-          <div>
-            <h3 class="font-medium">Sarah Johnson</h3>
-            <p class="text-xs text-gray-500">2 hours ago</p>
-          </div>
-        </div>
-        <p class="text-sm mb-3">Just crushed a new PR on deadlifts! 💪 Feeling stronger every week with this program.</p>
-        <div class="bg-gray-100 rounded-lg p-2 mb-3">
-          <div class="flex items-center text-sm">
-            <i class="fa-solid fa-dumbbell text-secondary mr-2"></i>
-            <div>
-              <p class="font-medium">Lower Body Strength</p>
-              <p class="text-xs text-gray-500">4 exercises • 8.5k volume</p>
-            </div>
-          </div>
-        </div>
-        <div class="flex justify-between text-sm text-gray-500">
-          <button class="flex items-center"><i class="fa-regular fa-heart mr-1"></i> 24</button>
-          <button class="flex items-center"><i class="fa-regular fa-comment mr-1"></i> 8</button>
-          <button class="flex items-center"><i class="fa-regular fa-share-from-square"></i></button>
-        </div>
-      </div>
-      <!-- Social Post 2: Mike Peters (same structure) -->
-    </div>
-    <!-- Bottom Navigation -->
-    <div id="bottom-nav" class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-2">
-      <span class="flex flex-col items-center justify-center p-2 text-secondary cursor-pointer">
-        <i class="fa-solid fa-house text-lg"></i><span class="text-xs mt-1">Home</span>
-      </span>
-      <span class="flex flex-col items-center justify-center p-2 text-gray-500 cursor-pointer">
-        <i class="fa-solid fa-chart-simple text-lg"></i><span class="text-xs mt-1">Stats</span>
-      </span>
-      <span class="flex flex-col items-center justify-center p-2 text-gray-500 cursor-pointer">
-        <i class="fa-solid fa-users text-lg"></i><span class="text-xs mt-1">Social</span>
-      </span>
-      <span class="flex flex-col items-center justify-center p-2 text-gray-500 cursor-pointer">
-        <i class="fa-solid fa-user text-lg"></i><span class="text-xs mt-1">Profile</span>
-      </span>
-    </div>
-    <!-- Add Workout Modal (hidden by default) -->
-    <div id="add-workout-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
-      <div class="bg-background absolute inset-0 rounded-t-xl flex flex-col">
-        <div class="px-4 py-5 flex justify-between items-center border-b border-gray-200">
-          <h2 class="text-xl font-semibold">Select Exercises</h2>
-          <button class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
-        <div class="p-4">
-          <div class="flex items-center justify-between mb-4">
-            <p class="text-sm text-gray-500">Today, 5:30 PM</p>
-            <label class="flex items-center">
-              <input type="checkbox" class="w-4 h-4 mr-2 accent-secondary">
-              <span class="text-sm">Copy last session sets</span>
-            </label>
-          </div>
-          <div class="relative mb-4">
-            <input type="text" placeholder="Search exercises..."
-                   class="w-full py-3 pl-10 pr-4 bg-white rounded-xl border border-gray-200 focus:outline-none focus:ring-1 focus:ring-secondary">
-            <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-          </div>
-          <div class="mb-4">
-            <h3 class="text-sm font-medium mb-2">Most Used</h3>
-            <div class="flex space-x-2 overflow-x-auto pb-2">
-              <button class="bg-primary text-white px-4 py-2 rounded-full text-sm whitespace-nowrap">Bench Press</button>
-              <button class="bg-white text-primary px-4 py-2 rounded-full text-sm whitespace-nowrap">Squat</button>
-              <button class="bg-white text-primary px-4 py-2 rounded-full text-sm whitespace-nowrap">Deadlift</button>
-              <button class="bg-white text-primary px-4 py-2 rounded-full text-sm whitespace-nowrap">Pull-up</button>
-              <button class="bg-white text-primary px-4 py-2 rounded-full text-sm whitespace-nowrap">Shoulder Press</button>
-            </div>
-          </div>
-          <div>
-            <h3 class="text-sm font-medium mb-2">All Exercises</h3>
-            <!-- Chest Category -->
-            <div class="mb-4">
-              <h4 class="text-xs uppercase tracking-wider text-gray-500 mb-2">Chest</h4>
-              <div class="bg-white rounded-xl shadow-sm divide-y divide-gray-100">
-                <div class="flex justify-between items-center p-3">
-                  <span>Bench Press</span>
-                  <button class="w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center">
-                    <i class="fa-solid fa-plus"></i>
-                  </button>
-                </div>
-                <div class="flex justify-between items-center p-3">
-                  <span>Incline Bench Press</span>
-                  <button class="w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center">
-                    <i class="fa-solid fa-plus"></i>
-                  </button>
-                </div>
-                <div class="flex justify-between items-center p-3">
-                  <span>Chest Fly</span>
-                  <button class="w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center">
-                    <i class="fa-solid fa-plus"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-            <!-- Back Category -->
-            <div class="mb-4">
-              <h4 class="text-xs uppercase tracking-wider text-gray-500 mb-2">Back</h4>
-              <div class="bg-white rounded-xl shadow-sm divide-y divide-gray-100">
-                <div class="flex justify-between items-center p-3">
-                  <span>Pull-up</span>
-                  <button class="w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center">
-                    <i class="fa-solid fa-plus"></i>
-                  </button>
-                </div>
-                <div class="flex justify-between items-center p-3">
-                  <span>Bent Over Row</span>
-                  <button class="w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center">
-                    <i class="fa-solid fa-plus"></i>
-                  </button>
-                </div>
-                <div class="flex justify-between items-center p-3">
-                  <span>Lat Pulldown</span>
-                  <button class="w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center">
-                    <i class="fa-solid fa-plus"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Log Workout Screen (hidden by default) -->
-    <div id="log-workout-screen" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
-      <div class="h-full flex flex-col">
-        <!-- Top Heatmap Background -->
-        <div class="h-[35%] bg-primary bg-opacity-10 flex items-center justify-center">
-          <div class="text-center text-gray-500">
-            <i class="fa-solid fa-dumbbell text-3xl mb-2"></i>
-            <p>SVG Heatmap Background</p>
-          </div>
-        </div>
-        <!-- Bottom Sliding Panel -->
-        <div class="h-[65%] bg-white rounded-t-xl p-4">
-          <div class="flex justify-between items-center mb-4">
-            <h2 class="text-lg font-semibold">Exercises in This Workout</h2>
-            <button class="bg-primary text-white px-4 py-1.5 rounded-full text-sm font-medium flex items-center">
-              <i class="fa-solid fa-plus mr-1"></i> Add Exercise
-            </button>
-          </div>
-          <!-- Exercise Accordion for Bench Press -->
-          <div class="mb-4">
-            <div class="bg-gray-100 rounded-xl mb-3">
-              <div class="p-3 flex justify-between items-center">
-                <div class="flex items-center">
-                  <span class="font-medium">Bench Press</span>
-                  <button class="ml-2 w-5 h-5 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center">
-                    <i class="fa-solid fa-question text-xs"></i>
-                  </button>
-                </div>
-                <button><i class="fa-solid fa-chevron-down"></i></button>
-              </div>
-              <div class="p-3 pt-0">
-                <!-- Warmup Set -->
-                <div class="bg-white rounded-lg p-2 mb-2">
-                  <div class="flex items-center">
-                    <span class="bg-blue-100 text-blue-600 text-xs px-2 py-0.5 rounded-full mr-2">Warmup</span>
-                    <input type="text" value="45" class="w-16 p-1 border border-gray-200 rounded text-center mr-2" placeholder="kg">
-                    <span class="mr-2">×</span>
-                    <input type="text" value="10" class="w-12 p-1 border border-gray-200 rounded text-center mr-2" placeholder="reps">
-                    <select class="p-1 border border-gray-200 rounded text-sm mr-2">
-                      <option>RPE 7</option><option>RPE 8</option><option>RPE 9</option>
-                    </select>
-                    <input type="checkbox" class="w-5 h-5 accent-secondary">
-                  </div>
-                </div>
-                <!-- Working Set -->
-                <div class="bg-white rounded-lg p-2 mb-2">
-                  <div class="flex items-center">
-                    <input type="text" value="65" class="w-16 p-1 border border-gray-200 rounded text-center mr-2" placeholder="kg">
-                    <span class="mr-2">×</span>
-                    <input type="text" value="8" class="w-12 p-1 border border-gray-200 rounded text-center mr-2" placeholder="reps">
-                    <select class="p-1 border border-gray-200 rounded text-sm mr-2">
-                      <option>RPE 8</option><option>RPE 9</option><option>RPE 10</option>
-                    </select>
-                    <input type="checkbox" class="w-5 h-5 accent-secondary">
-                  </div>
-                </div>
-                <div class="flex space-x-3 mb-2">
-                  <button class="text-sm text-secondary flex items-center">
-                    <i class="fa-solid fa-plus mr-1 text-xs"></i> Add Set
-                  </button>
-                  <button class="text-sm text-secondary flex items-center">
-                    <i class="fa-solid fa-plus mr-1 text-xs"></i> Add Warmup Set
-                  </button>
-                </div>
-                <!-- Plate Calculator -->
-                <div class="bg-gray-100 rounded-lg p-2">
-                  <p class="text-xs font-medium mb-1">Plate Calculator</p>
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                      <div class="w-4 h-8 bg-red-500 rounded-sm mr-1"></div><span class="text-xs">× 2</span>
-                    </div>
-                    <div class="flex items-center">
-                      <div class="w-3 h-6 bg-blue-500 rounded-sm mr-1"></div><span class="text-xs">× 2</span>
-                    </div>
-                    <div class="flex items-center">
-                      <div class="w-2 h-4 bg-yellow-500 rounded-sm mr-1"></div><span class="text-xs">× 2</span>
-                    </div>
-                    <span class="text-xs">+ Bar (20kg)</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <!-- Next Exercise Accordion (collapsed) -->
-            <div class="bg-gray-100 rounded-xl mb-3">
-              <div class="p-3 flex justify-between items-center">
-                <div class="flex items-center">
-                  <span class="font-medium">Incline Bench Press</span>
-                  <button class="ml-2 w-5 h-5 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center">
-                    <i class="fa-solid fa-question text-xs"></i>
-                  </button>
-                </div>
-                <button><i class="fa-solid fa-chevron-right"></i></button>
-              </div>
-            </div>
-          </div>
-          <!-- Finish Workout Button -->
-          <div class="absolute bottom-4 left-4 right-4">
-            <button class="w-full bg-secondary text-white py-3 rounded-xl font-semibold shadow-sm">
-              Finish Workout
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Finish Workout Modal (hidden by default) -->
-    <div id="finish-workout-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
-      <div class="bg-background absolute inset-x-0 bottom-0 rounded-t-xl p-4">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-semibold">Finish Workout</h2>
-          <button class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
-        <div class="mb-4">
-          <p class="text-sm text-gray-500 mb-2">Date & Time</p>
-          <input type="datetime-local" class="w-full p-3 bg-white rounded-xl border border-gray-200">
-        </div>
-        <div class="mb-4">
-          <p class="text-sm text-gray-500 mb-2">How do you feel?</p>
-          <textarea class="w-full p-3 bg-white rounded-xl border border-gray-200 h-24"
-                    placeholder="Add notes about this workout..."></textarea>
-        </div>
-        <div class="mb-4 border-2 border-dashed border-gray-300 rounded-xl p-4 flex flex-col items-center justify-center">
-          <i class="fa-solid fa-camera text-gray-400 text-2xl mb-2"></i>
-          <p class="text-sm text-gray-500">Tap to upload photo or video</p>
-        </div>
-        <div class="flex items-center justify-between mb-6">
-          <span class="font-medium">Make this workout public</span>
-          <label class="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" class="sr-only peer" checked>
-            <div class="w-11 h-6 bg-gray-200 rounded-full peer-checked:bg-secondary peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
-          </label>
-        </div>
-        <button class="w-full bg-secondary text-white py-3 rounded-xl font-semibold shadow-sm">
-          Save Workout
-        </button>
-      </div>
-    </div>
-    <!-- Stats Screen (hidden by default) -->
-    <div id="stats-screen" class="h-full pb-20 hidden">
-      <div class="px-4 pt-12 pb-4"><h1 class="text-2xl font-semibold">Stats & Progress</h1></div>
-      <div class="px-4">
-        <div class="bg-white rounded-xl shadow-md p-4 mb-4">
-          <h2 class="text-lg font-semibold mb-3">Volume Trend</h2>
-          <div class="h-[200px] w-full"><canvas id="volumeChart"></canvas></div>
-          <div class="flex justify-between mt-3 pt-3 border-t border-gray-100">
-            <div><p class="text-sm text-gray-500">Total This Week</p><p class="text-lg font-semibold">34.5k kg</p></div>
-            <div><p class="text-sm text-gray-500">Weekly Average</p><p class="text-lg font-semibold">28.2k kg</p></div>
-          </div>
-        </div>
-        <div class="bg-white rounded-xl shadow-md p-4 mb-4">
-          <h2 class="text-lg font-semibold mb-3">Training Frequency</h2>
-          <div class="h-[200px] w-full"><canvas id="frequencyChart"></canvas></div>
-          <div class="flex justify-between mt-3 pt-3 border-t border-gray-100">
-            <div><p class="text-sm text-gray-500">Longest Streak</p><p class="text-lg font-semibold">5 days</p></div>
-            <div><p class="text-sm text-gray-500">Most Trained Muscle</p><p class="text-lg font-semibold">Chest</p></div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const volumeCtx = document.getElementById('volumeChart');
-        if (volumeCtx) {
-          new Chart(volumeCtx, {
-            type: 'line',
-            data: {
-              labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
-              datasets:[{
-                label:'Volume (kg)',
-                data:[5000,0,8500,4200,7800,0,9000],
-                borderColor:'#73AB84',
-                backgroundColor:'rgba(115,171,132,0.1)',
-                tension:0.3, fill:true
-              }]
-            },
-            options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}}}
-          });
-        }
-        const freqCtx = document.getElementById('frequencyChart');
-        if (freqCtx) {
-          new Chart(freqCtx, {
-            type: 'bar',
-            data: {
-              labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
-              datasets:[{label:'Days Trained',data:[3,4,2,5,3,1,2], backgroundColor:'#34113F'}]
-            },
-            options:{responsive:true, maintainAspectRatio
+- **`design/add-workout.html.txt`**  
+  Contains the full `<html>…</html>` from the Add Workout modal iframe `srcdoc`.
+
+Make sure your repo structure includes:
+/design/home-dashboard.html.txt
+/design/add-workout.html.txt
+
+## Reuse vs Refactor
+
+UI Components (src/components/)
+Reusable:
+ui/button.tsx, ui/card.tsx, ui/badge.tsx, ui/avatar.tsx, ui/scroll-area.tsx, ui/sheet.tsx, ui/dialog.tsx, ui/tooltip.tsx, ui/tabs.tsx, ui/accordion.tsx, ui/progress.tsx, ui/slider.tsx, ui/switch.tsx, ui/input.tsx, ui/label.tsx, ui/menubar.tsx, ui/popover.tsx, ui/checkbox.tsx, ui/separator.tsx, ui/toast.tsx, ui/toaster.tsx, ui/skeleton.tsx, ui/alert.tsx, ui/alert-dialog.tsx, ui/calendar.tsx, ui/form.tsx, ui/dropdown-menu.tsx
+dashboard/anatomy-visualization.tsx (SVG heatmap logic, to be refactored for the new design)
+dashboard/progress-analytics.tsx (progress/stats logic, to be refactored)
+dashboard/workout-logger.tsx (workout logging logic, to be refactored)
+layout/header.tsx (header, will need redesign)
+Refactor/Build New:
+Status bar/header (needs new layout and icons)
+Bottom navigation bar (not present, needs to be built)
+Social/community feed (not present, needs to be built)
+Recent workouts carousel (not present, needs to be built)
+Stats cards row (not present, needs to be built)
+Add workout modal (may need to be built or heavily refactored)
+Log workout screen/modal (refactor from workout-logger.tsx)
+Finish workout modal (may need to be built or refactored)
+Hooks (src/hooks/)
+Reusable:
+use-mobile.tsx (mobile detection)
+use-toast.ts (toast notifications)
+Refactor/Build New:
+Any new hooks for navigation, modal state, etc.
+Contexts (src/contexts/)
+Reusable:
+WorkoutContext.tsx (workout state and logic)
+Refactor/Build New:
+Any new context for UI state (e.g., modal open/close, navigation)
+Utilities (src/lib/)
+Reusable:
+constants.ts (muscle and threshold constants)
+utils.ts (utility functions)
+Refactor/Build New:
+Extend as needed for new features
+Assets (src/assets/images/)
+Refactor/Build New:
+None, unless new SVGs are required for the design
+App Structure (src/app/)
+Reusable:
+layout.tsx (global layout, can be updated)
+globals.css (global styles, to be updated)
+Refactor/Build New:
+page.tsx (main dashboard, will need to be rebuilt for new layout)
