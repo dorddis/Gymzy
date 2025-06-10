@@ -46,62 +46,50 @@ export function AddWorkoutModal({ open, onOpenChange, onExerciseSave }: AddWorko
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg w-full p-0 rounded-xl">
-        <>
-          <div className="px-4 py-5 flex justify-between items-center border-b border-gray-200">
-            <DialogTitle className="text-xl font-semibold">Add Exercise</DialogTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onOpenChange(false)}
-              className="w-8 h-8 rounded-full"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+      <DialogContent className="flex flex-col max-w-lg w-[90vw] md:w-full h-auto max-h-[95vh] p-0 rounded-xl overflow-hidden">
+        <div className="px-4 py-5 flex justify-between items-center border-b border-gray-200 flex-shrink-0">
+          <DialogTitle className="text-xl font-semibold">Add Exercise</DialogTitle>
+        </div>
+
+        <div className="p-4 flex flex-col flex-grow overflow-y-auto">
+          {/* Date and Copy Last Session */}
+          <div className="flex items-center justify-between mb-4 flex-shrink-0">
+            <div>
+              <p className="text-sm text-gray-500">
+                {new Date().toLocaleDateString('en-US', {
+                  weekday: 'long',
+                  month: 'short',
+                  day: 'numeric',
+                  hour: 'numeric',
+                  minute: 'numeric',
+                })}
+              </p>
+            </div>
+            <label className="flex items-center space-x-2">
+              <Checkbox
+                checked={copyLastSession}
+                onCheckedChange={(checked) => setCopyLastSession(checked as boolean)}
+              />
+              <span className="text-sm">Copy last session sets</span>
+            </label>
           </div>
 
-          <div className="p-4">
-            {/* Date and Copy Last Session */}
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-sm text-gray-500">
-                  {new Date().toLocaleDateString('en-US', {
-                    weekday: 'long',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: 'numeric',
-                    minute: 'numeric',
-                  })}
-                </p>
-              </div>
-              <label className="flex items-center space-x-2">
-                <Checkbox
-                  checked={copyLastSession}
-                  onCheckedChange={(checked) => setCopyLastSession(checked as boolean)}
-                />
-                <span className="text-sm">Copy last session sets</span>
-              </label>
-            </div>
-
-            {/* Search Bar */}
-            <div className="mb-4">
-              <ExerciseSearch onSearch={handleSearch} />
-            </div>
-
-            {/* Most Used Exercises */}
-            <MostUsedExercises
-              exercises={mostUsedExercises}
-              onSelect={handleExerciseSelect}
-            />
-
-            {/* Exercise List */}
-            <ExerciseList
-              exercises={filteredExercises}
-              onSelect={handleExerciseSelect}
-              onInfo={handleExerciseInfo}
-            />
+          {/* Search Bar */}
+          <div className="mb-4 flex-shrink-0">
+            <ExerciseSearch onSearch={handleSearch} />
           </div>
-        </>
+
+          <MostUsedExercises
+            exercises={mostUsedExercises}
+            onSelect={handleExerciseSelect}
+          />
+
+          <ExerciseList
+            exercises={filteredExercises}
+            onSelect={handleExerciseSelect}
+            onInfo={handleExerciseInfo}
+          />
+        </div>
       </DialogContent>
     </Dialog>
   );

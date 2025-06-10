@@ -23,7 +23,7 @@ interface LoggedWorkout {
   targetedMuscles: Muscle[];
 }
 
-export type MuscleVolumes = { [key in Muscle]?: number };
+export type MuscleVolumes = Record<Muscle, number>;
 
 interface WorkoutContextType {
   recentWorkouts: Workout[];
@@ -40,7 +40,10 @@ const WorkoutContext = createContext<WorkoutContextType | undefined>(undefined);
 
 // Helper to calculate muscle volumes from a list of workouts
 const calculateMuscleVolumes = (workouts: Workout[]): MuscleVolumes => {
-  const volumes: MuscleVolumes = {};
+  const volumes: Record<Muscle, number> = Object.values(Muscle).reduce((acc, muscle) => {
+    acc[muscle] = 0; // Initialize all muscles to 0
+    return acc;
+  }, {} as Record<Muscle, number>);
 
   workouts.forEach(workout => {
     workout.exercises.forEach(exercise => {
@@ -72,7 +75,7 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
   const [recentWorkouts, setRecentWorkouts] = useState<Workout[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [calculatedMuscleVolumes, setCalculatedMuscleVolumes] = useState<MuscleVolumes>({});
+  const [calculatedMuscleVolumes, setCalculatedMuscleVolumes] = useState<MuscleVolumes>(() => calculateMuscleVolumes([])); // Initialize with empty workouts
 
   const fetchWorkouts = async () => {
     if (!user) return;

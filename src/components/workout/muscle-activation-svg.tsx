@@ -2,10 +2,8 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import type { SVGProps } from 'react';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useWorkout } from '@/contexts/WorkoutContext';
 import { Muscle, MUSCLE_VOLUME_THRESHOLDS } from '@/lib/constants';
 
 import FrontFullBody from '@/assets/images/front-full-body-with-all-muscles-showing.svg';
@@ -13,6 +11,8 @@ import BackFullBody from '@/assets/images/back-full-body-with-all-muscles-showin
 
 interface MuscleActivationSVGProps {
   muscleVolumes: Record<Muscle, number | undefined>;
+  className?: string;
+  scrollElementRef?: React.RefObject<HTMLElement>;
 }
 
 /**
@@ -128,7 +128,7 @@ const frontMuscleIdMap: Partial<Record<Muscle, string | string[]>> = {
  *  - Displays the full-body SVG with muscle activation.
  *  - Implements scroll-blur effect and tappable functionality.
  */
-export function MuscleActivationSVG({ muscleVolumes }: MuscleActivationSVGProps) {
+export function MuscleActivationSVG({ muscleVolumes, className, scrollElementRef }: MuscleActivationSVGProps) {
   const [view, setView] = useState<'front' | 'back'>('front');
   const svgRef = useRef<SVGSVGElement>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -174,21 +174,29 @@ export function MuscleActivationSVG({ muscleVolumes }: MuscleActivationSVGProps)
   }, [applyMuscleActivation]);
 
   useEffect(() => {
+    const scrollElement = scrollElementRef?.current || window;
     const handleScroll = () => {
-      setScrollPosition(window.scrollY);
+      setScrollPosition(scrollElement === window ? window.scrollY : (scrollElement as HTMLElement).scrollTop);
     };
 
-    window.addEventListener('scroll', handleScroll);
+    scrollElement.addEventListener('scroll', handleScroll);
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      scrollElement.removeEventListener('scroll', handleScroll);
     };
-  }, []);
+  }, [scrollElementRef]);
 
-  const blurAmount = Math.min(scrollPosition / 100, 5); // Max blur of 5px
-  const opacityAmount = Math.max(0.5, 1 - scrollPosition / 200); // Min opacity of 0.5
+  const blurAmount = Math.min(scrollPosition / 100, 5);
+  const opacityAmount = Math.max(0.5, 1 - scrollPosition / 200);
+
+  // Temporary logging for debugging blur effect
+  useEffect(() => {
+    console.log("Scroll Position:", scrollPosition);
+    console.log("Blur Amount:", blurAmount);
+    console.log("Opacity Amount:", opacityAmount);
+  }, [scrollPosition, blurAmount, opacityAmount]);
 
   return (
-    <Card className="relative mx-4 bg-white rounded-xl shadow-md p-4 mb-4 overflow-hidden">
+    <div className={`relative ${className || ''}`}>
       <div
         className="absolute inset-0 z-0 transition-all duration-300 ease-out"
         style={{ filter: `blur(${blurAmount}px)`, opacity: opacityAmount }}
@@ -200,7 +208,7 @@ export function MuscleActivationSVG({ muscleVolumes }: MuscleActivationSVGProps)
         <Button
           className="bg-primary text-white px-4 py-1.5 rounded-full text-sm font-medium h-8"
           onClick={(e) => {
-            e.stopPropagation(); // Prevent modal from opening when toggling view
+            e.stopPropagation();
             setView(view === 'front' ? 'back' : 'front');
           }}
         >
@@ -208,7 +216,6 @@ export function MuscleActivationSVG({ muscleVolumes }: MuscleActivationSVGProps)
         </Button>
       </div>
 
-      {/* Modal for detailed view */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -216,11 +223,11 @@ export function MuscleActivationSVG({ muscleVolumes }: MuscleActivationSVGProps)
             <DialogDescription>Detailed view of activated muscles.</DialogDescription>
           </DialogHeader>
           <div className="flex flex-col items-center">
-            <BodySvg ref={svgRef} className="w-full h-full" /> {/* This SVG should be re-rendered in full opacity */}
+            <BodySvg ref={svgRef} className="w-full h-full" />
             <div className="mt-4 w-full">
               {relevantMuscles.map((muscle) => {
                 const volume = muscleVolumes[muscle];
-                const { level, opacity } = getMuscleActivationLevel(volume);
+                const { level } = getMuscleActivationLevel(volume);
                 if (level === 'None') return null;
                 return (
                   <div key={muscle} className="flex justify-between items-center py-1">
@@ -238,6 +245,6 @@ export function MuscleActivationSVG({ muscleVolumes }: MuscleActivationSVGProps)
           </div>
         </DialogContent>
       </Dialog>
-    </Card>
+    </div>
   );
 } 

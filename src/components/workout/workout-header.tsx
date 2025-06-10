@@ -6,14 +6,16 @@ import { useRouter } from 'next/navigation';
 interface WorkoutHeaderProps {
   onTerminateWorkout: () => void;
   onCompleteWorkout: () => void;
+  className?: string;
 }
 
-export function WorkoutHeader({ onTerminateWorkout, onCompleteWorkout }: WorkoutHeaderProps) {
+export function WorkoutHeader({ onTerminateWorkout, onCompleteWorkout, className }: WorkoutHeaderProps) {
   const [time, setTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
+    setIsRunning(true); // Automatically start the timer
     let interval: NodeJS.Timeout | null = null;
     if (isRunning) {
       interval = setInterval(() => {
@@ -51,7 +53,7 @@ export function WorkoutHeader({ onTerminateWorkout, onCompleteWorkout }: Workout
   }, [onCompleteWorkout, router]);
 
   return (
-    <header className="w-full bg-background px-4 py-4 flex justify-between items-center border-b border-gray-200">
+    <header className={`w-full bg-background px-4 py-4 flex justify-between items-center border-b border-gray-200 ${className || ''}`}>
       <Button variant="ghost" size="icon" onClick={handleTerminateClick}>
         <X className="h-5 w-5 text-red-500" />
       </Button>
