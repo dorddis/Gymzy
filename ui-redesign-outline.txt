@@ -15,20 +15,24 @@ Mark each step complete by changing `[ ]` to `[x]`.
 [x] 1. Analyze Codebase  
 [x] 2. Configure Design System  
 [x] 3. Build Header (Status Bar)  
-[ ] 4. Weekly Muscle Heatmap Card  
-[ ] 5. Stats Cards Row  
-[ ] **6. Add Workout CTA**  
-&nbsp;&nbsp;&nbsp;&nbsp;[ ] 6.1. See saved home-dashboard HTML → `design/home-dashboard.html.txt`  
-&nbsp;&nbsp;&nbsp;&nbsp;[ ] 6.2. See saved add-workout HTML → `design/add-workout.html.txt`  
-&nbsp;&nbsp;&nbsp;&nbsp;[ ] 6.3. Hook button click to open modal  
-[ ] 7. Recent Workouts Carousel  
-[ ] 8. Community Feed Section  
-[ ] 9. Bottom Navigation Bar  
-[ ] 10. Add Workout Modal  
-[ ] 11. Log Workout Screen  
-[ ] 12. Finish Workout Modal  
-[ ] 13. Stats & Trends Screen  
-[ ] 14. Review & Polish
+[x] 4. Weekly Muscle Heatmap Card  
+[x] 5. Stats Cards Row  
+[x] **6. Add Workout CTA**  
+&nbsp;&nbsp;&nbsp;&nbsp;[x] 6.1. See saved home-dashboard HTML → `design/home-dashboard.html.txt`  
+&nbsp;&nbsp;&nbsp;&nbsp;[x] 6.2. See saved add-workout HTML → `design/add-workout.html.txt`  
+&nbsp;&nbsp;&nbsp;&nbsp;[x] 6.3. Hook button click to open modal  
+[x] 7. Recent Workouts Carousel  
+[x] 8. Replace Main Dashboard Layout  
+[x] 9. Community Feed Section  
+&nbsp;&nbsp;&nbsp;&nbsp;[x] 9.1. Implement CommunityFeed component (frontend)  
+&nbsp;&nbsp;&nbsp;&nbsp;[x] 9.2. Design and implement backend data structure/API for community posts  
+&nbsp;&nbsp;&nbsp;&nbsp;[x] 9.3. Integrate frontend with backend  
+[ ] 10. Bottom Navigation Bar  
+[ ] 11. Add Workout Modal  
+[ ] 12. Log Workout Screen  
+[ ] 13. Finish Workout Modal  
+[ ] 14. Stats & Trends Screen  
+[ ] 15. Review & Polish
 
 ---
 
@@ -59,7 +63,7 @@ Mark each step complete by changing `[ ]` to `[x]`.
 - **Inputs:** Design tokens, existing icon components  
 - **Tasks:**  
   - Create `<StatusBar />` component.  
-  - Include text "Fitness Track", notification button, avatar.  
+  - Include text "Gymzy", notification button, avatar.  
   - Verify responsive padding and background color.  
 - **Output:** `StatusBar` ready for integration.
 
@@ -103,29 +107,42 @@ Mark each step complete by changing `[ ]` to `[x]`.
   - Include "See All" link.  
 - **Output:** Functional carousel.
 
-### Step 8: Community Feed Section
-- **Goal:** Vertical list of social posts  
-- **Inputs:** Community posts API  
-- **Tasks:**  
-  - Build `<PostCard />` with avatar, user name, time, text, snippet, and action buttons.  
-- **Output:** Styled feed.
+### Step 8: Replace Main Dashboard Layout
+- **Goal:** The main dashboard page (src/app/page.tsx) should use only the new components and match the design reference layout.
+- **Inputs:** All new dashboard components, design/home-dashboard.html.txt
+- **Tasks:**
+  - Remove old grid/components from page.tsx
+  - Render: StatusBar, HeatmapCard, StatsCardsRow, Add Workout CTA, RecentWorkoutsCarousel, Community Feed Section, Bottom Navigation Bar (in correct order)
+  - Ensure stacking, spacing, and mobile layout match the design reference
+- **Output:** Dashboard matches the new design
 
-### Step 9: Bottom Navigation Bar
-- **Goal:** Persistent footer with Home, Stats, Social, Profile  
-- **Inputs:** Routing config  
-- **Tasks:**  
-  - Create `<BottomNav />` with four icons/labels.  
-  - Highlight active tab and wire navigation.  
-- **Output:** Fixed nav component.
+### Step 9: Community Feed Section
+- **Goal:** Vertical list of social posts
+- **Inputs:** Community posts API
+- **Tasks:**
+  1. Implement CommunityFeed component (frontend)
+  2. Design and implement backend data structure/API for community posts
+  3. Integrate frontend with backend
+- **Output:** Styled feed with real data
 
-### Step 10: Add Workout Modal
+### Step 10: Bottom Navigation Bar
+- **Goal:** Persistent footer with Home, Stats, Social, Profile
+- **Inputs:** Routing config, lucide-react icons
+- **Tasks:**
+  1. Create `<BottomNav />` component.
+  2. Include four navigation items (Home, Stats, Social, Profile) with appropriate icons and labels.
+  3. Highlight the active tab (placeholder logic for now, actual routing later).
+  4. Ensure fixed positioning at the bottom and responsive behavior.
+- **Output:** Fixed navigation component visible on dashboard
+
+### Step 11: Add Workout Modal
 - **Goal:** Exercise selection interface  
 - **Inputs:** Exercise list, last-session data  
 - **Tasks:**  
   - Modal with title, date/time, "Copy last session" option, search bar, "Most Used" pills, grouped exercise list with "+" buttons.  
 - **Output:** Interactive selection modal.
 
-### Step 11: Log Workout Screen
+### Step 12: Log Workout Screen
 - **Goal:** Enter sets/reps/weights and view heatmap background  
 - **Inputs:** Selected exercises  
 - **Tasks:**  
@@ -133,14 +150,14 @@ Mark each step complete by changing `[ ]` to `[x]`.
   - Inputs for warm-up and working sets, RPE selector, checkboxes, plate calculator, add-set actions.  
 - **Output:** Complete logging UI.
 
-### Step 12: Finish Workout Modal
+### Step 13: Finish Workout Modal
 - **Goal:** Finalize and save workout  
 - **Inputs:** Workout summary  
 - **Tasks:**  
   - Modal with date/time picker, notes textarea, media upload, public/private toggle, "Save Workout" button.  
 - **Output:** Ready finish modal.
 
-### Step 13: Stats & Trends Screen
+### Step 14: Stats & Trends Screen
 - **Goal:** Show volume trend and training frequency charts  
 - **Inputs:** Weekly volume & frequency data  
 - **Tasks:**  
@@ -148,7 +165,7 @@ Mark each step complete by changing `[ ]` to `[x]`.
   - Display summary metrics (total week, average, streak, top muscle).  
 - **Output:** Fully rendered stats screen.
 
-### Step 14: Review & Polish
+### Step 15: Review & Polish
 - **Goal:** Final quality pass  
 - **Tasks:**  
   - Test responsiveness on mobile (390×844).  

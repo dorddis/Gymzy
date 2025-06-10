@@ -68,11 +68,14 @@ export function HeatmapCard() {
   }, [view, muscleVolumes, relevantMuscles, currentMuscleIdMap]);
 
   return (
-    <Card className="mx-4 bg-white rounded-xl shadow-md p-4 mb-4">
-      <CardHeader className="flex flex-row justify-between items-center mb-3 p-0">
-        <h2 className="text-lg font-semibold">Weekly Muscle Activation</h2>
+    <Card className="mx-4 bg-white rounded-xl shadow-md p-4 mb-4 relative overflow-visible">
+      {/* Overlay header */}
+      <div className="absolute top-2 left-4 z-10 pointer-events-none">
+        <h2 className="text-lg font-semibold text-gray-800 drop-shadow-sm bg-white/80 px-2 rounded">Weekly Muscle Activation</h2>
+      </div>
+      <CardHeader className="flex flex-row justify-end items-center mb-1 p-0 min-h-0 h-8">
         <Button
-          className="bg-primary text-white px-4 py-1.5 rounded-full text-sm font-medium"
+          className="bg-primary text-white px-4 py-1.5 rounded-full text-sm font-medium h-8"
           onClick={() => setView(view === 'front' ? 'back' : 'front')}
         >
           {view === 'front' ? 'Show Back' : 'Show Front'}
@@ -84,15 +87,15 @@ export function HeatmapCard() {
       <div className="flex items-center justify-between px-2">
         <div className="flex items-center">
           <div className="w-4 h-4 bg-red-100 rounded-sm mr-1" />
-          <span className="text-xs">Low</span>
+          <span className="text-xs text-gray-700 font-medium">Low</span>
         </div>
         <div className="flex items-center">
           <div className="w-4 h-4 bg-red-300 rounded-sm mr-1" />
-          <span className="text-xs">Medium</span>
+          <span className="text-xs text-gray-700 font-medium">Medium</span>
         </div>
         <div className="flex items-center">
           <div className="w-4 h-4 bg-red-500 rounded-sm mr-1" />
-          <span className="text-xs">High</span>
+          <span className="text-xs text-gray-700 font-medium">High</span>
         </div>
       </div>
     </Card>
