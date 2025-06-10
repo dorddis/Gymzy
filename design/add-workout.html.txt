@@ -1,0 +1,369 @@
+<div class="preview-element border-4 bg-neutral-100 overflow-hidden flex-shrink-0 text-carbon-800 w-[390px] max-w-[390px] min-w-[390px] min-h-[844px]  
+          h-full flex flex-col mt-4 rounded-[6px] font-[Inter] mx-auto  
+          border-carbon-300
+          " style="height: 849px;"><iframe title="wireframe-0" frameborder="0" class="overflow-hidden" style="height: 849px; width: 100%; overflow: hidden; z-index: 10; transform: translateZ(0px); contain: layout style paint;" srcdoc="&lt;html&gt;&lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot;&gt;
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+    &lt;script src=&quot;https://cdn.tailwindcss.com&quot;&gt;&lt;/script&gt;
+    &lt;script&gt; window.FontAwesomeConfig = { autoReplaceSvg: 'nest'};&lt;/script&gt;
+    &lt;script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js&quot; crossorigin=&quot;anonymous&quot; referrerpolicy=&quot;no-referrer&quot;&gt;&lt;/script&gt;
+    
+    &lt;style&gt;::-webkit-scrollbar { display: none;}&lt;/style&gt;
+    &lt;script&gt;tailwind.config = {
+  &quot;theme&quot;: {
+    &quot;extend&quot;: {
+      &quot;fontFamily&quot;: {
+        &quot;inter&quot;: [
+          &quot;Inter&quot;,
+          &quot;sans-serif&quot;
+        ],
+        &quot;sans&quot;: [
+          &quot;Inter&quot;,
+          &quot;sans-serif&quot;
+        ]
+      },
+      &quot;colors&quot;: {
+        &quot;primary&quot;: &quot;#3B82F6&quot;,
+        &quot;gray-light&quot;: &quot;#F9FAFB&quot;,
+        &quot;gray-border&quot;: &quot;#E5E7EB&quot;,
+        &quot;gray-text&quot;: &quot;#6B7280&quot;,
+        &quot;gray-dark&quot;: &quot;#374151&quot;
+      }
+    }
+  }
+};&lt;/script&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.gstatic.com&quot; crossorigin=&quot;&quot;&gt;&lt;link rel=&quot;stylesheet&quot; href=&quot;https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;500;600;700;800;900&amp;amp;display=swap&quot;&gt;&lt;style&gt;
+      body {
+        font-family: 'Inter', sans-serif !important;
+      }
+      
+      /* Preserve Font Awesome icons */
+      .fa, .fas, .far, .fal, .fab {
+        font-family: &quot;Font Awesome 6 Free&quot;, &quot;Font Awesome 6 Brands&quot; !important;
+      }
+    &lt;/style&gt;&lt;style&gt;
+  .highlighted-section {
+    outline: 2px solid #3F20FB;
+    background-color: rgba(63, 32, 251, 0.1);
+  }
+
+  .edit-button {
+    position: absolute;
+    z-index: 1000;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  html, body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  &lt;/style&gt;&lt;/head&gt;
+&lt;body class=&quot;font-inter bg-gray-light&quot;&gt;
+    &lt;!-- 1. Full-Screen Modal Container --&gt;
+    &lt;div id=&quot;workout-modal&quot; class=&quot;fixed inset-0 bg-white rounded-t-xl shadow-lg flex flex-col&quot;&gt;
+        &lt;!-- Header Bar --&gt;
+        &lt;div id=&quot;header&quot; class=&quot;flex items-center justify-between p-4 border-b border-gray-border&quot;&gt;
+            &lt;button class=&quot;h-11 w-11 flex items-center justify-center&quot;&gt;
+                &lt;i class=&quot;fa-solid fa-xmark text-2xl&quot;&gt;&lt;/i&gt;
+            &lt;/button&gt;
+            &lt;h1 class=&quot;text-xl font-semibold&quot;&gt;Log Workout&lt;/h1&gt;
+            &lt;button class=&quot;flex items-center h-11 text-sm text-gray-dark&quot;&gt;
+                &lt;i class=&quot;fa-regular fa-calendar mr-1&quot;&gt;&lt;/i&gt;
+                &lt;span&gt;Today • 1:00 PM&lt;/span&gt;
+                &lt;i class=&quot;fa-solid fa-chevron-down ml-1 text-xs&quot;&gt;&lt;/i&gt;
+            &lt;/button&gt;
+        &lt;/div&gt;
+
+        &lt;!-- 2. Copy Last Session Toggle --&gt;
+        &lt;div id=&quot;copy-toggle&quot; class=&quot;flex items-center px-4 py-3 border-b border-gray-border&quot;&gt;
+            &lt;div class=&quot;w-5 h-5 border border-gray-border rounded mr-2&quot;&gt;&lt;/div&gt;
+            &lt;span class=&quot;text-base&quot;&gt;Copy last session sets&lt;/span&gt;
+        &lt;/div&gt;
+
+        &lt;!-- 3. Exercise Selection --&gt;
+        &lt;div id=&quot;exercise-selection&quot; class=&quot;flex-1 overflow-y-auto&quot;&gt;
+            &lt;!-- Search Bar --&gt;
+            &lt;div class=&quot;p-4&quot;&gt;
+                &lt;div class=&quot;relative&quot;&gt;
+                    &lt;i class=&quot;fa-solid fa-search absolute left-3 top-3.5 text-gray-text&quot;&gt;&lt;/i&gt;
+                    &lt;input type=&quot;text&quot; placeholder=&quot;Search exercises...&quot; class=&quot;w-full h-12 pl-10 pr-4 rounded-lg border border-gray-border bg-white&quot;&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+            &lt;!-- Most Used --&gt;
+            &lt;div id=&quot;most-used&quot; class=&quot;px-4&quot;&gt;
+                &lt;h2 class=&quot;font-semibold text-base mb-2&quot;&gt;Most Used&lt;/h2&gt;
+                &lt;div class=&quot;flex overflow-x-auto pb-2 -mx-1&quot;&gt;
+                    &lt;button class=&quot;flex-shrink-0 bg-white rounded-full px-4 py-2 shadow-sm mx-1 h-11&quot;&gt;
+                        Bench Press
+                    &lt;/button&gt;
+                    &lt;button class=&quot;flex-shrink-0 bg-white rounded-full px-4 py-2 shadow-sm mx-1 h-11&quot;&gt;
+                        Squat
+                    &lt;/button&gt;
+                    &lt;button class=&quot;flex-shrink-0 bg-white rounded-full px-4 py-2 shadow-sm mx-1 h-11&quot;&gt;
+                        Deadlift
+                    &lt;/button&gt;
+                    &lt;button class=&quot;flex-shrink-0 bg-white rounded-full px-4 py-2 shadow-sm mx-1 h-11&quot;&gt;
+                        Pull-up
+                    &lt;/button&gt;
+                    &lt;button class=&quot;flex-shrink-0 bg-white rounded-full px-4 py-2 shadow-sm mx-1 h-11&quot;&gt;
+                        Shoulder Press
+                    &lt;/button&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+            &lt;!-- All Exercises --&gt;
+            &lt;div id=&quot;all-exercises&quot; class=&quot;mt-4&quot;&gt;
+                &lt;!-- Chest --&gt;
+                &lt;div id=&quot;chest-section&quot; class=&quot;sticky top-0 bg-gray-light&quot;&gt;
+                    &lt;h3 class=&quot;text-sm font-medium text-gray-text uppercase px-4 py-2&quot;&gt;CHEST&lt;/h3&gt;
+                &lt;/div&gt;
+                &lt;div class=&quot;bg-white&quot;&gt;
+                    &lt;div class=&quot;flex items-center justify-between h-[60px] px-4 border-b border-gray-border&quot;&gt;
+                        &lt;span class=&quot;text-base&quot;&gt;Bench Press&lt;/span&gt;
+                        &lt;button class=&quot;w-11 h-11 flex items-center justify-center&quot;&gt;
+                            &lt;i class=&quot;fa-solid fa-plus text-primary&quot;&gt;&lt;/i&gt;
+                        &lt;/button&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&quot;flex items-center justify-between h-[60px] px-4 border-b border-gray-border&quot;&gt;
+                        &lt;span class=&quot;text-base&quot;&gt;Incline Bench Press&lt;/span&gt;
+                        &lt;button class=&quot;w-11 h-11 flex items-center justify-center&quot;&gt;
+                            &lt;i class=&quot;fa-solid fa-plus text-primary&quot;&gt;&lt;/i&gt;
+                        &lt;/button&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&quot;flex items-center justify-between h-[60px] px-4 border-b border-gray-border&quot;&gt;
+                        &lt;span class=&quot;text-base&quot;&gt;Dumbbell Fly&lt;/span&gt;
+                        &lt;button class=&quot;w-11 h-11 flex items-center justify-center&quot;&gt;
+                            &lt;i class=&quot;fa-solid fa-plus text-primary&quot;&gt;&lt;/i&gt;
+                        &lt;/button&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+
+                &lt;!-- Back --&gt;
+                &lt;div id=&quot;back-section&quot; class=&quot;sticky top-0 bg-gray-light&quot;&gt;
+                    &lt;h3 class=&quot;text-sm font-medium text-gray-text uppercase px-4 py-2&quot;&gt;BACK&lt;/h3&gt;
+                &lt;/div&gt;
+                &lt;div class=&quot;bg-white&quot;&gt;
+                    &lt;div class=&quot;flex items-center justify-between h-[60px] px-4 border-b border-gray-border&quot;&gt;
+                        &lt;span class=&quot;text-base&quot;&gt;Deadlift&lt;/span&gt;
+                        &lt;button class=&quot;w-11 h-11 flex items-center justify-center&quot;&gt;
+                            &lt;i class=&quot;fa-solid fa-plus text-primary&quot;&gt;&lt;/i&gt;
+                        &lt;/button&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&quot;flex items-center justify-between h-[60px] px-4 border-b border-gray-border&quot;&gt;
+                        &lt;span class=&quot;text-base&quot;&gt;Pull-up&lt;/span&gt;
+                        &lt;button class=&quot;w-11 h-11 flex items-center justify-center&quot;&gt;
+                            &lt;i class=&quot;fa-solid fa-plus text-primary&quot;&gt;&lt;/i&gt;
+                        &lt;/button&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&quot;flex items-center justify-between h-[60px] px-4 border-b border-gray-border&quot;&gt;
+                        &lt;span class=&quot;text-base&quot;&gt;Barbell Row&lt;/span&gt;
+                        &lt;button class=&quot;w-11 h-11 flex items-center justify-center&quot;&gt;
+                            &lt;i class=&quot;fa-solid fa-plus text-primary&quot;&gt;&lt;/i&gt;
+                        &lt;/button&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;!-- 4. Bottom &quot;Next&quot; Button --&gt;
+        &lt;div id=&quot;next-button&quot; class=&quot;p-4 border-t border-gray-border&quot;&gt;
+            &lt;button class=&quot;w-full h-12 bg-primary text-white font-semibold rounded-lg&quot;&gt;
+                Next: Review &amp;amp; Log
+            &lt;/button&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;!-- 5. Review &amp; Log Screen (hidden by default) --&gt;
+    &lt;div id=&quot;review-screen&quot; class=&quot;fixed inset-0 bg-gray-light hidden&quot;&gt;
+        &lt;!-- A. Background Heatmap Panel --&gt;
+        &lt;div id=&quot;heatmap&quot; class=&quot;h-[35%] relative bg-gray-dark overflow-hidden&quot;&gt;
+            &lt;div class=&quot;absolute inset-0 backdrop-blur-md bg-black/40 flex items-center justify-center&quot;&gt;
+                &lt;img class=&quot;w-full h-full object-contain opacity-70&quot; src=&quot;https://storage.googleapis.com/uxpilot-auth.appspot.com/214c4fb2b3-150dc29c113705c5bdbd.png&quot; alt=&quot;fitness male body outline with muscle heatmap showing chest and back muscles highlighted in red and yellow&quot;&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;!-- B. Sliding Log Panel --&gt;
+        &lt;div id=&quot;log-panel&quot; class=&quot;absolute top-[32%] bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-xl&quot;&gt;
+            &lt;!-- Panel Header --&gt;
+            &lt;div class=&quot;flex flex-col items-center pt-2 pb-4 border-b border-gray-border&quot;&gt;
+                &lt;div class=&quot;w-8 h-1 bg-gray-border rounded-full mb-4&quot;&gt;&lt;/div&gt;
+                &lt;div class=&quot;flex items-center justify-between w-full px-4&quot;&gt;
+                    &lt;h2 class=&quot;text-lg font-semibold&quot;&gt;Exercises in This Workout&lt;/h2&gt;
+                    &lt;button class=&quot;bg-primary text-white text-sm rounded-full px-3 py-1.5&quot;&gt;
+                        + Add Exercise
+                    &lt;/button&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+            &lt;!-- Exercise Accordion Cards --&gt;
+            &lt;div class=&quot;p-4 overflow-y-auto h-[calc(100%-130px)]&quot;&gt;
+                &lt;!-- Exercise Card 1 --&gt;
+                &lt;div id=&quot;exercise-card-1&quot; class=&quot;bg-white rounded-lg shadow-sm mb-3 overflow-hidden&quot;&gt;
+                    &lt;!-- Header Row --&gt;
+                    &lt;div class=&quot;flex items-center justify-between p-3 border-b border-gray-border&quot;&gt;
+                        &lt;div class=&quot;flex items-center&quot;&gt;
+                            &lt;h3 class=&quot;font-semibold&quot;&gt;Bench Press&lt;/h3&gt;
+                            &lt;button class=&quot;ml-2 w-5 h-5 flex items-center justify-center text-gray-text&quot;&gt;
+                                &lt;i class=&quot;fa-solid fa-circle-question&quot;&gt;&lt;/i&gt;
+                            &lt;/button&gt;
+                        &lt;/div&gt;
+                        &lt;button class=&quot;w-8 h-8 flex items-center justify-center&quot;&gt;
+                            &lt;i class=&quot;fa-solid fa-chevron-down&quot;&gt;&lt;/i&gt;
+                        &lt;/button&gt;
+                    &lt;/div&gt;
+
+                    &lt;!-- Expanded Content --&gt;
+                    &lt;div class=&quot;p-3&quot;&gt;
+                        &lt;!-- Set 1 --&gt;
+                        &lt;div class=&quot;flex items-center justify-between mb-3&quot;&gt;
+                            &lt;div class=&quot;bg-green-500 text-white text-xs w-6 h-6 rounded-full flex items-center justify-center&quot;&gt;
+                                W
+                            &lt;/div&gt;
+                            &lt;div class=&quot;border border-gray-border rounded-full px-3 py-2 w-24 text-center&quot;&gt;
+                                135 lb
+                            &lt;/div&gt;
+                            &lt;div class=&quot;border border-gray-border rounded-full px-3 py-2 w-24 text-center&quot;&gt;
+                                12 rep
+                            &lt;/div&gt;
+                            &lt;div class=&quot;border border-gray-border rounded-full px-3 py-2 w-16 text-center&quot;&gt;
+                                RPE 7
+                            &lt;/div&gt;
+                            &lt;div class=&quot;w-6 h-6 border border-gray-border rounded-full&quot;&gt;&lt;/div&gt;
+                        &lt;/div&gt;
+
+                        &lt;!-- Set 2 --&gt;
+                        &lt;div class=&quot;flex items-center justify-between mb-3&quot;&gt;
+                            &lt;div class=&quot;w-6 h-6 flex items-center justify-center text-gray-text&quot;&gt;
+                                1
+                            &lt;/div&gt;
+                            &lt;div class=&quot;border border-gray-border rounded-full px-3 py-2 w-24 text-center&quot;&gt;
+                                185 lb
+                            &lt;/div&gt;
+                            &lt;div class=&quot;border border-gray-border rounded-full px-3 py-2 w-24 text-center&quot;&gt;
+                                8 rep
+                            &lt;/div&gt;
+                            &lt;div class=&quot;border border-gray-border rounded-full px-3 py-2 w-16 text-center&quot;&gt;
+                                RPE 8
+                            &lt;/div&gt;
+                            &lt;div class=&quot;w-6 h-6 border border-gray-border rounded-full&quot;&gt;&lt;/div&gt;
+                        &lt;/div&gt;
+
+                        &lt;!-- Set 3 --&gt;
+                        &lt;div class=&quot;flex items-center justify-between mb-4&quot;&gt;
+                            &lt;div class=&quot;w-6 h-6 flex items-center justify-center text-gray-text&quot;&gt;
+                                2
+                            &lt;/div&gt;
+                            &lt;div class=&quot;border border-gray-border rounded-full px-3 py-2 w-24 text-center&quot;&gt;
+                                185 lb
+                            &lt;/div&gt;
+                            &lt;div class=&quot;border border-gray-border rounded-full px-3 py-2 w-24 text-center&quot;&gt;
+                                8 rep
+                            &lt;/div&gt;
+                            &lt;div class=&quot;border border-gray-border rounded-full px-3 py-2 w-16 text-center&quot;&gt;
+                                RPE 9
+                            &lt;/div&gt;
+                            &lt;div class=&quot;w-6 h-6 border border-gray-border rounded-full&quot;&gt;&lt;/div&gt;
+                        &lt;/div&gt;
+
+                        &lt;!-- Add Set Links --&gt;
+                        &lt;div class=&quot;flex mb-3&quot;&gt;
+                            &lt;button class=&quot;text-primary text-sm mr-4&quot;&gt;+ Add Set&lt;/button&gt;
+                            &lt;button class=&quot;text-gray-text text-sm&quot;&gt;+ Add Warmup Set&lt;/button&gt;
+                        &lt;/div&gt;
+
+                        &lt;!-- Plate Calculator Widget --&gt;
+                        &lt;div class=&quot;bg-white rounded-lg shadow-sm p-3 border border-gray-border&quot;&gt;
+                            &lt;p class=&quot;text-sm&quot;&gt;Plates for 185 lb → 2×45 lb, 1×5 lb, 2×2.5 lb&lt;/p&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+
+                &lt;!-- Exercise Card 2 --&gt;
+                &lt;div id=&quot;exercise-card-2&quot; class=&quot;bg-white rounded-lg shadow-sm mb-3&quot;&gt;
+                    &lt;!-- Header Row --&gt;
+                    &lt;div class=&quot;flex items-center justify-between p-3&quot;&gt;
+                        &lt;div class=&quot;flex items-center&quot;&gt;
+                            &lt;h3 class=&quot;font-semibold&quot;&gt;Deadlift&lt;/h3&gt;
+                            &lt;button class=&quot;ml-2 w-5 h-5 flex items-center justify-center text-gray-text&quot;&gt;
+                                &lt;i class=&quot;fa-solid fa-circle-question&quot;&gt;&lt;/i&gt;
+                            &lt;/button&gt;
+                        &lt;/div&gt;
+                        &lt;button class=&quot;w-8 h-8 flex items-center justify-center&quot;&gt;
+                            &lt;i class=&quot;fa-solid fa-chevron-right&quot;&gt;&lt;/i&gt;
+                        &lt;/button&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+            &lt;!-- 6. Finish Workout Bar --&gt;
+            &lt;div id=&quot;finish-bar&quot; class=&quot;absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-border&quot;&gt;
+                &lt;button class=&quot;w-full h-14 bg-primary text-white font-semibold rounded-lg&quot;&gt;
+                    Finish Workout
+                &lt;/button&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;!-- 7. Finish Workout Modal (hidden by default) --&gt;
+    &lt;div id=&quot;finish-modal&quot; class=&quot;fixed inset-0 flex items-center justify-center bg-black/50 hidden&quot;&gt;
+        &lt;div class=&quot;bg-white rounded-xl w-[90%] max-h-[70%] p-4 overflow-y-auto&quot;&gt;
+            &lt;h2 class=&quot;text-xl font-semibold mb-4&quot;&gt;Complete Workout&lt;/h2&gt;
+            
+            &lt;!-- Date &amp; Time --&gt;
+            &lt;div class=&quot;flex items-center justify-between py-3 border-b border-gray-border&quot;&gt;
+                &lt;div class=&quot;flex items-center&quot;&gt;
+                    &lt;i class=&quot;fa-regular fa-calendar mr-2&quot;&gt;&lt;/i&gt;
+                    &lt;span&gt;Date &amp;amp; Time&lt;/span&gt;
+                &lt;/div&gt;
+                &lt;div class=&quot;flex items-center&quot;&gt;
+                    &lt;span class=&quot;text-sm text-gray-text mr-1&quot;&gt;Today • 1:00 PM&lt;/span&gt;
+                    &lt;i class=&quot;fa-solid fa-chevron-right text-gray-text&quot;&gt;&lt;/i&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+            
+            &lt;!-- Feelings --&gt;
+            &lt;div class=&quot;py-3&quot;&gt;
+                &lt;label class=&quot;block text-base mb-2&quot;&gt;How did it go?&lt;/label&gt;
+                &lt;textarea placeholder=&quot;How do you feel...&quot; class=&quot;w-full h-24 border border-gray-border rounded-lg p-3 text-sm&quot;&gt;&lt;/textarea&gt;
+            &lt;/div&gt;
+            
+            &lt;!-- Media --&gt;
+            &lt;div class=&quot;py-3&quot;&gt;
+                &lt;div class=&quot;border border-dashed border-gray-border rounded-lg p-4 flex flex-col items-center justify-center&quot;&gt;
+                    &lt;i class=&quot;fa-solid fa-camera text-2xl text-gray-text mb-2&quot;&gt;&lt;/i&gt;
+                    &lt;span class=&quot;text-sm text-gray-text&quot;&gt;Add Photo/Video&lt;/span&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+            
+            &lt;!-- Privacy --&gt;
+            &lt;div class=&quot;flex items-center justify-between py-3 mb-4&quot;&gt;
+                &lt;span&gt;Make this workout public&lt;/span&gt;
+                &lt;div class=&quot;w-12 h-6 bg-gray-border rounded-full relative&quot;&gt;
+                    &lt;div class=&quot;absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full&quot;&gt;&lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+            
+            &lt;!-- Save Button --&gt;
+            &lt;button class=&quot;w-full h-12 bg-primary text-white font-semibold rounded-lg&quot;&gt;
+                Save Workout
+            &lt;/button&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;script&gt;
+        // Toggle between screens (for demo purposes)
+        document.getElementById('next-button').addEventListener('click', function() {
+            document.getElementById('workout-modal').classList.add('hidden');
+            document.getElementById('review-screen').classList.remove('hidden');
+        });
+        
+        document.getElementById('finish-bar').addEventListener('click', function() {
+            document.getElementById('finish-modal').classList.remove('hidden');
+        });
+    &lt;/script&gt;
+
+&lt;/body&gt;&lt;/html&gt;"></iframe></div>

@@ -1,0 +1,651 @@
+<div class="preview-element border-4 bg-neutral-100 overflow-hidden flex-shrink-0 text-carbon-800 w-[390px] max-w-[390px] min-w-[390px] min-h-[844px]  
+          h-full flex flex-col mt-4 rounded-[6px] font-[Inter] mx-auto  
+          border-carbon-300
+          " style="height: 1465px;"><iframe title="wireframe-0" srcdoc="&lt;html&gt;&lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot;&gt;
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+    &lt;script src=&quot;https://cdn.tailwindcss.com&quot;&gt;&lt;/script&gt;
+    &lt;script&gt; window.FontAwesomeConfig = { autoReplaceSvg: 'nest'};&lt;/script&gt;
+    &lt;script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js&quot; crossorigin=&quot;anonymous&quot; referrerpolicy=&quot;no-referrer&quot;&gt;&lt;/script&gt;
+    
+    &lt;script src=&quot;https://cdn.jsdelivr.net/npm/chart.js&quot;&gt;&lt;/script&gt;
+    &lt;style&gt;::-webkit-scrollbar { display: none;}&lt;/style&gt;
+    &lt;script&gt;tailwind.config = {
+  &quot;theme&quot;: {
+    &quot;extend&quot;: {
+      &quot;fontFamily&quot;: {
+        &quot;inter&quot;: [
+          &quot;Inter&quot;,
+          &quot;sans-serif&quot;
+        ],
+        &quot;sans&quot;: [
+          &quot;Inter&quot;,
+          &quot;sans-serif&quot;
+        ]
+      },
+      &quot;colors&quot;: {
+        &quot;primary&quot;: &quot;#34113F&quot;,
+        &quot;secondary&quot;: &quot;#73AB84&quot;,
+        &quot;background&quot;: &quot;#FDFFFC&quot;
+      }
+    }
+  }
+};&lt;/script&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.gstatic.com&quot; crossorigin=&quot;&quot;&gt;&lt;link rel=&quot;stylesheet&quot; href=&quot;https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;500;600;700;800;900&amp;amp;display=swap&quot;&gt;&lt;style&gt;
+      body {
+        font-family: 'Inter', sans-serif !important;
+      }
+      
+      /* Preserve Font Awesome icons */
+      .fa, .fas, .far, .fal, .fab {
+        font-family: &quot;Font Awesome 6 Free&quot;, &quot;Font Awesome 6 Brands&quot; !important;
+      }
+    &lt;/style&gt;&lt;style&gt;
+  .highlighted-section {
+    outline: 2px solid #3F20FB;
+    background-color: rgba(63, 32, 251, 0.1);
+  }
+
+  .edit-button {
+    position: absolute;
+    z-index: 1000;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  html, body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  &lt;/style&gt;&lt;/head&gt;
+&lt;body class=&quot;bg-background font-inter text-primary&quot;&gt;
+    &lt;!-- Home Dashboard --&gt;
+    &lt;div id=&quot;home-dashboard&quot; class=&quot;h-full pb-20&quot;&gt;
+        &lt;!-- Status Bar --&gt;
+        &lt;div id=&quot;status-bar&quot; class=&quot;px-4 pt-12 pb-4 flex justify-between items-center&quot;&gt;
+            &lt;h1 class=&quot;text-2xl font-semibold&quot;&gt;Fitness Track&lt;/h1&gt;
+            &lt;div class=&quot;flex items-center space-x-3&quot;&gt;
+                &lt;button class=&quot;w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center&quot;&gt;
+                    &lt;i class=&quot;fa-regular fa-bell text-primary&quot;&gt;&lt;/i&gt;
+                &lt;/button&gt;
+                &lt;img src=&quot;https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-3.jpg&quot; class=&quot;w-10 h-10 rounded-full&quot; alt=&quot;Profile&quot;&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+        
+        &lt;!-- Muscle Activation Heatmap Card --&gt;
+        &lt;div id=&quot;heatmap-card&quot; class=&quot;mx-4 bg-white rounded-xl shadow-md p-4 mb-4&quot;&gt;
+            &lt;div class=&quot;flex justify-between items-center mb-3&quot;&gt;
+                &lt;h2 class=&quot;text-lg font-semibold&quot;&gt;Weekly Muscle Activation&lt;/h2&gt;
+                &lt;button id=&quot;toggle-view&quot; class=&quot;bg-primary text-white px-4 py-1.5 rounded-full text-sm font-medium&quot;&gt;
+                    Show Back
+                &lt;/button&gt;
+            &lt;/div&gt;
+            
+            &lt;!-- Placeholder for SVG Heatmap --&gt;
+            &lt;div id=&quot;heatmap-placeholder&quot; class=&quot;bg-white rounded-lg h-[280px] w-full flex items-center justify-center mb-3&quot;&gt;
+                &lt;div class=&quot;text-center text-gray-400&quot;&gt;
+                    &lt;i class=&quot;fa-solid fa-dumbbell text-3xl mb-2&quot;&gt;&lt;/i&gt;
+                    &lt;p&gt;SVG Heatmap will be inserted here&lt;/p&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+            
+            &lt;!-- Heatmap Legend --&gt;
+            &lt;div id=&quot;heatmap-legend&quot; class=&quot;flex items-center justify-between px-2&quot;&gt;
+                &lt;div class=&quot;flex items-center&quot;&gt;
+                    &lt;div class=&quot;w-4 h-4 bg-red-100 rounded-sm mr-1&quot;&gt;&lt;/div&gt;
+                    &lt;span class=&quot;text-xs&quot;&gt;Low&lt;/span&gt;
+                &lt;/div&gt;
+                &lt;div class=&quot;flex items-center&quot;&gt;
+                    &lt;div class=&quot;w-4 h-4 bg-red-300 rounded-sm mr-1&quot;&gt;&lt;/div&gt;
+                    &lt;span class=&quot;text-xs&quot;&gt;Medium&lt;/span&gt;
+                &lt;/div&gt;
+                &lt;div class=&quot;flex items-center&quot;&gt;
+                    &lt;div class=&quot;w-4 h-4 bg-red-500 rounded-sm mr-1&quot;&gt;&lt;/div&gt;
+                    &lt;span class=&quot;text-xs&quot;&gt;High&lt;/span&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+        
+        &lt;!-- Stats Cards --&gt;
+        &lt;div id=&quot;stats-row&quot; class=&quot;flex justify-between mx-4 mb-4&quot;&gt;
+            &lt;div class=&quot;bg-white rounded-xl shadow-sm p-3 w-[31%]&quot;&gt;
+                &lt;div class=&quot;flex items-center justify-center mb-1&quot;&gt;
+                    &lt;i class=&quot;fa-solid fa-weight-hanging text-secondary&quot;&gt;&lt;/i&gt;
+                &lt;/div&gt;
+                &lt;p class=&quot;text-center text-xl font-semibold&quot;&gt;12.4k&lt;/p&gt;
+                &lt;p class=&quot;text-xs text-center text-gray-500&quot;&gt;Total Volume&lt;/p&gt;
+            &lt;/div&gt;
+            &lt;div class=&quot;bg-white rounded-xl shadow-sm p-3 w-[31%]&quot;&gt;
+                &lt;div class=&quot;flex items-center justify-center mb-1&quot;&gt;
+                    &lt;i class=&quot;fa-solid fa-fire text-secondary&quot;&gt;&lt;/i&gt;
+                &lt;/div&gt;
+                &lt;p class=&quot;text-center text-xl font-semibold&quot;&gt;7.2&lt;/p&gt;
+                &lt;p class=&quot;text-xs text-center text-gray-500&quot;&gt;Average RPE&lt;/p&gt;
+            &lt;/div&gt;
+            &lt;div class=&quot;bg-white rounded-xl shadow-sm p-3 w-[31%]&quot;&gt;
+                &lt;div class=&quot;flex items-center justify-center mb-1&quot;&gt;
+                    &lt;i class=&quot;fa-solid fa-calendar-check text-secondary&quot;&gt;&lt;/i&gt;
+                &lt;/div&gt;
+                &lt;p class=&quot;text-center text-xl font-semibold&quot;&gt;85%&lt;/p&gt;
+                &lt;p class=&quot;text-xs text-center text-gray-500&quot;&gt;Consistency&lt;/p&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+        
+        &lt;!-- Add Workout Button --&gt;
+        &lt;div id=&quot;add-workout&quot; class=&quot;mx-4 mb-4&quot;&gt;
+            &lt;button class=&quot;w-full bg-secondary text-white py-3 rounded-xl font-semibold shadow-sm flex items-center justify-center&quot;&gt;
+                &lt;i class=&quot;fa-solid fa-plus mr-2&quot;&gt;&lt;/i&gt; Add Workout
+            &lt;/button&gt;
+        &lt;/div&gt;
+        
+        &lt;!-- Recent Workouts Carousel --&gt;
+        &lt;div id=&quot;recent-workouts&quot; class=&quot;mb-4&quot;&gt;
+            &lt;div class=&quot;flex justify-between items-center px-4 mb-2&quot;&gt;
+                &lt;h2 class=&quot;text-lg font-semibold&quot;&gt;Recent Workouts&lt;/h2&gt;
+                &lt;span class=&quot;text-secondary text-sm cursor-pointer&quot;&gt;See All&lt;/span&gt;
+            &lt;/div&gt;
+            &lt;div class=&quot;overflow-x-auto px-4 flex space-x-3 pb-2&quot;&gt;
+                &lt;div class=&quot;bg-white rounded-xl shadow-sm p-3 min-w-[200px] flex-shrink-0&quot;&gt;
+                    &lt;div class=&quot;flex justify-between items-start mb-2&quot;&gt;
+                        &lt;div&gt;
+                            &lt;h3 class=&quot;font-medium&quot;&gt;Upper Body&lt;/h3&gt;
+                            &lt;p class=&quot;text-xs text-gray-500&quot;&gt;Yesterday&lt;/p&gt;
+                        &lt;/div&gt;
+                        &lt;span class=&quot;bg-red-100 text-red-600 text-xs px-2 py-0.5 rounded-full&quot;&gt;High&lt;/span&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&quot;text-xs text-gray-600&quot;&gt;
+                        &lt;p&gt;5 exercises • 45 min&lt;/p&gt;
+                        &lt;p&gt;Chest, Shoulders, Triceps&lt;/p&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+                &lt;div class=&quot;bg-white rounded-xl shadow-sm p-3 min-w-[200px] flex-shrink-0&quot;&gt;
+                    &lt;div class=&quot;flex justify-between items-start mb-2&quot;&gt;
+                        &lt;div&gt;
+                            &lt;h3 class=&quot;font-medium&quot;&gt;Leg Day&lt;/h3&gt;
+                            &lt;p class=&quot;text-xs text-gray-500&quot;&gt;3 days ago&lt;/p&gt;
+                        &lt;/div&gt;
+                        &lt;span class=&quot;bg-orange-100 text-orange-600 text-xs px-2 py-0.5 rounded-full&quot;&gt;Medium&lt;/span&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&quot;text-xs text-gray-600&quot;&gt;
+                        &lt;p&gt;4 exercises • 60 min&lt;/p&gt;
+                        &lt;p&gt;Quads, Hamstrings, Calves&lt;/p&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+                &lt;div class=&quot;bg-white rounded-xl shadow-sm p-3 min-w-[200px] flex-shrink-0&quot;&gt;
+                    &lt;div class=&quot;flex justify-between items-start mb-2&quot;&gt;
+                        &lt;div&gt;
+                            &lt;h3 class=&quot;font-medium&quot;&gt;Core Focus&lt;/h3&gt;
+                            &lt;p class=&quot;text-xs text-gray-500&quot;&gt;5 days ago&lt;/p&gt;
+                        &lt;/div&gt;
+                        &lt;span class=&quot;bg-green-100 text-green-600 text-xs px-2 py-0.5 rounded-full&quot;&gt;Low&lt;/span&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&quot;text-xs text-gray-600&quot;&gt;
+                        &lt;p&gt;3 exercises • 30 min&lt;/p&gt;
+                        &lt;p&gt;Abs, Lower Back&lt;/p&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+        
+        &lt;!-- Social Feed --&gt;
+        &lt;div id=&quot;social-feed&quot; class=&quot;px-4&quot;&gt;
+            &lt;div class=&quot;flex justify-between items-center mb-3&quot;&gt;
+                &lt;h2 class=&quot;text-lg font-semibold&quot;&gt;Community&lt;/h2&gt;
+                &lt;span class=&quot;text-secondary text-sm cursor-pointer&quot;&gt;View All&lt;/span&gt;
+            &lt;/div&gt;
+            
+            &lt;!-- Social Post 1 --&gt;
+            &lt;div class=&quot;bg-white rounded-xl shadow-sm p-4 mb-4&quot;&gt;
+                &lt;div class=&quot;flex items-center mb-3&quot;&gt;
+                    &lt;img src=&quot;https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-1.jpg&quot; class=&quot;w-10 h-10 rounded-full mr-3&quot; alt=&quot;User&quot;&gt;
+                    &lt;div&gt;
+                        &lt;h3 class=&quot;font-medium&quot;&gt;Sarah Johnson&lt;/h3&gt;
+                        &lt;p class=&quot;text-xs text-gray-500&quot;&gt;2 hours ago&lt;/p&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+                &lt;p class=&quot;text-sm mb-3&quot;&gt;Just crushed a new PR on deadlifts! 💪 Feeling stronger every week with this program.&lt;/p&gt;
+                &lt;div class=&quot;bg-gray-100 rounded-lg p-2 mb-3&quot;&gt;
+                    &lt;div class=&quot;flex items-center text-sm&quot;&gt;
+                        &lt;i class=&quot;fa-solid fa-dumbbell text-secondary mr-2&quot;&gt;&lt;/i&gt;
+                        &lt;div&gt;
+                            &lt;p class=&quot;font-medium&quot;&gt;Lower Body Strength&lt;/p&gt;
+                            &lt;p class=&quot;text-xs text-gray-500&quot;&gt;4 exercises • 8.5k volume&lt;/p&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+                &lt;div class=&quot;flex justify-between text-sm text-gray-500&quot;&gt;
+                    &lt;button class=&quot;flex items-center&quot;&gt;
+                        &lt;i class=&quot;fa-regular fa-heart mr-1&quot;&gt;&lt;/i&gt; 24
+                    &lt;/button&gt;
+                    &lt;button class=&quot;flex items-center&quot;&gt;
+                        &lt;i class=&quot;fa-regular fa-comment mr-1&quot;&gt;&lt;/i&gt; 8
+                    &lt;/button&gt;
+                    &lt;button class=&quot;flex items-center&quot;&gt;
+                        &lt;i class=&quot;fa-regular fa-share-from-square&quot;&gt;&lt;/i&gt;
+                    &lt;/button&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+            
+            &lt;!-- Social Post 2 --&gt;
+            &lt;div class=&quot;bg-white rounded-xl shadow-sm p-4 mb-4&quot;&gt;
+                &lt;div class=&quot;flex items-center mb-3&quot;&gt;
+                    &lt;img src=&quot;https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-4.jpg&quot; class=&quot;w-10 h-10 rounded-full mr-3&quot; alt=&quot;User&quot;&gt;
+                    &lt;div&gt;
+                        &lt;h3 class=&quot;font-medium&quot;&gt;Mike Peters&lt;/h3&gt;
+                        &lt;p class=&quot;text-xs text-gray-500&quot;&gt;5 hours ago&lt;/p&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+                &lt;p class=&quot;text-sm mb-3&quot;&gt;Finally back in the gym after a week off. Taking it easy but feels good to be back!&lt;/p&gt;
+                &lt;div class=&quot;bg-gray-100 rounded-lg p-2 mb-3&quot;&gt;
+                    &lt;div class=&quot;flex items-center text-sm&quot;&gt;
+                        &lt;i class=&quot;fa-solid fa-dumbbell text-secondary mr-2&quot;&gt;&lt;/i&gt;
+                        &lt;div&gt;
+                            &lt;p class=&quot;font-medium&quot;&gt;Full Body Recovery&lt;/p&gt;
+                            &lt;p class=&quot;text-xs text-gray-500&quot;&gt;5 exercises • 5.2k volume&lt;/p&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+                &lt;div class=&quot;flex justify-between text-sm text-gray-500&quot;&gt;
+                    &lt;button class=&quot;flex items-center&quot;&gt;
+                        &lt;i class=&quot;fa-regular fa-heart mr-1&quot;&gt;&lt;/i&gt; 18
+                    &lt;/button&gt;
+                    &lt;button class=&quot;flex items-center&quot;&gt;
+                        &lt;i class=&quot;fa-regular fa-comment mr-1&quot;&gt;&lt;/i&gt; 3
+                    &lt;/button&gt;
+                    &lt;button class=&quot;flex items-center&quot;&gt;
+                        &lt;i class=&quot;fa-regular fa-share-from-square&quot;&gt;&lt;/i&gt;
+                    &lt;/button&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    
+    &lt;!-- Bottom Navigation --&gt;
+    &lt;div id=&quot;bottom-nav&quot; class=&quot;fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-2&quot;&gt;
+        &lt;span class=&quot;flex flex-col items-center justify-center p-2 text-secondary cursor-pointer&quot;&gt;
+            &lt;i class=&quot;fa-solid fa-house text-lg&quot;&gt;&lt;/i&gt;
+            &lt;span class=&quot;text-xs mt-1&quot;&gt;Home&lt;/span&gt;
+        &lt;/span&gt;
+        &lt;span class=&quot;flex flex-col items-center justify-center p-2 text-gray-500 cursor-pointer&quot;&gt;
+            &lt;i class=&quot;fa-solid fa-chart-simple text-lg&quot;&gt;&lt;/i&gt;
+            &lt;span class=&quot;text-xs mt-1&quot;&gt;Stats&lt;/span&gt;
+        &lt;/span&gt;
+        &lt;span class=&quot;flex flex-col items-center justify-center p-2 text-gray-500 cursor-pointer&quot;&gt;
+            &lt;i class=&quot;fa-solid fa-users text-lg&quot;&gt;&lt;/i&gt;
+            &lt;span class=&quot;text-xs mt-1&quot;&gt;Social&lt;/span&gt;
+        &lt;/span&gt;
+        &lt;span class=&quot;flex flex-col items-center justify-center p-2 text-gray-500 cursor-pointer&quot;&gt;
+            &lt;i class=&quot;fa-solid fa-user text-lg&quot;&gt;&lt;/i&gt;
+            &lt;span class=&quot;text-xs mt-1&quot;&gt;Profile&lt;/span&gt;
+        &lt;/span&gt;
+    &lt;/div&gt;
+    
+    &lt;!-- Add Workout Modal (Hidden by default) --&gt;
+    &lt;div id=&quot;add-workout-modal&quot; class=&quot;fixed inset-0 bg-black bg-opacity-50 z-50 hidden&quot;&gt;
+        &lt;div class=&quot;bg-background absolute inset-0 rounded-t-xl flex flex-col&quot;&gt;
+            &lt;div class=&quot;px-4 py-5 flex justify-between items-center border-b border-gray-200&quot;&gt;
+                &lt;h2 class=&quot;text-xl font-semibold&quot;&gt;Select Exercises&lt;/h2&gt;
+                &lt;button class=&quot;w-8 h-8 flex items-center justify-center rounded-full bg-gray-100&quot;&gt;
+                    &lt;i class=&quot;fa-solid fa-xmark&quot;&gt;&lt;/i&gt;
+                &lt;/button&gt;
+            &lt;/div&gt;
+            
+            &lt;div class=&quot;p-4&quot;&gt;
+                &lt;div class=&quot;flex items-center justify-between mb-4&quot;&gt;
+                    &lt;div&gt;
+                        &lt;p class=&quot;text-sm text-gray-500&quot;&gt;Today, 5:30 PM&lt;/p&gt;
+                    &lt;/div&gt;
+                    &lt;label class=&quot;flex items-center&quot;&gt;
+                        &lt;input type=&quot;checkbox&quot; class=&quot;w-4 h-4 mr-2 accent-secondary&quot;&gt;
+                        &lt;span class=&quot;text-sm&quot;&gt;Copy last session sets&lt;/span&gt;
+                    &lt;/label&gt;
+                &lt;/div&gt;
+                
+                &lt;div class=&quot;relative mb-4&quot;&gt;
+                    &lt;input type=&quot;text&quot; placeholder=&quot;Search exercises...&quot; class=&quot;w-full py-3 pl-10 pr-4 bg-white rounded-xl border border-gray-200 focus:outline-none focus:ring-1 focus:ring-secondary&quot;&gt;
+                    &lt;i class=&quot;fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400&quot;&gt;&lt;/i&gt;
+                &lt;/div&gt;
+                
+                &lt;div class=&quot;mb-4&quot;&gt;
+                    &lt;h3 class=&quot;text-sm font-medium mb-2&quot;&gt;Most Used&lt;/h3&gt;
+                    &lt;div class=&quot;flex space-x-2 overflow-x-auto pb-2&quot;&gt;
+                        &lt;button class=&quot;bg-primary text-white px-4 py-2 rounded-full text-sm whitespace-nowrap&quot;&gt;Bench Press&lt;/button&gt;
+                        &lt;button class=&quot;bg-white text-primary px-4 py-2 rounded-full text-sm whitespace-nowrap&quot;&gt;Squat&lt;/button&gt;
+                        &lt;button class=&quot;bg-white text-primary px-4 py-2 rounded-full text-sm whitespace-nowrap&quot;&gt;Deadlift&lt;/button&gt;
+                        &lt;button class=&quot;bg-white text-primary px-4 py-2 rounded-full text-sm whitespace-nowrap&quot;&gt;Pull-up&lt;/button&gt;
+                        &lt;button class=&quot;bg-white text-primary px-4 py-2 rounded-full text-sm whitespace-nowrap&quot;&gt;Shoulder Press&lt;/button&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+                
+                &lt;div&gt;
+                    &lt;h3 class=&quot;text-sm font-medium mb-2&quot;&gt;All Exercises&lt;/h3&gt;
+                    
+                    &lt;!-- Chest Category --&gt;
+                    &lt;div class=&quot;mb-4&quot;&gt;
+                        &lt;h4 class=&quot;text-xs uppercase tracking-wider text-gray-500 mb-2&quot;&gt;Chest&lt;/h4&gt;
+                        &lt;div class=&quot;bg-white rounded-xl shadow-sm divide-y divide-gray-100&quot;&gt;
+                            &lt;div class=&quot;flex justify-between items-center p-3&quot;&gt;
+                                &lt;span&gt;Bench Press&lt;/span&gt;
+                                &lt;button class=&quot;w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center&quot;&gt;
+                                    &lt;i class=&quot;fa-solid fa-plus&quot;&gt;&lt;/i&gt;
+                                &lt;/button&gt;
+                            &lt;/div&gt;
+                            &lt;div class=&quot;flex justify-between items-center p-3&quot;&gt;
+                                &lt;span&gt;Incline Bench Press&lt;/span&gt;
+                                &lt;button class=&quot;w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center&quot;&gt;
+                                    &lt;i class=&quot;fa-solid fa-plus&quot;&gt;&lt;/i&gt;
+                                &lt;/button&gt;
+                            &lt;/div&gt;
+                            &lt;div class=&quot;flex justify-between items-center p-3&quot;&gt;
+                                &lt;span&gt;Chest Fly&lt;/span&gt;
+                                &lt;button class=&quot;w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center&quot;&gt;
+                                    &lt;i class=&quot;fa-solid fa-plus&quot;&gt;&lt;/i&gt;
+                                &lt;/button&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                    
+                    &lt;!-- Back Category --&gt;
+                    &lt;div class=&quot;mb-4&quot;&gt;
+                        &lt;h4 class=&quot;text-xs uppercase tracking-wider text-gray-500 mb-2&quot;&gt;Back&lt;/h4&gt;
+                        &lt;div class=&quot;bg-white rounded-xl shadow-sm divide-y divide-gray-100&quot;&gt;
+                            &lt;div class=&quot;flex justify-between items-center p-3&quot;&gt;
+                                &lt;span&gt;Pull-up&lt;/span&gt;
+                                &lt;button class=&quot;w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center&quot;&gt;
+                                    &lt;i class=&quot;fa-solid fa-plus&quot;&gt;&lt;/i&gt;
+                                &lt;/button&gt;
+                            &lt;/div&gt;
+                            &lt;div class=&quot;flex justify-between items-center p-3&quot;&gt;
+                                &lt;span&gt;Bent Over Row&lt;/span&gt;
+                                &lt;button class=&quot;w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center&quot;&gt;
+                                    &lt;i class=&quot;fa-solid fa-plus&quot;&gt;&lt;/i&gt;
+                                &lt;/button&gt;
+                            &lt;/div&gt;
+                            &lt;div class=&quot;flex justify-between items-center p-3&quot;&gt;
+                                &lt;span&gt;Lat Pulldown&lt;/span&gt;
+                                &lt;button class=&quot;w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center&quot;&gt;
+                                    &lt;i class=&quot;fa-solid fa-plus&quot;&gt;&lt;/i&gt;
+                                &lt;/button&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    
+    &lt;!-- Log Workout Screen (Hidden by default) --&gt;
+    &lt;div id=&quot;log-workout-screen&quot; class=&quot;fixed inset-0 bg-black bg-opacity-50 z-50 hidden&quot;&gt;
+        &lt;div class=&quot;h-full flex flex-col&quot;&gt;
+            &lt;!-- Top Heatmap Background --&gt;
+            &lt;div class=&quot;h-[35%] bg-primary bg-opacity-10 flex items-center justify-center&quot;&gt;
+                &lt;div class=&quot;text-center text-gray-500&quot;&gt;
+                    &lt;i class=&quot;fa-solid fa-dumbbell text-3xl mb-2&quot;&gt;&lt;/i&gt;
+                    &lt;p&gt;SVG Heatmap Background&lt;/p&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+            
+            &lt;!-- Bottom Sliding Panel --&gt;
+            &lt;div class=&quot;h-[65%] bg-white rounded-t-xl p-4&quot;&gt;
+                &lt;div class=&quot;flex justify-between items-center mb-4&quot;&gt;
+                    &lt;h2 class=&quot;text-lg font-semibold&quot;&gt;Exercises in This Workout&lt;/h2&gt;
+                    &lt;button class=&quot;bg-primary text-white px-4 py-1.5 rounded-full text-sm font-medium flex items-center&quot;&gt;
+                        &lt;i class=&quot;fa-solid fa-plus mr-1&quot;&gt;&lt;/i&gt; Add Exercise
+                    &lt;/button&gt;
+                &lt;/div&gt;
+                
+                &lt;!-- Exercise Accordion --&gt;
+                &lt;div class=&quot;mb-4&quot;&gt;
+                    &lt;div class=&quot;bg-gray-100 rounded-xl mb-3&quot;&gt;
+                        &lt;div class=&quot;p-3 flex justify-between items-center&quot;&gt;
+                            &lt;div class=&quot;flex items-center&quot;&gt;
+                                &lt;span class=&quot;font-medium&quot;&gt;Bench Press&lt;/span&gt;
+                                &lt;button class=&quot;ml-2 w-5 h-5 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center&quot;&gt;
+                                    &lt;i class=&quot;fa-solid fa-question text-xs&quot;&gt;&lt;/i&gt;
+                                &lt;/button&gt;
+                            &lt;/div&gt;
+                            &lt;button&gt;
+                                &lt;i class=&quot;fa-solid fa-chevron-down&quot;&gt;&lt;/i&gt;
+                            &lt;/button&gt;
+                        &lt;/div&gt;
+                        
+                        &lt;!-- Set Rows (Expanded) --&gt;
+                        &lt;div class=&quot;p-3 pt-0&quot;&gt;
+                            &lt;div class=&quot;bg-white rounded-lg p-2 mb-2&quot;&gt;
+                                &lt;div class=&quot;flex items-center&quot;&gt;
+                                    &lt;span class=&quot;bg-blue-100 text-blue-600 text-xs px-2 py-0.5 rounded-full mr-2&quot;&gt;Warmup&lt;/span&gt;
+                                    &lt;input type=&quot;text&quot; value=&quot;45&quot; class=&quot;w-16 p-1 border border-gray-200 rounded text-center mr-2&quot; placeholder=&quot;kg&quot;&gt;
+                                    &lt;span class=&quot;mr-2&quot;&gt;×&lt;/span&gt;
+                                    &lt;input type=&quot;text&quot; value=&quot;10&quot; class=&quot;w-12 p-1 border border-gray-200 rounded text-center mr-2&quot; placeholder=&quot;reps&quot;&gt;
+                                    &lt;select class=&quot;p-1 border border-gray-200 rounded text-sm mr-2&quot;&gt;
+                                        &lt;option&gt;RPE 7&lt;/option&gt;
+                                        &lt;option&gt;RPE 8&lt;/option&gt;
+                                        &lt;option&gt;RPE 9&lt;/option&gt;
+                                    &lt;/select&gt;
+                                    &lt;input type=&quot;checkbox&quot; class=&quot;w-5 h-5 accent-secondary&quot;&gt;
+                                &lt;/div&gt;
+                            &lt;/div&gt;
+                            
+                            &lt;div class=&quot;bg-white rounded-lg p-2 mb-2&quot;&gt;
+                                &lt;div class=&quot;flex items-center&quot;&gt;
+                                    &lt;input type=&quot;text&quot; value=&quot;65&quot; class=&quot;w-16 p-1 border border-gray-200 rounded text-center mr-2&quot; placeholder=&quot;kg&quot;&gt;
+                                    &lt;span class=&quot;mr-2&quot;&gt;×&lt;/span&gt;
+                                    &lt;input type=&quot;text&quot; value=&quot;8&quot; class=&quot;w-12 p-1 border border-gray-200 rounded text-center mr-2&quot; placeholder=&quot;reps&quot;&gt;
+                                    &lt;select class=&quot;p-1 border border-gray-200 rounded text-sm mr-2&quot;&gt;
+                                        &lt;option&gt;RPE 8&lt;/option&gt;
+                                        &lt;option&gt;RPE 9&lt;/option&gt;
+                                        &lt;option&gt;RPE 10&lt;/option&gt;
+                                    &lt;/select&gt;
+                                    &lt;input type=&quot;checkbox&quot; class=&quot;w-5 h-5 accent-secondary&quot;&gt;
+                                &lt;/div&gt;
+                            &lt;/div&gt;
+                            
+                            &lt;div class=&quot;flex space-x-3 mb-2&quot;&gt;
+                                &lt;button class=&quot;text-sm text-secondary flex items-center&quot;&gt;
+                                    &lt;i class=&quot;fa-solid fa-plus mr-1 text-xs&quot;&gt;&lt;/i&gt; Add Set
+                                &lt;/button&gt;
+                                &lt;button class=&quot;text-sm text-secondary flex items-center&quot;&gt;
+                                    &lt;i class=&quot;fa-solid fa-plus mr-1 text-xs&quot;&gt;&lt;/i&gt; Add Warmup Set
+                                &lt;/button&gt;
+                            &lt;/div&gt;
+                            
+                            &lt;div class=&quot;bg-gray-100 rounded-lg p-2&quot;&gt;
+                                &lt;p class=&quot;text-xs font-medium mb-1&quot;&gt;Plate Calculator&lt;/p&gt;
+                                &lt;div class=&quot;flex items-center justify-between&quot;&gt;
+                                    &lt;div class=&quot;flex items-center&quot;&gt;
+                                        &lt;div class=&quot;w-4 h-8 bg-red-500 rounded-sm mr-1&quot;&gt;&lt;/div&gt;
+                                        &lt;span class=&quot;text-xs&quot;&gt;× 2&lt;/span&gt;
+                                    &lt;/div&gt;
+                                    &lt;div class=&quot;flex items-center&quot;&gt;
+                                        &lt;div class=&quot;w-3 h-6 bg-blue-500 rounded-sm mr-1&quot;&gt;&lt;/div&gt;
+                                        &lt;span class=&quot;text-xs&quot;&gt;× 2&lt;/span&gt;
+                                    &lt;/div&gt;
+                                    &lt;div class=&quot;flex items-center&quot;&gt;
+                                        &lt;div class=&quot;w-2 h-4 bg-yellow-500 rounded-sm mr-1&quot;&gt;&lt;/div&gt;
+                                        &lt;span class=&quot;text-xs&quot;&gt;× 2&lt;/span&gt;
+                                    &lt;/div&gt;
+                                    &lt;span class=&quot;text-xs&quot;&gt;+ Bar (20kg)&lt;/span&gt;
+                                &lt;/div&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                    
+                    &lt;div class=&quot;bg-gray-100 rounded-xl mb-3&quot;&gt;
+                        &lt;div class=&quot;p-3 flex justify-between items-center&quot;&gt;
+                            &lt;div class=&quot;flex items-center&quot;&gt;
+                                &lt;span class=&quot;font-medium&quot;&gt;Incline Bench Press&lt;/span&gt;
+                                &lt;button class=&quot;ml-2 w-5 h-5 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center&quot;&gt;
+                                    &lt;i class=&quot;fa-solid fa-question text-xs&quot;&gt;&lt;/i&gt;
+                                &lt;/button&gt;
+                            &lt;/div&gt;
+                            &lt;button&gt;
+                                &lt;i class=&quot;fa-solid fa-chevron-right&quot;&gt;&lt;/i&gt;
+                            &lt;/button&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+                
+                &lt;!-- Finish Workout Button --&gt;
+                &lt;div class=&quot;absolute bottom-4 left-4 right-4&quot;&gt;
+                    &lt;button class=&quot;w-full bg-secondary text-white py-3 rounded-xl font-semibold shadow-sm&quot;&gt;
+                        Finish Workout
+                    &lt;/button&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    
+    &lt;!-- Finish Workout Modal (Hidden by default) --&gt;
+    &lt;div id=&quot;finish-workout-modal&quot; class=&quot;fixed inset-0 bg-black bg-opacity-50 z-50 hidden&quot;&gt;
+        &lt;div class=&quot;bg-background absolute inset-x-0 bottom-0 rounded-t-xl p-4&quot;&gt;
+            &lt;div class=&quot;flex justify-between items-center mb-4&quot;&gt;
+                &lt;h2 class=&quot;text-xl font-semibold&quot;&gt;Finish Workout&lt;/h2&gt;
+                &lt;button class=&quot;w-8 h-8 flex items-center justify-center rounded-full bg-gray-100&quot;&gt;
+                    &lt;i class=&quot;fa-solid fa-xmark&quot;&gt;&lt;/i&gt;
+                &lt;/button&gt;
+            &lt;/div&gt;
+            
+            &lt;div class=&quot;mb-4&quot;&gt;
+                &lt;p class=&quot;text-sm text-gray-500 mb-2&quot;&gt;Date &amp;amp; Time&lt;/p&gt;
+                &lt;input type=&quot;datetime-local&quot; class=&quot;w-full p-3 bg-white rounded-xl border border-gray-200&quot;&gt;
+            &lt;/div&gt;
+            
+            &lt;div class=&quot;mb-4&quot;&gt;
+                &lt;p class=&quot;text-sm text-gray-500 mb-2&quot;&gt;How do you feel?&lt;/p&gt;
+                &lt;textarea class=&quot;w-full p-3 bg-white rounded-xl border border-gray-200 h-24&quot; placeholder=&quot;Add notes about this workout...&quot;&gt;&lt;/textarea&gt;
+            &lt;/div&gt;
+            
+            &lt;div class=&quot;mb-4 border-2 border-dashed border-gray-300 rounded-xl p-4 flex flex-col items-center justify-center&quot;&gt;
+                &lt;i class=&quot;fa-solid fa-camera text-gray-400 text-2xl mb-2&quot;&gt;&lt;/i&gt;
+                &lt;p class=&quot;text-sm text-gray-500&quot;&gt;Tap to upload photo or video&lt;/p&gt;
+            &lt;/div&gt;
+            
+            &lt;div class=&quot;flex items-center justify-between mb-6&quot;&gt;
+                &lt;span class=&quot;font-medium&quot;&gt;Make this workout public&lt;/span&gt;
+                &lt;label class=&quot;relative inline-flex items-center cursor-pointer&quot;&gt;
+                    &lt;input type=&quot;checkbox&quot; class=&quot;sr-only peer&quot; checked=&quot;&quot;&gt;
+                    &lt;div class=&quot;w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-secondary peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all&quot;&gt;&lt;/div&gt;
+                &lt;/label&gt;
+            &lt;/div&gt;
+            
+            &lt;button class=&quot;w-full bg-secondary text-white py-3 rounded-xl font-semibold shadow-sm&quot;&gt;
+                Save Workout
+            &lt;/button&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    
+    &lt;!-- Stats Screen (Hidden by default) --&gt;
+    &lt;div id=&quot;stats-screen&quot; class=&quot;h-full pb-20 hidden&quot;&gt;
+        &lt;div class=&quot;px-4 pt-12 pb-4&quot;&gt;
+            &lt;h1 class=&quot;text-2xl font-semibold&quot;&gt;Stats &amp;amp; Progress&lt;/h1&gt;
+        &lt;/div&gt;
+        
+        &lt;div class=&quot;px-4&quot;&gt;
+            &lt;div class=&quot;bg-white rounded-xl shadow-md p-4 mb-4&quot;&gt;
+                &lt;h2 class=&quot;text-lg font-semibold mb-3&quot;&gt;Volume Trend&lt;/h2&gt;
+                &lt;div class=&quot;h-[200px] w-full&quot;&gt;
+                    &lt;canvas id=&quot;volumeChart&quot;&gt;&lt;/canvas&gt;
+                &lt;/div&gt;
+                &lt;div class=&quot;flex justify-between mt-3 pt-3 border-t border-gray-100&quot;&gt;
+                    &lt;div&gt;
+                        &lt;p class=&quot;text-sm text-gray-500&quot;&gt;Total This Week&lt;/p&gt;
+                        &lt;p class=&quot;text-lg font-semibold&quot;&gt;34.5k kg&lt;/p&gt;
+                    &lt;/div&gt;
+                    &lt;div&gt;
+                        &lt;p class=&quot;text-sm text-gray-500&quot;&gt;Weekly Average&lt;/p&gt;
+                        &lt;p class=&quot;text-lg font-semibold&quot;&gt;28.2k kg&lt;/p&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+            
+            &lt;div class=&quot;bg-white rounded-xl shadow-md p-4 mb-4&quot;&gt;
+                &lt;h2 class=&quot;text-lg font-semibold mb-3&quot;&gt;Training Frequency&lt;/h2&gt;
+                &lt;div class=&quot;h-[200px] w-full&quot;&gt;
+                    &lt;canvas id=&quot;frequencyChart&quot;&gt;&lt;/canvas&gt;
+                &lt;/div&gt;
+                &lt;div class=&quot;flex justify-between mt-3 pt-3 border-t border-gray-100&quot;&gt;
+                    &lt;div&gt;
+                        &lt;p class=&quot;text-sm text-gray-500&quot;&gt;Longest Streak&lt;/p&gt;
+                        &lt;p class=&quot;text-lg font-semibold&quot;&gt;5 days&lt;/p&gt;
+                    &lt;/div&gt;
+                    &lt;div&gt;
+                        &lt;p class=&quot;text-sm text-gray-500&quot;&gt;Most Trained Muscle&lt;/p&gt;
+                        &lt;p class=&quot;text-lg font-semibold&quot;&gt;Chest&lt;/p&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    
+    &lt;script&gt;
+        // Charts would be initialized here
+        document.addEventListener('DOMContentLoaded', function() {
+            // Volume Chart
+            const volumeCtx = document.getElementById('volumeChart');
+            if (volumeCtx) {
+                new Chart(volumeCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'Volume (kg)',
+                            data: [5000, 0, 8500, 4200, 7800, 0, 9000],
+                            borderColor: '#73AB84',
+                            backgroundColor: 'rgba(115, 171, 132, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Frequency Chart
+            const freqCtx = document.getElementById('frequencyChart');
+            if (freqCtx) {
+                new Chart(freqCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'Days Trained',
+                            data: [3, 4, 2, 5, 3, 1, 2],
+                            backgroundColor: '#34113F'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 5
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    &lt;/script&gt;
+
+&lt;/body&gt;&lt;/html&gt;" frameborder="0" class="overflow-hidden" style="height: 1465px; width: 100%; overflow: hidden; z-index: 10; transform: translateZ(0px); contain: layout style paint;"></iframe></div>
