@@ -111,7 +111,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Contact
 
-For support or queries, please open an issue in the repository or contact us at support@gymzy.com
+For support or queries, please open an issue in the repository or contact us at dorddis2@gmail.com
 
 ---
 
