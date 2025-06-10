@@ -126,11 +126,11 @@ Mark each step complete by changing `[ ]` to `[x]`.
 - **Output:** Styled feed with real data
 
 ### Step 10: Bottom Navigation Bar
-- **Goal:** Persistent footer with Home, Stats, Social, Profile
+- **Goal:** Persistent footer with Home, Stats, Social, <Something else not profile>
 - **Inputs:** Routing config, lucide-react icons
 - **Tasks:**
   1. Create `<BottomNav />` component.
-  2. Include four navigation items (Home, Stats, Social, Profile) with appropriate icons and labels.
+  2. Include four navigation items (Home, Stats, Social, <Something else not profile>) with appropriate icons and labels.
   3. Highlight the active tab (placeholder logic for now, actual routing later).
   4. Ensure fixed positioning at the bottom and responsive behavior.
 - **Output:** Fixed navigation component visible on dashboard
@@ -172,6 +172,114 @@ Mark each step complete by changing `[ ]` to `[x]`.
   - Verify color, typography, spacing per design.  
   - Remove unused code, update docs/screenshots.  
 - **Output:** Merge-ready codebase.
+
+### Step 11: Recent Workouts Backend Implementation
+- **Goal:** Implement backend functionality for recent workouts
+- **Inputs:** Firebase configuration, existing workout data structure
+- **Tasks:**
+  1. Update Firebase Data Structure:
+     - Create `workouts` collection in Firebase
+     - Each workout document should include:
+       - id: string
+       - userId: string (reference to users collection)
+       - title: string
+       - date: timestamp
+       - exercises: array of {
+           name: string
+           sets: number
+           reps: number
+           weight: number
+         }
+       - totalVolume: number
+       - rpe: number
+       - createdAt: timestamp
+       - updatedAt: timestamp
+
+  2. Create Firebase Service Functions:
+     - `createWorkout(workoutData)`: Add new workout
+     - `getRecentWorkouts(userId, limit)`: Fetch recent workouts
+     - `updateWorkout(workoutId, workoutData)`: Update existing workout
+     - `deleteWorkout(workoutId)`: Delete workout
+     - `calculateTotalVolume(exercises)`: Helper function to calculate total volume
+
+  3. Update WorkoutContext:
+     - Add new state for recent workouts
+     - Implement functions to interact with Firebase
+     - Add loading and error states
+     - Implement real-time updates using Firebase listeners
+
+  4. Add Data Validation:
+     - Create Zod schema for workout data
+     - Implement validation in service functions
+     - Add error handling for invalid data
+
+  5. Implement Caching:
+     - Add local storage for offline access
+     - Implement cache invalidation strategy
+     - Add sync mechanism for offline changes
+
+  6. Add Security Rules:
+     - Implement Firebase security rules
+     - Add user authentication checks
+     - Set up proper data access controls
+
+  7. Testing:
+     - Write unit tests for service functions
+     - Add integration tests for Firebase operations
+     - Test offline functionality
+     - Test real-time updates
+
+  8. Documentation:
+     - Document API endpoints
+     - Add usage examples
+     - Document security rules
+     - Add troubleshooting guide
+
+- **Output:** Fully functional backend for recent workouts with proper data management, security, and offline support
+
+### Step 12: User Authentication (Login/Signup)
+- **Goal:** Implement user registration and login functionality using Firebase Authentication.
+- **Inputs:** Firebase Auth SDK, UI components for forms.
+- **Tasks:**
+  1. **Implement Firebase Auth Service:**
+     - `signInWithEmailAndPassword`
+     - `createUserWithEmailAndPassword`
+     - `signOut`
+     - `onAuthStateChanged` listener in `AuthContext` (already partially done).
+  2. **Create Login/Signup UI Components:**
+     - Forms for email/password input.
+     - Error handling for Firebase auth errors.
+     - Navigation between login/signup.
+  3. **Integrate with `AuthContext`:**
+     - Call service functions from UI components.
+     - Update global auth state.
+  4. **Protect Routes/Features:**
+     - Implement redirects for authenticated/unauthenticated users.
+     - Show/hide UI elements based on login status.
+  5. **Password Reset / Social Login (Optional):**
+     - Implement password reset functionality.
+     - Add Google/Apple sign-in.
+- **Output:** Secure user authentication system.
+
+### Step 13: Saving User Files/Data to Firebase Database
+- **Goal:** Persist user-specific data (workouts, profile, etc.) to Firebase Firestore.
+- **Inputs:** Firebase Firestore SDK, existing data models.
+- **Tasks:**
+  1. **Firestore Data Structure Design:**
+     - Define collections and documents for `users`, `workouts`, `profile`, etc.
+     - Ensure `userId` is used for data ownership.
+  2. **Update Existing Services/Contexts:**
+     - Modify `workout-service.ts` to use authenticated `userId`.
+     - Integrate `createWorkout`, `updateWorkout`, `deleteWorkout` with Firebase.
+     - Update `WorkoutContext` to fetch data based on the logged-in user.
+  3. **Implement Profile Management:**
+     - Create UI for viewing/editing user profile.
+     - Service functions for updating user profiles.
+  4. **Implement Security Rules:**
+     - Write Firebase Firestore security rules to ensure users can only access their own data.
+  5. **Real-time Data Sync (Optional but Recommended):**
+     - Implement real-time listeners for critical data (e.g., workouts) to keep UI updated.
+- **Output:** User-specific data persistence in Firebase.
 
 ---
 

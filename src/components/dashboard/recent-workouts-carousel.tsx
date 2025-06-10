@@ -1,42 +1,85 @@
 import React from 'react';
-import { useWorkout } from '@/contexts/WorkoutContext';
 import { Card } from '@/components/ui/card';
+import { useWorkout } from '@/contexts/WorkoutContext';
+import { Dumbbell, Clock, TrendingUp, Activity } from 'lucide-react';
 
 export function RecentWorkoutsCarousel() {
-  const { loggedWorkouts, getExerciseById } = useWorkout();
-  // Sort workouts by date descending
-  const sorted = [...loggedWorkouts].sort((a, b) => (b.date as any) - (a.date as any));
-  // Take the most recent 3 workouts for the carousel
-  const recent = sorted.slice(0, 3);
+  const { recentWorkouts, loading, error } = useWorkout();
+
+  if (loading) {
+    return (
+      <div className="px-4">
+        <div className="flex justify-between items-center mb-3">
+          <h2 className="text-lg font-semibold">Recent Workouts</h2>
+        </div>
+        <div className="text-center text-gray-500">Loading workouts...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="px-4">
+        <div className="flex justify-between items-center mb-3">
+          <h2 className="text-lg font-semibold">Recent Workouts</h2>
+        </div>
+        <div className="text-center text-red-500">Error loading workouts</div>
+      </div>
+    );
+  }
+
+  if (recentWorkouts.length === 0) {
+    return (
+      <div className="px-4">
+        <div className="flex justify-between items-center mb-3">
+          <h2 className="text-lg font-semibold">Recent Workouts</h2>
+        </div>
+        <div className="text-center text-gray-500">No workouts yet</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="mb-4">
-      <div className="flex justify-between items-center px-4 mb-2">
+    <div className="px-4">
+      <div className="flex justify-between items-center mb-3">
         <h2 className="text-lg font-semibold">Recent Workouts</h2>
-        <span className="text-secondary text-sm cursor-pointer">See All</span>
+        <span className="text-secondary text-sm cursor-pointer">View All</span>
       </div>
-      <div className="overflow-x-auto px-4 flex space-x-3 pb-2">
-        {recent.length === 0 && (
-          <div className="text-gray-400 text-center w-full">No recent workouts</div>
-        )}
-        {recent.map((w) => {
-          const exercise = getExerciseById(w.exerciseId);
-          return (
-            <Card key={w.id} className="bg-white rounded-xl shadow-sm p-3 min-w-[200px] flex-shrink-0">
-              <div className="flex justify-between items-start mb-2">
-                <div>
-                  <h3 className="font-medium">{exercise ? exercise.name : 'Workout'}</h3>
-                  <p className="text-xs text-gray-500">{w.date ? new Date(w.date).toLocaleDateString() : ''}</p>
+      <div className="flex overflow-x-auto gap-4 pb-4 -mx-4 px-4">
+        {recentWorkouts.map((workout) => (
+          <Card key={workout.id} className="min-w-[280px] bg-white rounded-xl shadow-sm p-4">
+            <div className="flex items-center mb-3">
+              <Dumbbell className="text-secondary mr-2" />
+              <div>
+                <h3 className="font-medium text-gray-900">{workout.title}</h3>
+                <div className="flex items-center text-xs text-gray-500">
+                  <Clock className="w-3 h-3 mr-1" />
+                  {workout.date.toDate().toLocaleDateString()}
                 </div>
-                <span className="bg-red-100 text-red-600 text-xs px-2 py-0.5 rounded-full">High</span>
               </div>
-              <div className="text-xs text-gray-600">
-                <p>{w.sets || 0} sets • {w.reps || 0} reps</p>
-                <p>{exercise && exercise.primaryMuscles ? exercise.primaryMuscles.join(', ') : ''}</p>
+            </div>
+            <div className="space-y-2 mb-3">
+              {workout.exercises.map((exercise, index) => (
+                <div key={index} className="text-sm">
+                  <p className="font-medium text-gray-900">{exercise.name}</p>
+                  <p className="text-gray-500">
+                    {exercise.sets} × {exercise.reps} {exercise.weight > 0 ? `@ ${exercise.weight}lbs` : ''}
+                  </p>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-between text-sm">
+              <div className="flex items-center text-gray-500">
+                <TrendingUp className="w-4 h-4 mr-1" />
+                {workout.totalVolume.toLocaleString()} lbs
               </div>
-            </Card>
-          );
-        })}
+              <div className="flex items-center text-gray-500">
+                <Activity className="w-4 h-4 mr-1" />
+                RPE {workout.rpe}
+              </div>
+            </div>
+          </Card>
+        ))}
       </div>
     </div>
   );

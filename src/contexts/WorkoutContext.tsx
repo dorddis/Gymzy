@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, {
   createContext,
@@ -6,8 +6,11 @@ import React, {
   useState,
   useCallback,
   ReactNode,
+  useEffect,
 } from 'react';
 import { Muscle, EXERCISES, Exercise } from '../../home/user/studio/src/lib/constants';
+import { useAuth } from './AuthContext';
+import { Workout, getRecentWorkouts, createWorkout, updateWorkout, deleteWorkout } from '@/services/workout-service';
 
 interface LoggedWorkout {
   id: string;
@@ -23,112 +26,102 @@ interface LoggedWorkout {
 export type MuscleVolumes = { [key in Muscle]?: number };
 
 interface WorkoutContextType {
-  loggedWorkouts: LoggedWorkout[];
-  muscleVolumes: MuscleVolumes;
-  addWorkout: (workoutData: {
-    exerciseId: string;
-    sets: number;
-    reps: number;
-    weight: number;
-  }) => void;
-  getExerciseById: (id: string) => Exercise | undefined;
+  recentWorkouts: Workout[];
+  loading: boolean;
+  error: Error | null;
+  addWorkout: (workoutData: Omit<Workout, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  updateWorkout: (workoutId: string, workoutData: Partial<Workout>) => Promise<void>;
+  deleteWorkout: (workoutId: string) => Promise<void>;
+  refreshWorkouts: () => Promise<void>;
 }
 
 const WorkoutContext = createContext<WorkoutContextType | undefined>(undefined);
 
-export const WorkoutProvider = ({ children }: { children: ReactNode }) => {
-  const [loggedWorkouts, setLoggedWorkouts] = useState<LoggedWorkout[]>([]);
-  const [muscleVolumes, setMuscleVolumes] = useState<MuscleVolumes>({});
+export function WorkoutProvider({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
+  const [recentWorkouts, setRecentWorkouts] = useState<Workout[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
-  /**
-   * getExerciseById
-   *  - We guard against EXERCISES being undefined or non-array.
-   */
-  const getExerciseById = useCallback((id: string): Exercise | undefined => {
-    const allExercises: Exercise[] = Array.isArray(EXERCISES) ? EXERCISES : [];
-    return allExercises.find((ex) => ex.id === id);
-  }, []);
+  const fetchWorkouts = async () => {
+    if (!user) return;
+    
+    try {
+      setLoading(true);
+      const workouts = await getRecentWorkouts(user.uid);
+      setRecentWorkouts(workouts);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to fetch workouts'));
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  /**
-   * addWorkout
-   *  - Logs a new workout and updates muscleVolumes accordingly.
-   *
-   *  Because we split “Rectus Abdominis” into two enum members,
-   *  any exercise whose primary/secondary included UpperRectusAbdominis
-   *  or LowerRectusAbdominis will be handled naturally.  Volume is calculated
-   *  exactly as before (sets × reps × (weight || 1)).  
-   *
-   *  We have also added logic so that if any of the three deltoid‐head keys
-   *  (AnteriorDeltoid / LateralDeltoid / PosteriorDeltoid) appear in
-   *  targetedMuscles, we also add that same share to `Muscle.Deltoid` (umbrella).
-   */
-  const addWorkout = useCallback(
-    (workoutData: { exerciseId: string; sets: number; reps: number; weight: number }) => {
-      const exercise = getExerciseById(workoutData.exerciseId);
-      if (!exercise) {
-        console.error("⚠️ [WorkoutContext] Exercise not found for ID:", workoutData.exerciseId);
-        return;
-      }
+  useEffect(() => {
+    fetchWorkouts();
+  }, [user]);
 
-      // Calculate volume = sets × reps × (weight or 1 if weight=0)
-      const volume =
-        workoutData.sets * workoutData.reps * (workoutData.weight > 0 ? workoutData.weight : 1);
-
-      const newWorkout: LoggedWorkout = {
-        id: Date.now().toString(),
+  const addWorkout = async (workoutData: Omit<Workout, 'id' | 'createdAt' | 'updatedAt'>) => {
+    if (!user) throw new Error('User must be logged in');
+    
+    try {
+      const newWorkout = await createWorkout({
         ...workoutData,
-        date: new Date(),
-        volume,
-        targetedMuscles: [...exercise.primaryMuscles, ...exercise.secondaryMuscles],
-      };
-
-      setLoggedWorkouts((prev) => [...prev, newWorkout]);
-
-      // Update muscleVolumes: primary muscles get full, secondary get half.
-      // Then—if any of the three deltoid heads were used—we also add that share
-      // into the umbrella Deltoid bucket.
-      setMuscleVolumes((prevVolumes) => {
-        const updated: MuscleVolumes = { ...prevVolumes };
-
-        // Loop through every targeted muscle (primary or secondary)
-        newWorkout.targetedMuscles.forEach((m) => {
-          // Primary = full volume, Secondary = half
-          const isPrimary = exercise.primaryMuscles.includes(m);
-          const share = isPrimary ? volume : volume * 0.5;
-
-          // Add share to m itself
-          updated[m] = (updated[m] || 0) + share;
-
-          // If this m is one of the three deltoid heads, also
-          // add that same share into the umbrella Deltoid key:
-          if (
-            m === Muscle.AnteriorDeltoid ||
-            m === Muscle.LateralDeltoid ||
-            m === Muscle.PosteriorDeltoid
-          ) {
-            updated[Muscle.Deltoid] = (updated[Muscle.Deltoid] || 0) + share;
-          }
-        });
-
-        return updated;
+        userId: user.uid
       });
-    },
-    [getExerciseById]
-  );
+      setRecentWorkouts(prev => [newWorkout, ...prev]);
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to add workout'));
+      throw err;
+    }
+  };
+
+  const updateWorkoutHandler = async (workoutId: string, workoutData: Partial<Workout>) => {
+    try {
+      const updatedWorkout = await updateWorkout(workoutId, workoutData);
+      setRecentWorkouts(prev => 
+        prev.map(workout => 
+          workout.id === workoutId ? { ...workout, ...updatedWorkout } : workout
+        )
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to update workout'));
+      throw err;
+    }
+  };
+
+  const deleteWorkoutHandler = async (workoutId: string) => {
+    try {
+      await deleteWorkout(workoutId);
+      setRecentWorkouts(prev => prev.filter(workout => workout.id !== workoutId));
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to delete workout'));
+      throw err;
+    }
+  };
+
+  const value = {
+    recentWorkouts,
+    loading,
+    error,
+    addWorkout,
+    updateWorkout: updateWorkoutHandler,
+    deleteWorkout: deleteWorkoutHandler,
+    refreshWorkouts: fetchWorkouts
+  };
 
   return (
-    <WorkoutContext.Provider
-      value={{ loggedWorkouts, muscleVolumes, addWorkout, getExerciseById }}
-    >
+    <WorkoutContext.Provider value={value}>
       {children}
     </WorkoutContext.Provider>
   );
-};
+}
 
-export const useWorkout = (): WorkoutContextType => {
+export function useWorkout() {
   const context = useContext(WorkoutContext);
   if (context === undefined) {
     throw new Error('useWorkout must be used within a WorkoutProvider');
   }
   return context;
-};
+}

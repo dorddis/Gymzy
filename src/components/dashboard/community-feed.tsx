@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { communityPosts } from '@/data/community-posts';
+import { Dumbbell, Heart, MessageSquare, Share2 } from 'lucide-react';
 
 export function CommunityFeed() {
   return (
@@ -21,7 +22,7 @@ export function CommunityFeed() {
           <p className="text-sm mb-3 text-gray-800">{post.text}</p>
           <div className="bg-gray-100 rounded-lg p-2 mb-3">
             <div className="flex items-center text-sm">
-              <span className="material-icons text-secondary mr-2">fitness_center</span>
+              <Dumbbell className="text-secondary mr-2" />
               <div>
                 <p className="font-medium text-gray-900">{post.workout.title}</p>
                 <p className="text-xs text-gray-500">{post.workout.summary}</p>
@@ -30,13 +31,13 @@ export function CommunityFeed() {
           </div>
           <div className="flex justify-between text-sm text-gray-500">
             <button className="flex items-center">
-              <span className="material-icons mr-1">favorite_border</span> {post.likes}
+              <Heart className="mr-1" /> {post.likes}
             </button>
             <button className="flex items-center">
-              <span className="material-icons mr-1">chat_bubble_outline</span> {post.comments}
+              <MessageSquare className="mr-1" /> {post.comments}
             </button>
             <button className="flex items-center">
-              <span className="material-icons">share</span>
+              <Share2 />
             </button>
           </div>
         </Card>
