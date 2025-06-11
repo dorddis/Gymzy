@@ -142,54 +142,54 @@ export default function StatsTrendsScreen() {
     <div className="min-h-screen bg-background flex flex-col">
       <StatusBar />
       <main className="flex-1 overflow-y-auto p-4 md:p-6 pb-20">
-        <h1 className="text-2xl font-headline font-bold mb-6">Stats & Trends</h1>
+        <h1 className="text-2xl font-headline font-bold mb-6 text-primary">Stats & Trends</h1>
 
         {/* Summary Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <Card className="shadow-lg border-none bg-card p-4">
-            <CardHeader className="p-0 mb-2">
-              <CardTitle className="text-lg font-semibold flex items-center">
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <Card className="shadow-md border-none bg-white p-4 hover:shadow-lg transition-shadow duration-200">
+            <CardHeader className="p-0 mb-3">
+              <CardTitle className="text-lg font-semibold flex items-center text-gray-700">
                 <TrendingUp className="mr-2 text-primary" /> Total Volume (7D)
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              <CardDescription className="text-3xl font-bold text-gray-900">
+              <CardDescription className="text-3xl font-bold text-primary">
                 {totalVolumeLast7Days.toLocaleString()} lbs
               </CardDescription>
             </CardContent>
           </Card>
-          <Card className="shadow-lg border-none bg-card p-4">
-            <CardHeader className="p-0 mb-2">
-              <CardTitle className="text-lg font-semibold flex items-center">
-                <Gauge className="mr-2 text-secondary" /> Avg RPE
+          <Card className="shadow-md border-none bg-white p-4 hover:shadow-lg transition-shadow duration-200">
+            <CardHeader className="p-0 mb-3">
+              <CardTitle className="text-lg font-semibold flex items-center text-gray-700">
+                <Gauge className="mr-2 text-primary" /> Avg RPE
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              <CardDescription className="text-3xl font-bold text-gray-900">
+              <CardDescription className="text-3xl font-bold text-primary">
                 {averageRPE.toFixed(1)}
               </CardDescription>
             </CardContent>
           </Card>
-          <Card className="shadow-lg border-none bg-card p-4">
-            <CardHeader className="p-0 mb-2">
-              <CardTitle className="text-lg font-semibold flex items-center">
+          <Card className="shadow-md border-none bg-white p-4 hover:shadow-lg transition-shadow duration-200">
+            <CardHeader className="p-0 mb-3">
+              <CardTitle className="text-lg font-semibold flex items-center text-gray-700">
                 <CalendarCheck className="mr-2 text-primary" /> Consistency (7D)
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              <CardDescription className="text-3xl font-bold text-gray-900">
+              <CardDescription className="text-3xl font-bold text-primary">
                 {consistencyStreak} Days
               </CardDescription>
             </CardContent>
           </Card>
-          <Card className="shadow-lg border-none bg-card p-4">
-            <CardHeader className="p-0 mb-2">
-              <CardTitle className="text-lg font-semibold flex items-center">
-                <Activity className="mr-2 text-secondary" /> Top Muscle Group
+          <Card className="shadow-md border-none bg-white p-4 hover:shadow-lg transition-shadow duration-200">
+            <CardHeader className="p-0 mb-3">
+              <CardTitle className="text-lg font-semibold flex items-center text-gray-700">
+                <Activity className="mr-2 text-primary" /> Top Muscle Group
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              <CardDescription className="text-3xl font-bold text-gray-900">
+              <CardDescription className="text-3xl font-bold text-primary">
                 {topMuscleGroup}
               </CardDescription>
             </CardContent>
@@ -197,15 +197,14 @@ export default function StatsTrendsScreen() {
         </div>
 
         {/* GitHub-style Progress Tracker */}
-        <Card className="mb-6 shadow-lg border-none bg-card p-4">
+        <Card className="mb-6 shadow-md border-none bg-white p-4">
           <CardHeader className="p-0 mb-4">
-            <CardTitle className="text-lg font-semibold">Workout Progress (Last 3 Months)</CardTitle>
+            <CardTitle className="text-lg font-semibold text-gray-700">Workout Progress (Last 3 Months)</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <div className="flex flex-col md:flex-row items-start gap-2">
               {/* Day Labels */}
-              <div className="grid grid-rows-7 gap-1 text-xs text-gray-500 mr-2">
-                <span></span> {/* Empty space for month label alignment */}
+              <div className="grid grid-rows-7 gap-1 text-xs text-gray-600 mr-2 mt-5">
                 {daysOfWeek.map((day, index) => (
                   <span key={day} className="h-4 flex items-center justify-end pr-1">
                     {index % 2 === 1 ? day.charAt(0) : ''}
@@ -213,76 +212,97 @@ export default function StatsTrendsScreen() {
                 ))}
               </div>
               {/* Progress Grid */}
-              <div className="flex-grow overflow-x-auto pb-2">
+              <div className="flex-1">
                 <div className="grid grid-flow-col grid-rows-7 gap-1 auto-cols-min">
+                  {/* Month labels */}
                   {monthLabels.map((month, index) => (
-                    <div key={index} className="text-xs text-gray-500" style={{ gridRow: 1, gridColumn: index + 2 }}>
+                    <div key={index} className="text-xs text-gray-600 text-center" style={{ gridColumnStart: `span 4`, gridRow: 1 }}>
                       {month}
                     </div>
                   ))}
+                  {/* Actual date squircles */}
                   {last3MonthsDates.map((dateString) => {
-                    const day = new Date(dateString).getDay(); // 0 for Sunday, 6 for Saturday
+                    const date = new Date(dateString);
+                    const day = date.getDay();
+                    const monthIndex = date.getMonth();
                     const dailyVolume = dailyVolumesForTracker.find(d => d.date === dateString)?.volume || 0;
                     const colorClass = getVolumeColor(dailyVolume, maxDailyVolume);
+
+                    const firstDayOfRange = new Date(last3MonthsDates[0]);
+                    const diffTime = Math.abs(date.getTime() - firstDayOfRange.getTime());
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    const column = Math.floor((firstDayOfRange.getDay() + diffDays) / 7) + 1;
+
                     return (
                       <div
                         key={dateString}
                         className={`w-4 h-4 rounded-sm ${colorClass}`}
-                        style={{ gridRow: day + 2 }} // +1 for skipping month row, +1 for day labels
-                        title={`${dateString}: ${dailyVolume} lbs`}
+                        style={{ gridRow: day + 2, gridColumn: column }}
+                        title={`${dailyVolume.toLocaleString()} lbs on ${date.toLocaleDateString()}`}
                       />
                     );
                   })}
                 </div>
               </div>
             </div>
+            {/* Legend */}
+            <div className="flex justify-end items-center mt-4 text-xs text-gray-600">
+              <span className="mr-2">Less</span>
+              <div className="flex">
+                <div className="w-4 h-4 rounded-sm bg-gray-200 mr-1"></div>
+                <div className="w-4 h-4 rounded-sm bg-green-100 mr-1"></div>
+                <div className="w-4 h-4 rounded-sm bg-green-300 mr-1"></div>
+                <div className="w-4 h-4 rounded-sm bg-green-500 mr-1"></div>
+                <div className="w-4 h-4 rounded-sm bg-green-700"></div>
+              </div>
+              <span className="ml-2">More</span>
+            </div>
           </CardContent>
         </Card>
 
         {/* Volume Trend Chart */}
-        <Card className="mb-6 shadow-lg border-none bg-card">
+        <Card className="mb-6 shadow-md border-none bg-white">
           <CardHeader className="p-4 pb-0">
-            <CardTitle className="text-lg font-semibold">Volume Trend (Last 7 Days)</CardTitle>
+            <CardTitle className="text-lg font-semibold text-gray-700">Volume Trend (Last 7 Days)</CardTitle>
           </CardHeader>
           <CardContent className="p-4">
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={weeklyVolumeData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" />
                 <YAxis stroke="hsl(var(--muted-foreground))" />
                 <Tooltip
-                  contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '0.5rem' }}
-                  labelStyle={{ color: 'hsl(var(--foreground))' }}
-                  itemStyle={{ color: 'hsl(var(--foreground))' }}
+                  contentStyle={{ backgroundColor: 'white', border: '1px solid hsl(var(--border))', borderRadius: '0.25rem' }}
+                  labelStyle={{ color: 'hsl(var(--primary))' }}
+                  itemStyle={{ color: 'hsl(var(--muted-foreground))' }}
                 />
-                <Line type="monotone" dataKey="volume" stroke="hsl(var(--secondary))" strokeWidth={2} activeDot={{ r: 6, fill: 'hsl(var(--secondary))' }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <Line type="monotone" dataKey="volume" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ stroke: 'hsl(var(--primary))', strokeWidth: 2, r: 4 }} activeDot={{ r: 6 }} />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        {/* Frequency Chart */}
-        <Card className="mb-6 shadow-lg border-none bg-card">
+        {/* Workout Frequency Chart */}
+        <Card className="shadow-md border-none bg-white">
           <CardHeader className="p-4 pb-0">
-            <CardTitle className="text-lg font-semibold">Training Frequency (Last 7 Days)</CardTitle>
+            <CardTitle className="text-lg font-semibold text-gray-700">Workout Frequency (Last 7 Days)</CardTitle>
           </CardHeader>
           <CardContent className="p-4">
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={weeklyFrequencyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" />
-                <YAxis stroke="hsl(var(--muted-foreground))" />
+                <YAxis allowDecimals={false} stroke="hsl(var(--muted-foreground))" />
                 <Tooltip
-                  contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '0.5rem' }}
-                  labelStyle={{ color: 'hsl(var(--foreground))' }}
-                  itemStyle={{ color: 'hsl(var(--foreground))' }}
+                  contentStyle={{ backgroundColor: 'white', border: '1px solid hsl(var(--border))', borderRadius: '0.25rem' }}
+                  labelStyle={{ color: 'hsl(var(--primary))' }}
+                  itemStyle={{ color: 'hsl(var(--muted-foreground))' }}
                 />
-                <Bar dataKey="workouts" fill="hsl(var(--primary))" />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <Bar dataKey="workouts" fill="hsl(var(--secondary))" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
-
       </main>
       <BottomNav />
     </div>
