@@ -6,13 +6,13 @@ import { BottomNav } from "@/components/layout/bottom-nav";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
 import { useWorkout } from '@/contexts/WorkoutContext';
-import { TrendingUp, Activity, Gauge, CalendarCheck } from 'lucide-react';
+import { TrendingUp, Activity, Gauge, CalendarCheck, Flame, Award } from 'lucide-react';
 import { Muscle } from '@/lib/constants'; // Import Muscle enum
 
 // Constants for the GitHub-style progress tracker
 const DAY_SQUARE_SIZE = 20; // px
 const GAP_SIZE = 6; // px
-const ROW_HEIGHT = DAY_SQUARE_SIZE + GAP_SIZE; // 16px
+const ROW_HEIGHT = DAY_SQUARE_SIZE + GAP_SIZE; // 26px
 
 interface WeeklyData {
   date: string;
@@ -51,7 +51,7 @@ const getVolumeColor = (volume: number, maxVolume: number): string => {
 export default function StatsTrendsScreen() {
   const { recentWorkouts, allWorkouts, loading, error } = useWorkout();
 
-  const last7Days = getDatesInRange(7).map(date => new Date(date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' }));
+  const last7Days = getDatesInRange(14).map(date => new Date(date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' })); // Changed to 14 days
   const last6MonthsDates = getDatesInRange(180); // Changed to 6 months
 
   const {
@@ -62,7 +62,9 @@ export default function StatsTrendsScreen() {
     consistencyStreak,
     topMuscleGroup,
     dailyVolumesForTracker,
-    maxDailyVolume
+    maxDailyVolume,
+    totalCaloriesBurnt,
+    personalBestLift
   } = React.useMemo(() => {
     const volumeMap7Days = new Map<string, number>(last7Days.map(date => [date, 0]));
     const frequencyMap7Days = new Map<string, number>(last7Days.map(date => [date, 0]));
@@ -111,6 +113,23 @@ export default function StatsTrendsScreen() {
 
     const consistencyStreak = weeklyFrequencyData.filter(d => d.workouts > 0).length;
 
+    // Placeholder for total calories burnt (to be replaced with actual calculation)
+    const totalCaloriesBurnt = Math.round(totalVolume7Days * 0.1); // Very rough estimate
+
+    // Calculate personal best lift
+    let personalBestLift: { weight: number; exercise: string } | null = null;
+    if (allWorkouts) {
+      allWorkouts.forEach(workout => {
+        workout.exercises.forEach(exercise => {
+          exercise.sets.forEach(set => {
+            if (set.weight > (personalBestLift?.weight || 0)) {
+              personalBestLift = { weight: set.weight, exercise: exercise.name };
+            }
+          });
+        });
+      });
+    }
+
     return {
       weeklyVolumeData,
       weeklyFrequencyData,
@@ -119,7 +138,9 @@ export default function StatsTrendsScreen() {
       consistencyStreak,
       topMuscleGroup,
       dailyVolumesForTracker,
-      maxDailyVolume
+      maxDailyVolume,
+      totalCaloriesBurnt,
+      personalBestLift
     };
   }, [allWorkouts, last7Days, last6MonthsDates]);
 
@@ -186,7 +207,7 @@ export default function StatsTrendsScreen() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              <CardDescription className="text-3xl font-bold text-primary">
+              <CardDescription className="text-2xl font-bold text-primary">
                 {totalVolumeLast7Days.toLocaleString()} lbs
               </CardDescription>
             </CardContent>
@@ -198,7 +219,7 @@ export default function StatsTrendsScreen() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              <CardDescription className="text-3xl font-bold text-primary">
+              <CardDescription className="text-2xl font-bold text-primary">
                 {averageRPE.toFixed(1)}
               </CardDescription>
             </CardContent>
@@ -206,11 +227,11 @@ export default function StatsTrendsScreen() {
           <Card className="shadow-md border-none bg-white p-4 hover:shadow-lg transition-shadow duration-200">
             <CardHeader className="p-0 mb-3">
               <CardTitle className="text-lg font-semibold flex items-center text-gray-700">
-                <CalendarCheck className="mr-2 text-primary" /> Consistency (7D)
+                <CalendarCheck className="mr-2 text-primary" /> Streak
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              <CardDescription className="text-3xl font-bold text-primary">
+              <CardDescription className="text-2xl font-bold text-primary">
                 {consistencyStreak} Days
               </CardDescription>
             </CardContent>
@@ -222,8 +243,32 @@ export default function StatsTrendsScreen() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              <CardDescription className="text-3xl font-bold text-primary">
+              <CardDescription className="text-2xl font-bold text-primary">
                 {topMuscleGroup}
+              </CardDescription>
+            </CardContent>
+          </Card>
+          <Card className="shadow-md border-none bg-white p-4 hover:shadow-lg transition-shadow duration-200">
+            <CardHeader className="p-0 mb-3">
+              <CardTitle className="text-lg font-semibold flex items-center text-gray-700">
+                <Flame className="mr-2 text-primary" /> Total Calories Burnt
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <CardDescription className="text-2xl font-bold text-primary">
+                {totalCaloriesBurnt.toLocaleString()} kcal
+              </CardDescription>
+            </CardContent>
+          </Card>
+          <Card className="shadow-md border-none bg-white p-4 hover:shadow-lg transition-shadow duration-200">
+            <CardHeader className="p-0 mb-3">
+              <CardTitle className="text-lg font-semibold flex items-center text-gray-700">
+                <Award className="mr-2 text-primary" /> Personal Best Lift
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <CardDescription className="text-2xl font-bold text-primary">
+                {personalBestLift ? `${personalBestLift.weight.toLocaleString()} lbs (${personalBestLift.exercise})` : 'N/A'}
               </CardDescription>
             </CardContent>
           </Card>
@@ -239,7 +284,7 @@ export default function StatsTrendsScreen() {
               {/* Day Labels Column */}
               <div className="flex flex-col justify-between text-xs text-gray-600 mr-2" style={{height: `${7 * ROW_HEIGHT - GAP_SIZE}px`, marginTop: `${ROW_HEIGHT}px`}}> 
                 {daysOfWeek.map((day, index) => (
-                  <span key={day} className="flex items-center justify-end pr-1" style={{height: `${DAY_SQUARE_SIZE}px`}}> {/* Reverted to DAY_SQUARE_SIZE for height */}
+                  <span key={day} className="flex items-center justify-end pr-1" style={{height: `${DAY_SQUARE_SIZE}px`}}> {/* Use DAY_SQUARE_SIZE for height */}
                     {/* Only show M, W, F */}
                     {index === 1 && 'M'} {/* Monday */}
                     {index === 3 && 'W'} {/* Wednesday */}
@@ -250,7 +295,7 @@ export default function StatsTrendsScreen() {
 
               {/* Main Calendar Grid Area */}
               <div className="flex-1 overflow-x-auto px-1 pb-2"> {/* Added px-1 for padding, and removed p-2 from parent div */}
-                <div className="relative" style={{height: `${7 * ROW_HEIGHT + ROW_HEIGHT}px`}}> {/* Added relative and fixed height for absolute positioning of month labels and grid */}
+                <div className="relative" style={{height: `${7 * ROW_HEIGHT + ROW_HEIGHT}px`}}> {/* Adjusted height for absolute positioning of month labels and grid */}
                   {/* Month labels */}
                   {monthLabelsWithColumns.map((label, index) => (
                     <div
@@ -318,44 +363,48 @@ export default function StatsTrendsScreen() {
         {/* Volume Trend Chart */}
         <Card className="mb-6 shadow-md border-none bg-white">
           <CardHeader className="p-4 pb-0">
-            <CardTitle className="text-lg font-semibold text-gray-700">Volume Trend (Last 7 Days)</CardTitle>
+            <CardTitle className="text-lg font-semibold text-gray-700">Volume Trend (Last 14 Days)</CardTitle> {/* Changed title to 14 Days */}
           </CardHeader>
-          <CardContent className="p-4">
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={weeklyVolumeData}>
-                <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" />
-                <YAxis stroke="hsl(var(--muted-foreground))" />
-                <Tooltip
-                  contentStyle={{ backgroundColor: 'white', border: '1px solid hsl(var(--border))', borderRadius: '0.25rem' }}
-                  labelStyle={{ color: 'hsl(var(--primary))' }}
-                  itemStyle={{ color: 'hsl(var(--muted-foreground))' }}
-                />
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <Line type="monotone" dataKey="volume" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ stroke: 'hsl(var(--primary))', strokeWidth: 2, r: 4 }} activeDot={{ r: 6 }} />
-              </LineChart>
-            </ResponsiveContainer>
+          <CardContent className="p-2 overflow-x-auto"> {/* Reduced padding and added overflow-x-auto */}
+            <div style={{ width: '700px' }}> {/* Fixed width container for chart content */}
+              <ResponsiveContainer width="100%" height={200}> {/* Reduced height. Width will fill parent */}
+                <LineChart data={weeklyVolumeData}> {/* Removed margin prop */}
+                  <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" />
+                  <YAxis stroke="hsl(var(--muted-foreground))" />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: 'white', border: '1px solid hsl(var(--border))', borderRadius: '0.25rem' }}
+                    labelStyle={{ color: 'hsl(var(--primary))' }}
+                    itemStyle={{ color: 'hsl(var(--muted-foreground))' }}
+                  />
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <Line type="monotone" dataKey="volume" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ stroke: 'hsl(var(--primary))', strokeWidth: 2, r: 4 }} activeDot={{ r: 6 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </CardContent>
         </Card>
 
         {/* Workout Frequency Chart */}
         <Card className="shadow-md border-none bg-white">
           <CardHeader className="p-4 pb-0">
-            <CardTitle className="text-lg font-semibold text-gray-700">Workout Frequency (Last 7 Days)</CardTitle>
+            <CardTitle className="text-lg font-semibold text-gray-700">Workout Frequency (Last 14 Days)</CardTitle> {/* Changed title to 14 Days */}
           </CardHeader>
-          <CardContent className="p-4">
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={weeklyFrequencyData}>
-                <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" />
-                <YAxis allowDecimals={false} stroke="hsl(var(--muted-foreground))" />
-                <Tooltip
-                  contentStyle={{ backgroundColor: 'white', border: '1px solid hsl(var(--border))', borderRadius: '0.25rem' }}
-                  labelStyle={{ color: 'hsl(var(--primary))' }}
-                  itemStyle={{ color: 'hsl(var(--muted-foreground))' }}
-                />
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <Bar dataKey="workouts" fill="hsl(var(--primary))" />
-              </BarChart>
-            </ResponsiveContainer>
+          <CardContent className="p-2 overflow-x-auto"> {/* Reduced padding and added overflow-x-auto */}
+            <div style={{ width: '700px' }}> {/* Fixed width container for chart content */}
+              <ResponsiveContainer width="100%" height={200}> {/* Reduced height. Width will fill parent */}
+                <BarChart data={weeklyFrequencyData}> {/* Removed margin prop */}
+                  <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" />
+                  <YAxis allowDecimals={false} stroke="hsl(var(--muted-foreground))" />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: 'white', border: '1px solid hsl(var(--border))', borderRadius: '0.25rem' }}
+                    labelStyle={{ color: 'hsl(var(--primary))' }}
+                    itemStyle={{ color: 'hsl(var(--muted-foreground))' }}
+                  />
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <Bar dataKey="workouts" fill="hsl(var(--primary))" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </CardContent>
         </Card>
       </main>

@@ -82,7 +82,7 @@ export const createWorkout = async (workoutData: Omit<Workout, 'id' | 'createdAt
     if (error instanceof z.ZodError) {
       console.error('Validation Error creating workout:', error.issues);
     } else {
-      console.error('Error creating workout:', error);
+    console.error('Error creating workout:', error);
     }
     throw error;
   }
@@ -150,7 +150,7 @@ export const updateWorkout = async (workoutId: string, workoutData: Partial<Work
     if (error instanceof z.ZodError) {
       console.error('Validation Error updating workout:', error.issues);
     } else {
-      console.error('Error updating workout:', error);
+    console.error('Error updating workout:', error);
     }
     throw error;
   }
