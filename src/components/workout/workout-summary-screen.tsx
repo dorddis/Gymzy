@@ -10,6 +10,20 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Muscle } from '@/lib/constants';
 import { MuscleActivationSVG } from '@/components/workout/muscle-activation-svg'; // Import the new SVG component
 import { useWorkout } from '@/contexts/WorkoutContext'; // Import useWorkout hook
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter
+} from "@/components/ui/dialog";
 
 interface WorkoutSummaryScreenProps {
   toggleSetExecuted: (exerciseIndex: number, setIndex: number) => void;
@@ -20,6 +34,10 @@ export function WorkoutSummaryScreen({ toggleSetExecuted }: WorkoutSummaryScreen
   // const contentScrollRef = useRef<HTMLDivElement>(null); // No longer needed here
 
   const { currentWorkoutExercises, setCurrentWorkoutExercises } = useWorkout(); // Use state from context
+  const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = React.useState(false);
+  const [exerciseToDeleteIndex, setExerciseToDeleteIndex] = React.useState<number | null>(null);
+  const [deletingExerciseId, setDeletingExerciseId] = React.useState<string | null>(null);
+  const [expandedNotesExerciseId, setExpandedNotesExerciseId] = React.useState<string | null>(null);
 
   // Removed: const handleAddExercise = (exerciseWithSets: ExerciseWithSets) => {
   //   setCurrentWorkoutExercises(prev => [...prev, exerciseWithSets]);
@@ -98,6 +116,60 @@ export function WorkoutSummaryScreen({ toggleSetExecuted }: WorkoutSummaryScreen
     });
   };
 
+  const moveExerciseUp = (index: number) => {
+    setCurrentWorkoutExercises(prevExercises => {
+      if (index === 0) return prevExercises; // Cannot move up the first item
+      const newExercises = [...prevExercises];
+      const [movedExercise] = newExercises.splice(index, 1);
+      newExercises.splice(index - 1, 0, movedExercise);
+      return newExercises;
+    });
+  };
+
+  const moveExerciseDown = (index: number) => {
+    setCurrentWorkoutExercises(prevExercises => {
+      if (index === prevExercises.length - 1) return prevExercises; // Cannot move down the last item
+      const newExercises = [...prevExercises];
+      const [movedExercise] = newExercises.splice(index, 1);
+      newExercises.splice(index + 1, 0, movedExercise);
+      return newExercises;
+    });
+  };
+
+  const confirmRemoveExercise = (index: number) => {
+    setExerciseToDeleteIndex(index);
+    setIsConfirmDeleteOpen(true);
+  };
+
+  const handleRemoveExercise = () => {
+    if (exerciseToDeleteIndex !== null) {
+      const exerciseId = currentWorkoutExercises[exerciseToDeleteIndex].id;
+      setDeletingExerciseId(exerciseId);
+      setTimeout(() => {
+        setCurrentWorkoutExercises(prevExercises => {
+          const updatedExercises = prevExercises.filter((_, i) => i !== exerciseToDeleteIndex);
+          // Update order property for remaining exercises
+          return updatedExercises.map((ex, idx) => ({ ...ex, order: idx }));
+        });
+        setIsConfirmDeleteOpen(false);
+        setExerciseToDeleteIndex(null);
+        setDeletingExerciseId(null);
+      }, 300); // Duration of the fade-out animation
+    }
+  };
+
+  const updateExerciseNotes = (exerciseIndex: number, notes: string) => {
+    setCurrentWorkoutExercises(prevExercises => {
+      const newExercises = [...prevExercises];
+      newExercises[exerciseIndex] = { ...newExercises[exerciseIndex], notes };
+      return newExercises;
+    });
+  };
+
+  const toggleNotesVisibility = (exerciseId: string) => {
+    setExpandedNotesExerciseId(prevId => (prevId === exerciseId ? null : exerciseId));
+  };
+
   // Removed: const totalVolume = useMemo(() => {
   //   return currentWorkoutExercises.reduce((totalExerciseVolume, exercise) => {
   //     const exerciseVolume = exercise.sets.reduce((totalSetVolume, set) => {
@@ -151,15 +223,54 @@ export function WorkoutSummaryScreen({ toggleSetExecuted }: WorkoutSummaryScreen
         ) : (
           <div className="space-y-4"> {/* Reduced vertical spacing between exercises */}
             {currentWorkoutExercises.map((exercise, exerciseIndex) => (
-              <div key={exercise.id} className="bg-white rounded-xl shadow-sm p-3 border border-gray-200"> {/* Reduced padding */}
+              <div 
+                key={exercise.id}
+                className={`bg-white rounded-xl shadow-sm p-3 border border-gray-200 transition-all duration-300 ease-in-out
+                  ${deletingExerciseId === exercise.id ? 'opacity-0 transform -translate-y-4' : ''}
+                `}
+                style={{ order: exerciseIndex }} // This helps with FLIP animations for reordering
+              >
                 <div className="flex justify-between items-center mb-2"> {/* Reduced margin */}
                   <h3 className="text-lg font-semibold">{exercise.name}</h3>
                   <div className="flex items-center space-x-2">
-                    <Button variant="ghost" size="icon">
-                      <MoreVertical className="h-4 w-4 text-gray-500" />
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreVertical className="h-4 w-4 text-gray-500" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => moveExerciseUp(exerciseIndex)} disabled={exerciseIndex === 0}>
+                          Move Up
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => moveExerciseDown(exerciseIndex)} disabled={exerciseIndex === currentWorkoutExercises.length - 1}>
+                          Move Down
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => toggleNotesVisibility(exercise.id)}>
+                          {expandedNotesExerciseId === exercise.id ? "Hide Notes" : "Show Notes"}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => confirmRemoveExercise(exerciseIndex)} className="text-red-500">
+                          Delete Exercise
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
+
+                {/* Exercise Notes Section (Conditionally Rendered) */}
+                {expandedNotesExerciseId === exercise.id && (
+                  <div className="mb-4 mt-2">
+                    <label htmlFor={`notes-${exercise.id}`} className="text-sm font-semibold text-gray-700 mb-1 block">Notes:</label>
+                    <textarea
+                      id={`notes-${exercise.id}`}
+                      value={exercise.notes || ''}
+                      onChange={(e) => updateExerciseNotes(exerciseIndex, e.target.value)}
+                      placeholder="Add exercise notes here..."
+                      className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                      rows={3}
+                    />
+                  </div>
+                )}
 
                 <div className="flex gap-2 mb-2"> {/* Reduced margin */}
                   <Button
@@ -233,6 +344,20 @@ export function WorkoutSummaryScreen({ toggleSetExecuted }: WorkoutSummaryScreen
 
       </div>
 
+      <Dialog open={isConfirmDeleteOpen} onOpenChange={setIsConfirmDeleteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this exercise? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsConfirmDeleteOpen(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleRemoveExercise}>Delete</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 } 
