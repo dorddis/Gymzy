@@ -39,7 +39,7 @@ Mark each step complete by changing `[ ]` to `[x]`.
 - Add "Add Set" and "Add Warmup Set" functionality
 - Implement plate calculator widget
 - Add exercise notes and tips section
-[ ] 11.3. Workout Summary Screen
+[x] 11.3. Workout Summary Screen
 - Show total volume calculation
 - Do not display targeted muscle groups separately as they are shown in the svg
 - Add ability to reorder exercises

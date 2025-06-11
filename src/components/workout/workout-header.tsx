@@ -49,8 +49,7 @@ export function WorkoutHeader({ onTerminateWorkout, onCompleteWorkout, className
 
   const handleCompleteClick = useCallback(() => {
     onCompleteWorkout();
-    router.push('/'); // Navigate back to home page after completion
-  }, [onCompleteWorkout, router]);
+  }, [onCompleteWorkout]);
 
   return (
     <header className={`w-full bg-background px-4 py-4 flex justify-between items-center border-b border-gray-200 ${className || ''}`}>

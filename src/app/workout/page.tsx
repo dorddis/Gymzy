@@ -12,10 +12,13 @@ import { Plus } from "lucide-react";
 import { AddWorkoutModal } from "@/components/dashboard/add-workout-modal";
 import { RotateCcw, Play, Pause } from "lucide-react";
 import { AnimatedTimer } from "@/components/ui/animated-timer";
+import { FinishWorkoutModal } from "@/components/workout/finish-workout-modal";
+import { useRouter } from "next/navigation";
 
 export default function WorkoutPage() {
   const pathname = usePathname();
   const isWorkoutPage = pathname === "/workout";
+  const router = useRouter();
 
   const {
     muscleVolumes,
@@ -25,10 +28,12 @@ export default function WorkoutPage() {
   } = useWorkout();
 
   const [isAddExerciseModalOpen, setIsAddExerciseModalOpen] = useState(false);
+  const [isFinishWorkoutModalOpen, setIsFinishWorkoutModalOpen] = useState(false);
   const [showRestTimerUI, setShowRestTimerUI] = useState(true);
   const [isRestTimerRunning, setIsRestTimerRunning] = useState(false);
   const [restTimeRemaining, setRestTimeRemaining] = useState(120);
   const totalRestTime = 120;
+  const [showIncompleteSetsWarning, setShowIncompleteSetsWarning] = useState(false);
 
   const mainRef = useRef<HTMLDivElement>(null);
   const svgWrapperRef = useRef<HTMLDivElement>(null);
@@ -67,8 +72,36 @@ export default function WorkoutPage() {
     return () => clearInterval(timer);
   }, [isRestTimerRunning, restTimeRemaining]);
 
-  const handleTerminateWorkout = () => console.log("Workout terminated!");
-  const handleCompleteWorkout = () => console.log("Workout completed!");
+  const handleTerminateWorkout = () => {
+    if (window.confirm("Are you sure you want to terminate the workout? All progress will be lost.")) {
+      setCurrentWorkoutExercises([]);
+      // TODO: Navigate back to home
+    }
+  };
+
+  const handleCompleteWorkout = () => {
+    // Check if all sets are executed
+    const allSetsExecuted = currentWorkoutExercises.every(exercise => 
+      exercise.sets.every(set => set.isExecuted)
+    );
+
+    if (allSetsExecuted) {
+      setIsFinishWorkoutModalOpen(true);
+    } else {
+      // Show warning in WorkoutSummaryScreen
+      const remainingSets = currentWorkoutExercises.reduce((total, exercise) => 
+        total + exercise.sets.filter(set => !set.isExecuted).length, 0);
+      
+      // Pass this to WorkoutSummaryScreen to show warning
+      setShowIncompleteSetsWarning(true);
+    }
+  };
+
+  const handleSaveWorkout = () => {
+    // The actual save logic is handled in the FinishWorkoutModal component
+    setCurrentWorkoutExercises([]);
+    router.push('/'); // Navigate back to home after saving
+  };
 
   const handleAddExercise = (exerciseWithSets: any) => {
     const idx = currentWorkoutExercises.findIndex((e) => e.id === exerciseWithSets.id);
@@ -137,7 +170,12 @@ export default function WorkoutPage() {
         </div>
 
         <div className="mt-4 px-4 relative z-10">
-          <WorkoutSummaryScreen toggleSetExecuted={toggleSetExecuted} />
+          <WorkoutSummaryScreen 
+            toggleSetExecuted={toggleSetExecuted}
+            showIncompleteSetsWarning={showIncompleteSetsWarning}
+            remainingSets={currentWorkoutExercises.reduce((total, exercise) => 
+              total + exercise.sets.filter(set => !set.isExecuted).length, 0)}
+          />
         </div>
       </main>
 
@@ -193,6 +231,12 @@ export default function WorkoutPage() {
         open={isAddExerciseModalOpen}
         onOpenChange={() => setIsAddExerciseModalOpen(false)}
         onExerciseSave={handleAddExercise}
+      />
+
+      <FinishWorkoutModal
+        open={isFinishWorkoutModalOpen}
+        onOpenChange={setIsFinishWorkoutModalOpen}
+        onSave={handleSaveWorkout}
       />
 
       {!isWorkoutPage && <BottomNav />}
