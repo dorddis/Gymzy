@@ -8,13 +8,15 @@ interface HeatmapCardProps {
   muscleVolumes: Record<Muscle, number | undefined>;
   className?: string;
   height?: string;
+  scale?: number;
 }
 
 export function HeatmapCard({ 
   title = "Muscle Activation", 
   muscleVolumes, 
   className = "",
-  height = "280px"
+  height = "350px",
+  scale = 1.3 // Adjusted scale for dashboard
 }: HeatmapCardProps) {
   return (
     <Card className={`bg-white rounded-xl shadow-md p-4 ${className}`}>
@@ -26,8 +28,14 @@ export function HeatmapCard({
         </div>
       )}
 
-      <CardContent className="bg-white rounded-lg w-full flex items-center justify-center" style={{ height }}>
-        <MuscleActivationSVG muscleVolumes={muscleVolumes} className="w-full h-full" />
+      <CardContent className="bg-white rounded-lg w-full flex items-center justify-center overflow-hidden" style={{ height }}>
+        <div className="w-full h-full flex items-center justify-center">
+          <MuscleActivationSVG 
+            muscleVolumes={muscleVolumes} 
+            className="w-full h-full" 
+            scale={scale}
+          />
+        </div>
       </CardContent>
 
       <div className="flex items-center justify-between px-2 mt-2">

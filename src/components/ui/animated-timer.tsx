@@ -18,7 +18,7 @@ export function AnimatedTimer({ totalTime, timeRemaining, isRestTimerRunning }: 
       ></div>
       <div className="absolute inset-0 flex items-center justify-center">
         <span className="text-lg font-bold text-gray-800">
-          Rest: {formattedTime}
+          Rest \ {formattedTime}
         </span>
       </div>
     </div>

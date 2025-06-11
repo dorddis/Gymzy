@@ -33,8 +33,9 @@ export default function WorkoutPage() {
   const mainRef = useRef<HTMLDivElement>(null);
   const svgWrapperRef = useRef<HTMLDivElement>(null);
 
-  const MIN_HEIGHT = 300;               // px
-  const MAX_HEIGHT = MIN_HEIGHT * 2.2;  // 660px
+  const MIN_HEIGHT = 320;               // Slightly increased height
+  const MAX_HEIGHT = MIN_HEIGHT * 1.5;  // Adjusted multiplier
+  const DEFAULT_SCALE = 1.0;            // Slightly increased scale
 
   // scroll handler to shrink SVG from MAX_HEIGHT → MIN_HEIGHT
   useEffect(() => {
@@ -110,7 +111,7 @@ export default function WorkoutPage() {
   const toggleRestTimer = () => setIsRestTimerRunning((r) => !r);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="flex flex-col h-full">
       <WorkoutHeader
         onTerminateWorkout={handleTerminateWorkout}
         onCompleteWorkout={handleCompleteWorkout}
@@ -123,10 +124,16 @@ export default function WorkoutPage() {
       >
         <div
           ref={svgWrapperRef}
-          className="sticky top-[72px] w-full overflow-hidden z-0 transition-[height] duration-100 ease-out"
-          style={{ height: `${MAX_HEIGHT}px` }}
+          className="relative w-full mb-6 mt-4 transition-all duration-300 ease-in-out overflow-hidden"
+          style={{ height: `${MIN_HEIGHT}px` }}
         >
-          <MuscleActivationSVG className="w-full h-full" />
+          <div className="w-full h-full flex items-center justify-center">
+            <MuscleActivationSVG
+              muscleVolumes={muscleVolumes}
+              className="w-full h-full"
+              scale={DEFAULT_SCALE}
+            />
+          </div>
         </div>
 
         <div className="mt-4 px-4 relative z-10">
@@ -166,7 +173,7 @@ export default function WorkoutPage() {
               variant="ghost"
               size="icon"
               onClick={toggleRestTimer}
-              className="absolute left-2 top-1/2 -translate-y-1/2"
+              className="absolute left-2 top-1/2 -translate-y-1/2 focus:ring-0 focus:ring-offset-0 active:bg-transparent"
             >
               {isRestTimerRunning ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
             </Button>
@@ -174,7 +181,7 @@ export default function WorkoutPage() {
               variant="ghost"
               size="icon"
               onClick={resetRestTimer}
-              className="absolute right-2 top-1/2 -translate-y-1/2"
+              className="absolute right-2 top-1/2 -translate-y-1/2 focus:ring-0 focus:ring-offset-0 active:bg-transparent"
             >
               <RotateCcw className="h-5 w-5" />
             </Button>

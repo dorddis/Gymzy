@@ -5,7 +5,7 @@ import type { SVGProps } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Muscle, MUSCLE_VOLUME_THRESHOLDS } from '@/lib/constants';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
 
 import FrontFullBody from '@/assets/images/front-full-body-with-all-muscles-showing.svg';
 import BackFullBody from '@/assets/images/back-full-body-with-all-muscles-showing.svg';
@@ -14,6 +14,7 @@ interface MuscleActivationSVGProps {
   muscleVolumes?: Partial<Record<Muscle, number>>;
   className?: string;
   scrollElementRef?: React.RefObject<HTMLElement>;
+  scale?: number;
 }
 
 /**
@@ -133,8 +134,14 @@ const frontMuscleIdMap: Partial<Record<Muscle, string | string[]>> = {
  *  - Displays the full-body SVG with muscle activation.
  *  - Implements scroll-blur effect and tappable functionality.
  */
-export function MuscleActivationSVG({ muscleVolumes = {}, className, scrollElementRef }: MuscleActivationSVGProps) {
+export function MuscleActivationSVG({ 
+  muscleVolumes = {}, 
+  className, 
+  scrollElementRef,
+  scale = 2 // Updated default scale to 2
+}: MuscleActivationSVGProps) {
   const [view, setView] = useState<'front' | 'back'>('front');
+  const [isRotating, setIsRotating] = useState(false);
   const svgRef = useRef<SVGSVGElement>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [scrollPosition, setScrollPosition] = useState(0);
@@ -237,6 +244,13 @@ export function MuscleActivationSVG({ muscleVolumes = {}, className, scrollEleme
     }
   };
 
+  const handleViewChange = (newView: 'front' | 'back') => {
+    if (isRotating) return;
+    setIsRotating(true);
+    setView(newView);
+    setTimeout(() => setIsRotating(false), 300); // Match the transition duration
+  };
+
   return (
     <div
       className={`relative ${className}`}
@@ -244,34 +258,40 @@ export function MuscleActivationSVG({ muscleVolumes = {}, className, scrollEleme
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      <BodySvg ref={svgRef} className="w-full h-full" />
+      <BodySvg 
+        ref={svgRef} 
+        className="w-full h-full transition-transform duration-300 ease-in-out" 
+        style={{ transform: `scale(${scale})` }}
+      />
 
       {/* Left Arrow Button */}
       <Button
         variant="ghost"
         size="icon"
-        className="absolute left-2 top-1/2 -translate-y-1/2 z-20 text-gray-600 hover:text-gray-800"
+        className={`absolute left-1 top-1/2 -translate-y-1/2 z-20 text-gray-600 hover:text-gray-800 transition-all duration-200 rounded-full border border-gray-200 hover:border-gray-300 hover:bg-gray-50 ${isRotating ? 'animate-spin' : ''}`}
         onClick={(e) => {
           e.stopPropagation();
-          setView('back');
+          handleViewChange('back');
         }}
         aria-label="Show Back View"
+        disabled={isRotating}
       >
-        <ChevronLeft className="h-6 w-6" />
+        <RotateCcw className="h-5 w-5 transform rotate-180" />
       </Button>
 
       {/* Right Arrow Button */}
       <Button
         variant="ghost"
         size="icon"
-        className="absolute right-2 top-1/2 -translate-y-1/2 z-20 text-gray-600 hover:text-gray-800"
+        className={`absolute right-1 top-1/2 -translate-y-1/2 z-20 text-gray-600 hover:text-gray-800 transition-all duration-200 rounded-full border border-gray-200 hover:border-gray-300 hover:bg-gray-50 ${isRotating ? 'animate-spin' : ''}`}
         onClick={(e) => {
           e.stopPropagation();
-          setView('front');
+          handleViewChange('front');
         }}
         aria-label="Show Front View"
+        disabled={isRotating}
       >
-        <ChevronRight className="h-6 w-6" />
+        <RotateCcw className="h-5 w-5" />
       </Button>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>

@@ -1,0 +1,103 @@
+SVG Redesign Implementation Plan
+==============================
+
+1. Component Modifications
+-------------------------
+a) Update MuscleActivationSVG component:
+   - Move chevron arrows closer to the SVG edges
+   - Replace chevron icons with circular flip icons
+   - Remove background from arrow buttons
+   - Add hover effects for better user interaction
+   - Increase default SVG scale to match workout page scale
+
+2. UI/UX Improvements
+--------------------
+a) Arrow Button Styling:
+   - Remove background color (bg-white/80)
+   - Add circular border
+   - Implement smooth hover transitions
+   - Add tooltip for better user guidance
+
+b) Positioning:
+   - Adjust left arrow position from left-2 to left-1
+   - Adjust right arrow position from right-2 to right-1
+   - Ensure arrows are vertically centered
+
+c) SVG Scaling:
+   - Increase default scale to match workout page
+   - Ensure proper container sizing
+   - Maintain aspect ratio
+   - Add responsive scaling behavior
+
+3. Functionality Enhancements
+---------------------------
+a) Add flip animation:
+   - Implement smooth transition between front/back views
+   - Add rotation effect for better visual feedback
+   - Ensure touch/mouse interactions work seamlessly
+
+4. Code Changes Required
+-----------------------
+a) Update button styling in MuscleActivationSVG:
+   - Remove background classes
+   - Add circular border
+   - Update icon components
+   - Add transition effects
+
+b) Update positioning classes:
+   - Modify left/right positioning
+   - Adjust z-index for proper layering
+   - Update hover states
+
+c) Add animation classes:
+   - Implement flip transition
+   - Add rotation effect
+   - Ensure proper state management
+
+d) SVG Scaling Implementation:
+   - Update default scale in MuscleActivationSVG
+   - Modify container dimensions
+   - Update workout page to use new default scale
+   - Add scale-related utility functions
+
+5. Testing Requirements
+----------------------
+a) Verify:
+   - Arrow button positioning
+   - Flip animation smoothness
+   - Touch/mouse interaction
+   - Responsive behavior
+   - Accessibility features
+   - SVG scaling across different screen sizes
+   - Consistency between dashboard and workout pages
+
+6. Implementation Steps
+----------------------
+1. Update MuscleActivationSVG component
+2. Modify button styling and positioning
+3. Implement flip animation
+4. Add hover effects and transitions
+5. Implement new SVG scaling
+6. Update workout page to use new default scale
+7. Test on different devices
+8. Verify accessibility
+9. Document changes
+
+7. Scale-Specific Changes
+------------------------
+a) MuscleActivationSVG Component:
+   - Update default scale value
+   - Modify container dimensions
+   - Add scale-related props
+   - Implement scale utilities
+
+b) Workout Page Updates:
+   - Remove custom scaling
+   - Use new default scale
+   - Update container sizing
+   - Ensure responsive behavior
+
+c) Responsive Considerations:
+   - Add breakpoint-specific scaling
+   - Implement minimum/maximum scale limits
+   - Ensure proper scaling on mobile devices 
