@@ -17,7 +17,29 @@ export function WorkoutSummaryScreen() {
   const [currentWorkoutExercises, setCurrentWorkoutExercises] = useState<ExerciseWithSets[]>([]);
 
   const handleAddExercise = (exerciseWithSets: ExerciseWithSets) => {
-    setCurrentWorkoutExercises(prev => [...prev, exerciseWithSets]);
+    // Check if exercise already exists in the workout
+    const existingExerciseIndex = currentWorkoutExercises.findIndex(
+      (e) => e.id === exerciseWithSets.id
+    );
+
+    if (existingExerciseIndex !== -1) {
+      // If exercise exists, add a new set to it
+      setCurrentWorkoutExercises(prevExercises => {
+        const newExercises = [...prevExercises];
+        const existingExercise = newExercises[existingExerciseIndex];
+        newExercises[existingExerciseIndex] = {
+          ...existingExercise,
+          sets: [
+            ...existingExercise.sets,
+            { weight: 0, reps: 0, rpe: 0, isWarmup: false }
+          ]
+        };
+        return newExercises;
+      });
+    } else {
+      // If exercise doesn't exist, add it as a new exercise
+      setCurrentWorkoutExercises(prev => [...prev, exerciseWithSets]);
+    }
     setIsAddExerciseModalOpen(false);
   };
 
@@ -156,28 +178,31 @@ export function WorkoutSummaryScreen() {
                         ) : (
                           <span className="text-sm font-semibold text-secondary flex items-center justify-center w-6 h-6 rounded-full bg-secondary/10">{setIndex + 1}</span>
                         )}
-                        <div className="flex items-center space-x-1">
+                        <div className="flex items-center">
                           <Input
                             type="number"
                             value={set.weight}
                             onChange={(e) => updateSet(exerciseIndex, setIndex, 'weight', parseFloat(e.target.value) || 0)}
+                            onFocus={(e) => e.target.select()}
                             className="w-12 text-center border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto text-sm"
                           />
-                          <span className="text-xs text-gray-600">kg</span>
+                          <span className="text-xs text-gray-600 -ml-1">kg</span>
                           <Input
                             type="number"
                             value={set.reps}
                             onChange={(e) => updateSet(exerciseIndex, setIndex, 'reps', parseInt(e.target.value) || 0)}
+                            onFocus={(e) => e.target.select()}
                             className="w-12 text-center border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto text-sm"
                           />
-                          <span className="text-xs text-gray-600">reps</span>
+                          <span className="text-xs text-gray-600 -ml-1">reps</span>
                           <Input
                             type="number"
                             value={set.rpe}
                             onChange={(e) => updateSet(exerciseIndex, setIndex, 'rpe', parseFloat(e.target.value) || 0)}
+                            onFocus={(e) => e.target.select()}
                             className="w-12 text-center border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto text-sm"
                           />
-                          <span className="text-xs text-gray-600">RPE</span>
+                          <span className="text-xs text-gray-600 -ml-1">RPE</span>
                         </div>
                       </div>
                       <Button variant="ghost" size="icon" onClick={() => removeSetFromExercise(exerciseIndex, setIndex)}>

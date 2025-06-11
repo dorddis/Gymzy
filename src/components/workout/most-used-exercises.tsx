@@ -16,9 +16,9 @@ export function MostUsedExercises({ exercises, onSelect }: MostUsedExercisesProp
     if (scrollRef.current) {
       const scrollAmount = 200; // Adjust as needed
       if (direction === 'left') {
-        scrollRef.current.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+        scrollRef.current.scrollLeft -= scrollAmount;
       } else {
-        scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        scrollRef.current.scrollLeft += scrollAmount;
       }
     }
   };
@@ -26,8 +26,8 @@ export function MostUsedExercises({ exercises, onSelect }: MostUsedExercisesProp
   return (
     <div className="mb-6 relative">
       <h3 className="text-sm font-medium mb-2">Most Used</h3>
-      <ScrollArea className="w-full whitespace-nowrap">
-        <div ref={scrollRef} className="flex space-x-2 pb-4">
+      <ScrollArea viewportRef={scrollRef} className="w-full whitespace-nowrap">
+        <div className="flex space-x-2 pb-4">
           {exercises.map((exercise) => (
             <Button
               key={exercise.id}
