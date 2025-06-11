@@ -43,12 +43,17 @@ interface WorkoutContextType {
 
 const WorkoutContext = createContext<WorkoutContextType | undefined>(undefined);
 
+// Helper to initialize muscle volumes with all muscles set to 0
+const initializeMuscleVolumes = (): MuscleVolumes => {
+  return Object.values(Muscle).reduce((acc, muscle) => {
+    acc[muscle] = 0;
+    return acc;
+  }, {} as MuscleVolumes);
+};
+
 // Helper to calculate muscle volumes from a list of workouts
 const calculateMuscleVolumes = (workouts: Workout[]): MuscleVolumes => {
-  const volumes: Record<Muscle, number> = Object.values(Muscle).reduce((acc, muscle) => {
-    acc[muscle] = 0; // Initialize all muscles to 0
-    return acc;
-  }, {} as Record<Muscle, number>);
+  const volumes = initializeMuscleVolumes();
 
   workouts.forEach(workout => {
     workout.exercises.forEach(exercise => {
@@ -80,8 +85,8 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
   const [recentWorkouts, setRecentWorkouts] = useState<Workout[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [calculatedMuscleVolumes, setCalculatedMuscleVolumes] = useState<MuscleVolumes>(() => calculateMuscleVolumes([])); // Initialize with empty workouts
-  const [currentWorkoutExercises, setCurrentWorkoutExercises] = useState<ExerciseWithSets[]>([]); // New state for current workout
+  const [calculatedMuscleVolumes, setCalculatedMuscleVolumes] = useState<MuscleVolumes>(initializeMuscleVolumes());
+  const [currentWorkoutExercises, setCurrentWorkoutExercises] = useState<ExerciseWithSets[]>([]);
 
   const totalVolume = useMemo(() => {
     return currentWorkoutExercises.reduce((totalExerciseVolume, exercise) => {
@@ -91,6 +96,51 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
       return totalExerciseVolume + exerciseVolume;
     }, 0);
   }, [currentWorkoutExercises]);
+
+  // Calculate muscle volumes from current workout exercises
+  const currentWorkoutMuscleVolumes = useMemo(() => {
+    const volumes = initializeMuscleVolumes();
+
+    currentWorkoutExercises.forEach(exercise => {
+      const exerciseVolume = exercise.sets.reduce((sum, set) => {
+        // Only count volume from executed sets
+        return sum + (set.isExecuted ? set.weight * set.reps : 0);
+      }, 0);
+
+      // Add volume to primary muscles
+      if (exercise.primaryMuscles) {
+        exercise.primaryMuscles.forEach(muscle => {
+          volumes[muscle] = (volumes[muscle] || 0) + (exerciseVolume * 0.7); // Primary muscles get 70% of volume
+        });
+      }
+      
+      // Add volume to secondary muscles
+      if (exercise.secondaryMuscles) {
+        exercise.secondaryMuscles.forEach(muscle => {
+          volumes[muscle] = (volumes[muscle] || 0) + (exerciseVolume * 0.3); // Secondary muscles get 30% of volume
+        });
+      }
+    });
+
+    return volumes;
+  }, [currentWorkoutExercises]);
+
+  // Combine historical and current workout muscle volumes
+  const combinedMuscleVolumes = useMemo(() => {
+    const volumes = initializeMuscleVolumes();
+    
+    // Add historical volumes
+    Object.entries(calculatedMuscleVolumes).forEach(([muscle, volume]) => {
+      volumes[muscle as Muscle] = volume;
+    });
+    
+    // Add current workout volumes
+    Object.entries(currentWorkoutMuscleVolumes).forEach(([muscle, volume]) => {
+      volumes[muscle as Muscle] += volume;
+    });
+
+    return volumes;
+  }, [calculatedMuscleVolumes, currentWorkoutMuscleVolumes]);
 
   const fetchWorkouts = async () => {
     if (!user) return;
@@ -159,7 +209,7 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
     updateWorkout: updateWorkoutHandler,
     deleteWorkout: deleteWorkoutHandler,
     refreshWorkouts: fetchWorkouts,
-    muscleVolumes: calculatedMuscleVolumes,
+    muscleVolumes: combinedMuscleVolumes,
     currentWorkoutExercises,
     setCurrentWorkoutExercises,
     totalVolume,

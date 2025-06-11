@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import type { SVGProps } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -10,7 +10,7 @@ import FrontFullBody from '@/assets/images/front-full-body-with-all-muscles-show
 import BackFullBody from '@/assets/images/back-full-body-with-all-muscles-showing.svg';
 
 interface MuscleActivationSVGProps {
-  muscleVolumes: Record<Muscle, number | undefined>;
+  muscleVolumes?: Partial<Record<Muscle, number>>;
   className?: string;
   scrollElementRef?: React.RefObject<HTMLElement>;
 }
@@ -121,6 +121,10 @@ const frontMuscleIdMap: Partial<Record<Muscle, string | string[]>> = {
     'Triceps_long_head_00000083776378062729911360000007780280132728440204_',
     'triceps_lateral_head_00000114039035336761946620000010495095347100091037_',
   ],
+  [Muscle.BicepsBrachii]: 'Biceps_brachii_00000165913426772514415860000005830889273115133587_',
+  [Muscle.AnteriorDeltoid]: 'Deltoids_front_00000075869929722435460100000017330691835694619786_',
+  [Muscle.LateralDeltoid]: 'Deltoids_side_00000075869929722435460100000017330691835694619787_',
+  [Muscle.PosteriorDeltoid]: 'Deltoids_back_00000075869929722435460100000017330691835694619788_',
 };
 
 /**
@@ -128,7 +132,7 @@ const frontMuscleIdMap: Partial<Record<Muscle, string | string[]>> = {
  *  - Displays the full-body SVG with muscle activation.
  *  - Implements scroll-blur effect and tappable functionality.
  */
-export function MuscleActivationSVG({ muscleVolumes, className, scrollElementRef }: MuscleActivationSVGProps) {
+export function MuscleActivationSVG({ muscleVolumes = {}, className, scrollElementRef }: MuscleActivationSVGProps) {
   const [view, setView] = useState<'front' | 'back'>('front');
   const svgRef = useRef<SVGSVGElement>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -137,7 +141,32 @@ export function MuscleActivationSVG({ muscleVolumes, className, scrollElementRef
   const BodySvg = view === 'front' ? FrontFullBody : BackFullBody;
   const currentMuscleIdMap = view === 'front' ? frontMuscleIdMap : backMuscleIdMap;
 
-  const relevantMuscles = typeof Muscle === 'object' && Muscle !== null ? (Object.values(Muscle) as Muscle[]) : [];
+  // Initialize all muscles with 0 if undefined
+  const safeMuscleVolumes = useMemo(() => {
+    const volumes: Record<Muscle, number> = {} as Record<Muscle, number>;
+    // Initialize all muscles from the enum
+    Object.values(Muscle).forEach((muscle) => {
+      if (typeof muscle === 'string') {
+        volumes[muscle as Muscle] = 0;
+      }
+    });
+    // Override with actual values from muscleVolumes if it exists
+    if (muscleVolumes && typeof muscleVolumes === 'object') {
+      Object.entries(muscleVolumes).forEach(([muscle, volume]) => {
+        if (typeof muscle === 'string' && muscle in Muscle) {
+          volumes[muscle as Muscle] = volume ?? 0;
+        }
+      });
+    }
+    return volumes;
+  }, [muscleVolumes]);
+
+  // Get relevant muscles (those with volume > 0)
+  const relevantMuscles = useMemo(() => {
+    return Object.entries(safeMuscleVolumes)
+      .filter(([_, volume]) => volume > 0)
+      .map(([muscle]) => muscle as Muscle);
+  }, [safeMuscleVolumes]);
 
   const applyMuscleActivation = useCallback(() => {
     if (!svgRef.current) return;
@@ -159,7 +188,7 @@ export function MuscleActivationSVG({ muscleVolumes, className, scrollElementRef
       if (!maybeId) return;
 
       const groupIds: string[] = Array.isArray(maybeId) ? maybeId : [maybeId];
-      const volume = muscleVolumes[muscle];
+      const volume = safeMuscleVolumes[muscle];
       const activation = getMuscleActivationLevel(volume);
 
       groupIds.forEach((groupId) => {
@@ -167,7 +196,7 @@ export function MuscleActivationSVG({ muscleVolumes, className, scrollElementRef
         if (g) g.style.opacity = `${activation.opacity}`;
       });
     });
-  }, [view, muscleVolumes, relevantMuscles, currentMuscleIdMap]);
+  }, [view, safeMuscleVolumes, relevantMuscles, currentMuscleIdMap]);
 
   useEffect(() => {
     applyMuscleActivation();
@@ -197,6 +226,7 @@ export function MuscleActivationSVG({ muscleVolumes, className, scrollElementRef
 
   return (
     <div className={`relative ${className || ''}`}>
+      {/* Background SVG with blur effect */}
       <div
         className="absolute inset-0 z-0 transition-all duration-300 ease-out"
         style={{ filter: `blur(${blurAmount}px)`, opacity: opacityAmount }}
@@ -204,17 +234,26 @@ export function MuscleActivationSVG({ muscleVolumes, className, scrollElementRef
       >
         <BodySvg ref={svgRef} className="w-full h-full" />
       </div>
-      <div className="absolute top-2 right-4 z-10">
-        <Button
-          className="bg-primary text-white px-4 py-1.5 rounded-full text-sm font-medium h-8"
-          onClick={(e) => {
-            e.stopPropagation();
-            setView(view === 'front' ? 'back' : 'front');
-          }}
-        >
-          {view === 'front' ? 'Show Back' : 'Show Front'}
-        </Button>
-      </div>
+
+      {/* View toggle button - now outside the blurred background */}
+      <Button
+        className="absolute top-2 right-4 z-20 bg-primary text-white px-4 py-1.5 rounded-full text-sm font-medium h-8 hover:bg-primary/90 active:bg-primary/80 transition-colors"
+        onClick={(e) => {
+          e.stopPropagation();
+          setView(prevView => prevView === 'front' ? 'back' : 'front');
+          if (svgRef.current) {
+            const svg = svgRef.current;
+            svg.style.opacity = '0';
+            setTimeout(() => {
+              svg.style.opacity = '1';
+              applyMuscleActivation();
+            }, 50);
+          }
+        }}
+        aria-label={view === 'front' ? 'Show Back View' : 'Show Front View'}
+      >
+        {view === 'front' ? 'Show Back' : 'Show Front'}
+      </Button>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="sm:max-w-[425px]">
@@ -226,14 +265,14 @@ export function MuscleActivationSVG({ muscleVolumes, className, scrollElementRef
             <BodySvg ref={svgRef} className="w-full h-full" />
             <div className="mt-4 w-full">
               {relevantMuscles.map((muscle) => {
-                const volume = muscleVolumes[muscle];
+                const volume = safeMuscleVolumes[muscle];
                 const { level } = getMuscleActivationLevel(volume);
                 if (level === 'None') return null;
                 return (
                   <div key={muscle} className="flex justify-between items-center py-1">
                     <span className="text-sm font-medium">{muscle}</span>
                     <span className={`text-xs font-semibold ${level === 'Low' ? 'text-green-500' : level === 'Medium' ? 'text-yellow-500' : 'text-red-500'}`}>
-                      {level} ({volume ? volume.toFixed(0) : 0} kg)
+                      {level} ({volume.toFixed(0)} kg)
                     </span>
                   </div>
                 );

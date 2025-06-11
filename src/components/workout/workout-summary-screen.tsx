@@ -40,7 +40,35 @@ export function WorkoutSummaryScreen({ toggleSetExecuted }: WorkoutSummaryScreen
     setCurrentWorkoutExercises(prevExercises => {
       const newExercises = [...prevExercises];
       const currentSets = [...newExercises[exerciseIndex].sets];
-      const newSet = { weight: 0, reps: 0, rpe: 0, isWarmup, isExecuted: false }; // Initialize isExecuted
+      
+      // Get the last non-warmup set's values if adding a regular set
+      // or the last warmup set's values if adding a warmup set
+      let lastSetValues = { weight: 0, reps: 0, rpe: 0 };
+      if (currentSets.length > 0) {
+        if (isWarmup) {
+          // Find the last warmup set
+          for (let i = currentSets.length - 1; i >= 0; i--) {
+            if (currentSets[i].isWarmup) {
+              lastSetValues = { ...currentSets[i] };
+              break;
+            }
+          }
+        } else {
+          // Find the last non-warmup set
+          for (let i = currentSets.length - 1; i >= 0; i--) {
+            if (!currentSets[i].isWarmup) {
+              lastSetValues = { ...currentSets[i] };
+              break;
+            }
+          }
+        }
+      }
+
+      const newSet = { 
+        ...lastSetValues,
+        isWarmup, 
+        isExecuted: false 
+      };
 
       if (isWarmup) {
         // Find the last warmup set index to insert after it, or at the beginning if no warmups exist
@@ -168,7 +196,6 @@ export function WorkoutSummaryScreen({ toggleSetExecuted }: WorkoutSummaryScreen
                               type="number"
                               value={set.weight}
                               onChange={(e) => updateSet(exerciseIndex, setIndex, 'weight', parseFloat(e.target.value) || 0)}
-                              onFocus={(e) => e.target.select()}
                               className="w-12 text-center border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto text-sm"
                             />
                             <span className="text-xs text-gray-600">kg</span>
@@ -178,7 +205,6 @@ export function WorkoutSummaryScreen({ toggleSetExecuted }: WorkoutSummaryScreen
                               type="number"
                               value={set.reps}
                               onChange={(e) => updateSet(exerciseIndex, setIndex, 'reps', parseInt(e.target.value) || 0)}
-                              onFocus={(e) => e.target.select()}
                               className="w-12 text-center border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto text-sm"
                             />
                             <span className="text-xs text-gray-600">reps</span>
@@ -188,7 +214,6 @@ export function WorkoutSummaryScreen({ toggleSetExecuted }: WorkoutSummaryScreen
                               type="number"
                               value={set.rpe}
                               onChange={(e) => updateSet(exerciseIndex, setIndex, 'rpe', parseFloat(e.target.value) || 0)}
-                              onFocus={(e) => e.target.select()}
                               className="w-12 text-center border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto text-sm"
                             />
                             <span className="text-xs text-gray-600">RPE</span>
