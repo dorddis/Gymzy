@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useMemo, useCallback } from "react";
 import { WorkoutSummaryScreen } from "@/components/workout/workout-summary-screen";
 import { WorkoutHeader } from "@/components/workout/workout-header";
 import { BottomNav } from "@/components/layout/bottom-nav";
@@ -34,6 +34,20 @@ export default function WorkoutPage() {
   const [restTimeRemaining, setRestTimeRemaining] = useState(120);
   const totalRestTime = 120;
   const [showIncompleteSetsWarning, setShowIncompleteSetsWarning] = useState(false);
+
+  // Reset warning when exercises change
+  useEffect(() => {
+    setShowIncompleteSetsWarning(false);
+  }, [currentWorkoutExercises]);
+
+  // Check if there are any changes in the workout
+  const hasChanges = useMemo(() => {
+    const changed = currentWorkoutExercises.some(exercise => 
+      exercise.sets.some(set => set.isExecuted || set.weight > 0 || set.reps > 0)
+    );
+    console.log(`WorkoutPage - currentWorkoutExercises length: ${currentWorkoutExercises.length}, hasChanges: ${changed}`);
+    return changed;
+  }, [currentWorkoutExercises]);
 
   const mainRef = useRef<HTMLDivElement>(null);
   const svgWrapperRef = useRef<HTMLDivElement>(null);
@@ -72,17 +86,21 @@ export default function WorkoutPage() {
     return () => clearInterval(timer);
   }, [isRestTimerRunning, restTimeRemaining]);
 
-  const handleTerminateWorkout = () => {
-    if (window.confirm("Are you sure you want to terminate the workout? All progress will be lost.")) {
-      setCurrentWorkoutExercises([]);
-      // TODO: Navigate back to home
-    }
-  };
+  const handleTerminateWorkout = useCallback(() => {
+    setCurrentWorkoutExercises([]);
+    router.push('/');
+  }, [router, setCurrentWorkoutExercises]);
 
-  const handleCompleteWorkout = () => {
+  const handleCompleteWorkout = useCallback(() => {
+    // Check if workout is empty
+    if (currentWorkoutExercises.length === 0) {
+      setShowIncompleteSetsWarning(true);
+      return;
+    }
+
     // Check if all sets are executed
-    const allSetsExecuted = currentWorkoutExercises.every(exercise => 
-      exercise.sets.every(set => set.isExecuted)
+    const allSetsExecuted = currentWorkoutExercises.every((exercise) => 
+      exercise.sets.every((set) => set.isExecuted)
     );
 
     if (allSetsExecuted) {
@@ -90,12 +108,12 @@ export default function WorkoutPage() {
     } else {
       // Show warning in WorkoutSummaryScreen
       const remainingSets = currentWorkoutExercises.reduce((total, exercise) => 
-        total + exercise.sets.filter(set => !set.isExecuted).length, 0);
+        total + exercise.sets.filter((set) => !set.isExecuted).length, 0);
       
       // Pass this to WorkoutSummaryScreen to show warning
       setShowIncompleteSetsWarning(true);
     }
-  };
+  }, [currentWorkoutExercises, setIsFinishWorkoutModalOpen, setShowIncompleteSetsWarning]);
 
   const handleSaveWorkout = () => {
     // The actual save logic is handled in the FinishWorkoutModal component
@@ -149,6 +167,7 @@ export default function WorkoutPage() {
         onTerminateWorkout={handleTerminateWorkout}
         onCompleteWorkout={handleCompleteWorkout}
         className="fixed top-0 left-0 right-0 z-20"
+        hasChanges={hasChanges}
       />
 
       <main
@@ -173,7 +192,7 @@ export default function WorkoutPage() {
           <WorkoutSummaryScreen 
             showIncompleteSetsWarning={showIncompleteSetsWarning}
             remainingSets={currentWorkoutExercises.reduce((total, exercise) => 
-              total + exercise.sets.filter(set => !set.isExecuted).length, 0)}
+              total + exercise.sets.filter((set) => !set.isExecuted).length, 0)}
           />
         </div>
       </main>

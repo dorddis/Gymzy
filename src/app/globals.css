@@ -58,7 +58,5 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    transform: none !important;
-    transform-origin: top left !important;
   }
 }

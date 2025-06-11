@@ -40,6 +40,7 @@ interface WorkoutContextType {
   setCurrentWorkoutExercises: React.Dispatch<React.SetStateAction<ExerciseWithSets[]>>;
   toggleSetExecuted: (exerciseIndex: number, setIndex: number) => void;
   totalVolume: number;
+  combinedMuscleVolumes: MuscleVolumes;
 }
 
 const WorkoutContext = createContext<WorkoutContextType | undefined>(undefined);
@@ -257,6 +258,7 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
     setCurrentWorkoutExercises,
     toggleSetExecuted,
     totalVolume,
+    combinedMuscleVolumes,
   };
 
   return (

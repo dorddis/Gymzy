@@ -193,7 +193,7 @@ export function WorkoutSummaryScreen({
   return (
     <div className="space-y-6">
       <AnimatePresence>
-        {showIncompleteSetsWarning && !allSetsExecuted && (
+        {showIncompleteSetsWarning && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -208,23 +208,29 @@ export function WorkoutSummaryScreen({
                 </div>
                 <div className="ml-3">
                   <p className="text-sm text-yellow-700 font-medium">
-                    You have {remainingSets} unfinished sets. Please mark all sets as executed before finishing your workout.
+                    {currentWorkoutExercises.length === 0 ? (
+                      "Please add at least one exercise to your workout. Click 'Add Exercise' to get started."
+                    ) : (
+                      `You have ${remainingSets} unfinished sets. Please mark all sets as finished before finishing your workout.`
+                    )}
                   </p>
                 </div>
               </div>
               
-              <div className="flex items-center gap-2 text-sm text-yellow-700">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
-                    1
+              {currentWorkoutExercises.length > 0 && (
+                <div className="flex items-center gap-2 text-sm text-yellow-700">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
+                      1
+                    </div>
+                    <ArrowRight className="h-4 w-4" />
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center text-white">
+                      <CheckCircle2 className="h-4 w-4" />
+                    </div>
                   </div>
-                  <ArrowRight className="h-4 w-4" />
-                  <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center text-white">
-                    <CheckCircle2 className="h-4 w-4" />
-                  </div>
+                  <span>Tap the number circles to mark sets as executed</span>
                 </div>
-                <span>Tap the number circles to mark sets as executed</span>
-              </div>
+              )}
             </div>
           </motion.div>
         )}

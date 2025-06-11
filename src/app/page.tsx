@@ -6,27 +6,30 @@ import { StatsCardsRow } from "@/components/dashboard/stats-cards-row";
 import { RecentWorkoutsCarousel } from "@/components/dashboard/recent-workouts-carousel";
 import { CommunityFeed } from "@/components/dashboard/community-feed";
 import { BottomNav } from "@/components/layout/bottom-nav";
-import Link from 'next/link';
+import { useWorkout } from "@/contexts/WorkoutContext";
 
 export default function HomePage() {
+  const { combinedMuscleVolumes } = useWorkout();
+
   return (
     <div className="min-h-screen bg-background flex flex-col pb-16">
       <StatusBar />
-      <main className="flex-grow space-y-4 py-4">
-        <HeatmapCard />
-        <StatsCardsRow />
-        {/* Add Workout CTA Button */}
-        <div className="px-4">
-          <Link href="/workout" passHref>
-            <button
-              className="w-full bg-secondary text-white py-3 px-4 rounded-xl text-lg font-semibold shadow-md hover:bg-secondary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2"
-            >
-              + Add Workout
-            </button>
-          </Link>
+      <main className="flex-1 overflow-y-auto pb-20">
+        <div className="container mx-auto px-4 py-6 space-y-6">
+          <div className="space-y-4">
+            <h2 className="text-2xl font-bold">Weekly Activation</h2>
+            <div className="grid gap-4">
+              <HeatmapCard
+                title="Muscle Activation"
+                muscleVolumes={combinedMuscleVolumes}
+                className="w-full"
+              />
+            </div>
+          </div>
+          <StatsCardsRow />
+          <RecentWorkoutsCarousel />
+          <CommunityFeed />
         </div>
-        <RecentWorkoutsCarousel />
-        <CommunityFeed />
       </main>
       <BottomNav />
     </div>
