@@ -89,38 +89,91 @@ export const EXERCISES: Exercise[] = (rawExercises as Array<{
 }>).map((e) => ({
   id: e.id,
   name: e.name,
-
-  // Whenever JSON says "Rectus Abdominis," split into upper + lower.
-  primaryMuscles: e.primaryMuscles.flatMap((m) => {
-    if (m === 'Rectus Abdominis') {
-      return [Muscle.UpperRectusAbdominis, Muscle.LowerRectusAbdominis];
+  primaryMuscles: e.primaryMuscles.map(m => {
+    // Map string muscle names to Muscle enum values
+    switch (m) {
+      case 'Pectoralis Major': return Muscle.PectoralisMajor;
+      case 'Anterior Deltoid': return Muscle.AnteriorDeltoid;
+      case 'Lateral Deltoid': return Muscle.LateralDeltoid;
+      case 'Posterior Deltoid': return Muscle.PosteriorDeltoid;
+      case 'Deltoid': return Muscle.Deltoid;
+      case 'Latissimus Dorsi': return Muscle.LatissimusDorsi;
+      case 'Trapezius': return Muscle.Trapezius;
+      case 'Rhomboids': return Muscle.Rhomboids;
+      case 'Erector Spinae': return Muscle.ErectorSpinae;
+      case 'Infraspinatus': return Muscle.Infraspinatus;
+      case 'Biceps Brachii': return Muscle.BicepsBrachii;
+      case 'Triceps Brachii': return Muscle.TricepsBrachii;
+      case 'Triceps Long Head': return Muscle.TricepsLongHead;
+      case 'Triceps Lateral Head': return Muscle.TricepsLateralHead;
+      case 'Forearms': return Muscle.Forearms;
+      case 'Brachialis': return Muscle.Brachialis;
+      case 'Brachioradialis': return Muscle.Brachioradialis;
+      case 'Quadriceps': return Muscle.Quadriceps;
+      case 'Hamstrings': return Muscle.Hamstrings;
+      case 'Gluteus Maximus': return Muscle.GluteusMaximus;
+      case 'Gluteus Medius': return Muscle.GluteusMedius;
+      case 'Calves': return Muscle.Calves;
+      case 'Sartorius': return Muscle.Sartorius;
+      case 'Upper Rectus Abdominis': return Muscle.UpperRectusAbdominis;
+      case 'Lower Rectus Abdominis': return Muscle.LowerRectusAbdominis;
+      case 'Obliques': return Muscle.Obliques;
+      case 'Sternocleidomastoid': return Muscle.Sternocleidomastoid;
+      case 'Serratus Anterior': return Muscle.SerratusAnterior;
+      case 'Tensor Fasciae Latae': return Muscle.TensorFasciaeLatae;
+      case 'Teres Major': return Muscle.TeresMajor;
+      case 'Thoracolumbar Fascia': return Muscle.ThoracolumbarFascia;
+      case 'Adductor Magnus': return Muscle.AdductorMagnus;
+      case 'Semitendinosus': return Muscle.Semitendinosus;
+      case 'Gracilis': return Muscle.Gracilis;
+      case 'Peroneus Longus': return Muscle.PeroneusLongus;
+      case 'Lower Trapezius': return Muscle.LowerTrapezius;
+      case 'Soleus': return Muscle.Soleus;
+      default: throw new Error(`Unknown muscle: ${m}`);
     }
-    if (m === 'Gluteus Medius') {
-      return [Muscle.GluteusMedius];
-    }
-    if (m === 'Triceps Long Head') {
-      return [Muscle.TricepsLongHead];
-    }
-    if (m === 'Triceps Lateral Head') {
-      return [Muscle.TricepsLateralHead];
-    }
-    return [m as Muscle];
   }),
-
-  secondaryMuscles: e.secondaryMuscles.flatMap((m) => {
-    if (m === 'Rectus Abdominis') {
-      return [Muscle.UpperRectusAbdominis, Muscle.LowerRectusAbdominis];
+  secondaryMuscles: e.secondaryMuscles.map(m => {
+    // Map string muscle names to Muscle enum values
+    switch (m) {
+      case 'Pectoralis Major': return Muscle.PectoralisMajor;
+      case 'Anterior Deltoid': return Muscle.AnteriorDeltoid;
+      case 'Lateral Deltoid': return Muscle.LateralDeltoid;
+      case 'Posterior Deltoid': return Muscle.PosteriorDeltoid;
+      case 'Deltoid': return Muscle.Deltoid;
+      case 'Latissimus Dorsi': return Muscle.LatissimusDorsi;
+      case 'Trapezius': return Muscle.Trapezius;
+      case 'Rhomboids': return Muscle.Rhomboids;
+      case 'Erector Spinae': return Muscle.ErectorSpinae;
+      case 'Infraspinatus': return Muscle.Infraspinatus;
+      case 'Biceps Brachii': return Muscle.BicepsBrachii;
+      case 'Triceps Brachii': return Muscle.TricepsBrachii;
+      case 'Triceps Long Head': return Muscle.TricepsLongHead;
+      case 'Triceps Lateral Head': return Muscle.TricepsLateralHead;
+      case 'Forearms': return Muscle.Forearms;
+      case 'Brachialis': return Muscle.Brachialis;
+      case 'Brachioradialis': return Muscle.Brachioradialis;
+      case 'Quadriceps': return Muscle.Quadriceps;
+      case 'Hamstrings': return Muscle.Hamstrings;
+      case 'Gluteus Maximus': return Muscle.GluteusMaximus;
+      case 'Gluteus Medius': return Muscle.GluteusMedius;
+      case 'Calves': return Muscle.Calves;
+      case 'Sartorius': return Muscle.Sartorius;
+      case 'Upper Rectus Abdominis': return Muscle.UpperRectusAbdominis;
+      case 'Lower Rectus Abdominis': return Muscle.LowerRectusAbdominis;
+      case 'Obliques': return Muscle.Obliques;
+      case 'Sternocleidomastoid': return Muscle.Sternocleidomastoid;
+      case 'Serratus Anterior': return Muscle.SerratusAnterior;
+      case 'Tensor Fasciae Latae': return Muscle.TensorFasciaeLatae;
+      case 'Teres Major': return Muscle.TeresMajor;
+      case 'Thoracolumbar Fascia': return Muscle.ThoracolumbarFascia;
+      case 'Adductor Magnus': return Muscle.AdductorMagnus;
+      case 'Semitendinosus': return Muscle.Semitendinosus;
+      case 'Gracilis': return Muscle.Gracilis;
+      case 'Peroneus Longus': return Muscle.PeroneusLongus;
+      case 'Lower Trapezius': return Muscle.LowerTrapezius;
+      case 'Soleus': return Muscle.Soleus;
+      default: throw new Error(`Unknown muscle: ${m}`);
     }
-    if (m === 'Gluteus Medius') {
-      return [Muscle.GluteusMedius];
-    }
-    if (m === 'Triceps Long Head') {
-      return [Muscle.TricepsLongHead];
-    }
-    if (m === 'Triceps Lateral Head') {
-      return [Muscle.TricepsLateralHead];
-    }
-    return [m as Muscle];
   }),
 }));
 

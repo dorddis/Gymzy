@@ -102,22 +102,29 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
     const volumes = initializeMuscleVolumes();
 
     currentWorkoutExercises.forEach(exercise => {
+      // Find the exercise details from EXERCISES constant
+      const exerciseDetails = EXERCISES.find(e => e.id === exercise.id);
+      if (!exerciseDetails) {
+        console.warn(`Exercise not found: ${exercise.id}`);
+        return;
+      }
+
+      // Calculate volume only from executed sets
       const exerciseVolume = exercise.sets.reduce((sum, set) => {
-        // Only count volume from executed sets
         return sum + (set.isExecuted ? set.weight * set.reps : 0);
       }, 0);
 
       // Add volume to primary muscles
-      if (exercise.primaryMuscles) {
-        exercise.primaryMuscles.forEach(muscle => {
-          volumes[muscle] = (volumes[muscle] || 0) + (exerciseVolume * 0.7); // Primary muscles get 70% of volume
+      if (exerciseDetails.primaryMuscles) {
+        exerciseDetails.primaryMuscles.forEach(muscle => {
+          volumes[muscle] = (volumes[muscle] || 0) + (exerciseVolume * 0.7); // Primary muscles get 70% of volume DO NOT CHANGE THIS
         });
       }
       
       // Add volume to secondary muscles
-      if (exercise.secondaryMuscles) {
-        exercise.secondaryMuscles.forEach(muscle => {
-          volumes[muscle] = (volumes[muscle] || 0) + (exerciseVolume * 0.3); // Secondary muscles get 30% of volume
+      if (exerciseDetails.secondaryMuscles) {
+        exerciseDetails.secondaryMuscles.forEach(muscle => {
+          volumes[muscle] = (volumes[muscle] || 0) + (exerciseVolume * 0.3); // Secondary muscles get 30% of volume DO NOT CHANGE THIS
         });
       }
     });
@@ -136,7 +143,9 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
     
     // Add current workout volumes
     Object.entries(currentWorkoutMuscleVolumes).forEach(([muscle, volume]) => {
-      volumes[muscle as Muscle] += volume;
+      if (volume > 0) { // Only add if there's actual volume
+        volumes[muscle as Muscle] = (volumes[muscle as Muscle] || 0) + volume;
+      }
     });
 
     return volumes;

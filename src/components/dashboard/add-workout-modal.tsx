@@ -34,8 +34,18 @@ export function AddWorkoutModal({ open, onOpenChange, onExerciseSave }: AddWorko
   }, []);
 
   const handleExerciseSelect = useCallback((exercise: Exercise) => {
-    // Directly save the exercise with an initial empty set
-    onExerciseSave({ ...exercise, sets: [{ weight: 0, reps: 0, rpe: 0, isWarmup: false }] });
+    // Find the exact exercise from EXERCISES to ensure ID matches
+    const exactExercise = EXERCISES.find(e => e.id === exercise.id);
+    if (!exactExercise) {
+      console.error(`Exercise not found: ${exercise.id}`);
+      return;
+    }
+    
+    // Use the exact exercise from EXERCISES
+    onExerciseSave({ 
+      ...exactExercise, 
+      sets: [{ weight: 0, reps: 0, rpe: 0, isWarmup: false, isExecuted: false }] 
+    });
     onOpenChange(false); // Close the modal
   }, [onExerciseSave, onOpenChange]);
 

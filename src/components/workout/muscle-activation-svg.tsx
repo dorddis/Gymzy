@@ -141,35 +141,43 @@ export function MuscleActivationSVG({ muscleVolumes = {}, className, scrollEleme
   const BodySvg = view === 'front' ? FrontFullBody : BackFullBody;
   const currentMuscleIdMap = view === 'front' ? frontMuscleIdMap : backMuscleIdMap;
 
-  // Initialize all muscles with 0 if undefined
+  // Initialize all muscles with 0 if undefined, and ensure all muscles are present
   const safeMuscleVolumes = useMemo(() => {
-    const volumes: Record<Muscle, number> = {} as Record<Muscle, number>;
-    // Initialize all muscles from the enum
+    const newVolumes: Record<Muscle, number> = {} as Record<Muscle, number>;
+
+    // Initialize all muscles from the enum to 0
     Object.values(Muscle).forEach((muscle) => {
       if (typeof muscle === 'string') {
-        volumes[muscle as Muscle] = 0;
+        newVolumes[muscle as Muscle] = 0;
       }
     });
-    // Override with actual values from muscleVolumes if it exists
+
+    // Merge actual volumes from props, overriding defaults
     if (muscleVolumes && typeof muscleVolumes === 'object') {
-      Object.entries(muscleVolumes).forEach(([muscle, volume]) => {
-        if (typeof muscle === 'string' && muscle in Muscle) {
-          volumes[muscle as Muscle] = volume ?? 0;
+      for (const muscleKey in muscleVolumes) {
+        if (Object.prototype.hasOwnProperty.call(muscleVolumes, muscleKey)) {
+          const muscle = muscleKey as Muscle;
+          newVolumes[muscle] = muscleVolumes[muscle] ?? 0;
         }
-      });
+      }
     }
-    return volumes;
+
+    return newVolumes;
   }, [muscleVolumes]);
 
   // Get relevant muscles (those with volume > 0)
   const relevantMuscles = useMemo(() => {
     return Object.entries(safeMuscleVolumes)
-      .filter(([_, volume]) => volume > 0)
+      .filter(([, volume]) => volume > 0)
       .map(([muscle]) => muscle as Muscle);
   }, [safeMuscleVolumes]);
 
   const applyMuscleActivation = useCallback(() => {
     if (!svgRef.current) return;
+
+    console.log("MuscleActivationSVG - muscleVolumes prop:", muscleVolumes);
+    console.log("MuscleActivationSVG - safeMuscleVolumes:", safeMuscleVolumes);
+    console.log("MuscleActivationSVG - relevantMuscles:", relevantMuscles);
 
     const allGroupIds: string[] = Object.values(currentMuscleIdMap).reduce<string[]>((acc, maybeId) => {
       if (!maybeId) return acc;
