@@ -48,6 +48,16 @@ export function FinishWorkoutModal({ open, onOpenChange, onSave }: FinishWorkout
       return;
     }
 
+    const selectedDate = new Date(dateTime);
+    if (selectedDate > new Date()) {
+      toast({
+        title: "Error",
+        description: "Workout date and time cannot be in the future.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setIsSaving(true);
       setUploadProgress(0);
@@ -155,6 +165,7 @@ export function FinishWorkoutModal({ open, onOpenChange, onSave }: FinishWorkout
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               className="h-24 resize-none"
+              maxLength={500}
             />
           </div>
 

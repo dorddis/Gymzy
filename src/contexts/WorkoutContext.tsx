@@ -13,6 +13,7 @@ import { Muscle, EXERCISES, Exercise } from '../../home/user/studio/src/lib/cons
 import { useAuth } from '@/contexts/AuthContext';
 import { Workout, getRecentWorkouts, createWorkout, updateWorkout, deleteWorkout } from '@/services/workout-service';
 import { ExerciseWithSets } from '@/types/exercise';
+import { workoutService } from '@/services/workout-service';
 
 interface LoggedWorkout {
   id: string;
@@ -41,6 +42,8 @@ interface WorkoutContextType {
   toggleSetExecuted: (exerciseIndex: number, setIndex: number) => void;
   totalVolume: number;
   combinedMuscleVolumes: MuscleVolumes;
+  latestWorkout: Workout | null;
+  fetchLatestWorkout: () => Promise<void>;
 }
 
 const WorkoutContext = createContext<WorkoutContextType | undefined>(undefined);
@@ -94,6 +97,7 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<Error | null>(null);
   const [calculatedMuscleVolumes, setCalculatedMuscleVolumes] = useState<MuscleVolumes>(initializeMuscleVolumes());
   const [currentWorkoutExercises, setCurrentWorkoutExercises] = useState<ExerciseWithSets[]>([]);
+  const [latestWorkout, setLatestWorkout] = useState<Workout | null>(null);
 
   // Add a function to toggle set execution
   const toggleSetExecuted = useCallback((exerciseIndex: number, setIndex: number) => {
@@ -202,9 +206,24 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const fetchLatestWorkout = useCallback(async () => {
+    if (!user) {
+      setLatestWorkout(null);
+      return;
+    }
+    try {
+      const latest = await workoutService.getLatestWorkout(user.uid);
+      setLatestWorkout(latest);
+    } catch (err) {
+      console.error("Failed to fetch latest workout:", err);
+      setLatestWorkout(null);
+    }
+  }, [user]);
+
   useEffect(() => {
     fetchWorkouts();
-  }, [user]);
+    fetchLatestWorkout();
+  }, [user, fetchLatestWorkout]);
 
   const addWorkout = async (workoutData: Omit<Workout, 'id' | 'createdAt' | 'updatedAt'>) => {
     if (!user) throw new Error('User must be logged in');
@@ -215,6 +234,8 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
         userId: user.uid
       });
       setRecentWorkouts(prev => [newWorkout, ...prev]);
+      // After adding a new workout, refetch the latest workout
+      await fetchLatestWorkout();
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to add workout'));
       throw err;
@@ -229,6 +250,8 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
           workout.id === workoutId ? { ...workout, ...updatedWorkout } : workout
         )
       );
+      // After updating a workout, refetch the latest workout
+      await fetchLatestWorkout();
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to update workout'));
       throw err;
@@ -239,6 +262,8 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
     try {
       await deleteWorkout(workoutId);
       setRecentWorkouts(prev => prev.filter(workout => workout.id !== workoutId));
+      // After deleting a workout, refetch the latest workout
+      await fetchLatestWorkout();
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to delete workout'));
       throw err;
@@ -259,6 +284,8 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
     toggleSetExecuted,
     totalVolume,
     combinedMuscleVolumes,
+    latestWorkout,
+    fetchLatestWorkout,
   };
 
   return (

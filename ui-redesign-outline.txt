@@ -43,15 +43,15 @@ Mark each step complete by changing `[ ]` to `[x]`.
 - Show total volume calculation
 - Do not display targeted muscle groups separately as they are shown in the svg
 - Add ability to reorder exercises
-[ ] 11.4. Finish Workout Modal
+[x] 11.4. Finish Workout Modal
 - Add date/time picker
 - Implement notes textarea
 - Add media upload functionality
 - Add public/private toggle
-[ ] 11.5. State Management & Data Flow
+[x] 11.5. State Management & Data Flow
 - Implement proper state management for multi-step flow
-- Add validation for all inputs
-- Handle "Copy last session" functionality
+- [x] Add validation for all inputs
+[x] Handle "Copy last session" functionality
 - Implement proper error handling
 [ ] 11.6. Integration with Backend
 - Connect with workout service

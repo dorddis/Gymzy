@@ -19,7 +19,7 @@ interface AddWorkoutModalProps {
 export function AddWorkoutModal({ open, onOpenChange, onExerciseSave }: AddWorkoutModalProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [copyLastSession, setCopyLastSession] = useState(false);
-  const { recentWorkouts } = useWorkout();
+  const { latestWorkout } = useWorkout();
 
   // Filter exercises based on search query
   const filteredExercises = EXERCISES.filter(exercise =>
@@ -41,13 +41,30 @@ export function AddWorkoutModal({ open, onOpenChange, onExerciseSave }: AddWorko
       return;
     }
     
-    // Use the exact exercise from EXERCISES
+    let setsToCopy = [{ weight: 0, reps: 0, rpe: 0, isWarmup: false, isExecuted: false }];
+
+    if (copyLastSession && latestWorkout) {
+      const lastSessionExercise = latestWorkout.exercises.find(
+        (ex) => ex.exerciseId === exactExercise.id
+      );
+
+      if (lastSessionExercise && lastSessionExercise.sets.length > 0) {
+        setsToCopy = lastSessionExercise.sets.map(set => ({
+          weight: set.weight,
+          reps: set.reps,
+          rpe: set.rpe || 0,
+          isWarmup: set.isWarmup || false,
+          isExecuted: false, // Sets from previous session should not be pre-marked as executed
+        }));
+      }
+    }
+
     onExerciseSave({ 
       ...exactExercise, 
-      sets: [{ weight: 0, reps: 0, rpe: 0, isWarmup: false, isExecuted: false }] 
+      sets: setsToCopy
     });
     onOpenChange(false); // Close the modal
-  }, [onExerciseSave, onOpenChange]);
+  }, [onExerciseSave, onOpenChange, copyLastSession, latestWorkout]);
 
   const handleExerciseInfo = useCallback((exercise: Exercise) => {
     // TODO: Show exercise details modal - this will need to be re-evaluated if still needed

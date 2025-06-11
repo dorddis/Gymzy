@@ -42,7 +42,8 @@ const workoutSchema = z.object({
   updatedAt: z.instanceof(Timestamp)
 });
 
-export type Workout = z.infer<typeof workoutSchema> & { id: string };
+export type WorkoutData = z.infer<typeof workoutSchema>;
+export type Workout = WorkoutData & { id: string };
 
 // Helper function to calculate total volume
 const calculateTotalVolume = (exercises: z.infer<typeof exerciseSchema>[]): number => {
@@ -91,8 +92,8 @@ export const getRecentWorkouts = async (userId: string, limitCount: number = 5) 
     const snapshot = await getDocs(workoutsQuery);
     return snapshot.docs.map(doc => ({
       id: doc.id,
-      ...doc.data()
-    } as Workout));
+      ...doc.data() as WorkoutData
+    }));
   } catch (error) {
     console.error('Error getting recent workouts:', error);
     throw error;
@@ -131,4 +132,21 @@ export const deleteWorkout = async (workoutId: string) => {
     console.error('Error deleting workout:', error);
     throw error;
   }
+};
+
+export const workoutService = {
+  getLatestWorkout: async (userId: string): Promise<Workout | null> => {
+    const q = query(
+      collection(db, 'workouts'),
+      where('userId', '==', userId),
+      orderBy('date', 'desc'),
+      limit(1)
+    );
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
+      const doc = querySnapshot.docs[0];
+      return { id: doc.id, ...doc.data() as WorkoutData };
+    }
+    return null;
+  },
 }; 
