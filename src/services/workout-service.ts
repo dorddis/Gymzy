@@ -24,6 +24,7 @@ const exerciseSchema = z.object({
     reps: z.number().min(0),
     rpe: z.number().min(1).max(10).optional(),
     isWarmup: z.boolean().optional(),
+    isExecuted: z.boolean().optional(),
   })),
   targetedMuscles: z.array(z.nativeEnum(Muscle)),
   notes: z.string().optional(),

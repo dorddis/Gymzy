@@ -34,17 +34,15 @@ import { AlertTriangle, ArrowDown, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface WorkoutSummaryScreenProps {
-  toggleSetExecuted: (exerciseIndex: number, setIndex: number) => void;
   showIncompleteSetsWarning: boolean;
   remainingSets: number;
 }
 
 export function WorkoutSummaryScreen({ 
-  toggleSetExecuted,
   showIncompleteSetsWarning,
   remainingSets
 }: WorkoutSummaryScreenProps) {
-  const { currentWorkoutExercises, setCurrentWorkoutExercises } = useWorkout();
+  const { currentWorkoutExercises, setCurrentWorkoutExercises, toggleSetExecuted } = useWorkout();
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = React.useState(false);
   const [exerciseToDeleteIndex, setExerciseToDeleteIndex] = React.useState<number | null>(null);
   const [deletingExerciseId, setDeletingExerciseId] = React.useState<string | null>(null);

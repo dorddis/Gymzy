@@ -38,6 +38,7 @@ interface WorkoutContextType {
   muscleVolumes: MuscleVolumes;
   currentWorkoutExercises: ExerciseWithSets[];
   setCurrentWorkoutExercises: React.Dispatch<React.SetStateAction<ExerciseWithSets[]>>;
+  toggleSetExecuted: (exerciseIndex: number, setIndex: number) => void;
   totalVolume: number;
 }
 
@@ -59,19 +60,24 @@ const calculateMuscleVolumes = (workouts: Workout[]): MuscleVolumes => {
     workout.exercises.forEach(exercise => {
       const exerciseDetails = EXERCISES.find(e => e.id === exercise.exerciseId);
       if (exerciseDetails) {
-        const totalExerciseVolume = exercise.sets.reduce((sum, set) => sum + (set.weight * set.reps), 0);
+        const totalExerciseVolume = exercise.sets.reduce((sum, set) => {
+          if (!set.isExecuted) return sum;
+          return sum + (set.weight * set.reps);
+        }, 0);
         
+        if (totalExerciseVolume === 0) return; // Skip if no executed sets
+
         // Add volume to primary muscles
         if (exerciseDetails.primaryMuscles) {
           exerciseDetails.primaryMuscles.forEach(muscle => {
-            volumes[muscle] = (volumes[muscle] || 0) + totalExerciseVolume;
+            volumes[muscle] = (volumes[muscle] || 0) + (totalExerciseVolume * 0.7); // Primary muscles get 70% of volume
           });
         }
         
         // Add volume to secondary muscles
         if (exerciseDetails.secondaryMuscles) {
           exerciseDetails.secondaryMuscles.forEach(muscle => {
-            volumes[muscle] = (volumes[muscle] || 0) + (totalExerciseVolume * 0.5); // Secondary muscles get 50% of the volume
+            volumes[muscle] = (volumes[muscle] || 0) + (totalExerciseVolume * 0.3); // Secondary muscles get 30% of volume
           });
         }
       }
@@ -88,9 +94,34 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
   const [calculatedMuscleVolumes, setCalculatedMuscleVolumes] = useState<MuscleVolumes>(initializeMuscleVolumes());
   const [currentWorkoutExercises, setCurrentWorkoutExercises] = useState<ExerciseWithSets[]>([]);
 
+  // Add a function to toggle set execution
+  const toggleSetExecuted = useCallback((exerciseIndex: number, setIndex: number) => {
+    setCurrentWorkoutExercises(prevExercises => {
+      const newExercises = [...prevExercises];
+      const exercise = newExercises[exerciseIndex];
+      const set = exercise.sets[setIndex];
+      
+      // Create a new set with toggled isExecuted
+      const updatedSet = { ...set, isExecuted: !set.isExecuted };
+      
+      // Create a new array of sets with the updated set
+      const newSets = [...exercise.sets];
+      newSets[setIndex] = updatedSet;
+      
+      // Create a new exercise with the updated sets
+      const updatedExercise = { ...exercise, sets: newSets };
+      
+      // Create a new array of exercises with the updated exercise
+      newExercises[exerciseIndex] = updatedExercise;
+      
+      return newExercises;
+    });
+  }, []);
+
   const totalVolume = useMemo(() => {
     return currentWorkoutExercises.reduce((totalExerciseVolume, exercise) => {
       const exerciseVolume = exercise.sets.reduce((totalSetVolume, set) => {
+        if (!set.isExecuted) return totalSetVolume;
         return totalSetVolume + (set.weight * set.reps);
       }, 0);
       return totalExerciseVolume + exerciseVolume;
@@ -111,8 +142,11 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
 
       // Calculate volume only from executed sets
       const exerciseVolume = exercise.sets.reduce((sum, set) => {
-        return sum + (set.isExecuted ? set.weight * set.reps : 0);
+        if (!set.isExecuted) return sum;
+        return sum + (set.weight * set.reps);
       }, 0);
+
+      if (exerciseVolume === 0) return; // Skip if no executed sets
 
       // Add volume to primary muscles
       if (exerciseDetails.primaryMuscles) {
@@ -221,6 +255,7 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
     muscleVolumes: combinedMuscleVolumes,
     currentWorkoutExercises,
     setCurrentWorkoutExercises,
+    toggleSetExecuted,
     totalVolume,
   };
 

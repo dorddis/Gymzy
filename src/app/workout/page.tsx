@@ -171,7 +171,6 @@ export default function WorkoutPage() {
 
         <div className="mt-4 px-4 relative z-10">
           <WorkoutSummaryScreen 
-            toggleSetExecuted={toggleSetExecuted}
             showIncompleteSetsWarning={showIncompleteSetsWarning}
             remainingSets={currentWorkoutExercises.reduce((total, exercise) => 
               total + exercise.sets.filter(set => !set.isExecuted).length, 0)}
