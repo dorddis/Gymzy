@@ -53,13 +53,13 @@ Mark each step complete by changing `[ ]` to `[x]`.
 - [x] Add validation for all inputs
 - [x] Handle "Copy last session" functionality
 - [x] Implement proper error handling
-[ ] 11.6. Integration with Backend
-- Connect with workout service
-- Implement proper data saving
-- Add loading states and error handling
-[ ] 12. Log Workout Screen  
-[ ] 13. Finish Workout Modal  
-[ ] 14. Stats & Trends Screen  
+[x] 11.6. Integration with Backend
+- [x] Connect with workout service
+- [x] Implement proper data saving
+- [x] Add loading states and error handling
+[x] 12. Log Workout Screen  
+[x] 13. Finish Workout Modal  
+[x] 14. Stats & Trends Screen  
 [ ] 15. Review & Polish
 
 ---

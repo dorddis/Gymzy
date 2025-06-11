@@ -109,6 +109,26 @@ export const getRecentWorkouts = async (userId: string, limitCount: number = 5) 
   }
 };
 
+// Get all workouts for a user
+export const getAllWorkouts = async (userId: string): Promise<Workout[]> => {
+  try {
+    const workoutsQuery = query(
+      collection(db, 'workouts'),
+      where('userId', '==', userId),
+      orderBy('date', 'desc')
+    );
+
+    const snapshot = await getDocs(workoutsQuery);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data() as WorkoutData
+    }));
+  } catch (error) {
+    console.error('Error getting all workouts:', error);
+    throw error;
+  }
+};
+
 // Update an existing workout
 export const updateWorkout = async (workoutId: string, workoutData: Partial<Workout>) => {
   try {

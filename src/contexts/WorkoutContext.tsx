@@ -11,7 +11,7 @@ import React, {
 } from 'react';
 import { Muscle, EXERCISES, Exercise } from '../../home/user/studio/src/lib/constants';
 import { useAuth } from '@/contexts/AuthContext';
-import { Workout, getRecentWorkouts, createWorkout, updateWorkout, deleteWorkout } from '@/services/workout-service';
+import { Workout, getRecentWorkouts, createWorkout, updateWorkout, deleteWorkout, getAllWorkouts } from '@/services/workout-service';
 import { ExerciseWithSets } from '@/types/exercise';
 import { workoutService } from '@/services/workout-service';
 
@@ -44,6 +44,7 @@ interface WorkoutContextType {
   combinedMuscleVolumes: MuscleVolumes;
   latestWorkout: Workout | null;
   fetchLatestWorkout: () => Promise<void>;
+  allWorkouts: Workout[];
 }
 
 const WorkoutContext = createContext<WorkoutContextType | undefined>(undefined);
@@ -98,6 +99,7 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
   const [calculatedMuscleVolumes, setCalculatedMuscleVolumes] = useState<MuscleVolumes>(initializeMuscleVolumes());
   const [currentWorkoutExercises, setCurrentWorkoutExercises] = useState<ExerciseWithSets[]>([]);
   const [latestWorkout, setLatestWorkout] = useState<Workout | null>(null);
+  const [allWorkouts, setAllWorkouts] = useState<Workout[]>([]);
 
   // Add a function to toggle set execution
   const toggleSetExecuted = useCallback((exerciseIndex: number, setIndex: number) => {
@@ -198,9 +200,14 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
       const workouts = await getRecentWorkouts(user.uid);
       setRecentWorkouts(workouts);
       setCalculatedMuscleVolumes(calculateMuscleVolumes(workouts));
-      setError(null);
+
+      // Fetch all workouts for the progress tracker
+      const allUserWorkouts = await getAllWorkouts(user.uid);
+      setAllWorkouts(allUserWorkouts);
+
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to fetch workouts'));
+      setError(err as Error);
+      console.error("Failed to fetch workouts:", err);
     } finally {
       setLoading(false);
     }
@@ -286,6 +293,7 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
     combinedMuscleVolumes,
     latestWorkout,
     fetchLatestWorkout,
+    allWorkouts,
   };
 
   return (
