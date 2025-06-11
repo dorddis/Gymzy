@@ -10,7 +10,7 @@ import { useWorkout } from '@/contexts/WorkoutContext';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { AddWorkoutModal } from '@/components/dashboard/add-workout-modal';
-import { ChevronDown, RotateCcw, Play, Pause } from 'lucide-react';
+import { RotateCcw, Play, Pause } from 'lucide-react';
 import { AnimatedTimer } from '@/components/ui/animated-timer';
 
 export default function WorkoutPage() {
@@ -95,15 +95,6 @@ export default function WorkoutPage() {
     return () => clearInterval(timer);
   }, [isRestTimerRunning, restTimeRemaining]);
 
-  const scrollToBottom = () => {
-    if (mainScrollRef.current) {
-      mainScrollRef.current.scrollTo({
-        top: mainScrollRef.current.scrollHeight,
-        behavior: 'smooth'
-      });
-    }
-  };
-
   return (
     <div className="min-h-screen bg-background flex flex-col relative">
       <WorkoutHeader
@@ -178,17 +169,6 @@ export default function WorkoutPage() {
           </div>
         </div>
       </div>
-
-      {currentWorkoutExercises.length > 0 && (
-        <Button
-          variant="ghost"
-          size="icon"
-          className="fixed bottom-[190px] right-4 z-30 bg-white rounded-full shadow-md"
-          onClick={scrollToBottom}
-        >
-          <ChevronDown className="h-6 w-6" />
-        </Button>
-      )}
 
       <AddWorkoutModal
         open={isAddExerciseModalOpen}

@@ -19,44 +19,44 @@ Mark each step complete by changing `[ ]` to `[x]`.
 [x] 4. Weekly Muscle Heatmap Card  
 [x] 5. Stats Cards Row  
 [x] 6. Add Workout CTA  
-&nbsp;&nbsp;&nbsp;&nbsp;[x] 6.1. See saved home-dashboard HTML → `design/home-dashboard.html.txt`  
-&nbsp;&nbsp;&nbsp;&nbsp;[x] 6.2. See saved add-workout HTML → `design/add-workout.html.txt`  
-&nbsp;&nbsp;&nbsp;&nbsp;[x] 6.3. Hook button click to open modal  
+[x] 6.1. See saved home-dashboard HTML → `design/home-dashboard.html.txt`  
+[x] 6.2. See saved add-workout HTML → `design/add-workout.html.txt`  
+[x] 6.3. Hook button click to open modal  
 [x] 7. Recent Workouts Carousel  
 [x] 8. Replace Main Dashboard Layout  
 [x] 9. Community Feed Section  
-&nbsp;&nbsp;&nbsp;&nbsp;[x] 9.1. Implement CommunityFeed component (frontend)  
-&nbsp;&nbsp;&nbsp;&nbsp;[x] 9.2. Design and implement backend data structure/API for community posts  
-&nbsp;&nbsp;&nbsp;&nbsp;[x] 9.3. Integrate frontend with backend  
+[x] 9.1. Implement CommunityFeed component (frontend)  
+[x] 9.2. Design and implement backend data structure/API for community posts  
+[x] 9.3. Integrate frontend with backend  
 [x] 10. Bottom Navigation Bar  
 [ ] 11. Add Workout Modal  
-&nbsp;&nbsp;&nbsp;&nbsp;[ ] 11.1. Exercise Selection Screen
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Implement search functionality with debounce
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Add "Most Used" exercises section with actual usage data
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Implement exercise selection with proper state management
-&nbsp;&nbsp;&nbsp;&nbsp;[ ] 11.2. Exercise Details Screen
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Create exercise details view with sets/reps/weight/RPE inputs
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Add "Add Set" and "Add Warmup Set" functionality
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Implement plate calculator widget
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Add exercise notes and tips section
-&nbsp;&nbsp;&nbsp;&nbsp;[ ] 11.3. Workout Summary Screen
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Show total volume calculation
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Display targeted muscle groups
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Add ability to reorder exercises
-&nbsp;&nbsp;&nbsp;&nbsp;[ ] 11.4. Finish Workout Modal
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Add date/time picker
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Implement notes textarea
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Add media upload functionality
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Add public/private toggle
-&nbsp;&nbsp;&nbsp;&nbsp;[ ] 11.5. State Management & Data Flow
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Implement proper state management for multi-step flow
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Add validation for all inputs
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Handle "Copy last session" functionality
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Implement proper error handling
-&nbsp;&nbsp;&nbsp;&nbsp;[ ] 11.6. Integration with Backend
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Connect with workout service
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Implement proper data saving
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Add loading states and error handling
+[x] 11.1. Exercise Selection Screen
+- Implement search functionality with debounce
+- Add "Most Used" exercises section with actual usage data
+- Implement exercise selection with proper state management
+[x] 11.2. Exercise Details Screen
+- Create exercise details view with sets/reps/weight/RPE inputs
+- Add "Add Set" and "Add Warmup Set" functionality
+- Implement plate calculator widget
+- Add exercise notes and tips section
+[ ] 11.3. Workout Summary Screen
+- Show total volume calculation
+- Do not display targeted muscle groups separately as they are shown in the svg
+- Add ability to reorder exercises
+[ ] 11.4. Finish Workout Modal
+- Add date/time picker
+- Implement notes textarea
+- Add media upload functionality
+- Add public/private toggle
+[ ] 11.5. State Management & Data Flow
+- Implement proper state management for multi-step flow
+- Add validation for all inputs
+- Handle "Copy last session" functionality
+- Implement proper error handling
+[ ] 11.6. Integration with Backend
+- Connect with workout service
+- Implement proper data saving
+- Add loading states and error handling
 [ ] 12. Log Workout Screen  
 [ ] 13. Finish Workout Modal  
 [ ] 14. Stats & Trends Screen  
@@ -200,32 +200,12 @@ Mark each step complete by changing `[ ]` to `[x]`.
      - Exercise-specific tips and form guidance
      - Volume calculation per set and total
 
-3. **Workout Summary Screen**
-   - **Components:**
-     - `WorkoutSummary.tsx`: Overview of selected exercises
-     - `MuscleHeatmap.tsx`: Visual representation of targeted muscles
-     - `ExerciseReorder.tsx`: Drag-and-drop exercise reordering
-   - **Features:**
-     - Total volume calculation
-     - Muscle group distribution
-     - Exercise reordering
-     - Quick edit capabilities
-     - Workout duration estimation
-
 4. **Muscle Activation Visualization Redesign**
    - **Components:**
      - `MuscleActivationSVG.tsx`: Dedicated component for displaying the muscle activation SVG.
    - **Features:**
-     - Display only the muscle activation SVG at the top of the screen.
-     - Remove muscle names and individual volume displays from the initial view.
      - Implement a scroll-blur effect for the SVG, where it blurs and allows content to scroll over it.
-     - Make the blurred SVG tappable to reveal a detailed, full-screen muscle activation view (e.g., a modal).
-     - Reuse and adapt logic from `src/components/dashboard/anatomy-visualization.tsx` and `src/components/dashboard/heatmap-card.tsx` for muscle activation tracking and display.
-
-5. **Exercise Display & Input Styling**
-   - Apply a rounded border around each added exercise block.
-   - Remove borders from the weight, reps, and RPE text inputs.
-   - Reduce the space taken by the weight, reps, and RPE text inputs.
+     - Make the blurred SVG tappable to automatically scroll down the current exercises to reveal the complete svg with smooth bezier animations.
 
 4. **Finish Workout Modal**
    - **Components:**

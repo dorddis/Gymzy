@@ -148,19 +148,9 @@ export function MuscleActivationSVG({ muscleVolumes = {}, className, scrollEleme
     // Initialize all muscles from the enum to 0
     Object.values(Muscle).forEach((muscle) => {
       if (typeof muscle === 'string') {
-        newVolumes[muscle as Muscle] = 0;
+        newVolumes[muscle as Muscle] = muscleVolumes?.[muscle as Muscle] ?? 0; // Directly assign from prop or default to 0
       }
     });
-
-    // Merge actual volumes from props, overriding defaults
-    if (muscleVolumes && typeof muscleVolumes === 'object') {
-      for (const muscleKey in muscleVolumes) {
-        if (Object.prototype.hasOwnProperty.call(muscleVolumes, muscleKey)) {
-          const muscle = muscleKey as Muscle;
-          newVolumes[muscle] = muscleVolumes[muscle] ?? 0;
-        }
-      }
-    }
 
     return newVolumes;
   }, [muscleVolumes]);
