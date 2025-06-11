@@ -10,7 +10,7 @@ import { useWorkout } from '@/contexts/WorkoutContext';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { AddWorkoutModal } from '@/components/dashboard/add-workout-modal';
-import { ChevronDown, RotateCcw } from 'lucide-react';
+import { ChevronDown, RotateCcw, Play, Pause } from 'lucide-react';
 import { AnimatedTimer } from '@/components/ui/animated-timer';
 
 export default function WorkoutPage() {
@@ -77,6 +77,10 @@ export default function WorkoutPage() {
     console.log("Reset button clicked");
     setIsRestTimerRunning(false);
     setRestTimeRemaining(totalRestTime);
+  };
+
+  const toggleRestTimer = () => {
+    setIsRestTimerRunning(!isRestTimerRunning);
   };
 
   useEffect(() => {
@@ -154,8 +158,20 @@ export default function WorkoutPage() {
             <Button
               variant="ghost"
               size="icon"
+              onClick={toggleRestTimer}
+              className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 text-gray-600 hover:text-gray-800 hover:bg-transparent focus:outline-none focus:ring-0"
+            >
+              {isRestTimerRunning ? (
+                <Pause className="h-5 w-5" />
+              ) : (
+                <Play className="h-5 w-5" />
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={resetRestTimer}
-              className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 text-gray-600 hover:text-gray-800 hover:bg-transparent z-20"
+              className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 text-gray-600 hover:text-gray-800 hover:bg-transparent focus:outline-none focus:ring-0"
             >
               <RotateCcw className="h-5 w-5" />
             </Button>
