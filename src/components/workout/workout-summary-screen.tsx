@@ -36,11 +36,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface WorkoutSummaryScreenProps {
   showIncompleteSetsWarning: boolean;
   remainingSets: number;
+  showInvalidSetsWarning?: boolean;
 }
 
 export function WorkoutSummaryScreen({ 
   showIncompleteSetsWarning,
-  remainingSets
+  remainingSets,
+  showInvalidSetsWarning = false
 }: WorkoutSummaryScreenProps) {
   const { currentWorkoutExercises, setCurrentWorkoutExercises, toggleSetExecuted } = useWorkout();
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = React.useState(false);
@@ -232,6 +234,29 @@ export function WorkoutSummaryScreen({
                   <span>Tap the number circles to mark sets as executed</span>
                 </div>
               )}
+            </div>
+          </motion.div>
+        )}
+
+        {showInvalidSetsWarning && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4 rounded-lg shadow-lg"
+          >
+            <div className="flex flex-col gap-3">
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <AlertTriangle className="h-5 w-5 text-yellow-400" />
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-yellow-700 font-medium">
+                    You have sets with 0 weight and 0 reps. Please fill in the weight and reps for all sets before finishing your workout.
+                  </p>
+                </div>
+              </div>
             </div>
           </motion.div>
         )}

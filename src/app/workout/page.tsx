@@ -34,10 +34,12 @@ export default function WorkoutPage() {
   const [restTimeRemaining, setRestTimeRemaining] = useState(120);
   const totalRestTime = 120;
   const [showIncompleteSetsWarning, setShowIncompleteSetsWarning] = useState(false);
+  const [showInvalidSetsWarning, setShowInvalidSetsWarning] = useState(false);
 
-  // Reset warning when exercises change
+  // Reset warnings when exercises change
   useEffect(() => {
     setShowIncompleteSetsWarning(false);
+    setShowInvalidSetsWarning(false);
   }, [currentWorkoutExercises]);
 
   // Check if there are any changes in the workout
@@ -92,28 +94,34 @@ export default function WorkoutPage() {
   }, [router, setCurrentWorkoutExercises]);
 
   const handleCompleteWorkout = useCallback(() => {
-    // Check if workout is empty
     if (currentWorkoutExercises.length === 0) {
       setShowIncompleteSetsWarning(true);
       return;
     }
 
-    // Check if all sets are executed
+    // Check if all sets are executed (higher priority)
     const allSetsExecuted = currentWorkoutExercises.every((exercise) => 
       exercise.sets.every((set) => set.isExecuted)
     );
 
-    if (allSetsExecuted) {
-      setIsFinishWorkoutModalOpen(true);
-    } else {
-      // Show warning in WorkoutSummaryScreen
-      const remainingSets = currentWorkoutExercises.reduce((total, exercise) => 
-        total + exercise.sets.filter((set) => !set.isExecuted).length, 0);
-      
-      // Pass this to WorkoutSummaryScreen to show warning
+    if (!allSetsExecuted) {
       setShowIncompleteSetsWarning(true);
+      return;
     }
-  }, [currentWorkoutExercises, setIsFinishWorkoutModalOpen, setShowIncompleteSetsWarning]);
+
+    // Check for invalid sets (0 weight and 0 reps - lower priority)
+    const hasInvalidSets = currentWorkoutExercises.some(exercise => 
+      exercise.sets.some(set => set.weight === 0 && set.reps === 0)
+    );
+
+    if (hasInvalidSets) {
+      setShowInvalidSetsWarning(true);
+      return;
+    }
+
+    // If all checks pass, open the finish workout modal
+    setIsFinishWorkoutModalOpen(true);
+  }, [currentWorkoutExercises, setIsFinishWorkoutModalOpen]);
 
   const handleSaveWorkout = () => {
     // The actual save logic is handled in the FinishWorkoutModal component
@@ -193,6 +201,7 @@ export default function WorkoutPage() {
             showIncompleteSetsWarning={showIncompleteSetsWarning}
             remainingSets={currentWorkoutExercises.reduce((total, exercise) => 
               total + exercise.sets.filter((set) => !set.isExecuted).length, 0)}
+            showInvalidSetsWarning={showInvalidSetsWarning}
           />
         </div>
       </main>
