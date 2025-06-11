@@ -63,7 +63,7 @@ export function WorkoutSummaryScreen({
     [currentWorkoutExercises]
   );
 
-  const updateSet = (exerciseIndex: number, setIndex: number, field: keyof ExerciseWithSets['sets'][0], value: number | boolean) => {
+  const updateSet = (exerciseIndex: number, setIndex: number, field: keyof ExerciseWithSets['sets'][0], value: number | boolean | undefined) => {
     setCurrentWorkoutExercises((prevExercises: ExerciseWithSets[]) => {
       const newExercises = [...prevExercises];
       newExercises[exerciseIndex] = {
@@ -83,7 +83,7 @@ export function WorkoutSummaryScreen({
       
       // Get the last non-warmup set's values if adding a regular set
       // or the last warmup set's values if adding a warmup set
-      let lastSetValues = { weight: 0, reps: 0, rpe: 0 };
+      let lastSetValues: { weight: number; reps: number; rpe: number | undefined } = { weight: 0, reps: 0, rpe: undefined };
       if (currentSets.length > 0) {
         if (isWarmup) {
           // Find the last warmup set
@@ -328,8 +328,12 @@ export function WorkoutSummaryScreen({
                           <Input
                             type="number"
                             value={set.weight}
-                            onChange={(e) => updateSet(exerciseIndex, setIndex, 'weight', parseFloat(e.target.value) || 0)}
+                            onChange={(e) => {
+                              const value = parseFloat(e.target.value);
+                              updateSet(exerciseIndex, setIndex, 'weight', Math.max(0, value));
+                            }}
                             className="w-12 text-center border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto text-sm"
+                            min="0"
                           />
                           <span className="text-xs text-gray-600">kg</span>
                         </div>
@@ -337,17 +341,28 @@ export function WorkoutSummaryScreen({
                           <Input
                             type="number"
                             value={set.reps}
-                            onChange={(e) => updateSet(exerciseIndex, setIndex, 'reps', parseInt(e.target.value) || 0)}
+                            onChange={(e) => {
+                              const value = parseInt(e.target.value);
+                              updateSet(exerciseIndex, setIndex, 'reps', Math.max(0, value));
+                            }}
                             className="w-12 text-center border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto text-sm"
+                            min="0"
                           />
                           <span className="text-xs text-gray-600">reps</span>
                         </div>
                         <div className="flex items-center justify-center">
                           <Input
                             type="number"
-                            value={set.rpe}
-                            onChange={(e) => updateSet(exerciseIndex, setIndex, 'rpe', parseFloat(e.target.value) || 0)}
+                            value={set.rpe === undefined ? '' : set.rpe} // Handle undefined for empty input
+                            onChange={(e) => {
+                              const value = parseFloat(e.target.value);
+                              // Clamp RPE between 1 and 10, or set to undefined if input is empty or invalid
+                              const validatedRpe = isNaN(value) ? undefined : Math.min(10, Math.max(1, value));
+                              updateSet(exerciseIndex, setIndex, 'rpe', validatedRpe);
+                            }}
                             className="w-12 text-center border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto text-sm"
+                            min="1"
+                            max="10"
                           />
                           <span className="text-xs text-gray-600">RPE</span>
                         </div>

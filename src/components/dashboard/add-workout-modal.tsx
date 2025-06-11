@@ -49,13 +49,23 @@ export function AddWorkoutModal({ open, onOpenChange, onExerciseSave }: AddWorko
       );
 
       if (lastSessionExercise && lastSessionExercise.sets.length > 0) {
-        setsToCopy = lastSessionExercise.sets.map(set => ({
-          weight: set.weight,
-          reps: set.reps,
-          rpe: set.rpe || 0,
-          isWarmup: set.isWarmup || false,
-          isExecuted: false, // Sets from previous session should not be pre-marked as executed
-        }));
+        setsToCopy = lastSessionExercise.sets.map(set => {
+          const validatedWeight = typeof set.weight === 'number' && set.weight >= 0 ? set.weight : 0;
+          const validatedReps = typeof set.reps === 'number' && set.reps >= 0 ? set.reps : 0;
+          const validatedRpe = typeof set.rpe === 'number' && set.rpe >= 1 && set.rpe <= 10 ? set.rpe : undefined;
+          
+          if ((typeof set.weight !== 'number' || set.weight < 0) || (typeof set.reps !== 'number' || set.reps < 0) || (set.rpe !== undefined && (typeof set.rpe !== 'number' || set.rpe < 1 || set.rpe > 10))) {
+            console.warn(`Validation failed for copied set in exercise ${exactExercise.name}. Invalid values defaulted to 0 or undefined.`);
+          }
+
+          return {
+            weight: validatedWeight,
+            reps: validatedReps,
+            rpe: validatedRpe,
+            isWarmup: set.isWarmup || false,
+            isExecuted: false, // Sets from previous session should not be pre-marked as executed
+          };
+        });
       }
     }
 

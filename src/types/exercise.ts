@@ -16,7 +16,7 @@ export interface Exercise {
 export interface ExerciseSet {
   weight: number;
   reps: number;
-  rpe: number;
+  rpe: number | undefined;
   isWarmup: boolean;
   isExecuted?: boolean;
 }
