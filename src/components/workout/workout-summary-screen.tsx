@@ -47,7 +47,6 @@ export function WorkoutSummaryScreen({
   const [exerciseToDeleteIndex, setExerciseToDeleteIndex] = React.useState<number | null>(null);
   const [deletingExerciseId, setDeletingExerciseId] = React.useState<string | null>(null);
   const [expandedNotesExerciseId, setExpandedNotesExerciseId] = React.useState<string | null>(null);
-  const [inputErrors, setInputErrors] = React.useState<Record<number, Record<number, { weight?: boolean; reps?: boolean; rpe?: boolean }>>>({});
 
   // Calculate total sets
   const totalSets = React.useMemo(() => 
@@ -64,49 +63,13 @@ export function WorkoutSummaryScreen({
     [currentWorkoutExercises]
   );
 
-  const updateSet = (exerciseIndex: number, setIndex: number, field: keyof ExerciseWithSets['sets'][0], value: any) => {
+  const updateSet = (exerciseIndex: number, setIndex: number, field: keyof ExerciseWithSets['sets'][0], value: number | boolean) => {
     setCurrentWorkoutExercises((prevExercises: ExerciseWithSets[]) => {
       const newExercises = [...prevExercises];
-      const currentSet = { ...newExercises[exerciseIndex].sets[setIndex] };
-      let updatedValue = value;
-
-      if (field === 'weight' || field === 'reps' || field === 'rpe') {
-        const numValue = Number(value);
-        let hasError = false;
-
-        if (isNaN(numValue)) {
-          updatedValue = currentSet[field] || 0;
-          hasError = true;
-        } else {
-          if (field === 'weight') {
-            updatedValue = Math.max(0, numValue); // Weight cannot be negative
-          } else if (field === 'reps') {
-            updatedValue = Math.max(0, Math.floor(numValue)); // Reps must be non-negative integer
-          } else if (field === 'rpe') {
-            updatedValue = Math.max(0, Math.min(10, Math.floor(numValue))); // RPE must be integer between 0-10
-          }
-          if (updatedValue !== numValue) { // If value was clamped or floored, consider it an error
-            hasError = true;
-          }
-        }
-
-        setInputErrors(prevErrors => {
-          const newErrors = { ...prevErrors };
-          if (!newErrors[exerciseIndex]) {
-            newErrors[exerciseIndex] = {};
-          }
-          if (!newErrors[exerciseIndex][setIndex]) {
-            newErrors[exerciseIndex][setIndex] = {};
-          }
-          newErrors[exerciseIndex][setIndex][field as 'weight' | 'reps' | 'rpe'] = hasError;
-          return newErrors;
-        });
-      }
-
       newExercises[exerciseIndex] = {
         ...newExercises[exerciseIndex],
-        sets: newExercises[exerciseIndex].sets.map((set, i) =>
-          i === setIndex ? { ...currentSet, [field]: updatedValue } : set
+        sets: newExercises[exerciseIndex].sets.map((set, i) => 
+          i === setIndex ? { ...set, [field]: value } : set
         )
       };
       return newExercises;
@@ -361,39 +324,32 @@ export function WorkoutSummaryScreen({
                         {set.isWarmup ? "W" : setIndex + 1}
                       </button>
                       <div className="flex items-center justify-center space-x-1">
-                        <div className="flex flex-col items-center">
-                          <label className="text-xs text-gray-500 mb-1">Weight</label>
-                          <div className="flex items-center">
-                            <Input
-                              type="number"
-                              value={set.weight}
-                              onChange={(e) => updateSet(exerciseIndex, setIndex, 'weight', e.target.value)}
-                              className={`w-12 text-center border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto text-sm ${inputErrors[exerciseIndex]?.[setIndex]?.weight ? 'border-red-500 ring-red-500' : ''}`}
-                            />
-                            <span className="text-gray-500 text-sm">kg</span>
-                          </div>
+                        <div className="flex items-center justify-center">
+                          <Input
+                            type="number"
+                            value={set.weight}
+                            onChange={(e) => updateSet(exerciseIndex, setIndex, 'weight', parseFloat(e.target.value) || 0)}
+                            className="w-12 text-center border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto text-sm"
+                          />
+                          <span className="text-xs text-gray-600">kg</span>
                         </div>
-                        <div className="flex flex-col items-center">
-                          <label className="text-xs text-gray-500 mb-1">Reps</label>
-                          <div className="flex items-center">
-                            <Input
-                              type="number"
-                              value={set.reps}
-                              onChange={(e) => updateSet(exerciseIndex, setIndex, 'reps', e.target.value)}
-                              className={`w-12 text-center border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto text-sm ${inputErrors[exerciseIndex]?.[setIndex]?.reps ? 'border-red-500 ring-red-500' : ''}`}
-                            />
-                          </div>
+                        <div className="flex items-center justify-center">
+                          <Input
+                            type="number"
+                            value={set.reps}
+                            onChange={(e) => updateSet(exerciseIndex, setIndex, 'reps', parseInt(e.target.value) || 0)}
+                            className="w-12 text-center border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto text-sm"
+                          />
+                          <span className="text-xs text-gray-600">reps</span>
                         </div>
-                        <div className="flex flex-col items-center">
-                          <label className="text-xs text-gray-500 mb-1">RPE</label>
-                          <div className="flex items-center">
-                            <Input
-                              type="number"
-                              value={set.rpe}
-                              onChange={(e) => updateSet(exerciseIndex, setIndex, 'rpe', e.target.value)}
-                              className={`w-12 text-center border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto text-sm ${inputErrors[exerciseIndex]?.[setIndex]?.rpe ? 'border-red-500 ring-red-500' : ''}`}
-                            />
-                          </div>
+                        <div className="flex items-center justify-center">
+                          <Input
+                            type="number"
+                            value={set.rpe}
+                            onChange={(e) => updateSet(exerciseIndex, setIndex, 'rpe', parseFloat(e.target.value) || 0)}
+                            className="w-12 text-center border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto text-sm"
+                          />
+                          <span className="text-xs text-gray-600">RPE</span>
                         </div>
                       </div>
                     </div>
