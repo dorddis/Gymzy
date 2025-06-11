@@ -7,10 +7,12 @@ import React, {
   useCallback,
   ReactNode,
   useEffect,
+  useMemo
 } from 'react';
 import { Muscle, EXERCISES, Exercise } from '../../home/user/studio/src/lib/constants';
 import { useAuth } from '@/contexts/AuthContext';
 import { Workout, getRecentWorkouts, createWorkout, updateWorkout, deleteWorkout } from '@/services/workout-service';
+import { ExerciseWithSets } from '@/types/exercise';
 
 interface LoggedWorkout {
   id: string;
@@ -34,6 +36,9 @@ interface WorkoutContextType {
   deleteWorkout: (workoutId: string) => Promise<void>;
   refreshWorkouts: () => Promise<void>;
   muscleVolumes: MuscleVolumes;
+  currentWorkoutExercises: ExerciseWithSets[];
+  setCurrentWorkoutExercises: React.Dispatch<React.SetStateAction<ExerciseWithSets[]>>;
+  totalVolume: number;
 }
 
 const WorkoutContext = createContext<WorkoutContextType | undefined>(undefined);
@@ -76,6 +81,16 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [calculatedMuscleVolumes, setCalculatedMuscleVolumes] = useState<MuscleVolumes>(() => calculateMuscleVolumes([])); // Initialize with empty workouts
+  const [currentWorkoutExercises, setCurrentWorkoutExercises] = useState<ExerciseWithSets[]>([]); // New state for current workout
+
+  const totalVolume = useMemo(() => {
+    return currentWorkoutExercises.reduce((totalExerciseVolume, exercise) => {
+      const exerciseVolume = exercise.sets.reduce((totalSetVolume, set) => {
+        return totalSetVolume + (set.weight * set.reps);
+      }, 0);
+      return totalExerciseVolume + exerciseVolume;
+    }, 0);
+  }, [currentWorkoutExercises]);
 
   const fetchWorkouts = async () => {
     if (!user) return;
@@ -145,6 +160,9 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
     deleteWorkout: deleteWorkoutHandler,
     refreshWorkouts: fetchWorkouts,
     muscleVolumes: calculatedMuscleVolumes,
+    currentWorkoutExercises,
+    setCurrentWorkoutExercises,
+    totalVolume,
   };
 
   return (

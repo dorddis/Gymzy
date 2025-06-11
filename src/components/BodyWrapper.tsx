@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export function BodyWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <body className={inter.className}>
+    <body suppressHydrationWarning className={inter.className}>
       <Providers>
         {children}
       </Providers>

@@ -18,6 +18,7 @@ export interface ExerciseSet {
   reps: number;
   rpe: number;
   isWarmup: boolean;
+  isExecuted?: boolean;
 }
 
 export interface ExerciseWithSets extends Exercise {
