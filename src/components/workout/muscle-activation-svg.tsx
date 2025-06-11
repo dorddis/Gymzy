@@ -5,6 +5,7 @@ import type { SVGProps } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Muscle, MUSCLE_VOLUME_THRESHOLDS } from '@/lib/constants';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import FrontFullBody from '@/assets/images/front-full-body-with-all-muscles-showing.svg';
 import BackFullBody from '@/assets/images/back-full-body-with-all-muscles-showing.svg';
@@ -137,6 +138,8 @@ export function MuscleActivationSVG({ muscleVolumes = {}, className, scrollEleme
   const svgRef = useRef<SVGSVGElement>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [scrollPosition, setScrollPosition] = useState(0);
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
 
   const BodySvg = view === 'front' ? FrontFullBody : BackFullBody;
   const currentMuscleIdMap = view === 'front' ? frontMuscleIdMap : backMuscleIdMap;
@@ -202,6 +205,7 @@ export function MuscleActivationSVG({ muscleVolumes = {}, className, scrollEleme
 
   useEffect(() => {
     const scrollElement = scrollElementRef?.current || window;
+    console.log("MuscleActivationSVG - scrollElement:", scrollElement);
     const handleScroll = () => {
       setScrollPosition(scrollElement === window ? window.scrollY : (scrollElement as HTMLElement).scrollTop);
     };
@@ -212,45 +216,62 @@ export function MuscleActivationSVG({ muscleVolumes = {}, className, scrollEleme
     };
   }, [scrollElementRef]);
 
-  const blurAmount = Math.min(scrollPosition / 100, 5);
-  const opacityAmount = Math.max(0.5, 1 - scrollPosition / 200);
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
 
-  // Temporary logging for debugging blur effect
-  useEffect(() => {
-    console.log("Scroll Position:", scrollPosition);
-    console.log("Blur Amount:", blurAmount);
-    console.log("Opacity Amount:", opacityAmount);
-  }, [scrollPosition, blurAmount, opacityAmount]);
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    const distance = touchEndX.current - touchStartX.current;
+    const minSwipeDistance = 50; // Minimum distance for a swipe
+
+    if (distance > minSwipeDistance) {
+      // Swiped right
+      setView('front');
+    } else if (distance < -minSwipeDistance) {
+      // Swiped left
+      setView('back');
+    }
+  };
 
   return (
-    <div className={`relative ${className || ''}`}>
-      {/* Background SVG with blur effect */}
-      <div
-        className="absolute inset-0 z-0 transition-all duration-300 ease-out"
-        style={{ filter: `blur(${blurAmount}px)`, opacity: opacityAmount }}
-        onClick={() => setIsModalOpen(true)}
-      >
-        <BodySvg ref={svgRef} className="w-full h-full" />
-      </div>
+    <div
+      className={`relative ${className}`}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
+      <BodySvg ref={svgRef} className="w-full h-full" />
 
-      {/* View toggle button - now outside the blurred background */}
+      {/* Left Arrow Button */}
       <Button
-        className="absolute top-2 right-4 z-20 bg-primary text-white px-4 py-1.5 rounded-full text-sm font-medium h-8 hover:bg-primary/90 active:bg-primary/80 transition-colors"
+        variant="ghost"
+        size="icon"
+        className="absolute left-2 top-1/2 -translate-y-1/2 z-20 text-gray-600 hover:text-gray-800"
         onClick={(e) => {
           e.stopPropagation();
-          setView(prevView => prevView === 'front' ? 'back' : 'front');
-          if (svgRef.current) {
-            const svg = svgRef.current;
-            svg.style.opacity = '0';
-            setTimeout(() => {
-              svg.style.opacity = '1';
-              applyMuscleActivation();
-            }, 50);
-          }
+          setView('back');
         }}
-        aria-label={view === 'front' ? 'Show Back View' : 'Show Front View'}
+        aria-label="Show Back View"
       >
-        {view === 'front' ? 'Show Back' : 'Show Front'}
+        <ChevronLeft className="h-6 w-6" />
+      </Button>
+
+      {/* Right Arrow Button */}
+      <Button
+        variant="ghost"
+        size="icon"
+        className="absolute right-2 top-1/2 -translate-y-1/2 z-20 text-gray-600 hover:text-gray-800"
+        onClick={(e) => {
+          e.stopPropagation();
+          setView('front');
+        }}
+        aria-label="Show Front View"
+      >
+        <ChevronRight className="h-6 w-6" />
       </Button>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
