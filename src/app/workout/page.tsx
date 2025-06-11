@@ -112,7 +112,7 @@ export default function WorkoutPage() {
         className="fixed top-0 left-0 right-0 z-20"
       />
       
-      <div className="fixed top-[72px] left-0 right-0 h-[660px] z-0">
+      <div className="fixed top-[72px] left-0 right-0 h-[calc(100vh-72px-180px)] min-h-[400px] z-0">
         <MuscleActivationSVG 
           muscleVolumes={muscleVolumes} 
           className="w-full h-full" 
@@ -122,7 +122,7 @@ export default function WorkoutPage() {
 
       <main 
         ref={mainScrollRef} 
-        className="flex-grow overflow-y-auto pt-[732px] pb-[180px] relative z-10 min-h-[calc(100vh - 72px)]"
+        className="flex-grow overflow-y-auto pt-[calc(72px+min(calc(100vh-72px-180px),400px))] pb-[180px] relative z-10 min-h-[calc(100vh-72px)]"
       >
         <WorkoutSummaryScreen toggleSetExecuted={toggleSetExecuted} />
       </main>
@@ -135,13 +135,13 @@ export default function WorkoutPage() {
 
         <div className="flex gap-2 mt-4">
           <Button
-            className="flex-[2] bg-primary text-white py-3 rounded-xl font-semibold shadow-sm"
+            className="flex-[2] bg-primary text-white py-3 rounded-xl font-semibold shadow-sm active:scale-[0.98] active:shadow-none active:text-white hover:text-white transition-all duration-100"
             onClick={() => setIsAddExerciseModalOpen(true)}
           >
             + Add Exercise
           </Button>
           <Button
-            className="flex-[1] bg-blue-500 text-white py-3 rounded-xl font-semibold shadow-sm"
+            className="flex-[1] bg-blue-500 text-white py-3 rounded-xl font-semibold shadow-sm active:scale-[0.98] active:shadow-none active:text-white hover:text-white transition-all duration-100"
             onClick={() => console.log('Special set clicked')}
           >
             + Special set

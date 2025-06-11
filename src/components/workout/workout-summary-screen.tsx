@@ -113,7 +113,7 @@ export function WorkoutSummaryScreen({ toggleSetExecuted }: WorkoutSummaryScreen
   // };
 
   return (
-    <div className="px-4"> {/* Removed general p-4, using px-4 for horizontal padding only */}
+    <div className="px-2"> {/* Reduced horizontal padding */}
       {/* Muscle Activation SVG is now in src/app/workout/page.tsx, removed from here */}
 
       {/* Main content area, padding for exercises will be here */}
@@ -121,10 +121,10 @@ export function WorkoutSummaryScreen({ toggleSetExecuted }: WorkoutSummaryScreen
         {currentWorkoutExercises.length === 0 ? (
           <p className="text-center text-gray-500">No exercises added yet. Click "Add Exercise" to start!</p>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-4"> {/* Reduced vertical spacing between exercises */}
             {currentWorkoutExercises.map((exercise, exerciseIndex) => (
-              <div key={exercise.id} className="bg-white rounded-xl shadow-sm p-4 border border-gray-200">
-                <div className="flex justify-between items-center mb-4">
+              <div key={exercise.id} className="bg-white rounded-xl shadow-sm p-3 border border-gray-200"> {/* Reduced padding */}
+                <div className="flex justify-between items-center mb-2"> {/* Reduced margin */}
                   <h3 className="text-lg font-semibold">{exercise.name}</h3>
                   <div className="flex items-center space-x-2">
                     <Button variant="ghost" size="icon">
@@ -133,10 +133,10 @@ export function WorkoutSummaryScreen({ toggleSetExecuted }: WorkoutSummaryScreen
                   </div>
                 </div>
 
-                <div className="flex gap-2 mb-4">
+                <div className="flex gap-2 mb-2"> {/* Reduced margin */}
                   <Button
                     variant="ghost"
-                    className="flex-1 flex items-center justify-center text-primary-500"
+                    className="flex-1 flex items-center justify-center text-primary-500 hover:bg-transparent active:bg-transparent focus:bg-transparent hover:text-primary-500 active:text-primary-500 focus:text-primary-500"
                     onClick={() => addSetToExercise(exerciseIndex, true)}
                   >
                     <Plus className="h-4 w-4 mr-1" />
@@ -144,7 +144,7 @@ export function WorkoutSummaryScreen({ toggleSetExecuted }: WorkoutSummaryScreen
                   </Button>
                   <Button
                     variant="ghost"
-                    className="flex-1 flex items-center justify-center text-primary-500"
+                    className="flex-1 flex items-center justify-center text-primary-500 hover:bg-transparent active:bg-transparent focus:bg-transparent hover:text-primary-500 active:text-primary-500 focus:text-primary-500"
                     onClick={() => addSetToExercise(exerciseIndex)}
                   >
                     <Plus className="h-4 w-4 mr-1" />
@@ -152,19 +152,18 @@ export function WorkoutSummaryScreen({ toggleSetExecuted }: WorkoutSummaryScreen
                   </Button>
                 </div>
 
-                <div className="space-y-3">
-                  {exercise.sets.map((set, setIndex) => {
-                    console.log(`Exercise ${exercise.name}, Set ${setIndex + 1}: isExecuted = ${set.isExecuted}`);
-                    return (
-                      <div key={setIndex} className="flex items-center justify-between bg-transparent p-3">
-                        <div className="flex items-center space-x-3">
-                          <button
-                            className={`text-sm font-semibold text-secondary flex items-center justify-center w-6 h-6 rounded-full bg-secondary/10 cursor-pointer ${set.isExecuted ? 'border-2 border-green-500' : ''}`}
-                            onClick={() => toggleSetExecuted(exerciseIndex, setIndex)}
-                          >
-                            {set.isWarmup ? "W" : setIndex + 1}
-                          </button>
-                          <div className="flex items-center">
+                <div className="space-y-2"> {/* Reduced vertical spacing between sets */}
+                  {exercise.sets.map((set, setIndex) => (
+                    <div key={setIndex} className="flex items-center justify-between bg-transparent p-2"> {/* Reduced padding */}
+                      <div className="flex items-center space-x-3">
+                        <button
+                          className={`text-sm font-semibold text-secondary flex items-center justify-center w-6 h-6 rounded-full bg-secondary/10 cursor-pointer ${set.isExecuted ? 'border-2 border-green-500' : ''}`}
+                          onClick={() => toggleSetExecuted(exerciseIndex, setIndex)}
+                        >
+                          {set.isWarmup ? "W" : setIndex + 1}
+                        </button>
+                        <div className="flex items-center justify-center space-x-1">
+                          <div className="flex items-center justify-center">
                             <Input
                               type="number"
                               value={set.weight}
@@ -172,7 +171,9 @@ export function WorkoutSummaryScreen({ toggleSetExecuted }: WorkoutSummaryScreen
                               onFocus={(e) => e.target.select()}
                               className="w-12 text-center border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto text-sm"
                             />
-                            <span className="text-xs text-gray-600 -ml-1">kg</span>
+                            <span className="text-xs text-gray-600">kg</span>
+                          </div>
+                          <div className="flex items-center justify-center">
                             <Input
                               type="number"
                               value={set.reps}
@@ -180,7 +181,9 @@ export function WorkoutSummaryScreen({ toggleSetExecuted }: WorkoutSummaryScreen
                               onFocus={(e) => e.target.select()}
                               className="w-12 text-center border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto text-sm"
                             />
-                            <span className="text-xs text-gray-600 -ml-1">reps</span>
+                            <span className="text-xs text-gray-600">reps</span>
+                          </div>
+                          <div className="flex items-center justify-center">
                             <Input
                               type="number"
                               value={set.rpe}
@@ -188,15 +191,15 @@ export function WorkoutSummaryScreen({ toggleSetExecuted }: WorkoutSummaryScreen
                               onFocus={(e) => e.target.select()}
                               className="w-12 text-center border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto text-sm"
                             />
-                            <span className="text-xs text-gray-600 -ml-1">RPE</span>
+                            <span className="text-xs text-gray-600">RPE</span>
                           </div>
                         </div>
-                        <Button variant="ghost" size="icon" onClick={() => removeSetFromExercise(exerciseIndex, setIndex)}>
-                          <Trash2 className="h-4 w-4 text-red-500" />
-                        </Button>
                       </div>
-                    );
-                  })}
+                      <Button variant="ghost" size="icon" onClick={() => removeSetFromExercise(exerciseIndex, setIndex)}>
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </div>
+                  ))}
                 </div>
               </div>
             ))}

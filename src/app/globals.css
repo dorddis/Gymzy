@@ -46,9 +46,19 @@
   * {
     @apply border-border;
   }
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
   body {
     @apply bg-background text-foreground;
     font-family: 'Inter', sans-serif;
     font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    transform: none !important;
+    transform-origin: top left !important;
   }
 }
