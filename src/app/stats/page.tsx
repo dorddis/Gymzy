@@ -9,6 +9,11 @@ import { useWorkout } from '@/contexts/WorkoutContext';
 import { TrendingUp, Activity, Gauge, CalendarCheck } from 'lucide-react';
 import { Muscle } from '@/lib/constants'; // Import Muscle enum
 
+// Constants for the GitHub-style progress tracker
+const DAY_SQUARE_SIZE = 20; // px
+const GAP_SIZE = 6; // px
+const ROW_HEIGHT = DAY_SQUARE_SIZE + GAP_SIZE; // 16px
+
 interface WeeklyData {
   date: string;
   volume: number;
@@ -47,7 +52,7 @@ export default function StatsTrendsScreen() {
   const { recentWorkouts, allWorkouts, loading, error } = useWorkout();
 
   const last7Days = getDatesInRange(7).map(date => new Date(date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' }));
-  const last3MonthsDates = getDatesInRange(90);
+  const last6MonthsDates = getDatesInRange(180); // Changed to 6 months
 
   const {
     weeklyVolumeData,
@@ -61,7 +66,7 @@ export default function StatsTrendsScreen() {
   } = React.useMemo(() => {
     const volumeMap7Days = new Map<string, number>(last7Days.map(date => [date, 0]));
     const frequencyMap7Days = new Map<string, number>(last7Days.map(date => [date, 0]));
-    const dailyVolumeMap3Months = new Map<string, number>(last3MonthsDates.map(date => [date, 0]));
+    const dailyVolumeMap6Months = new Map<string, number>(last6MonthsDates.map(date => [date, 0])); // Changed to 6 months
 
     let totalVolume7Days = 0;
     let totalRPE7Days = 0;
@@ -82,9 +87,9 @@ export default function StatsTrendsScreen() {
           workoutCount7Days++;
         }
 
-        // For 3-month progress tracker
-        if (dailyVolumeMap3Months.has(workoutDateFormatted)) {
-          dailyVolumeMap3Months.set(workoutDateFormatted, (dailyVolumeMap3Months.get(workoutDateFormatted) || 0) + (workout.totalVolume || 0));
+        // For 6-month progress tracker
+        if (dailyVolumeMap6Months.has(workoutDateFormatted)) {
+          dailyVolumeMap6Months.set(workoutDateFormatted, (dailyVolumeMap6Months.get(workoutDateFormatted) || 0) + (workout.totalVolume || 0));
         }
 
         workout.exercises.forEach(exercise => {
@@ -98,7 +103,7 @@ export default function StatsTrendsScreen() {
     const weeklyVolumeData = Array.from(volumeMap7Days.entries()).map(([date, volume]) => ({ date, volume }));
     const weeklyFrequencyData = Array.from(frequencyMap7Days.entries()).map(([date, workouts]) => ({ date, workouts }));
 
-    const dailyVolumesForTracker: DailyVolume[] = Array.from(dailyVolumeMap3Months.entries()).map(([date, volume]) => ({ date, volume }));
+    const dailyVolumesForTracker: DailyVolume[] = Array.from(dailyVolumeMap6Months.entries()).map(([date, volume]) => ({ date, volume }));
     const maxDailyVolume = dailyVolumesForTracker.reduce((max, day) => Math.max(max, day.volume), 0);
 
     const sortedMuscleGroups = Object.entries(muscleGroupVolumes).sort(([, a], [, b]) => b - a);
@@ -116,7 +121,45 @@ export default function StatsTrendsScreen() {
       dailyVolumesForTracker,
       maxDailyVolume
     };
-  }, [allWorkouts, last7Days, last3MonthsDates]);
+  }, [allWorkouts, last7Days, last6MonthsDates]);
+
+  const monthLabelsWithColumns = React.useMemo(() => {
+    const labels: { month: string; startColumn: number; spanInColumns: number; }[] = [];
+    let currentMonth = -1;
+    const firstDayOfRange = new Date(last6MonthsDates[0]);
+
+    let monthStartColumn = 0;
+    let monthEndColumn = 0;
+
+    last6MonthsDates.forEach((dateString, index) => {
+      const date = new Date(dateString);
+
+      const currentColumn = Math.floor((firstDayOfRange.getDay() + index) / 7) + 1; // 1-indexed column
+
+      if (date.getMonth() !== currentMonth) {
+        if (currentMonth !== -1) {
+          labels.push({
+            month: new Date(firstDayOfRange.getFullYear(), currentMonth, 1).toLocaleDateString('en-US', { month: 'short' }),
+            startColumn: monthStartColumn,
+            spanInColumns: monthEndColumn - monthStartColumn + 1
+          });
+        }
+        currentMonth = date.getMonth();
+        monthStartColumn = currentColumn;
+      }
+      monthEndColumn = currentColumn;
+    });
+
+    // Add the last month after the loop
+    if (currentMonth !== -1) {
+      labels.push({
+        month: new Date(firstDayOfRange.getFullYear(), currentMonth, 1).toLocaleDateString('en-US', { month: 'short' }),
+        startColumn: monthStartColumn,
+        spanInColumns: monthEndColumn - monthStartColumn + 1
+      });
+    }
+    return labels;
+  }, [last6MonthsDates]);
 
   if (loading) {
     return <div className="text-center py-8">Loading stats...</div>;
@@ -125,16 +168,6 @@ export default function StatsTrendsScreen() {
   if (error) {
     return <div className="text-center py-8 text-red-500">Error loading stats.</div>;
   }
-
-  const monthLabels = last3MonthsDates.reduce((acc: string[], dateString, index) => {
-    const date = new Date(dateString);
-    if (index === 0 || date.getDate() === 1) { // Show month for the first day or the first day of a month
-        acc.push(date.toLocaleDateString('en-US', { month: 'short' }));
-    } else {
-        acc.push('');
-    }
-    return acc;
-}, []);
 
   const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -199,49 +232,71 @@ export default function StatsTrendsScreen() {
         {/* GitHub-style Progress Tracker */}
         <Card className="mb-6 shadow-md border-none bg-white p-4">
           <CardHeader className="p-0 mb-4">
-            <CardTitle className="text-lg font-semibold text-gray-700">Workout Progress (Last 3 Months)</CardTitle>
+            <CardTitle className="text-lg font-semibold text-gray-700">Workout Progress (Last 6 Months)</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="flex flex-col md:flex-row items-start gap-2">
-              {/* Day Labels */}
-              <div className="grid grid-rows-7 gap-1 text-xs text-gray-600 mr-2 mt-5">
+            <div className="flex items-start"> {/* Use flex to align day labels and calendar grid */}
+              {/* Day Labels Column */}
+              <div className="flex flex-col justify-between text-xs text-gray-600 mr-2" style={{height: `${7 * ROW_HEIGHT - GAP_SIZE}px`, marginTop: `${ROW_HEIGHT}px`}}> 
                 {daysOfWeek.map((day, index) => (
-                  <span key={day} className="h-4 flex items-center justify-end pr-1">
-                    {index % 2 === 1 ? day.charAt(0) : ''}
+                  <span key={day} className="flex items-center justify-end pr-1" style={{height: `${DAY_SQUARE_SIZE}px`}}> {/* Reverted to DAY_SQUARE_SIZE for height */}
+                    {/* Only show M, W, F */}
+                    {index === 1 && 'M'} {/* Monday */}
+                    {index === 3 && 'W'} {/* Wednesday */}
+                    {index === 5 && 'F'} {/* Friday */}
                   </span>
                 ))}
               </div>
-              {/* Progress Grid */}
-              <div className="flex-1">
-                <div className="grid grid-flow-col grid-rows-7 gap-1 auto-cols-min">
+
+              {/* Main Calendar Grid Area */}
+              <div className="flex-1 overflow-x-auto px-1 pb-2"> {/* Added px-1 for padding, and removed p-2 from parent div */}
+                <div className="relative" style={{height: `${7 * ROW_HEIGHT + ROW_HEIGHT}px`}}> {/* Added relative and fixed height for absolute positioning of month labels and grid */}
                   {/* Month labels */}
-                  {monthLabels.map((month, index) => (
-                    <div key={index} className="text-xs text-gray-600 text-center" style={{ gridColumnStart: `span 4`, gridRow: 1 }}>
-                      {month}
+                  {monthLabelsWithColumns.map((label, index) => (
+                    <div
+                      key={index}
+                      className="absolute text-xs text-gray-600 text-center" // Changed to text-center
+                      style={{
+                        left: `${(label.startColumn - 1) * (DAY_SQUARE_SIZE + GAP_SIZE)}px`, // Calculate left position based on column
+                        top: 0, // Position at the top
+                        width: `${(label.spanInColumns * (DAY_SQUARE_SIZE + GAP_SIZE)) - GAP_SIZE}px`, // Dynamic width based on spanInColumns
+                      }}
+                    >
+                      {label.month}
                     </div>
                   ))}
-                  {/* Actual date squircles */}
-                  {last3MonthsDates.map((dateString) => {
-                    const date = new Date(dateString);
-                    const day = date.getDay();
-                    const monthIndex = date.getMonth();
-                    const dailyVolume = dailyVolumesForTracker.find(d => d.date === dateString)?.volume || 0;
-                    const colorClass = getVolumeColor(dailyVolume, maxDailyVolume);
+                  {/* Actual Grid for days */}
+                  <div className="grid grid-flow-col auto-cols-min" style={{
+                      gridTemplateRows: `repeat(7, ${DAY_SQUARE_SIZE}px)`, // 7 rows for days
+                      paddingTop: `${ROW_HEIGHT}px`, // Add padding for month labels
+                      gap: `${GAP_SIZE}px`, // Added gap for grid cells
+                    }}>
+                    {last6MonthsDates.map((dateString, index) => {
+                      const date = new Date(dateString);
+                      const day = date.getDay(); // 0 for Sunday, 6 for Saturday
+                      const dailyVolume = dailyVolumesForTracker.find(d => d.date === dateString)?.volume || 0;
+                      const colorClass = getVolumeColor(dailyVolume, maxDailyVolume);
 
-                    const firstDayOfRange = new Date(last3MonthsDates[0]);
-                    const diffTime = Math.abs(date.getTime() - firstDayOfRange.getTime());
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                    const column = Math.floor((firstDayOfRange.getDay() + diffDays) / 7) + 1;
+                      const firstDayOfRange = new Date(last6MonthsDates[0]);
+                      const diffTime = Math.abs(date.getTime() - firstDayOfRange.getTime());
+                      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                      const column = Math.floor((firstDayOfRange.getDay() + diffDays) / 7) + 1; // 1-indexed column
 
-                    return (
-                      <div
-                        key={dateString}
-                        className={`w-4 h-4 rounded-sm ${colorClass}`}
-                        style={{ gridRow: day + 2, gridColumn: column }}
-                        title={`${dailyVolume.toLocaleString()} lbs on ${date.toLocaleDateString()}`}
-                      />
-                    );
-                  })}
+                      return (
+                        <div
+                          key={dateString}
+                          className={`rounded-sm ${colorClass} hover:ring-2 hover:ring-primary/20 transition-all duration-200`}
+                          style={{
+                            gridRow: day + 1, // Day 0 (Sunday) will be row 1, etc.
+                            gridColumn: column,
+                            width: `${DAY_SQUARE_SIZE}px`,
+                            height: `${DAY_SQUARE_SIZE}px`,
+                          }}
+                          title={`${dailyVolume.toLocaleString()} lbs on ${date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`}
+                        />
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             </div>
@@ -249,11 +304,11 @@ export default function StatsTrendsScreen() {
             <div className="flex justify-end items-center mt-4 text-xs text-gray-600">
               <span className="mr-2">Less</span>
               <div className="flex">
-                <div className="w-4 h-4 rounded-sm bg-gray-200 mr-1"></div>
-                <div className="w-4 h-4 rounded-sm bg-green-100 mr-1"></div>
-                <div className="w-4 h-4 rounded-sm bg-green-300 mr-1"></div>
-                <div className="w-4 h-4 rounded-sm bg-green-500 mr-1"></div>
-                <div className="w-4 h-4 rounded-sm bg-green-700"></div>
+                <div className="rounded-sm bg-gray-200 mr-1" style={{width: `${DAY_SQUARE_SIZE}px`, height: `${DAY_SQUARE_SIZE}px`}}></div>
+                <div className="rounded-sm bg-green-100 mr-1" style={{width: `${DAY_SQUARE_SIZE}px`, height: `${DAY_SQUARE_SIZE}px`}}></div>
+                <div className="rounded-sm bg-green-300 mr-1" style={{width: `${DAY_SQUARE_SIZE}px`, height: `${DAY_SQUARE_SIZE}px`}}></div>
+                <div className="rounded-sm bg-green-500 mr-1" style={{width: `${DAY_SQUARE_SIZE}px`, height: `${DAY_SQUARE_SIZE}px`}}></div>
+                <div className="rounded-sm bg-green-700" style={{width: `${DAY_SQUARE_SIZE}px`, height: `${DAY_SQUARE_SIZE}px`}}></div>
               </div>
               <span className="ml-2">More</span>
             </div>
@@ -298,7 +353,7 @@ export default function StatsTrendsScreen() {
                   itemStyle={{ color: 'hsl(var(--muted-foreground))' }}
                 />
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <Bar dataKey="workouts" fill="hsl(var(--secondary))" />
+                <Bar dataKey="workouts" fill="hsl(var(--primary))" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>

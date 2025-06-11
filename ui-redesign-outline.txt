@@ -72,7 +72,7 @@ Mark each step complete by changing `[ ]` to `[x]`.
       - **Constraint:** Use existing `allWorkouts` data from `WorkoutContext` and do not introduce new data fetching.
       - **Implementation Detail:** Ensure the tracker visually represents daily activity for the last 90 days, with appropriate date/month labels and tooltips.
       - **Tasks:**
-        1.  In `src/app/stats/page.tsx`, calculate daily workout volumes for the last 3 months (approximately 90 days).
+        [x] 1.  In `src/app/stats/page.tsx`, calculate daily workout volumes for the last 3 months (approximately 90 days).
             *   Group `allWorkouts` by date.
             *   Sum `totalVolume` for each day.
         2.  Determine a suitable color scale (e.g., 4-5 shades of green, plus grey for zero volume) based on Tailwind's `primary` and `secondary` or custom shades. Ensure colors are defined in `tailwind.config.ts` if custom. 
