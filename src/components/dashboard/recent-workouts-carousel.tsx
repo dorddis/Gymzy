@@ -63,7 +63,13 @@ export function RecentWorkoutsCarousel() {
                 <div key={index} className="text-sm">
                   <p className="font-medium text-gray-900">{exercise.name}</p>
                   <p className="text-gray-500">
-                    {exercise.sets} × {exercise.reps} {exercise.weight > 0 ? `@ ${exercise.weight}lbs` : ''}
+                    {exercise.sets.length > 0 ? (
+                      `${"" + exercise.sets.length} × ${exercise.sets[0].reps} ${
+                        exercise.sets[0].weight > 0 ? `@ ${exercise.sets[0].weight}lbs` : ""
+                      }`
+                    ) : (
+                      "No sets recorded"
+                    )}
                   </p>
                 </div>
               ))}
@@ -71,7 +77,7 @@ export function RecentWorkoutsCarousel() {
             <div className="flex justify-between text-sm">
               <div className="flex items-center text-gray-500">
                 <TrendingUp className="w-4 h-4 mr-1" />
-                {workout.totalVolume.toLocaleString()} lbs
+                {(workout.totalVolume ?? 0).toLocaleString()} lbs
               </div>
               <div className="flex items-center text-gray-500">
                 <Activity className="w-4 h-4 mr-1" />

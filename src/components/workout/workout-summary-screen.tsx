@@ -253,7 +253,7 @@ export function WorkoutSummaryScreen({
                 </div>
                 <div className="ml-3">
                   <p className="text-sm text-yellow-700 font-medium">
-                    You have sets with 0 weight and 0 reps. Please fill in the weight and reps for all sets before finishing your workout.
+                    You have sets with 0 weight or 0 reps. Please fill in the weight and reps for all sets before finishing your workout.
                   </p>
                 </div>
               </div>
