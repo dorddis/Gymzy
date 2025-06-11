@@ -10,7 +10,8 @@ import {
   updateDoc, 
   deleteDoc, 
   doc, 
-  Timestamp 
+  Timestamp,
+  getDoc
 } from 'firebase/firestore';
 import { z } from 'zod';
 import { Muscle } from '@/lib/constants';
@@ -38,6 +39,9 @@ const workoutSchema = z.object({
   exercises: z.array(exerciseSchema),
   totalVolume: z.number().min(0).optional(),
   rpe: z.number().min(1).max(10).optional(),
+  notes: z.string().optional(),
+  mediaUrls: z.array(z.string()).optional(),
+  isPublic: z.boolean().optional(),
   createdAt: z.instanceof(Timestamp),
   updatedAt: z.instanceof(Timestamp)
 });
@@ -72,9 +76,14 @@ export const createWorkout = async (workoutData: Omit<Workout, 'id' | 'createdAt
     }
 
     const docRef = await addDoc(collection(db, 'workouts'), workout);
+    console.log('Workout created successfully with ID:', docRef.id);
     return { id: docRef.id, ...workout };
   } catch (error) {
-    console.error('Error creating workout:', error);
+    if (error instanceof z.ZodError) {
+      console.error('Validation Error creating workout:', error.issues);
+    } else {
+      console.error('Error creating workout:', error);
+    }
     throw error;
   }
 };
@@ -115,9 +124,14 @@ export const updateWorkout = async (workoutId: string, workoutData: Partial<Work
     }
 
     await updateDoc(workoutRef, updateData);
+    console.log('Workout updated successfully:', workoutId);
     return { id: workoutId, ...updateData };
   } catch (error) {
-    console.error('Error updating workout:', error);
+    if (error instanceof z.ZodError) {
+      console.error('Validation Error updating workout:', error.issues);
+    } else {
+      console.error('Error updating workout:', error);
+    }
     throw error;
   }
 };
@@ -127,6 +141,7 @@ export const deleteWorkout = async (workoutId: string) => {
   try {
     const workoutRef = doc(db, 'workouts', workoutId);
     await deleteDoc(workoutRef);
+    console.log('Workout deleted successfully:', workoutId);
     return workoutId;
   } catch (error) {
     console.error('Error deleting workout:', error);
@@ -142,11 +157,36 @@ export const workoutService = {
       orderBy('date', 'desc'),
       limit(1)
     );
-    const querySnapshot = await getDocs(q);
-    if (!querySnapshot.empty) {
-      const doc = querySnapshot.docs[0];
-      return { id: doc.id, ...doc.data() as WorkoutData };
+    try {
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        const doc = querySnapshot.docs[0];
+        console.log('Latest workout fetched successfully.');
+        return { id: doc.id, ...doc.data() as WorkoutData };
+      }
+      console.log('No latest workout found.');
+      return null;
+    } catch (error) {
+      console.error('Error fetching latest workout:', error);
+      throw error;
     }
-    return null;
+  },
+  
+  getWorkoutById: async (workoutId: string): Promise<Workout | null> => {
+    try {
+      const docRef = doc(db, 'workouts', workoutId);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        console.log("Workout fetched by ID successfully.");
+        return { id: docSnap.id, ...docSnap.data() as WorkoutData };
+      } else {
+        console.log("No such workout found!");
+        return null;
+      }
+    } catch (error) {
+      console.error("Error getting workout by ID:", error);
+      throw error;
+    }
   },
 }; 

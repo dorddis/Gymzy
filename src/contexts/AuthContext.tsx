@@ -23,10 +23,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
+    console.log('AuthContext: useEffect running.');
+
     // Check if Firebase is properly configured
     if (!process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
-      setError(new Error('Firebase configuration is missing. Please check your .env.local file.'));
+      const firebaseConfigError = new Error('Firebase configuration is missing. Please check your .env.local file.');
+      setError(firebaseConfigError);
       setLoading(false);
+      console.error('AuthContext: Firebase configuration error:', firebaseConfigError);
       return;
     }
 
@@ -35,9 +39,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const retryDelay = 1000; // 1 second
 
     const attemptAnonymousSignIn = async () => {
+      console.log(`AuthContext: Attempting anonymous sign-in (retryCount: ${retryCount})...`);
       try {
         const { user: anonUser } = await signInAnonymously(auth);
-        console.log('AuthContext: Anonymous user created:', anonUser.uid);
+        console.log('AuthContext: Anonymous user created:', anonUser.uid, anonUser);
 
         // Fetch or create user profile in Firestore
         const userProfileRef = doc(db, 'users', anonUser.uid);
@@ -57,6 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         setUser(customUser);
         setError(null);
+        console.log('AuthContext: User state set after anonymous sign-in.');
 
       } catch (authError) {
         console.error('AuthContext: Failed to sign in anonymously:', authError);
@@ -65,16 +71,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.log(`AuthContext: Retrying anonymous sign in (attempt ${retryCount}/${maxRetries})...`);
           setTimeout(attemptAnonymousSignIn, retryDelay);
         } else {
-          setError(authError instanceof Error ? authError : new Error('Failed to sign in anonymously after multiple attempts'));
+          const finalError = authError instanceof Error ? authError : new Error('Failed to sign in anonymously after multiple attempts');
+          setError(finalError);
+          console.error('AuthContext: Final anonymous sign-in attempt failed:', finalError);
         }
       }
     };
 
+    console.log('AuthContext: Setting up onAuthStateChanged listener.');
     const unsubscribe = onAuthStateChanged(
       auth,
       async (firebaseUser) => {
+        console.log('AuthContext: onAuthStateChanged callback triggered.');
         if (firebaseUser) {
-          console.log('AuthContext: User detected:', firebaseUser.uid);
+          console.log('AuthContext: User detected:', firebaseUser.uid, firebaseUser);
 
           // Fetch or create user profile in Firestore for existing users
           const userProfileRef = doc(db, 'users', firebaseUser.uid);
@@ -91,20 +101,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
           setUser(customUser);
           setError(null);
+          console.log('AuthContext: User state set after onAuthStateChanged.');
         } else {
-          console.log('AuthContext: No user detected, attempting anonymous sign in');
+          console.log('AuthContext: No user detected in onAuthStateChanged, attempting anonymous sign in.');
           attemptAnonymousSignIn();
         }
         setLoading(false);
+        console.log('AuthContext: Loading set to false.');
       },
       (authError) => {
-        console.error('AuthContext: Firebase auth error:', authError);
+        console.error('AuthContext: Firebase auth error from onAuthStateChanged:', authError);
         setError(authError);
         setLoading(false);
+        console.log('AuthContext: Loading set to false on auth error.');
       }
     );
 
-    return () => unsubscribe();
+    return () => {
+      console.log('AuthContext: Cleaning up onAuthStateChanged listener.');
+      unsubscribe();
+    };
   }, []);
 
   const value = {

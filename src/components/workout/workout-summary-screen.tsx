@@ -106,6 +106,7 @@ export function WorkoutSummaryScreen({
 
       const newSet = { 
         ...lastSetValues,
+        rpe: 8, // Default RPE to 8 for new sets
         isWarmup, 
         isExecuted: false 
       };

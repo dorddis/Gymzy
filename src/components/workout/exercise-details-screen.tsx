@@ -14,11 +14,11 @@ interface ExerciseDetailsScreenProps {
 
 export function ExerciseDetailsScreen({ exercise, onBack, onSave }: ExerciseDetailsScreenProps) {
   const [sets, setSets] = useState<ExerciseSet[]>([
-    { weight: 0, reps: 0, rpe: 0, isWarmup: false }
+    { weight: 0, reps: 0, rpe: 8, isWarmup: false }
   ]);
 
   const addSet = () => {
-    setSets([...sets, { weight: 0, reps: 0, rpe: 0, isWarmup: false }]);
+    setSets([...sets, { weight: 0, reps: 0, rpe: 8, isWarmup: false }]);
   };
 
   const removeSet = (index: number) => {

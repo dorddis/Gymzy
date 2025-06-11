@@ -19,7 +19,7 @@ interface FinishWorkoutModalProps {
 
 export function FinishWorkoutModal({ open, onOpenChange, onSave }: FinishWorkoutModalProps) {
   const { currentWorkoutExercises, totalVolume, addWorkout } = useWorkout();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   
   const [dateTime, setDateTime] = useState<string>(new Date().toISOString().slice(0, 16));
@@ -45,22 +45,27 @@ export function FinishWorkoutModal({ open, onOpenChange, onSave }: FinishWorkout
         description: "You must be logged in to save a workout.",
         variant: "destructive",
       });
+      console.log("handleSave: User not logged in.");
       return;
     }
 
     try {
       setIsSaving(true);
       setUploadProgress(0);
+      console.log("handleSave: Starting save process.");
 
       // Create a temporary workout ID for media uploads
       const tempWorkoutId = `temp_${Date.now()}`;
+      console.log("handleSave: Temporary workout ID generated:", tempWorkoutId);
 
       // Upload media files if any
       let mediaUrls: string[] = [];
       if (mediaFiles.length > 0) {
+        console.log("handleSave: Uploading media files...");
         try {
           mediaUrls = await uploadMultipleMedia(mediaFiles, user.uid, tempWorkoutId);
           setUploadProgress(100);
+          console.log("handleSave: Media uploaded successfully:", mediaUrls);
         } catch (error) {
           console.error('Error uploading media:', error);
           toast({
@@ -68,6 +73,7 @@ export function FinishWorkoutModal({ open, onOpenChange, onSave }: FinishWorkout
             description: "Some media files failed to upload. The workout will be saved without them.",
             variant: "destructive",
           });
+          console.log("handleSave: Media upload failed.");
         }
       }
 
@@ -82,8 +88,9 @@ export function FinishWorkoutModal({ open, onOpenChange, onSave }: FinishWorkout
           sets: exercise.sets.map(set => ({
             weight: set.weight,
             reps: set.reps,
-            rpe: set.rpe || 0,
+            rpe: (set.rpe !== undefined && set.rpe >= 1 && set.rpe <= 10) ? set.rpe : undefined,
             isWarmup: set.isWarmup || false,
+            isExecuted: set.isExecuted || false,
           })),
           targetedMuscles: exercise.primaryMuscles,
           notes: exercise.notes || '',
@@ -96,25 +103,33 @@ export function FinishWorkoutModal({ open, onOpenChange, onSave }: FinishWorkout
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
       };
+      console.log("handleSave: Workout data prepared:", workoutData);
+      console.log('User UID before addWorkout:', user.uid);
 
       await addWorkout(workoutData);
+      console.log("handleSave: addWorkout completed.");
 
       toast({
         title: "Workout saved!",
         description: "Your workout has been successfully saved.",
       });
+      console.log("handleSave: Save success toast dispatched.");
 
       onSave();
+      console.log("handleSave: onSave callback executed.");
       onOpenChange(false);
+      console.log("handleSave: Modal close requested.");
     } catch (error) {
       toast({
         title: "Error saving workout",
         description: "There was an error saving your workout. Please try again.",
         variant: "destructive",
       });
+      console.error("handleSave: Error during save process:", error);
     } finally {
       setIsSaving(false);
       setUploadProgress(0);
+      console.log("handleSave: Save process finished. isSaving set to false.");
     }
   };
 
@@ -123,14 +138,6 @@ export function FinishWorkoutModal({ open, onOpenChange, onSave }: FinishWorkout
       <DialogContent className="flex flex-col max-w-lg w-[90vw] md:w-full h-auto max-h-[95vh] p-0 rounded-xl overflow-hidden">
         <div className="px-4 py-5 flex justify-between items-center border-b border-gray-200">
           <DialogTitle className="text-xl font-semibold">Finish Workout</DialogTitle>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => onOpenChange(false)}
-            className="w-8 h-8 rounded-full"
-          >
-            <X className="h-4 w-4" />
-          </Button>
         </div>
 
         <div className="p-4 space-y-4 overflow-y-auto">
@@ -212,10 +219,10 @@ export function FinishWorkoutModal({ open, onOpenChange, onSave }: FinishWorkout
         <div className="p-4 border-t border-gray-200">
           <Button
             onClick={handleSave}
-            disabled={isSaving}
+            disabled={isSaving || authLoading || !user}
             className="w-full bg-primary text-white py-3 rounded-xl font-semibold shadow-sm hover:opacity-95 disabled:opacity-50"
           >
-            {isSaving ? (
+            {isSaving || authLoading ? (
               <div className="flex items-center space-x-2">
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 <span>{uploadProgress > 0 ? `Uploading... ${uploadProgress}%` : 'Saving...'}</span>

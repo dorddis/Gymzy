@@ -131,7 +131,7 @@ export default function WorkoutPage() {
           ...existing,
           sets: [
             ...existing.sets,
-            { weight: 0, reps: 0, rpe: 0, isWarmup: false, isExecuted: false },
+            { weight: 0, reps: 0, rpe: 8, isWarmup: false, isExecuted: false },
           ],
         };
         return clone;
