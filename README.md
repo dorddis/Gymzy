@@ -1,16 +1,16 @@
 <div align="center">
   <h1>Gymzy</h1>
   <h3>Your AI-Powered Fitness Companion</h3>
-
-  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)  
-  [![Next.js](https://img.shields.io/badge/Next.js-15.2.3-000000?logo=next.js)](https://nextjs.org/)  
-  [![React](https://img.shields.io/badge/React-18.3.1-61DAFB?logo=react)](https://reactjs.org/)  
-  [![TypeScript](https://img.shields.io/badge/TypeScript-5.0.0-3178C6?logo=typescript)](https://www.typescriptlang.org/)  
-
-  [![Deployed on Vercel](https://vercel.com/button)](https://gymzy.vercel.app)  
+  
+  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+  [![Next.js](https://img.shields.io/badge/Next.js-15.2.3-000000?logo=next.js)](https://nextjs.org/)
+  [![React](https://img.shields.io/badge/React-18.3.1-61DAFB?logo=react)](https://reactjs.org/)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-5.0.0-3178C6?logo=typescript)](https://www.typescriptlang.org/)
+  
+  [![Deployed on Vercel](https://vercel.com/button)](https://gymzy.vercel.app)
 
   <img
-    src="src/assets/github-readme/02_home_dashboard.png"
+    src="src/assets/github-readme/01_weekly_muscle_activation.png"
     alt="Gymzy Dashboard"
     width="300"
   />
