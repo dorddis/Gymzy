@@ -16,8 +16,6 @@
   />
 </div>
 
----
-
 ## 🚀 Features
 
 ### 📊 Interactive Dashboard
