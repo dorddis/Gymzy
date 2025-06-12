@@ -29,7 +29,7 @@ Mark each step complete by changing `[ ]` to `[x]`.
 [x] 9.2. Design and implement backend data structure/API for community posts  
 [x] 9.3. Integrate frontend with backend  
 [x] 10. Bottom Navigation Bar  
-[ ] 11. Add Workout Modal  
+[x] 11. Add Workout Modal  
 [x] 11.1. Exercise Selection Screen
 - Implement search functionality with debounce
 - Add "Most Used" exercises section with actual usage data
@@ -60,42 +60,103 @@ Mark each step complete by changing `[ ]` to `[x]`.
 [x] 12. Log Workout Screen  
 [x] 13. Finish Workout Modal  
 [x] 14. Stats & Trends Screen  
-[ ] 15. Review & Polish
-  - **Goal:** Final quality pass, visual consistency, and new UI enhancements.
-  - **Tasks:**  
-    - Test responsiveness on mobile (390×844).  
-    - Verify color, typography, spacing per design.  
-    - Remove unused code, update docs/screenshots.  
-    - **Implement GitHub-style Progress Tracker Design:**
-      - **Reference:** `design/github-progress.html.txt`
-      - **Goal:** Display daily workout volume over the last 3 months using a color gradient (light green for less volume, darker green for more, grey for no workouts).
-      - **Constraint:** Use existing `allWorkouts` data from `WorkoutContext` and do not introduce new data fetching.
-      - **Implementation Detail:** Ensure the tracker visually represents daily activity for the last 90 days, with appropriate date/month labels and tooltips.
-      - **Tasks:**
-        [x] 1.  In `src/app/stats/page.tsx`, calculate daily workout volumes for the last 3 months (approximately 90 days).
-            *   Group `allWorkouts` by date.
-            *   Sum `totalVolume` for each day.
-        2.  Determine a suitable color scale (e.g., 4-5 shades of green, plus grey for zero volume) based on Tailwind's `primary` and `secondary` or custom shades. Ensure colors are defined in `tailwind.config.ts` if custom. 
-        3.  Render a grid-like structure for the tracker (e.g., using `div` elements with Tailwind CSS for `display: grid` or `flex`).
-        4.  For each day, render a "squirle" (square/rounded square) with a background color based on its workout volume, mapped to the color scale. For days with no workouts, use a grey color.
-        5.  Add month labels to the tracker for better readability.
-        6.  Add tooltips to each squirle showing the date and workout volume for that day (e.g., "X volume on Month Day, Year").
-        7.  Ensure responsiveness for different screen sizes.
-    - **Redesign Summary Metrics to 2x2 Grid:**
-      - **Goal:** Reformat the 'Total Volume (7D, add option to toggle between week month etc)', 'Avg RPE', 'Consistency (dont keep it just to 7 days)', and 'Top Muscle Group' section into a 2x2 grid layout for better visual organization.
-      - **Constraint:** Maintain current data calculations and displayed values.
-      - **Tasks:**
-        [x] 1.  In `src/app/stats/page.tsx`, restructure the JSX for the summary metrics section to use a `grid` layout (e.g., `grid grid-cols-2 gap-4`).
-        [x] 2.  Ensure each metric (`Total Volume`, `Avg RPE`, `Consistency`, `Top Muscle Group`) is displayed within its own card or container within this grid.
-        [x] 3.  Adjust styling (padding, margins, text alignment) to fit the new grid layout aesthetically.
-    - **Match Global Light Theme:**
-      - **Goal:** Ensure all graphs, cards, and other elements on the Stats & Trends page fully adhere to the global light theme and color palette (`primary`, `secondary`, `background`, `muted-foreground`, `border`, `card`).
-      - **Implementation Detail:** Pay close attention to background colors, text colors, grid lines, and chart element colors.
-      - **Tasks:**
-        1.  Review all existing components and elements within `src/app/stats/page.tsx` (and potentially any new components created for this step).
-        2.  Apply Tailwind CSS classes using the defined theme colors (`bg-background`, `text-primary`, `text-muted-foreground`, `border-border`, `bg-card`) to all relevant UI elements.
-        3.  For any charts (e.g., line charts from previous steps), ensure their colors for lines, labels, axes, and backgrounds match the theme. This might involve updating chart configurations and potentially creating a custom color palette for charts using the defined theme colors.
-  - **Output:** Merge-ready codebase with enhanced UI elements on the Stats & Trends page.
+
+### Step 15: Implement Robust Media Upload System
+- **Goal:** Create a reliable, user-friendly media upload system with proper data management and error handling.
+- **Inputs:** 
+  - Cloudinary configuration
+  - Workout data structure
+  - UI components for media upload
+  - Firestore database schema
+
+- **Tasks:**
+  1. **Media Upload Implementation**
+     - [x] Set up Cloudinary configuration with unsigned upload preset
+     - [x] Implement direct upload using Cloudinary's upload API
+     - [ ] Add proper progress tracking and UI feedback
+     - [ ] Implement file type and size validation
+     - [ ] Add retry mechanism for failed uploads
+     - [ ] Handle upload cancellation
+
+  2. **Database Schema Updates**
+     - [ ] Create `media` collection in Firestore with schema:
+       ```typescript
+       interface Media {
+         id: string;
+         userId: string;
+         workoutId: string;
+         publicId: string;      // Cloudinary public ID
+         secureUrl: string;     // Cloudinary secure URL
+         format: string;        // File format (jpg, png, mp4, etc.)
+         resourceType: string;  // image or video
+         bytes: number;         // File size
+         createdAt: Timestamp;
+         isPublic: boolean;     // Whether the media is publicly accessible
+       }
+       ```
+     - [ ] Add media references to workout documents
+     - [ ] Create indexes for efficient media queries
+
+  3. **UI/UX Improvements**
+     - [ ] Design and implement custom upload UI:
+       - Drag and drop support
+       - File preview before upload
+       - Progress bar with percentage
+       - Upload status indicators
+       - Error messages and retry options
+     - [ ] Add media preview in workout cards
+     - [ ] Implement media gallery view for workouts
+     - [ ] Add media deletion functionality
+
+  4. **Error Handling & Validation**
+     - [ ] Implement comprehensive error handling:
+       - Network errors
+       - File size limits
+       - Invalid file types
+       - Upload timeouts
+     - [ ] Add client-side validation:
+       - File size checks
+       - File type validation
+       - Multiple file handling
+     - [ ] Implement server-side validation
+     - [ ] Add retry mechanism for failed uploads
+
+  5. **Performance Optimization**
+     - [ ] Implement file compression before upload
+     - [ ] Add lazy loading for media previews
+     - [ ] Implement proper caching strategies
+     - [ ] Add upload queue management
+
+  6. **Security & Privacy**
+     - [ ] Implement proper access control for media
+     - [ ] Add media deletion when workout is deleted
+     - [ ] Implement proper cleanup of unused media
+     - [ ] Add privacy controls for media visibility
+
+  7. **Testing & Documentation**
+     - [ ] Write unit tests for media upload functionality
+     - [ ] Add integration tests for media workflow
+     - [ ] Test on various devices and browsers
+     - [ ] Document media upload process and limitations
+     - [ ] Add error handling documentation
+
+- **Output:** 
+  - Fully functional media upload system
+  - Proper database structure for media management
+  - User-friendly upload interface
+  - Comprehensive error handling
+  - Performance optimized implementation
+  - Security measures in place
+  - Complete documentation
+
+- **Success Criteria:**
+  1. Media uploads work reliably across all supported devices
+  2. Upload progress is clearly visible to users
+  3. Error handling provides clear feedback
+  4. Media is properly stored and retrievable
+  5. Performance meets or exceeds requirements
+  6. Security measures are properly implemented
+  7. Documentation is complete and accurate
 
 ### Step 16: Address Photo Upload Error During Workout Save
 - **Goal:** Investigate and fix the error encountered during photo upload when saving a workout.
@@ -118,6 +179,13 @@ Mark each step complete by changing `[ ]` to `[x]`.
   - Add a back arrow icon (e.g., from `lucide-react`) to the top-left of the Stats page, configured to navigate back to the home page (e.g., `/`).
   - Ensure the back arrow is styled consistently with the new header/footer guidelines.
 - **Output:** Updated `ui-redesign-outline.txt` with consistent header/footer strategy, and the Stats page header is replaced with a back arrow.
+
+
+[ ] 15. Review & Polish
+  - **Goal:** Final quality pass, visual consistency, and new UI enhancements.
+  - **Tasks:**  
+    - Test responsiveness on mobile (390×844).  
+    - Verify color, typography, spacing per design. 
 
 ---
 

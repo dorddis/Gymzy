@@ -49,6 +49,9 @@ const workoutSchema = z.object({
 export type WorkoutData = z.infer<typeof workoutSchema>;
 export type Workout = WorkoutData & { id: string };
 
+// Define the input type for creating a workout
+type WorkoutInput = Omit<Workout, 'id' | 'createdAt' | 'updatedAt'>;
+
 // Helper function to calculate total volume
 const calculateTotalVolume = (exercises: z.infer<typeof exerciseSchema>[]): number => {
   return exercises.reduce((total, exercise) => {
@@ -58,31 +61,61 @@ const calculateTotalVolume = (exercises: z.infer<typeof exerciseSchema>[]): numb
 };
 
 // Create a new workout
-export const createWorkout = async (workoutData: Omit<Workout, 'id' | 'createdAt' | 'updatedAt'>) => {
+export const createWorkout = async (workoutData: WorkoutInput): Promise<Workout> => {
   try {
-    const now = Timestamp.now();
-    const workout = {
-      ...workoutData,
-      createdAt: now,
-      updatedAt: now
+    // Debug logging
+    console.log('Workout data before validation:', JSON.stringify(workoutData, null, 2));
+    
+    // Check for undefined values in the entire object
+    const checkForUndefined = (obj: any, path: string = ''): string[] => {
+      const undefinedFields: string[] = [];
+      for (const [key, value] of Object.entries(obj)) {
+        const currentPath = path ? `${path}.${key}` : key;
+        if (value === undefined) {
+          undefinedFields.push(currentPath);
+        } else if (value && typeof value === 'object' && !Array.isArray(value)) {
+          undefinedFields.push(...checkForUndefined(value, currentPath));
+        } else if (Array.isArray(value)) {
+          value.forEach((item, index) => {
+            if (item && typeof item === 'object') {
+              undefinedFields.push(...checkForUndefined(item, `${currentPath}[${index}]`));
+            }
+          });
+        }
+      }
+      return undefinedFields;
     };
 
-    // Validate workout data
-    workoutSchema.parse(workout);
-
-    // Calculate total volume if not provided or if exercises are updated
-    if (workout.exercises && workout.totalVolume === undefined) {
-      workout.totalVolume = calculateTotalVolume(workout.exercises);
+    const undefinedFields = checkForUndefined(workoutData);
+    if (undefinedFields.length > 0) {
+      console.error('Found undefined fields:', undefinedFields);
+      throw new Error(`Found undefined fields: ${undefinedFields.join(', ')}`);
     }
 
-    const docRef = await addDoc(collection(db, 'workouts'), workout);
-    console.log('Workout created successfully with ID:', docRef.id);
-    return { id: docRef.id, ...workout };
+    // Add timestamps
+    const workoutWithTimestamps = {
+      ...workoutData,
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now()
+    };
+
+    // Validate the workout data
+    const validatedData = workoutSchema.parse(workoutWithTimestamps);
+    console.log('Validated workout data:', JSON.stringify(validatedData, null, 2));
+
+    // Add the workout to Firestore
+    const workoutRef = await addDoc(collection(db, 'workouts'), validatedData);
+    console.log('Workout added to Firestore with ID:', workoutRef.id);
+
+    // Return the created workout
+    return {
+      id: workoutRef.id,
+      ...validatedData
+    };
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      console.error('Validation Error creating workout:', error.issues);
-    } else {
     console.error('Error creating workout:', error);
+    if (error instanceof z.ZodError) {
+      console.error('Validation errors:', error.errors);
     }
     throw error;
   }
@@ -99,10 +132,17 @@ export const getRecentWorkouts = async (userId: string, limitCount: number = 5) 
     );
 
     const snapshot = await getDocs(workoutsQuery);
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data() as WorkoutData
-    }));
+    const workouts = snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        date: data.date instanceof Timestamp ? data.date : Timestamp.fromDate(new Date(data.date)),
+        createdAt: data.createdAt instanceof Timestamp ? data.createdAt : Timestamp.fromDate(new Date(data.createdAt)),
+        updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt : Timestamp.fromDate(new Date(data.updatedAt))
+      } as Workout;
+    });
+    return workouts;
   } catch (error) {
     console.error('Error getting recent workouts:', error);
     throw error;
@@ -119,10 +159,17 @@ export const getAllWorkouts = async (userId: string): Promise<Workout[]> => {
     );
 
     const snapshot = await getDocs(workoutsQuery);
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data() as WorkoutData
-    }));
+    const workouts = snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        date: data.date instanceof Timestamp ? data.date : Timestamp.fromDate(new Date(data.date)),
+        createdAt: data.createdAt instanceof Timestamp ? data.createdAt : Timestamp.fromDate(new Date(data.createdAt)),
+        updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt : Timestamp.fromDate(new Date(data.updatedAt))
+      } as Workout;
+    });
+    return workouts;
   } catch (error) {
     console.error('Error getting all workouts:', error);
     throw error;

@@ -85,7 +85,7 @@ export function WorkoutSummaryScreen({
       
       // Get the last non-warmup set's values if adding a regular set
       // or the last warmup set's values if adding a warmup set
-      let lastSetValues: { weight: number; reps: number; rpe: number | undefined } = { weight: 0, reps: 0, rpe: undefined };
+      let lastSetValues: { weight: number; reps: number; rpe: number | undefined } = { weight: 0, reps: 0, rpe: 8 };
       if (currentSets.length > 0) {
         if (isWarmup) {
           // Find the last warmup set
@@ -135,8 +135,16 @@ export function WorkoutSummaryScreen({
   const removeSetFromExercise = (exerciseIndex: number, setIndex: number) => {
     setCurrentWorkoutExercises((prevExercises: ExerciseWithSets[]) => {
       const newExercises = [...prevExercises];
-      const newSets = newExercises[exerciseIndex].sets.filter((_, i) => i !== setIndex);
-      newExercises[exerciseIndex] = { ...newExercises[exerciseIndex], sets: newSets };
+      const exercise = newExercises[exerciseIndex];
+      const newSets = exercise.sets.filter((_, i) => i !== setIndex);
+      
+      // If this was the last set, remove the entire exercise
+      if (newSets.length === 0) {
+        return newExercises.filter((_, i) => i !== exerciseIndex);
+      }
+      
+      // Otherwise, update the exercise with the remaining sets
+      newExercises[exerciseIndex] = { ...exercise, sets: newSets };
       return newExercises;
     });
   };

@@ -41,7 +41,7 @@ export function AddWorkoutModal({ open, onOpenChange, onExerciseSave }: AddWorko
       return;
     }
     
-    let setsToCopy = [{ weight: 0, reps: 0, rpe: 0, isWarmup: false, isExecuted: false }];
+    let setsToCopy = [{ weight: 0, reps: 0, rpe: 8, isWarmup: false, isExecuted: false }];
 
     if (copyLastSession && latestWorkout) {
       const lastSessionExercise = latestWorkout.exercises.find(
