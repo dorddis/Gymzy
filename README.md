@@ -9,59 +9,78 @@
   
   [![Deployed on Vercel](https://vercel.com/button)](https://gymzy.vercel.app)
   
-  <img src="src/assets/github-readme/02_home_dashboard.png" alt="Gymzy Dashboard" style="border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 60%; height: auto;"/>
+  <img src="src/assets/github-readme/02_home_dashboard.png"
+       alt="Gymzy Dashboard"
+       style="border-radius:8px; box-shadow:0 4px 6px rgba(0,0,0,0.1);
+              max-width:100px; height:auto;"/>
 </div>
 
 ## 🚀 Features
 
 ### 📊 Interactive Dashboard
-<div style="text-align: center;">
-  <img src="src/assets/github-readme/02_home_dashboard.png" alt="Home Dashboard" style="max-width: 50%; height: auto; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
+<div align="center">
+  <img src="src/assets/github-readme/02_home_dashboard.png"
+       alt="Home Dashboard"
+       style="border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1);
+              max-width:250px; height:auto;"/>
 </div>
-- **At-a-Glance Stats**: View your weekly progress and upcoming workouts
-- **Quick Actions**: Start a new workout or review your history instantly
-- **Performance Overview**: Track your fitness journey with beautiful visualizations
 
 ### 🏋️‍♂️ Smart Workout Tracking
-<div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin: 20px 0;">
-  <img src="src/assets/github-readme/03_add_exercise_modal.png" alt="Add Exercise" style="max-width: 35%; height: auto; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
-  <img src="src/assets/github-readme/04_empty_workout_state.png" alt="Empty Workout" style="max-width: 35%; height: auto; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
+<div align="center" style="display:flex; gap:12px; flex-wrap:wrap;">
+  <img src="src/assets/github-readme/03_add_exercise_modal.png"
+       alt="Add Exercise"
+       style="border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1);
+              max-width:200px; height:auto;"/>
+  <img src="src/assets/github-readme/04_empty_workout_state.png"
+       alt="Empty Workout"
+       style="border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1);
+              max-width:200px; height:auto;"/>
 </div>
-- **Effortless Exercise Logging**: Add exercises with just a few taps
-- **Custom Workout Templates**: Save your favorite routines for quick access
-- **Intuitive Interface**: Simple, clean design for distraction-free training
 
 ### 💪 Muscle Activation Visualization
-<div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin: 20px 0;">
-  <img src="src/assets/github-readme/05_workout_front_view.png" alt="Front View" style="max-width: 35%; height: auto; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
-  <img src="src/assets/github-readme/06_workout_back_view.png" alt="Back View" style="max-width: 35%; height: auto; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
+<div align="center" style="display:flex; gap:12px; flex-wrap:wrap;">
+  <img src="src/assets/github-readme/05_workout_front_view.png"
+       alt="Front View"
+       style="border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1);
+              max-width:200px; height:auto;"/>
+  <img src="src/assets/github-readme/06_workout_back_view.png"
+       alt="Back View"
+       style="border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1);
+              max-width:200px; height:auto;"/>
 </div>
-- **Interactive Anatomy Models**: Switch between front and back views
-- **Real-time Feedback**: See which muscles are being activated
-- **Form Guidance**: Visual cues for proper exercise execution
 
 ### 📈 Comprehensive Analytics
-<div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin: 20px 0;">
-  <img src="src/assets/github-readme/01_weekly_muscle_activation.png" alt="Weekly Analytics" style="max-width: 60%; height: auto; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
-  <img src="src/assets/github-readme/10_stats_page.png" alt="Stats Page" style="max-width: 60%; height: auto; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
+<div align="center" style="display:flex; gap:12px; flex-wrap:wrap;">
+  <img src="src/assets/github-readme/01_weekly_muscle_activation.png"
+       alt="Weekly Analytics"
+       style="border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1);
+              max-width:250px; height:auto;"/>
+  <img src="src/assets/github-readme/10_stats_page.png"
+       alt="Stats Page"
+       style="border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1);
+              max-width:250px; height:auto;"/>
 </div>
-- **Weekly Muscle Activation**: Track which muscle groups you've worked
-- **Training Volume Analysis**: Monitor your progress over time
-- **Performance Insights**: Get personalized recommendations
 
 ### 🤖 AI-Powered Assistance
-<div style="display: flex; flex-wrap: wrap; gap: 16px; margin: 20px 0;">
-  <img src="src/assets/github-readme/09_gymzy_ai_chat.png" alt="AI Chat" style="width: 100%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
+<div align="center" style="margin:20px 0;">
+  <img src="src/assets/github-readme/09_gymzy_ai_chat.png"
+       alt="AI Chat"
+       style="border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1);
+              max-width:300px; height:auto;"/>
 </div>
-- **24/7 Support**: Get instant answers to your fitness questions
-- **Personalized Advice**: Receive workout and nutrition recommendations
-- **Form Checks**: Get feedback on your exercise technique
 
 ### 🚨 Smart Notifications
-<div style="display: flex; flex-wrap: wrap; gap: 16px; margin: 20px 0;">
-  <img src="src/assets/github-readme/07_unfinished_sets_warning.png" alt="Unfinished Sets" style="width: 48%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
-  <img src="src/assets/github-readme/08_workout_completed_volume.png" alt="Workout Volume" style="width: 48%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
+<div align="center" style="display:flex; gap:12px; flex-wrap:wrap;">
+  <img src="src/assets/github-readme/07_unfinished_sets_warning.png"
+       alt="Unfinished Sets"
+       style="border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1);
+              max-width:200px; height:auto;"/>
+  <img src="src/assets/github-readme/08_workout_completed_volume.png"
+       alt="Workout Volume"
+       style="border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1);
+              max-width:200px; height:auto;"/>
 </div>
+
 - **Set Completion Reminders**: Never forget to finish your planned sets
 - **Workout Summary**: Review your completed workout volume and stats
 - **Rest Day Alerts**: Optimize recovery with smart notifications
