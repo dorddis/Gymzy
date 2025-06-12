@@ -61,20 +61,22 @@ const calculateTotalVolume = (exercises: z.infer<typeof exerciseSchema>[]): numb
 };
 
 // Helper function to calculate average RPE
-const calculateAverageRPE = (exercises: z.infer<typeof exerciseSchema>[]): number | undefined => {
+const calculateAverageRPE = (exercises: z.infer<typeof exerciseSchema>[]): number => {
   let totalRPE = 0;
-  let validRPECount = 0;
+  let totalSets = 0;
 
   exercises.forEach(exercise => {
     exercise.sets.forEach(set => {
-      if (set.isExecuted && set.rpe !== undefined && set.rpe >= 1 && set.rpe <= 10) {
-        totalRPE += set.rpe;
-        validRPECount++;
+      if (set.isExecuted) {
+        // Use 7 as default RPE if undefined or invalid
+        const rpe = (set.rpe !== undefined && set.rpe >= 1 && set.rpe <= 10) ? set.rpe : 7;
+        totalRPE += rpe;
+        totalSets++;
       }
     });
   });
 
-  return validRPECount > 0 ? totalRPE / validRPECount : undefined;
+  return totalSets > 0 ? totalRPE / totalSets : 7; // Default to 7 if no sets
 };
 
 // Create a new workout

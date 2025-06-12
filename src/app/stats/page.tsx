@@ -108,8 +108,10 @@ export default function StatsTrendsScreen() {
           // Calculate RPE from individual sets
           workout.exercises.forEach(exercise => {
             exercise.sets.forEach(set => {
-              if (set.isExecuted && set.rpe !== undefined && set.rpe > 0) {
-                totalRPE7Days += set.rpe;
+              if (set.isExecuted) {
+                // Use 7 as default RPE if undefined or invalid
+                const rpe = (set.rpe !== undefined && set.rpe >= 1 && set.rpe <= 10) ? set.rpe : 7;
+                totalRPE7Days += rpe;
                 totalRPEsets++;
               }
             });
@@ -166,7 +168,7 @@ export default function StatsTrendsScreen() {
       weeklyVolumeData,
       weeklyFrequencyData,
       totalVolumeLast7Days: totalVolume7Days,
-      averageRPE: totalRPEsets > 0 ? (totalRPE7Days / totalRPEsets) : 0,
+      averageRPE: totalRPEsets > 0 ? (totalRPE7Days / totalRPEsets) : 7, // Default to 7 if no sets
       consistencyStreak,
       topMuscleGroup,
       dailyVolumesForTracker,

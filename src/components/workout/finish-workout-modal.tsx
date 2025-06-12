@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { X, Camera, Trash2 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -10,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Timestamp } from 'firebase/firestore';
 import { useAuth } from '@/contexts/AuthContext';
 import { uploadMultipleMedia } from '@/services/media-service';
+import { MediaUpload } from './media-upload';
 
 interface FinishWorkoutModalProps {
   open: boolean;
@@ -29,76 +29,8 @@ export function FinishWorkoutModal({ open, onOpenChange, onSave }: FinishWorkout
   const [isSaving, setIsSaving] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-  const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'video/mp4', 'video/quicktime'];
-
-  const validateFile = (file: File): { isValid: boolean; error?: string } => {
-    // Check file type
-    if (!ALLOWED_FILE_TYPES.includes(file.type)) {
-      return {
-        isValid: false,
-        error: `File type ${file.type} is not supported. Please upload images (JPEG, PNG, GIF) or videos (MP4, MOV).`
-      };
-    }
-
-    // Check file size
-    if (file.size > MAX_FILE_SIZE) {
-      return {
-        isValid: false,
-        error: `File size exceeds 10MB limit. Please choose a smaller file.`
-      };
-    }
-
-    return { isValid: true };
-  };
-
-  const handleMediaUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    
-    // Validate each file
-    const validationResults = files.map(file => ({
-      file,
-      ...validateFile(file)
-    }));
-
-    // Separate valid and invalid files
-    const validFiles = validationResults.filter(result => result.isValid).map(result => result.file);
-    const invalidFiles = validationResults.filter(result => !result.isValid);
-
-    // Show error messages for invalid files
-    invalidFiles.forEach(result => {
-      toast({
-        title: "Invalid file",
-        description: result.error,
-        variant: "destructive",
-      });
-    });
-
-    // Add valid files to state
-    if (validFiles.length > 0) {
-      setMediaFiles(prev => [...prev, ...validFiles]);
-      
-      // Show success message if any files were added
-      if (validFiles.length === files.length) {
-        toast({
-          title: "Files added",
-          description: `Added ${validFiles.length} file(s) to upload.`,
-        });
-      } else {
-        toast({
-          title: "Partial success",
-          description: `Added ${validFiles.length} of ${files.length} files. Some files were invalid.`,
-          variant: "warning",
-        });
-      }
-    }
-
-    // Reset the input value to allow selecting the same file again
-    event.target.value = '';
-  };
-
-  const removeMediaFile = (index: number) => {
-    setMediaFiles(prev => prev.filter((_, i) => i !== index));
+  const handleMediaFilesChange = (files: File[]) => {
+    setMediaFiles(files);
   };
 
   const handleSave = async () => {
@@ -292,59 +224,12 @@ export function FinishWorkoutModal({ open, onOpenChange, onSave }: FinishWorkout
           {/* Media Upload */}
           <div className="space-y-2">
             <Label>Media</Label>
-            <div className="border-2 border-dashed border-gray-300 rounded-xl p-4">
-              <input
-                type="file"
-                id="media-upload"
-                accept="image/*,video/*"
-                multiple
-                onChange={handleMediaUpload}
-                className="hidden"
-                disabled={isSaving}
-              />
-              <label
-                htmlFor="media-upload"
-                className={`flex flex-col items-center justify-center cursor-pointer ${
-                  isSaving ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-              >
-                <Camera className="h-8 w-8 text-gray-400 mb-2" />
-                <p className="text-sm text-gray-500">
-                  {isSaving ? 'Uploading...' : 'Tap to upload photo or video'}
-                </p>
-              </label>
-              {mediaFiles.length > 0 && (
-                <div className="mt-4 space-y-2">
-                  {mediaFiles.map((file, index) => (
-                    <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded-lg">
-                      <span className="text-sm truncate flex-1">{file.name}</span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeMediaFile(index)}
-                        className="h-8 w-8"
-                        disabled={isSaving}
-                      >
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
-              {isSaving && uploadProgress > 0 && (
-                <div className="mt-4">
-                  <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-primary transition-all duration-300"
-                      style={{ width: `${uploadProgress}%` }}
-                    />
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Uploading... {uploadProgress}%
-                  </p>
-                </div>
-              )}
-            </div>
+            <MediaUpload
+              onFilesChange={handleMediaFilesChange}
+              onUploadProgress={setUploadProgress}
+              isUploading={isSaving}
+              disabled={isSaving}
+            />
           </div>
 
           {/* Privacy Toggle */}
