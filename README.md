@@ -9,14 +9,14 @@
   
   [![Deployed on Vercel](https://vercel.com/button)](https://gymzy.vercel.app)
   
-  <img src="src/assets/github-readme/02_home_dashboard.png" alt="Gymzy Dashboard" style="border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 80%; height: auto;"/>
+  <img src="src/assets/github-readme/02_home_dashboard.png" alt="Gymzy Dashboard" style="border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 60%; height: auto;"/>
 </div>
 
 ## 🚀 Features
 
 ### 📊 Interactive Dashboard
 <div style="text-align: center;">
-  <img src="src/assets/github-readme/02_home_dashboard.png" alt="Home Dashboard" style="max-width: 70%; height: auto; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
+  <img src="src/assets/github-readme/02_home_dashboard.png" alt="Home Dashboard" style="max-width: 50%; height: auto; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
 </div>
 - **At-a-Glance Stats**: View your weekly progress and upcoming workouts
 - **Quick Actions**: Start a new workout or review your history instantly
@@ -24,8 +24,8 @@
 
 ### 🏋️‍♂️ Smart Workout Tracking
 <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin: 20px 0;">
-  <img src="src/assets/github-readme/03_add_exercise_modal.png" alt="Add Exercise" style="max-width: 40%; height: auto; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
-  <img src="src/assets/github-readme/04_empty_workout_state.png" alt="Empty Workout" style="max-width: 40%; height: auto; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
+  <img src="src/assets/github-readme/03_add_exercise_modal.png" alt="Add Exercise" style="max-width: 35%; height: auto; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
+  <img src="src/assets/github-readme/04_empty_workout_state.png" alt="Empty Workout" style="max-width: 35%; height: auto; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
 </div>
 - **Effortless Exercise Logging**: Add exercises with just a few taps
 - **Custom Workout Templates**: Save your favorite routines for quick access
@@ -33,8 +33,8 @@
 
 ### 💪 Muscle Activation Visualization
 <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin: 20px 0;">
-  <img src="src/assets/github-readme/05_workout_front_view.png" alt="Front View" style="max-width: 40%; height: auto; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
-  <img src="src/assets/github-readme/06_workout_back_view.png" alt="Back View" style="max-width: 40%; height: auto; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
+  <img src="src/assets/github-readme/05_workout_front_view.png" alt="Front View" style="max-width: 35%; height: auto; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
+  <img src="src/assets/github-readme/06_workout_back_view.png" alt="Back View" style="max-width: 35%; height: auto; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
 </div>
 - **Interactive Anatomy Models**: Switch between front and back views
 - **Real-time Feedback**: See which muscles are being activated
@@ -42,8 +42,8 @@
 
 ### 📈 Comprehensive Analytics
 <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin: 20px 0;">
-  <img src="src/assets/github-readme/01_weekly_muscle_activation.png" alt="Weekly Analytics" style="max-width: 80%; height: auto; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
-  <img src="src/assets/github-readme/10_stats_page.png" alt="Stats Page" style="max-width: 80%; height: auto; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
+  <img src="src/assets/github-readme/01_weekly_muscle_activation.png" alt="Weekly Analytics" style="max-width: 60%; height: auto; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
+  <img src="src/assets/github-readme/10_stats_page.png" alt="Stats Page" style="max-width: 60%; height: auto; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
 </div>
 - **Weekly Muscle Activation**: Track which muscle groups you've worked
 - **Training Volume Analysis**: Monitor your progress over time
@@ -131,16 +131,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## ✨ Show Your Support
 
 Give a ⭐️ if this project helped you!
-
----
-
-<div align="center">
-  Made with ❤️ by the Gymzy Team
-</div>
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
