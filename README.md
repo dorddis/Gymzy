@@ -129,7 +129,7 @@
 
 ### Backend
 - **Authentication**: Firebase Auth
-- **Database**: Firestore
+- **Database**: Cloudinary
 - **Storage**: Firebase Storage
 - **Hosting**: Vercel
 
