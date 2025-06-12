@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Workout } from '@/services/workout-service';
