@@ -1,4 +1,4 @@
-# Gymzy - Your Smart Fitness Partner
+# Gymzy - Your Smart Fitness Partner [[OLD]] (work in progress for new UI/UX)
 
 ![Gymzy Logo](docs/images/logo.png)
 

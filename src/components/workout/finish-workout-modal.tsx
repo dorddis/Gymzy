@@ -155,7 +155,7 @@ export function FinishWorkoutModal({ open, onOpenChange, onSave }: FinishWorkout
                 <Button
                   variant="outline"
                   className={cn(
-                    "w-full justify-start text-left font-normal",
+                    "w-full justify-start text-left font-normal focus-visible:ring-0 focus-visible:ring-offset-0",
                     !date && "text-muted-foreground"
                   )}
                   onClick={() => setShowCalendar(!showCalendar)}
