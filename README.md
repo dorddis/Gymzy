@@ -25,9 +25,10 @@
   <img
     src="src/assets/github-readme/02_home_dashboard.png"
     alt="Home Dashboard"
-    width="200"
+    width="300"
   />
 </p>
+
 - **At-a-Glance Stats**: View your weekly progress and upcoming workouts
 - **Quick Actions**: Start a new workout or review history instantly
 - **Performance Overview**: Beautiful visualizations of your fitness journey
@@ -39,14 +40,15 @@
   <img
     src="src/assets/github-readme/03_add_exercise_modal.png"
     alt="Add Exercise Modal"
-    width="150"
+    width="300"
   />  
   <img
     src="src/assets/github-readme/04_empty_workout_state.png"
     alt="Empty Workout State"
-    width="150"
+    width="300"
   />
 </p>
+
 - **Effortless Logging**: Add exercises, sets, reps, and weights in a tap
 - **Custom Templates**: Save and reuse your favorite routines
 - **Clean UI**: Distraction-free design focused on training
@@ -58,14 +60,15 @@
   <img
     src="src/assets/github-readme/05_workout_front_view.png"
     alt="Front-View Muscle Activation"
-    width="150"
+    width="300"
   />  
   <img
     src="src/assets/github-readme/06_workout_back_view.png"
     alt="Back-View Muscle Activation"
-    width="150"
+    width="300"
   />
 </p>
+
 - **Interactive Anatomy**: Toggle between front and back body views
 - **Real-Time Feedback**: See exactly which muscles you’re working
 - **Form Guidance**: Visual cues to help you maintain proper technique
@@ -77,14 +80,15 @@
   <img
     src="src/assets/github-readme/01_weekly_muscle_activation.png"
     alt="Weekly Muscle Activation"
-    width="200"
+    width="300"
   />  
   <img
     src="src/assets/github-readme/10_stats_page.png"
     alt="Stats Page"
-    width="200"
+    width="300"
   />
 </p>
+
 - **Weekly Activation**: Track which muscle groups you hit most
 - **Volume Tracking**: Monitor total weight lifted over time
 - **Personal Insights**: Get data-driven recommendations for improvement
@@ -99,6 +103,7 @@
     width="300"
   />
 </p>
+
 - **24/7 Support**: Instant answers to your fitness and nutrition questions  
 - **Personalized Advice**: Tailored workout and meal suggestions  
 - **Form Checks**: AI-driven feedback on your exercise technique
