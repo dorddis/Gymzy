@@ -142,7 +142,7 @@ export function FinishWorkoutModal({ open, onOpenChange, onSave }: FinishWorkout
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] max-h-[90vh] flex flex-col mx-4 sm:mx-4 rounded-xl">
+      <DialogContent className="w-full max-w-[425px] max-h-[90vh] flex flex-col mx-auto px-4 rounded-xl">
         <DialogHeader className="px-1">
           <DialogTitle>Finish Workout</DialogTitle>
         </DialogHeader>
