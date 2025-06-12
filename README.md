@@ -12,7 +12,7 @@
   <img src="src/assets/github-readme/02_home_dashboard.png"
        alt="Gymzy Dashboard"
        style="border-radius:8px; box-shadow:0 4px 6px rgba(0,0,0,0.1);
-              max-width:100px; height:auto;"/>
+              max-width:10px; height:auto;"/>
 </div>
 
 ## 🚀 Features
