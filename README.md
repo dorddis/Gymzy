@@ -7,7 +7,7 @@
   [![React](https://img.shields.io/badge/React-18.3.1-61DAFB?logo=react)](https://reactjs.org/)
   [![TypeScript](https://img.shields.io/badge/TypeScript-5.0.0-3178C6?logo=typescript)](https://www.typescriptlang.org/)
   
-  [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/git/external?repository-url=https%3A%2F%2Fgithub.com%2Fyourusername%2Fgymzy)
+  [![Deployed on Vercel](https://vercel.com/button)](https://gymzy.vercel.app)
   
   <img src="src/assets/github-readme/02_home_dashboard.png" alt="Gymzy Dashboard" style="border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 100%;"/>
 </div>
