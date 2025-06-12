@@ -33,8 +33,6 @@
 - **Quick Actions**: Start a new workout or review history instantly
 - **Performance Overview**: Beautiful visualizations of your fitness journey
 
----
-
 ### 🏋️‍♂️ Smart Workout Tracking
 <p align="center">
   <img
@@ -52,8 +50,6 @@
 - **Effortless Logging**: Add exercises, sets, reps, and weights in a tap
 - **Custom Templates**: Save and reuse your favorite routines
 - **Clean UI**: Distraction-free design focused on training
-
----
 
 ### 💪 Muscle Activation Visualization
 <p align="center">
@@ -73,8 +69,6 @@
 - **Real-Time Feedback**: See exactly which muscles you’re working
 - **Form Guidance**: Visual cues to help you maintain proper technique
 
----
-
 ### 📈 Comprehensive Analytics
 <p align="center">
   <img
@@ -93,8 +87,6 @@
 - **Volume Tracking**: Monitor total weight lifted over time
 - **Personal Insights**: Get data-driven recommendations for improvement
 
----
-
 ### 🤖 AI-Powered Assistance
 <p align="center">
   <img
@@ -107,8 +99,6 @@
 - **24/7 Support**: Instant answers to your fitness and nutrition questions  
 - **Personalized Advice**: Tailored workout and meal suggestions  
 - **Form Checks**: AI-driven feedback on your exercise technique
-
----
 
 ### 🚨 Smart Notifications
 <p align="center">
