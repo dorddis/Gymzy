@@ -115,12 +115,12 @@
   <img
     src="src/assets/github-readme/07_unfinished_sets_warning.png"
     alt="Unfinished Sets Warning"
-    width="150"
+    width="300"
   />  
   <img
     src="src/assets/github-readme/08_workout_completed_volume.png"
     alt="Workout Completed Summary"
-    width="150"
+    width="300"
   />
 </p>
 
