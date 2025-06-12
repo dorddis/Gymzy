@@ -1,3 +1,5 @@
+import { compressMedia } from '@/lib/image-compression';
+
 declare global {
   interface Window {
     cloudinary: any;
@@ -38,9 +40,12 @@ export async function uploadMedia(
   
   while (retries < MAX_RETRIES) {
     try {
+      // Compress the file before upload
+      const compressedFile = await compressMedia(file);
+
       // Create form data
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', compressedFile);
       formData.append('upload_preset', 'gymzy_workouts');
       formData.append('cloud_name', process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!);
       formData.append('folder', `users/${userId}/workouts/${workoutId}`);

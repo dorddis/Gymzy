@@ -1,37 +1,42 @@
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useWorkout } from '@/contexts/WorkoutContext';
+import { Switch } from '@/components/ui/switch';
+import { Progress } from '@/components/ui/progress';
+import { MediaUpload } from './media-upload';
 import { useToast } from '@/hooks/use-toast';
-import { Timestamp } from 'firebase/firestore';
 import { useAuth } from '@/contexts/AuthContext';
 import { uploadMultipleMedia } from '@/services/media-service';
-import { MediaUpload } from './media-upload';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { CalendarIcon, Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface FinishWorkoutModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: () => void;
+  onSave: (data: {
+    date: Date;
+    notes: string;
+    isPublic: boolean;
+    mediaUrls: string[];
+  }) => Promise<void>;
 }
 
 export function FinishWorkoutModal({ open, onOpenChange, onSave }: FinishWorkoutModalProps) {
-  const { currentWorkoutExercises, totalVolume, addWorkout } = useWorkout();
-  const { user, loading: authLoading } = useAuth();
-  const { toast } = useToast();
-  
-  const [dateTime, setDateTime] = useState<string>(new Date().toISOString().slice(0, 16));
+  const [date, setDate] = useState<Date>(new Date());
   const [notes, setNotes] = useState('');
   const [isPublic, setIsPublic] = useState(false);
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
-  const [isSaving, setIsSaving] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-
-  const handleMediaFilesChange = (files: File[]) => {
-    setMediaFiles(files);
-  };
+  const [isSaving, setIsSaving] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const { user } = useAuth();
+  const { toast } = useToast();
 
   const handleSave = async () => {
     if (!user) {
@@ -91,166 +96,177 @@ export function FinishWorkoutModal({ open, onOpenChange, onSave }: FinishWorkout
             description: `Successfully uploaded ${mediaUrls.length} file(s).`,
           });
         } catch (error) {
-          console.error('Error uploading media:', error);
-          
-          // Check if any files were uploaded successfully
-          if (mediaUrls.length > 0) {
-            toast({
-              title: "Partial Upload",
-              description: `Only ${mediaUrls.length} of ${mediaFiles.length} files were uploaded. The workout will be saved with available media.`,
-              variant: "warning",
-            });
-          } else {
-            toast({
-              title: "Media Upload Failed",
-              description: "Could not upload media files. The workout will be saved without media.",
-              variant: "destructive",
-            });
-          }
+          console.error("handleSave: Error uploading media:", error);
+          toast({
+            title: "Error uploading media",
+            description: error instanceof Error ? error.message : "Failed to upload media files.",
+            variant: "destructive",
+          });
+          throw error;
         }
       }
 
-      // Create workout data
-      const workoutData = {
-        userId: user.uid,
-        title: `Workout ${new Date().toLocaleDateString()}`,
-        date: Timestamp.fromDate(new Date(dateTime)),
-        exercises: currentWorkoutExercises.map(exercise => ({
-          exerciseId: exercise.id,
-          name: exercise.name,
-          sets: exercise.sets.map(set => ({
-            weight: set.weight || 0,
-            reps: set.reps || 0,
-            rpe: (set.rpe !== undefined && set.rpe >= 1 && set.rpe <= 10) ? set.rpe : undefined,
-            isWarmup: set.isWarmup || false,
-            isExecuted: set.isExecuted || false,
-          })),
-          targetedMuscles: exercise.primaryMuscles || [],
-          notes: exercise.notes || '',
-          order: exercise.order || 0,
-        })),
-        totalVolume: totalVolume || 0,
-        notes: notes || '',
-        mediaUrls: mediaUrls || [],
-        isPublic: isPublic || false,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now()
-      };
-
-      // Debug logging
-      console.log('Workout data before saving:', JSON.stringify(workoutData, null, 2));
-      Object.entries(workoutData).forEach(([key, value]) => {
-        if (value === undefined) {
-          console.error(`Undefined field in workout data: ${key}`);
-        }
+      // Save workout data
+      console.log("handleSave: Saving workout data...");
+      await onSave({
+        date,
+        notes,
+        isPublic,
+        mediaUrls,
       });
 
-      // Show saving workout toast
+      console.log("handleSave: Workout saved successfully.");
       toast({
-        title: "Saving workout",
-        description: "Saving your workout data...",
+        title: "Workout saved",
+        description: "Your workout has been saved successfully.",
       });
 
-      // Remove createdAt and updatedAt as they are added by createWorkout
-      const { createdAt, updatedAt, ...workoutDataToSave } = workoutData;
-      
-      // Debug logging for final data
-      console.log('Workout data to save:', JSON.stringify(workoutDataToSave, null, 2));
-      Object.entries(workoutDataToSave).forEach(([key, value]) => {
-        if (value === undefined) {
-          console.error(`Undefined field in final workout data: ${key}`);
-        }
-      });
-
-      await addWorkout(workoutDataToSave);
-      console.log("handleSave: addWorkout completed.");
-
-      toast({
-        title: "Workout saved!",
-        description: mediaUrls.length > 0 
-          ? `Your workout has been saved with ${mediaUrls.length} media file(s).`
-          : "Your workout has been saved successfully.",
-      });
-
-      onSave();
+      // Reset form and close modal
+      setDate(new Date());
+      setNotes('');
+      setIsPublic(false);
+      setMediaFiles([]);
+      setUploadProgress(0);
       onOpenChange(false);
     } catch (error) {
-      console.error("handleSave: Error during save process:", error);
+      console.error("handleSave: Error saving workout:", error);
       toast({
         title: "Error saving workout",
-        description: error instanceof Error 
-          ? error.message 
-          : "There was an error saving your workout. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to save workout.",
         variant: "destructive",
       });
     } finally {
       setIsSaving(false);
-      setUploadProgress(0);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex flex-col max-w-lg w-[90vw] md:w-full h-auto max-h-[95vh] p-0 rounded-xl overflow-hidden">
-        <div className="px-4 py-5 flex justify-between items-center border-b border-gray-200">
-          <DialogTitle className="text-xl font-semibold">Finish Workout</DialogTitle>
+      <DialogContent className="sm:max-w-[425px] max-h-[90vh] flex flex-col mx-4 sm:mx-4 rounded-xl">
+        <DialogHeader className="px-1">
+          <DialogTitle>Finish Workout</DialogTitle>
+        </DialogHeader>
+
+        <div className="flex-1 overflow-y-auto pr-1 px-1">
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="date">Date</Label>
+              <div className="relative">
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !date && "text-muted-foreground"
+                  )}
+                  onClick={() => setShowCalendar(!showCalendar)}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {date ? format(date, "PPP") : <span>Pick a date</span>}
+                </Button>
+                <AnimatePresence>
+                  {showCalendar && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute z-50 mt-2 w-[calc(100%-rem)]"
+                    >
+                      <Calendar
+                        mode="single"
+                        selected={date}
+                        onSelect={(date) => {
+                          setDate(date || new Date());
+                          setShowCalendar(false);
+                        }}
+                        initialFocus
+                        disabled={(date) => date > new Date()}
+                        className="bg-background border rounded-lg shadow-lg"
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="notes">Notes</Label>
+              <Textarea
+                id="notes"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Add any notes about your workout..."
+                className="min-h-[100px] focus-visible:ring-0 focus-visible:ring-offset-0"
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label>Media</Label>
+              <MediaUpload
+                onFilesChange={setMediaFiles}
+                onUploadProgress={setUploadProgress}
+                isUploading={isSaving}
+                disabled={isSaving}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <Label htmlFor="public" className="flex flex-col gap-1">
+                <span>Public Workout</span>
+                <span className="text-sm text-muted-foreground">
+                  Share your workout with the community
+                </span>
+              </Label>
+              <Switch
+                id="public"
+                checked={isPublic}
+                onCheckedChange={setIsPublic}
+                disabled={isSaving}
+              />
+            </div>
+
+            <AnimatePresence>
+              {isSaving && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="space-y-2"
+                >
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className="text-sm text-muted-foreground">
+                      {uploadProgress < 100 ? 'Uploading media...' : 'Saving workout...'}
+                    </span>
+                  </div>
+                  <Progress value={uploadProgress} className="w-full" />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
 
-        <div className="p-4 space-y-4 overflow-y-auto">
-          {/* Date & Time */}
-          <div className="space-y-2">
-            <Label htmlFor="datetime">Date & Time</Label>
-            <input
-              type="datetime-local"
-              id="datetime"
-              value={dateTime}
-              onChange={(e) => setDateTime(e.target.value)}
-              className="w-full p-3 bg-white rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
-
-          {/* Notes */}
-          <div className="space-y-2">
-            <Label htmlFor="notes">How do you feel?</Label>
-            <Textarea
-              id="notes"
-              placeholder="Add notes about this workout..."
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="h-24 resize-none"
-            />
-          </div>
-
-          {/* Media Upload */}
-          <div className="space-y-2">
-            <Label>Media</Label>
-            <MediaUpload
-              onFilesChange={handleMediaFilesChange}
-              onUploadProgress={setUploadProgress}
-              isUploading={isSaving}
-              disabled={isSaving}
-            />
-          </div>
-
-          {/* Privacy Toggle */}
-          <div className="flex items-center justify-between py-2">
-            <Label htmlFor="privacy">Make this workout public</Label>
-            <Switch
-              id="privacy"
-              checked={isPublic}
-              onCheckedChange={setIsPublic}
-            />
-          </div>
-        </div>
-
-        {/* Save Button */}
-        <div className="px-4 py-3 border-t border-gray-200">
+        <div className="flex justify-end gap-2 pt-4 border-t">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={isSaving}
+          >
+            Cancel
+          </Button>
           <Button
             onClick={handleSave}
             disabled={isSaving}
-            className="w-full"
+            className="relative text-white"
           >
-            {isSaving ? 'Saving...' : 'Save Workout'}
+            {isSaving ? (
+              <>
+                <span className="opacity-0">Save Workout</span>
+                <Loader2 className="absolute h-4 w-4 animate-spin" />
+              </>
+            ) : (
+              'Save Workout'
+            )}
           </Button>
         </div>
       </DialogContent>
