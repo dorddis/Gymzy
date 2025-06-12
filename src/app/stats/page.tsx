@@ -51,7 +51,23 @@ const getVolumeColor = (volume: number, maxVolume: number): string => {
 export default function StatsTrendsScreen() {
   const { recentWorkouts, allWorkouts, loading, error } = useWorkout();
 
-  const last7Days = getDatesInRange(14).map(date => new Date(date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' })); // Changed to 14 days
+  // Helper function to get dates in user's local timezone
+  const getLocalDateString = (date: Date) => {
+    return date.toLocaleDateString('en-US', { 
+      month: 'numeric', 
+      day: 'numeric',
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone 
+    });
+  };
+
+  // Helper function to get start of day in user's timezone
+  const getStartOfDay = (date: Date) => {
+    const localDate = new Date(date);
+    localDate.setHours(0, 0, 0, 0);
+    return localDate;
+  };
+
+  const last7Days = getDatesInRange(14).map(date => getLocalDateString(new Date(date))); // Changed to 14 days
   const last6MonthsDates = getDatesInRange(180); // Changed to 6 months
 
   const {
@@ -72,21 +88,32 @@ export default function StatsTrendsScreen() {
 
     let totalVolume7Days = 0;
     let totalRPE7Days = 0;
-    let workoutCount7Days = 0;
+    let totalRPEsets = 0;
     const muscleGroupVolumes: { [key: string]: number } = {};
 
     if (allWorkouts) {
       allWorkouts.forEach(workout => {
-        const workoutDateFormatted = workout.date.toDate().toISOString().split('T')[0]; // YYYY-MM-DD
-        const workoutDateShort = new Date(workoutDateFormatted).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
+        // Convert workout date to user's local timezone
+        const workoutDate = workout.date.toDate();
+        const localWorkoutDate = getStartOfDay(workoutDate);
+        const workoutDateFormatted = localWorkoutDate.toISOString().split('T')[0]; // YYYY-MM-DD
+        const workoutDateShort = getLocalDateString(localWorkoutDate);
 
         // For 7-day charts
         if (volumeMap7Days.has(workoutDateShort)) {
           volumeMap7Days.set(workoutDateShort, (volumeMap7Days.get(workoutDateShort) || 0) + (workout.totalVolume || 0));
           frequencyMap7Days.set(workoutDateShort, (frequencyMap7Days.get(workoutDateShort) || 0) + 1);
           totalVolume7Days += (workout.totalVolume || 0);
-          totalRPE7Days += (workout.rpe || 0);
-          workoutCount7Days++;
+          
+          // Calculate RPE from individual sets
+          workout.exercises.forEach(exercise => {
+            exercise.sets.forEach(set => {
+              if (set.isExecuted && set.rpe !== undefined && set.rpe > 0) {
+                totalRPE7Days += set.rpe;
+                totalRPEsets++;
+              }
+            });
+          });
         }
 
         // For 6-month progress tracker
@@ -94,9 +121,14 @@ export default function StatsTrendsScreen() {
           dailyVolumeMap6Months.set(workoutDateFormatted, (dailyVolumeMap6Months.get(workoutDateFormatted) || 0) + (workout.totalVolume || 0));
         }
 
+        // Calculate muscle group volumes
         workout.exercises.forEach(exercise => {
           exercise.targetedMuscles.forEach(muscle => {
-            muscleGroupVolumes[muscle] = (muscleGroupVolumes[muscle] || 0) + (exercise.sets.reduce((sum, set) => sum + (set.weight * set.reps), 0));
+            const exerciseVolume = exercise.sets.reduce((sum, set) => {
+              if (!set.isExecuted) return sum;
+              return sum + (set.weight * set.reps);
+            }, 0);
+            muscleGroupVolumes[muscle] = (muscleGroupVolumes[muscle] || 0) + exerciseVolume;
           });
         });
       });
@@ -134,7 +166,7 @@ export default function StatsTrendsScreen() {
       weeklyVolumeData,
       weeklyFrequencyData,
       totalVolumeLast7Days: totalVolume7Days,
-      averageRPE: workoutCount7Days > 0 ? (totalRPE7Days / workoutCount7Days) : 0,
+      averageRPE: totalRPEsets > 0 ? (totalRPE7Days / totalRPEsets) : 0,
       consistencyStreak,
       topMuscleGroup,
       dailyVolumesForTracker,

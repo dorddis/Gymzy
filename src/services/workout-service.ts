@@ -60,62 +60,56 @@ const calculateTotalVolume = (exercises: z.infer<typeof exerciseSchema>[]): numb
   }, 0);
 };
 
-// Create a new workout
-export const createWorkout = async (workoutData: WorkoutInput): Promise<Workout> => {
-  try {
-    // Debug logging
-    console.log('Workout data before validation:', JSON.stringify(workoutData, null, 2));
-    
-    // Check for undefined values in the entire object
-    const checkForUndefined = (obj: any, path: string = ''): string[] => {
-      const undefinedFields: string[] = [];
-      for (const [key, value] of Object.entries(obj)) {
-        const currentPath = path ? `${path}.${key}` : key;
-        if (value === undefined) {
-          undefinedFields.push(currentPath);
-        } else if (value && typeof value === 'object' && !Array.isArray(value)) {
-          undefinedFields.push(...checkForUndefined(value, currentPath));
-        } else if (Array.isArray(value)) {
-          value.forEach((item, index) => {
-            if (item && typeof item === 'object') {
-              undefinedFields.push(...checkForUndefined(item, `${currentPath}[${index}]`));
-            }
-          });
-        }
-      }
-      return undefinedFields;
-    };
+// Helper function to calculate average RPE
+const calculateAverageRPE = (exercises: z.infer<typeof exerciseSchema>[]): number | undefined => {
+  let totalRPE = 0;
+  let validRPECount = 0;
 
-    const undefinedFields = checkForUndefined(workoutData);
-    if (undefinedFields.length > 0) {
-      console.error('Found undefined fields:', undefinedFields);
-      throw new Error(`Found undefined fields: ${undefinedFields.join(', ')}`);
-    }
+  exercises.forEach(exercise => {
+    exercise.sets.forEach(set => {
+      if (set.isExecuted && set.rpe !== undefined && set.rpe >= 1 && set.rpe <= 10) {
+        totalRPE += set.rpe;
+        validRPECount++;
+      }
+    });
+  });
+
+  return validRPECount > 0 ? totalRPE / validRPECount : undefined;
+};
+
+// Create a new workout
+export const createWorkout = async (workoutData: Omit<WorkoutData, 'createdAt' | 'updatedAt'>): Promise<Workout> => {
+  try {
+    // Calculate total volume
+    const totalVolume = calculateTotalVolume(workoutData.exercises);
+    
+    // Calculate average RPE
+    const averageRPE = calculateAverageRPE(workoutData.exercises);
 
     // Add timestamps
     const workoutWithTimestamps = {
       ...workoutData,
+      totalVolume,
+      rpe: averageRPE,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now()
     };
 
     // Validate the workout data
     const validatedData = workoutSchema.parse(workoutWithTimestamps);
-    console.log('Validated workout data:', JSON.stringify(validatedData, null, 2));
 
-    // Add the workout to Firestore
-    const workoutRef = await addDoc(collection(db, 'workouts'), validatedData);
-    console.log('Workout added to Firestore with ID:', workoutRef.id);
-
-    // Return the created workout
+    // Add to Firestore
+    const docRef = await addDoc(collection(db, 'workouts'), validatedData);
+    
     return {
-      id: workoutRef.id,
+      id: docRef.id,
       ...validatedData
     };
   } catch (error) {
-    console.error('Error creating workout:', error);
     if (error instanceof z.ZodError) {
-      console.error('Validation errors:', error.errors);
+      console.error('Validation Error creating workout:', error.issues);
+    } else {
+      console.error('Error creating workout:', error);
     }
     throw error;
   }
@@ -134,13 +128,22 @@ export const getRecentWorkouts = async (userId: string, limitCount: number = 5) 
     const snapshot = await getDocs(workoutsQuery);
     const workouts = snapshot.docs.map(doc => {
       const data = doc.data();
-      return {
+      // Ensure all required fields are present with default values
+      const workoutData = {
         id: doc.id,
-        ...data,
+        userId: data.userId || userId,
+        title: data.title || 'Untitled Workout',
         date: data.date instanceof Timestamp ? data.date : Timestamp.fromDate(new Date(data.date)),
+        exercises: data.exercises || [],
+        totalVolume: data.totalVolume || 0,
+        rpe: data.rpe,
+        notes: data.notes || '',
+        mediaUrls: data.mediaUrls || [],
+        isPublic: data.isPublic || false,
         createdAt: data.createdAt instanceof Timestamp ? data.createdAt : Timestamp.fromDate(new Date(data.createdAt)),
         updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt : Timestamp.fromDate(new Date(data.updatedAt))
-      } as Workout;
+      };
+      return workoutData as Workout;
     });
     return workouts;
   } catch (error) {
@@ -161,13 +164,22 @@ export const getAllWorkouts = async (userId: string): Promise<Workout[]> => {
     const snapshot = await getDocs(workoutsQuery);
     const workouts = snapshot.docs.map(doc => {
       const data = doc.data();
-      return {
+      // Ensure all required fields are present with default values
+      const workoutData = {
         id: doc.id,
-        ...data,
+        userId: data.userId || userId,
+        title: data.title || 'Untitled Workout',
         date: data.date instanceof Timestamp ? data.date : Timestamp.fromDate(new Date(data.date)),
+        exercises: data.exercises || [],
+        totalVolume: data.totalVolume || 0,
+        rpe: data.rpe,
+        notes: data.notes || '',
+        mediaUrls: data.mediaUrls || [],
+        isPublic: data.isPublic || false,
         createdAt: data.createdAt instanceof Timestamp ? data.createdAt : Timestamp.fromDate(new Date(data.createdAt)),
         updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt : Timestamp.fromDate(new Date(data.updatedAt))
-      } as Workout;
+      };
+      return workoutData as Workout;
     });
     return workouts;
   } catch (error) {
@@ -185,9 +197,10 @@ export const updateWorkout = async (workoutId: string, workoutData: Partial<Work
       updatedAt: Timestamp.now()
     };
 
-    // If exercises are updated, recalculate total volume
+    // If exercises are updated, recalculate total volume and average RPE
     if (workoutData.exercises) {
       updateData.totalVolume = calculateTotalVolume(workoutData.exercises);
+      updateData.rpe = calculateAverageRPE(workoutData.exercises);
     }
 
     await updateDoc(workoutRef, updateData);
@@ -197,7 +210,7 @@ export const updateWorkout = async (workoutId: string, workoutData: Partial<Work
     if (error instanceof z.ZodError) {
       console.error('Validation Error updating workout:', error.issues);
     } else {
-    console.error('Error updating workout:', error);
+      console.error('Error updating workout:', error);
     }
     throw error;
   }
