@@ -129,9 +129,28 @@
 
 ### Backend
 - **Authentication**: Firebase Auth
-- **Database**: Cloudinary
-- **Storage**: Firebase Storage
+- **Database**: Firestore
+- **Media Storage**: Cloudinary
+- **File Storage**: Firebase Storage
 - **Hosting**: Vercel
+
+### Cloudinary Setup
+The app uses Cloudinary for media storage with two upload presets:
+- `gymzy_workouts` - For workout photos and videos
+- `gymzy_profiles` - For profile pictures
+
+**Required Cloudinary Upload Presets:**
+1. **gymzy_profiles** (for profile pictures):
+   - Folder: `users/{userId}/profile`
+   - Transformations: Auto-optimize, auto-format
+   - Max file size: 5MB
+   - Allowed formats: jpg, png, webp
+
+2. **gymzy_workouts** (for workout media):
+   - Folder: `users/{userId}/workouts/{workoutId}`
+   - Transformations: Auto-optimize, auto-format
+   - Max file size: 10MB
+   - Allowed formats: jpg, png, gif, mp4, mov
 
 ## 🚀 Getting Started
 

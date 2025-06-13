@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { Send, ChevronLeft, Loader2, MessageSquare, Trash2, Plus, X, AlignRight } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -22,7 +22,7 @@ interface ChatMessage {
   timestamp?: Date;
 }
 
-export default function ChatPage() {
+function ChatContent() {
   const { user } = useAuth();
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -358,5 +358,22 @@ export default function ChatPage() {
       )}
 
     </div>
+  );
+}
+
+export default function ChatPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex flex-col h-screen bg-background">
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p>Loading chat...</p>
+          </div>
+        </div>
+      </div>
+    }>
+      <ChatContent />
+    </Suspense>
   );
 }

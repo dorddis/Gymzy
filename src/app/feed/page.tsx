@@ -17,7 +17,8 @@ import {
   Clock,
   Dumbbell,
   Loader2,
-  ArrowLeft
+  ChevronLeft,
+  Search
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { 
@@ -276,13 +277,24 @@ export default function FeedPage() {
             onClick={() => router.back()}
             className="p-2 hover:bg-gray-100 rounded-full"
           >
-            <ArrowLeft className="h-5 w-5 text-gray-700" />
+            <ChevronLeft className="h-5 w-5 text-gray-700" />
           </Button>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Gymzy Community</h1>
-            <p className="text-gray-600 text-sm">
-              Discover workouts and connect with the fitness community
-            </p>
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Gymzy Community</h1>
+            <div className="flex items-center justify-between">
+              <p className="text-gray-600 text-sm flex-1 mr-4">
+                Discover workouts and connect with the fitness community
+              </p>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => router.push('/discover')}
+                className="flex items-center gap-2 whitespace-nowrap shrink-0"
+              >
+                <Search className="h-4 w-4" />
+                Search
+              </Button>
+            </div>
           </div>
         </div>
       </div>

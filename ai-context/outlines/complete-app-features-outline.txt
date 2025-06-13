@@ -715,14 +715,24 @@ interface CalorieBurn {
 - Profile dropdown menu with user info and logout
 - Basic logout functionality with secure session cleanup
 - User settings outline with comprehensive specifications
+- Profile picture upload and editing system with Cloudinary integration
+- Profile picture cropping, rotation, and progress tracking
+- Onboarding context service with complete CRUD operations
+- Settings page with tabbed interface and navigation
+- Firebase security rules for new collections
+- Build optimization with Suspense boundary for useSearchParams
+- Fitness Goals Editor with interactive goal selection and targets
+- Equipment Manager with location, space, budget, and equipment tracking
+- Cloudinary integration for profile pictures with upload presets
 
 **🚧 REMAINING FEATURES:**
-- Profile picture upload and editing system
-- Onboarding context editing interface
+- Schedule builder component for workout timing preferences
+- Health information management interface
 - Physical stats management with BMR/TDEE calculations
-- AI coach settings customization
+- AI coach settings customization interface
 - Privacy and security dashboard
 - Notification settings management
+- Profile picture history management interface
 
 **Tasks:**
 1. **Profile Icon Menu**

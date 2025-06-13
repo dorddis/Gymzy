@@ -9,6 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ProfilePictureUpload } from '@/components/profile/profile-picture-upload';
 import { ProfilePictureService } from '@/services/profile-picture-service';
 import { OnboardingContextService, OnboardingContext } from '@/services/onboarding-context-service';
+import { FitnessGoalsEditor } from '@/components/settings/fitness-goals-editor';
+import { EquipmentManager } from '@/components/settings/equipment-manager';
 import { 
   ArrowLeft, 
   User, 
@@ -47,7 +49,11 @@ export default function SettingsPage() {
     }
   };
 
-  const handleProfilePictureUpload = async (originalFile: File, croppedBlob: Blob) => {
+  const handleProfilePictureUpload = async (
+    originalFile: File,
+    croppedBlob: Blob,
+    onProgress?: (progress: number) => void
+  ) => {
     if (!user?.uid) return;
 
     try {
@@ -55,11 +61,12 @@ export default function SettingsPage() {
       const profilePicture = await ProfilePictureService.uploadProfilePicture(
         user.uid,
         originalFile,
-        croppedBlob
+        croppedBlob,
+        onProgress
       );
-      
+
       await ProfilePictureService.setActiveProfilePicture(user.uid, profilePicture.id);
-      
+
       // Refresh user data or show success message
       console.log('Profile picture updated successfully');
     } catch (error) {
@@ -203,33 +210,17 @@ export default function SettingsPage() {
           </TabsContent>
 
           <TabsContent value="goals" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Fitness Goals</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-gray-500">
-                  <Target className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                  <p>Fitness goals editing coming soon!</p>
-                  <p className="text-sm">You'll be able to modify your fitness goals and targets here.</p>
-                </div>
-              </CardContent>
-            </Card>
+            <FitnessGoalsEditor
+              context={onboardingContext}
+              onUpdate={setOnboardingContext}
+            />
           </TabsContent>
 
           <TabsContent value="equipment" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Equipment & Environment</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-gray-500">
-                  <Dumbbell className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                  <p>Equipment settings coming soon!</p>
-                  <p className="text-sm">You'll be able to manage your available equipment here.</p>
-                </div>
-              </CardContent>
-            </Card>
+            <EquipmentManager
+              context={onboardingContext}
+              onUpdate={setOnboardingContext}
+            />
           </TabsContent>
 
           <TabsContent value="schedule" className="space-y-6">

@@ -4,6 +4,7 @@ import React, { useState, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Progress } from '@/components/ui/progress';
 import { 
   Upload, 
   Camera, 
@@ -20,7 +21,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 interface ProfilePictureUploadProps {
   currentPicture?: string;
-  onUpload: (file: File, croppedBlob: Blob) => Promise<void>;
+  onUpload: (file: File, croppedBlob: Blob, onProgress?: (progress: number) => void) => Promise<void>;
   onRemove?: () => Promise<void>;
   isLoading?: boolean;
 }
@@ -35,6 +36,7 @@ export function ProfilePictureUpload({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [cropData, setCropData] = useState({
     x: 0,
     y: 0,
@@ -147,12 +149,19 @@ export function ProfilePictureUpload({
 
     try {
       const croppedBlob = await getCroppedImage();
-      await onUpload(selectedFile, croppedBlob);
+      setUploadProgress(0);
+
+      await onUpload(selectedFile, croppedBlob, (progress) => {
+        setUploadProgress(progress);
+      });
+
       setIsEditing(false);
       setSelectedFile(null);
       setPreviewUrl(null);
+      setUploadProgress(0);
     } catch (error) {
       console.error('Error saving profile picture:', error);
+      setUploadProgress(0);
     }
   };
 
@@ -216,25 +225,35 @@ export function ProfilePictureUpload({
                 </Button>
               </div>
 
+              {uploadProgress > 0 && uploadProgress < 100 && (
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Uploading...</span>
+                    <span>{uploadProgress}%</span>
+                  </div>
+                  <Progress value={uploadProgress} className="w-full" />
+                </div>
+              )}
+
               <div className="flex justify-center gap-2">
                 <Button
                   variant="outline"
                   onClick={handleCancel}
-                  disabled={isLoading}
+                  disabled={isLoading || uploadProgress > 0}
                 >
                   <X className="h-4 w-4 mr-2" />
                   Cancel
                 </Button>
                 <Button
                   onClick={handleSave}
-                  disabled={isLoading}
+                  disabled={isLoading || uploadProgress > 0}
                 >
-                  {isLoading ? (
+                  {isLoading || uploadProgress > 0 ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   ) : (
                     <Check className="h-4 w-4 mr-2" />
                   )}
-                  Save
+                  {uploadProgress > 0 ? `Uploading ${uploadProgress}%` : 'Save'}
                 </Button>
               </div>
             </div>

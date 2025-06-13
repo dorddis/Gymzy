@@ -1,24 +1,18 @@
-import { 
-  ref, 
-  uploadBytes, 
-  getDownloadURL, 
-  deleteObject,
-  getMetadata 
-} from 'firebase/storage';
-import { 
-  doc, 
-  setDoc, 
-  getDoc, 
-  updateDoc, 
-  collection, 
-  query, 
-  where, 
-  orderBy, 
-  limit, 
+import {
+  doc,
+  setDoc,
+  getDoc,
+  updateDoc,
+  collection,
+  query,
+  where,
+  orderBy,
+  limit,
   getDocs,
-  Timestamp 
+  Timestamp
 } from 'firebase/firestore';
-import { storage, db } from '@/lib/firebase';
+import { db } from '@/lib/firebase';
+import { compressMedia } from '@/lib/image-compression';
 
 export interface ProfilePicture {
   id: string;
@@ -33,6 +27,8 @@ export interface ProfilePicture {
   };
   isActive: boolean;
   uploadedAt: Timestamp;
+  cloudinaryPublicId: string;
+  cloudinaryOriginalId?: string;
   metadata?: {
     camera?: string;
     location?: string;
@@ -40,43 +36,63 @@ export interface ProfilePicture {
   };
 }
 
+interface CloudinaryResponse {
+  secure_url: string;
+  public_id: string;
+  format: string;
+  resource_type: string;
+  bytes: number;
+  created_at: string;
+  width: number;
+  height: number;
+}
+
 export class ProfilePictureService {
   private static readonly COLLECTION_NAME = 'profile_pictures';
-  private static readonly STORAGE_PATH = 'profile-pictures';
   private static readonly MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
   private static readonly ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+  private static readonly MAX_RETRIES = 3;
+  private static readonly RETRY_DELAY = 1000;
 
   static async uploadProfilePicture(
     userId: string,
     originalFile: File,
-    croppedBlob: Blob
+    croppedBlob: Blob,
+    onProgress?: (progress: number) => void
   ): Promise<ProfilePicture> {
     // Validate file
     this.validateFile(originalFile);
 
     const pictureId = `${userId}_${Date.now()}`;
-    
-    try {
-      // Upload original and cropped versions
-      const [originalUrl, croppedUrl] = await Promise.all([
-        this.uploadFile(originalFile, `${this.STORAGE_PATH}/${userId}/original/${pictureId}`),
-        this.uploadFile(croppedBlob, `${this.STORAGE_PATH}/${userId}/cropped/${pictureId}`)
-      ]);
 
-      // Get image dimensions
-      const dimensions = await this.getImageDimensions(croppedBlob);
+    try {
+      // Upload cropped version to Cloudinary
+      const croppedFile = new File([croppedBlob], `profile_${pictureId}.jpg`, {
+        type: 'image/jpeg'
+      });
+
+      const cloudinaryResponse = await this.uploadToCloudinary(
+        croppedFile,
+        userId,
+        pictureId,
+        onProgress
+      );
 
       // Create profile picture record
       const profilePicture: ProfilePicture = {
         id: pictureId,
         userId,
-        url: croppedUrl,
-        thumbnailUrl: croppedUrl, // For now, using same URL
+        url: cloudinaryResponse.secure_url,
+        thumbnailUrl: this.generateThumbnailUrl(cloudinaryResponse.secure_url),
         originalFilename: originalFile.name,
         fileSize: originalFile.size,
-        dimensions,
+        dimensions: {
+          width: cloudinaryResponse.width,
+          height: cloudinaryResponse.height
+        },
         isActive: false, // Will be set to active separately
         uploadedAt: Timestamp.now(),
+        cloudinaryPublicId: cloudinaryResponse.public_id,
         metadata: {
           camera: this.extractCameraInfo(originalFile),
           filters: []
@@ -193,14 +209,10 @@ export class ProfilePictureService {
         throw new Error('Profile picture not found');
       }
 
-      // Delete from storage
-      const originalRef = ref(storage, `${this.STORAGE_PATH}/${profilePicture.userId}/original/${pictureId}`);
-      const croppedRef = ref(storage, `${this.STORAGE_PATH}/${profilePicture.userId}/cropped/${pictureId}`);
-      
-      await Promise.all([
-        deleteObject(originalRef).catch(() => {}), // Ignore errors if file doesn't exist
-        deleteObject(croppedRef).catch(() => {})
-      ]);
+      // Delete from Cloudinary
+      if (profilePicture.cloudinaryPublicId) {
+        await this.deleteFromCloudinary(profilePicture.cloudinaryPublicId);
+      }
 
       // Delete from Firestore
       await updateDoc(doc(db, this.COLLECTION_NAME, pictureId), {
@@ -221,10 +233,99 @@ export class ProfilePictureService {
     }
   }
 
-  private static async uploadFile(file: File | Blob, path: string): Promise<string> {
-    const storageRef = ref(storage, path);
-    const snapshot = await uploadBytes(storageRef, file);
-    return await getDownloadURL(snapshot.ref);
+  private static async uploadToCloudinary(
+    file: File,
+    userId: string,
+    pictureId: string,
+    onProgress?: (progress: number) => void
+  ): Promise<CloudinaryResponse> {
+    let retries = 0;
+
+    while (retries < this.MAX_RETRIES) {
+      try {
+        // Compress the file before upload
+        const compressedFile = await compressMedia(file);
+
+        // Create form data
+        const formData = new FormData();
+        formData.append('file', compressedFile);
+        formData.append('upload_preset', 'gymzy_profiles'); // Different preset for profiles
+        formData.append('cloud_name', process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!);
+        formData.append('folder', `users/${userId}/profile`);
+        formData.append('public_id', pictureId);
+
+        // Create XMLHttpRequest for progress tracking
+        const xhr = new XMLHttpRequest();
+
+        // Set up progress tracking
+        if (onProgress) {
+          xhr.upload.onprogress = (event) => {
+            if (event.lengthComputable) {
+              const progress = Math.round((event.loaded / event.total) * 100);
+              onProgress(progress);
+            }
+          };
+        }
+
+        // Create promise for upload
+        const uploadPromise = new Promise<CloudinaryResponse>((resolve, reject) => {
+          xhr.onload = () => {
+            if (xhr.status === 200) {
+              try {
+                const response = JSON.parse(xhr.responseText);
+                resolve(response);
+              } catch (error) {
+                reject(new Error('Invalid response from Cloudinary'));
+              }
+            } else {
+              reject(new Error(`Upload failed with status ${xhr.status}`));
+            }
+          };
+
+          xhr.onerror = () => {
+            reject(new Error('Network error during upload'));
+          };
+
+          xhr.ontimeout = () => {
+            reject(new Error('Upload timeout'));
+          };
+        });
+
+        // Start the upload
+        xhr.open('POST', `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`);
+        xhr.send(formData);
+
+        // Wait for the upload to complete
+        return await uploadPromise;
+      } catch (error) {
+        retries++;
+        if (retries === this.MAX_RETRIES) {
+          throw new Error(`Failed to upload after ${this.MAX_RETRIES} attempts: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+        // Wait before retrying
+        await new Promise(resolve => setTimeout(resolve, this.RETRY_DELAY * retries));
+      }
+    }
+
+    throw new Error('Upload failed after all retries');
+  }
+
+  private static async deleteFromCloudinary(publicId: string): Promise<void> {
+    try {
+      // Note: Deleting from Cloudinary requires server-side implementation
+      // For now, we'll just mark as deleted in our database
+      // In production, you'd want to implement a server endpoint for deletion
+      console.log(`Would delete Cloudinary image: ${publicId}`);
+    } catch (error) {
+      console.error('Error deleting from Cloudinary:', error);
+      // Don't throw error as this is not critical
+    }
+  }
+
+  private static generateThumbnailUrl(originalUrl: string): string {
+    // Use Cloudinary's transformation API to generate thumbnail
+    // Replace /upload/ with /upload/w_150,h_150,c_fill/
+    return originalUrl.replace('/upload/', '/upload/w_150,h_150,c_fill/');
   }
 
   private static validateFile(file: File): void {
@@ -235,28 +336,6 @@ export class ProfilePictureService {
     if (file.size > this.MAX_FILE_SIZE) {
       throw new Error('File too large. Please upload an image smaller than 5MB.');
     }
-  }
-
-  private static async getImageDimensions(blob: Blob): Promise<{ width: number; height: number }> {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      const url = URL.createObjectURL(blob);
-      
-      img.onload = () => {
-        URL.revokeObjectURL(url);
-        resolve({
-          width: img.naturalWidth,
-          height: img.naturalHeight
-        });
-      };
-      
-      img.onerror = () => {
-        URL.revokeObjectURL(url);
-        reject(new Error('Failed to load image'));
-      };
-      
-      img.src = url;
-    });
   }
 
   private static extractCameraInfo(file: File): string | undefined {
