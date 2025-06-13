@@ -401,10 +401,21 @@ interface AIRecommendation {
 }
 ```
 
-### Step 25: Enhanced AI Chat & Coaching Interface
+### Step 25: Enhanced AI Chat & Coaching Interface ✅ PARTIALLY COMPLETED
 **Goal:** Transform basic chat into comprehensive AI coaching experience
 **Priority:** High
 **Estimated Time:** 6-7 days
+
+**✅ COMPLETED FEATURES:**
+- Chat history system with persistent storage
+- ChatGPT-style interface with sidebar
+- Session management (create, load, delete)
+- Right-side chat history panel with proper icon
+- Elegant back button design across all pages
+- Fixed button visibility and text contrast issues
+- AI welcome message with "Reply in chat..." button
+- Profile dropdown with logout functionality
+- User settings outline with comprehensive features
 
 **Tasks:**
 1. **Advanced Chat Features**
@@ -695,10 +706,23 @@ interface CalorieBurn {
 - **Strength Training:** ~6-8 METs depending on intensity
 - **Cardio:** Variable METs based on activity type and intensity
 
-### Step 25.9: User Settings & Profile Management
+### Step 25.9: User Settings & Profile Management ✅ PARTIALLY COMPLETED
 **Goal:** Comprehensive user settings, profile management, and logout functionality
 **Priority:** High
 **Estimated Time:** 4-5 days
+
+**✅ COMPLETED FEATURES:**
+- Profile dropdown menu with user info and logout
+- Basic logout functionality with secure session cleanup
+- User settings outline with comprehensive specifications
+
+**🚧 REMAINING FEATURES:**
+- Profile picture upload and editing system
+- Onboarding context editing interface
+- Physical stats management with BMR/TDEE calculations
+- AI coach settings customization
+- Privacy and security dashboard
+- Notification settings management
 
 **Tasks:**
 1. **Profile Icon Menu**
@@ -710,21 +734,74 @@ interface CalorieBurn {
 2. **User Settings Page**
    - **Personal Information**
      - Edit display name and bio
-     - Update profile picture
+     - Update profile picture with advanced features
      - Change email (with verification)
      - Phone number (optional)
+     - Location and timezone settings
+     - Social media links (optional)
+
+   - **Profile Picture Management**
+     - Upload from device gallery
+     - Take photo with camera
+     - Crop and resize with preview
+     - Apply filters and adjustments
+     - Remove/reset to default avatar
+     - Profile picture history (last 5 uploads)
+     - Privacy settings for profile visibility
+
+   - **Onboarding Context Editing**
+     - **Fitness Goals Modification**
+       - Primary goals (weight loss, muscle gain, endurance, etc.)
+       - Target timeline adjustments
+       - Priority level changes
+       - Add/remove secondary goals
+
+     - **Experience Level Updates**
+       - Beginner/Intermediate/Advanced status
+       - Years of training experience
+       - Specific exercise experience levels
+       - Previous injuries or limitations
+
+     - **Equipment & Environment**
+       - Available equipment list editing
+       - Gym vs. home workout preferences
+       - Equipment acquisition plans
+       - Space constraints updates
+
+     - **Schedule & Availability**
+       - Workout days and times
+       - Session duration preferences
+       - Flexibility in scheduling
+       - Busy periods and availability changes
+
+     - **Personal Preferences**
+       - Workout intensity preferences
+       - Music and motivation preferences
+       - Social vs. solo workout preferences
+       - Coaching style preferences
+
+     - **Health & Medical Information**
+       - Medical conditions updates
+       - Medication changes
+       - Dietary restrictions modifications
+       - Sleep pattern changes
+       - Stress level assessments
 
    - **Physical Stats Management**
      - Update age, height, weight, gender
      - Activity level adjustment
      - Unit preferences (metric/imperial)
      - BMR/TDEE recalculation on changes
+     - Body composition tracking
+     - Measurement history and trends
 
    - **Fitness Preferences**
      - Modify fitness goals
      - Update preferred workout types
      - Equipment availability changes
      - Workout schedule preferences
+     - Training split preferences
+     - Recovery preferences
 
    - **AI Coach Settings**
      - Communication style preferences
@@ -732,6 +809,8 @@ interface CalorieBurn {
      - Learning style adjustment
      - Motivation level settings
      - Personal challenges and support system updates
+     - AI personality customization
+     - Context retention preferences
 
 3. **Privacy & Security**
    - **Account Security**
@@ -825,6 +904,114 @@ interface UserSettings {
   updatedAt: Timestamp;
 }
 
+interface ProfilePicture {
+  id: string;
+  userId: string;
+  url: string;
+  thumbnailUrl: string;
+  originalFilename: string;
+  fileSize: number;
+  dimensions: {
+    width: number;
+    height: number;
+  };
+  isActive: boolean;
+  uploadedAt: Timestamp;
+  metadata?: {
+    camera?: string;
+    location?: string;
+    filters?: string[];
+  };
+}
+
+interface OnboardingContext {
+  userId: string;
+
+  // Fitness Goals
+  fitnessGoals: {
+    primary: 'weight_loss' | 'muscle_gain' | 'endurance' | 'strength' | 'general_fitness' | 'sport_specific';
+    secondary: string[];
+    targetTimeline: '1_month' | '3_months' | '6_months' | '1_year' | 'ongoing';
+    priorityLevel: 'low' | 'medium' | 'high';
+    specificTargets?: {
+      weightTarget?: number;
+      bodyFatTarget?: number;
+      strengthTargets?: Record<string, number>;
+    };
+  };
+
+  // Experience Level
+  experienceLevel: {
+    overall: 'beginner' | 'intermediate' | 'advanced';
+    yearsTraining: number;
+    specificExperience: {
+      weightlifting: 'none' | 'beginner' | 'intermediate' | 'advanced';
+      cardio: 'none' | 'beginner' | 'intermediate' | 'advanced';
+      flexibility: 'none' | 'beginner' | 'intermediate' | 'advanced';
+      sports: 'none' | 'beginner' | 'intermediate' | 'advanced';
+    };
+    previousInjuries: string[];
+    limitations: string[];
+  };
+
+  // Equipment & Environment
+  equipment: {
+    available: string[];
+    location: 'home' | 'gym' | 'both' | 'outdoor';
+    spaceConstraints: 'minimal' | 'moderate' | 'spacious';
+    acquisitionPlans: string[];
+    budget: 'low' | 'medium' | 'high' | 'unlimited';
+  };
+
+  // Schedule & Availability
+  schedule: {
+    workoutDays: string[]; // ['monday', 'wednesday', 'friday']
+    preferredTimes: string[]; // ['morning', 'afternoon', 'evening']
+    sessionDuration: '15_30' | '30_45' | '45_60' | '60_90' | '90_plus';
+    flexibility: 'rigid' | 'somewhat_flexible' | 'very_flexible';
+    busyPeriods: string[];
+    restDayPreferences: string[];
+  };
+
+  // Personal Preferences
+  preferences: {
+    workoutIntensity: 'low' | 'moderate' | 'high' | 'variable';
+    musicPreferences: string[];
+    motivationStyle: 'encouraging' | 'challenging' | 'analytical' | 'casual';
+    socialPreference: 'solo' | 'partner' | 'group' | 'mixed';
+    coachingStyle: 'detailed' | 'concise' | 'visual' | 'conversational';
+    feedbackFrequency: 'minimal' | 'moderate' | 'frequent';
+  };
+
+  // Health & Medical
+  healthInfo: {
+    medicalConditions: string[];
+    medications: string[];
+    dietaryRestrictions: string[];
+    allergies: string[];
+    sleepPattern: {
+      averageHours: number;
+      quality: 'poor' | 'fair' | 'good' | 'excellent';
+      schedule: 'regular' | 'irregular';
+    };
+    stressLevel: 'low' | 'moderate' | 'high';
+    energyLevels: 'low' | 'moderate' | 'high' | 'variable';
+  };
+
+  // Tracking Preferences
+  tracking: {
+    progressPhotos: boolean;
+    bodyMeasurements: boolean;
+    performanceMetrics: boolean;
+    moodTracking: boolean;
+    nutritionTracking: boolean;
+    sleepTracking: boolean;
+  };
+
+  lastUpdated: Timestamp;
+  version: number; // for tracking context evolution
+}
+
 interface UserSession {
   id: string;
   userId: string;
@@ -842,29 +1029,173 @@ interface UserSession {
 
 **UI Components:**
 1. **Settings Navigation**
-   - Categorized settings sections
+   - Categorized settings sections with icons
    - Search functionality within settings
-   - Quick access toggles
-   - Save/cancel confirmation
+   - Quick access toggles for common settings
+   - Save/cancel confirmation with change detection
+   - Progress indicators for multi-step processes
+   - Breadcrumb navigation for deep settings
 
-2. **Profile Management**
-   - Image upload with cropping
-   - Real-time preview of changes
-   - Validation and error handling
+2. **Profile Picture Management**
+   - **Upload Interface**
+     - Drag-and-drop upload area
+     - Gallery selection with preview
+     - Camera capture with real-time preview
+     - Multiple file format support (JPEG, PNG, WebP)
+
+   - **Editing Tools**
+     - Crop tool with aspect ratio options
+     - Zoom and pan controls
+     - Rotation and flip options
+     - Basic filters (brightness, contrast, saturation)
+     - Preview before/after comparison
+
+   - **Management Features**
+     - Profile picture history carousel
+     - Delete/restore previous pictures
+     - Set privacy levels for profile visibility
+     - Automatic thumbnail generation
+     - File size optimization
+
+3. **Onboarding Context Editor**
+   - **Fitness Goals Section**
+     - Interactive goal selection with icons
+     - Timeline slider with visual milestones
+     - Priority ranking with drag-and-drop
+     - Target setting with unit conversion
+     - Progress tracking integration
+
+   - **Experience Level Assessment**
+     - Skill level sliders for different areas
+     - Experience timeline with milestones
+     - Injury/limitation input with suggestions
+     - Previous workout history import
+
+   - **Equipment & Environment Setup**
+     - Equipment checklist with images
+     - Location preference toggle
+     - Space assessment with visual guides
+     - Budget range selector
+     - Equipment recommendation engine
+
+   - **Schedule Builder**
+     - Weekly calendar interface
+     - Time slot selection with conflicts detection
+     - Duration preference sliders
+     - Flexibility assessment questionnaire
+     - Busy period calendar integration
+
+   - **Preference Customization**
+     - Intensity preference scale
+     - Music genre selection with samples
+     - Motivation style quiz with examples
+     - Social preference assessment
+     - Coaching style preview with examples
+
+   - **Health Information Form**
+     - Medical condition autocomplete
+     - Medication interaction warnings
+     - Dietary restriction tags
+     - Sleep pattern tracking integration
+     - Stress level assessment tools
+
+4. **Profile Management Dashboard**
+   - Real-time preview of profile changes
+   - Validation and error handling with helpful messages
    - Progress indicators for updates
+   - Change history with rollback options
+   - Data export functionality
+   - Privacy impact assessment
 
-3. **Security Dashboard**
-   - Active sessions list
-   - Security score indicator
-   - Recent activity log
-   - Security recommendations
+5. **Security Dashboard**
+   - Active sessions list with device details
+   - Security score indicator with recommendations
+   - Recent activity log with location data
+   - Security recommendations with one-click fixes
+   - Two-factor authentication setup wizard
+   - Password strength meter and suggestions
 
 **User Experience Flow:**
 1. **Profile Icon Click** → Dropdown menu with quick actions
-2. **Settings Access** → Categorized settings page
-3. **Edit Profile** → Form with real-time validation
-4. **Security Settings** → Dashboard with active sessions
-5. **Logout** → Confirmation dialog with options
+2. **Settings Access** → Categorized settings page with search
+3. **Edit Profile** → Comprehensive profile management dashboard
+4. **Profile Picture Update** → Upload → Crop → Preview → Save
+5. **Onboarding Context Edit** → Section selection → Form editing → Preview changes → Save
+6. **Physical Stats Update** → Form with unit conversion → BMR/TDEE recalculation → Save
+7. **AI Coach Customization** → Personality selection → Communication style → Test conversation → Apply
+8. **Security Settings** → Dashboard with active sessions → Security recommendations → Apply fixes
+9. **Privacy Controls** → Visibility settings → Data sharing preferences → Apply changes
+10. **Logout** → Confirmation dialog with session cleanup options
+
+**Detailed User Flows:**
+
+**Profile Picture Management Flow:**
+1. Click profile picture → Edit option
+2. Choose upload method (gallery/camera/URL)
+3. Select image → Automatic face detection and centering
+4. Crop and adjust → Real-time preview
+5. Apply filters (optional) → Preview changes
+6. Save → Automatic thumbnail generation → Update across app
+7. View history → Option to revert to previous pictures
+
+**Onboarding Context Editing Flow:**
+1. Settings → Onboarding Context → Section overview
+2. Select section to edit (Goals/Experience/Equipment/Schedule/Preferences/Health)
+3. Form with current values pre-filled → Make changes
+4. Real-time validation and suggestions → Preview impact on AI coaching
+5. Save changes → Update AI personality profile → Confirmation
+6. Option to test new settings with AI coach → Apply or revert
+
+**AI Coach Customization Flow:**
+1. Settings → AI Coach → Current personality overview
+2. Communication style selection → Preview examples
+3. Feedback preferences → Test with sample scenarios
+4. Motivation level adjustment → Preview motivational messages
+5. Context retention settings → Privacy implications explanation
+6. Test conversation with new settings → Satisfaction check
+7. Apply changes → AI personality update → Welcome message with new style
+
+**Implementation Priorities for Step 25.9:**
+
+**Phase 1 (Week 1): Core Profile Management**
+- Profile picture upload and basic editing
+- Personal information editing (name, bio, email)
+- Basic onboarding context viewing
+- Profile dropdown menu implementation
+
+**Phase 2 (Week 2): Advanced Profile Features**
+- Profile picture cropping and filters
+- Profile picture history management
+- Comprehensive onboarding context editing
+- Physical stats management with calculations
+
+**Phase 3 (Week 3): AI Integration**
+- AI coach settings customization
+- Context impact preview
+- AI personality testing interface
+- Real-time AI coaching updates
+
+**Phase 4 (Week 4): Security & Privacy**
+- Security dashboard implementation
+- Session management
+- Privacy controls
+- Two-factor authentication setup
+
+**Phase 5 (Week 5): Polish & Testing**
+- User experience optimization
+- Performance testing
+- Security testing
+- User acceptance testing
+
+**Technical Implementation Notes:**
+- Use Firebase Storage for profile pictures with automatic resizing
+- Implement client-side image cropping with Canvas API
+- Use Firestore transactions for atomic onboarding context updates
+- Implement real-time preview of AI coaching changes
+- Add comprehensive form validation with helpful error messages
+- Implement progressive image loading for profile picture history
+- Use optimistic updates for better user experience
+- Add comprehensive analytics for settings usage patterns
 
 ### Step 26: Smart Notifications & Daily Engagement
 **Goal:** Keep users engaged with intelligent, personalized notifications
