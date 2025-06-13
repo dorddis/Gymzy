@@ -113,6 +113,12 @@ export function AIChatInterface({ onStartWorkout }: AIChatInterfaceProps) {
         }
       );
 
+      console.log('AI Response received:', {
+        content: aiResponse.content,
+        toolCalls: aiResponse.toolCalls,
+        workoutData: aiResponse.workoutData
+      });
+
       // Update the final message with tool calls and workout data
       setMessages(prev => prev.map(msg =>
         msg.id === assistantMessageId
@@ -124,6 +130,11 @@ export function AIChatInterface({ onStartWorkout }: AIChatInterfaceProps) {
             }
           : msg
       ));
+
+      // Force a re-render to ensure workout button appears
+      setTimeout(() => {
+        setMessages(prev => [...prev]);
+      }, 100);
 
     } catch (error) {
       console.error('Error generating AI response:', error);

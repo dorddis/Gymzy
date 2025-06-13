@@ -1,4 +1,4 @@
-import { generateAIResponse } from './ai-service';
+import { generateAIResponse, generateCharacterStreamingResponse } from './ai-service';
 import { AI_WORKOUT_TOOLS, executeAITool, WorkoutExercise } from './ai-workout-tools';
 
 export interface AgenticAIResponse {
@@ -149,7 +149,7 @@ export class AgenticAIService {
       return {
         content: "I apologize, but I encountered an error processing your request. Please try again or rephrase your question.",
         toolCalls: [],
-        workoutData: null
+        workoutData: undefined
       };
     }
   }
@@ -241,24 +241,17 @@ If no tools are needed, return an empty toolCalls array.`);
   }
 
   private async generateStreamingResponse(
-    prompt: string, 
+    prompt: string,
     onChunk: (chunk: string) => void
   ): Promise<string> {
-    // For now, simulate streaming by breaking the response into chunks
-    const fullResponse = await generateAIResponse(prompt);
-    const words = fullResponse.split(' ');
-    let currentResponse = '';
-    
-    for (let i = 0; i < words.length; i++) {
-      const word = words[i] + ' ';
-      currentResponse += word;
-      onChunk(word);
-      
-      // Add a small delay to simulate streaming
-      await new Promise(resolve => setTimeout(resolve, 50));
+    try {
+      // Use character-by-character streaming for smoother effect
+      return await generateCharacterStreamingResponse(prompt, onChunk);
+    } catch (error) {
+      console.error('Error in streaming response:', error);
+      // Fallback to regular response
+      return await generateAIResponse(prompt);
     }
-    
-    return currentResponse.trim();
   }
 }
 
