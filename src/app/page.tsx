@@ -70,9 +70,6 @@ export default function HomePage() {
           {/* AI Welcome Message */}
           <AIWelcomeMessage />
 
-          {/* AI Recommendations */}
-          <AIRecommendationsPanel maxRecommendations={3} />
-
           {/* Daily Check-in */}
           <div className="flex justify-center">
             <Dialog open={isLifestyleDialogOpen} onOpenChange={setIsLifestyleDialogOpen}>
@@ -99,6 +96,10 @@ export default function HomePage() {
             </div>
           </div>
           <StatsCardsRow />
+
+          {/* AI Recommendations */}
+          <AIRecommendationsPanel maxRecommendations={3} />
+
           <QuickWorkoutTemplates />
           <RecentWorkoutsCarousel />
           <CommunityFeed />
