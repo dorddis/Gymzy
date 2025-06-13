@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { StatusBar } from "@/components/layout/header";
 import { HeatmapCard } from "@/components/dashboard/heatmap-card";
@@ -11,12 +11,16 @@ import { AIWelcomeMessage } from "@/components/dashboard/ai-welcome-message";
 import { QuickWorkoutTemplates } from "@/components/dashboard/quick-workout-templates";
 import { useWorkout } from "@/contexts/WorkoutContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2 } from "lucide-react";
+import { Loader2, Heart } from "lucide-react";
+import { LifestyleTracker } from "@/components/lifestyle/lifestyle-tracker";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 export default function HomePage() {
   const { combinedMuscleVolumes } = useWorkout();
   const { user, loading } = useAuth();
   const router = useRouter();
+  const [isLifestyleDialogOpen, setIsLifestyleDialogOpen] = useState(false);
 
   // Handle authentication and onboarding routing
   useEffect(() => {
@@ -64,6 +68,21 @@ export default function HomePage() {
         <div className="container mx-auto px-4 py-6 space-y-6">
           {/* AI Welcome Message */}
           <AIWelcomeMessage />
+
+          {/* Daily Check-in */}
+          <div className="flex justify-center">
+            <Dialog open={isLifestyleDialogOpen} onOpenChange={setIsLifestyleDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="flex items-center gap-2">
+                  <Heart className="h-4 w-4" />
+                  Daily Check-in
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <LifestyleTracker onClose={() => setIsLifestyleDialogOpen(false)} />
+              </DialogContent>
+            </Dialog>
+          </div>
 
           <div className="space-y-4">
             {/* <h2 className="text-2xl font-bold">Weekly Activation</h2> */}

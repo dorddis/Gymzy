@@ -10,6 +10,7 @@ import { useWorkout } from "@/contexts/WorkoutContext";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { AddWorkoutModal } from "@/components/dashboard/add-workout-modal";
+import { useContextualTracking } from "@/hooks/useContextualTracking";
 import { RotateCcw, Play, Pause } from "lucide-react";
 import { AnimatedTimer } from "@/components/ui/animated-timer";
 import { FinishWorkoutModal } from "@/components/workout/finish-workout-modal";
@@ -27,11 +28,13 @@ export default function WorkoutPage() {
     setCurrentWorkoutExercises,
   } = useWorkout();
 
+  const { trackWorkoutCompletion, trackFeatureUsage } = useContextualTracking();
+
   const [isAddExerciseModalOpen, setIsAddExerciseModalOpen] = useState(false);
   const [isFinishWorkoutModalOpen, setIsFinishWorkoutModalOpen] = useState(false);
-  const [showRestTimerUI, setShowRestTimerUI] = useState(true);
   const [isRestTimerRunning, setIsRestTimerRunning] = useState(false);
   const [restTimeRemaining, setRestTimeRemaining] = useState(120);
+  const [workoutStartTime] = useState(Date.now());
   const totalRestTime = 120;
   const [showIncompleteSetsWarning, setShowIncompleteSetsWarning] = useState(false);
   const [showInvalidSetsWarning, setShowInvalidSetsWarning] = useState(false);
@@ -123,10 +126,34 @@ export default function WorkoutPage() {
     setIsFinishWorkoutModalOpen(true);
   }, [currentWorkoutExercises, setIsFinishWorkoutModalOpen]);
 
-  const handleSaveWorkout = () => {
-    // The actual save logic is handled in the FinishWorkoutModal component
-    setCurrentWorkoutExercises([]);
-    router.push('/'); // Navigate back to home after saving
+  const handleSaveWorkout = async (data: { date: Date; notes: string; isPublic: boolean; mediaUrls: string[]; }) => {
+    try {
+      // Track workout completion with contextual data
+      const workoutData = {
+        exercises: currentWorkoutExercises,
+        duration: Math.floor((Date.now() - workoutStartTime) / 1000 / 60), // duration in minutes
+        totalVolume,
+        date: data.date,
+        notes: data.notes,
+        isPublic: data.isPublic,
+        mediaUrls: data.mediaUrls
+      };
+
+      // Track the workout completion for AI insights
+      await trackWorkoutCompletion(workoutData);
+
+      // Track feature usage
+      await trackFeatureUsage('workout_completion');
+
+      // The actual save logic is handled in the FinishWorkoutModal component
+      setCurrentWorkoutExercises([]);
+      router.push('/'); // Navigate back to home after saving
+    } catch (error) {
+      console.error('Error saving workout:', error);
+      // Still proceed with navigation even if tracking fails
+      setCurrentWorkoutExercises([]);
+      router.push('/');
+    }
   };
 
   const handleAddExercise = (exerciseWithSets: any) => {
@@ -157,7 +184,6 @@ export default function WorkoutPage() {
       clone[exerciseIndex].sets[setIndex] = { ...set, isExecuted: !set.isExecuted };
       return clone;
     });
-    setShowRestTimerUI(true);
     setIsRestTimerRunning(true);
     setRestTimeRemaining(totalRestTime);
   };

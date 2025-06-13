@@ -18,10 +18,12 @@ import {
   PublicUserProfile
 } from '@/services/user-discovery-service';
 import { useRouter } from 'next/navigation';
+import { useContextualTracking } from '@/hooks/useContextualTracking';
 
 export default function DiscoverPage() {
   const { user } = useAuth();
   const router = useRouter();
+  const { trackSocialEngagement, trackFeatureUsage } = useContextualTracking();
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<PublicUserProfile[]>([]);
   const [suggestedUsers, setSuggestedUsers] = useState<PublicUserProfile[]>([]);
@@ -104,6 +106,8 @@ export default function DiscoverPage() {
       } else {
         await followUser(user.uid, targetUserId);
         setFollowingStatus(prev => ({ ...prev, [targetUserId]: true }));
+        // Track social engagement for following users
+        await trackSocialEngagement('followersGained');
       }
     } catch (error) {
       console.error('Error toggling follow:', error);

@@ -27,15 +27,17 @@ import {
   getFollowingFeed,
   FeedPost 
 } from '@/services/social-feed-service';
-import { 
-  likeWorkoutPost, 
-  unlikeWorkoutPost, 
-  hasUserLikedPost 
+import {
+  likeWorkoutPost,
+  unlikeWorkoutPost,
+  hasUserLikedPost
 } from '@/services/workout-sharing-service';
+import { useContextualTracking } from '@/hooks/useContextualTracking';
 
 export default function FeedPage() {
   const { user } = useAuth();
   const router = useRouter();
+  const { trackSocialEngagement, trackFeatureUsage } = useContextualTracking();
   
   const [personalizedFeed, setPersonalizedFeed] = useState<FeedPost[]>([]);
   const [trendingPosts, setTrendingPosts] = useState<FeedPost[]>([]);
@@ -100,15 +102,17 @@ export default function FeedPage() {
 
     try {
       setLoadingLikes(prev => ({ ...prev, [postId]: true }));
-      
+
       const isCurrentlyLiked = likedPosts[postId];
-      
+
       if (isCurrentlyLiked) {
         await unlikeWorkoutPost(postId, user.uid);
         setLikedPosts(prev => ({ ...prev, [postId]: false }));
       } else {
         await likeWorkoutPost(postId, user.uid);
         setLikedPosts(prev => ({ ...prev, [postId]: true }));
+        // Track social engagement for likes given
+        await trackSocialEngagement('likesGiven');
       }
     } catch (error) {
       console.error('Error toggling like:', error);
