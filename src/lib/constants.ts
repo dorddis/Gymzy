@@ -117,6 +117,7 @@ export const EXERCISES: Exercise[] = (rawExercises as Array<{
       case 'Sartorius': return Muscle.Sartorius;
       case 'Upper Rectus Abdominis': return Muscle.UpperRectusAbdominis;
       case 'Lower Rectus Abdominis': return Muscle.LowerRectusAbdominis;
+      case 'Rectus Abdominis': return Muscle.UpperRectusAbdominis; // Map generic to upper
       case 'Obliques': return Muscle.Obliques;
       case 'Sternocleidomastoid': return Muscle.Sternocleidomastoid;
       case 'Serratus Anterior': return Muscle.SerratusAnterior;
@@ -160,6 +161,7 @@ export const EXERCISES: Exercise[] = (rawExercises as Array<{
       case 'Sartorius': return Muscle.Sartorius;
       case 'Upper Rectus Abdominis': return Muscle.UpperRectusAbdominis;
       case 'Lower Rectus Abdominis': return Muscle.LowerRectusAbdominis;
+      case 'Rectus Abdominis': return Muscle.UpperRectusAbdominis; // Map generic to upper
       case 'Obliques': return Muscle.Obliques;
       case 'Sternocleidomastoid': return Muscle.Sternocleidomastoid;
       case 'Serratus Anterior': return Muscle.SerratusAnterior;

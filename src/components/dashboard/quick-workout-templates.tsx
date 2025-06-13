@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useWorkout } from '@/contexts/WorkoutContext';
+import { EXERCISES } from '@/lib/constants';
+import { Exercise } from '@/types/exercise';
 
 interface WorkoutTemplate {
   id: string;
@@ -26,7 +28,7 @@ interface WorkoutTemplate {
   difficulty: 'beginner' | 'intermediate' | 'advanced';
   type: 'strength' | 'cardio' | 'hiit' | 'flexibility' | 'full_body';
   exercises: Array<{
-    name: string;
+    exerciseId: string; // This should match an ID from EXERCISES
     sets: number;
     reps: string;
     restTime?: number;
@@ -47,10 +49,10 @@ const WORKOUT_TEMPLATES: WorkoutTemplate[] = [
     difficulty: 'intermediate',
     type: 'strength',
     exercises: [
-      { name: 'Push-ups', sets: 3, reps: '8-12' },
-      { name: 'Overhead Press', sets: 3, reps: '8-10', restTime: 90 },
-      { name: 'Dips', sets: 3, reps: '6-10' },
-      { name: 'Lateral Raises', sets: 3, reps: '12-15' }
+      { exerciseId: 'push-ups', sets: 3, reps: '8-12' },
+      { exerciseId: 'overhead-press', sets: 3, reps: '8-10', restTime: 90 },
+      { exerciseId: 'dips', sets: 3, reps: '6-10' },
+      { exerciseId: 'lateral-raises', sets: 3, reps: '12-15' }
     ],
     targetMuscles: ['Chest', 'Shoulders', 'Triceps'],
     equipment: ['Dumbbells', 'Dip Station'],
@@ -66,10 +68,10 @@ const WORKOUT_TEMPLATES: WorkoutTemplate[] = [
     difficulty: 'advanced',
     type: 'hiit',
     exercises: [
-      { name: 'Burpees', sets: 4, reps: '30s on, 30s off' },
-      { name: 'Mountain Climbers', sets: 4, reps: '30s on, 30s off' },
-      { name: 'Jump Squats', sets: 4, reps: '30s on, 30s off' },
-      { name: 'High Knees', sets: 4, reps: '30s on, 30s off' }
+      { exerciseId: 'burpees', sets: 4, reps: '30s on, 30s off' },
+      { exerciseId: 'mountain-climbers', sets: 4, reps: '30s on, 30s off' },
+      { exerciseId: 'jump-squats', sets: 4, reps: '30s on, 30s off' },
+      { exerciseId: 'high-knees', sets: 4, reps: '30s on, 30s off' }
     ],
     targetMuscles: ['Full Body', 'Cardio'],
     equipment: ['Bodyweight'],
@@ -85,10 +87,10 @@ const WORKOUT_TEMPLATES: WorkoutTemplate[] = [
     difficulty: 'intermediate',
     type: 'strength',
     exercises: [
-      { name: 'Squats', sets: 4, reps: '8-12', restTime: 120 },
-      { name: 'Romanian Deadlifts', sets: 3, reps: '10-12' },
-      { name: 'Bulgarian Split Squats', sets: 3, reps: '8-10 each leg' },
-      { name: 'Calf Raises', sets: 3, reps: '15-20' }
+      { exerciseId: 'squat', sets: 4, reps: '8-12', restTime: 120 },
+      { exerciseId: 'romanian-deadlift', sets: 3, reps: '10-12' },
+      { exerciseId: 'bulgarian-split-squat', sets: 3, reps: '8-10 each leg' },
+      { exerciseId: 'calf-raises', sets: 3, reps: '15-20' }
     ],
     targetMuscles: ['Quadriceps', 'Hamstrings', 'Glutes', 'Calves'],
     equipment: ['Barbell', 'Dumbbells'],
@@ -104,10 +106,10 @@ const WORKOUT_TEMPLATES: WorkoutTemplate[] = [
     difficulty: 'beginner',
     type: 'strength',
     exercises: [
-      { name: 'Plank', sets: 3, reps: '30-60s' },
-      { name: 'Russian Twists', sets: 3, reps: '20-30' },
-      { name: 'Dead Bug', sets: 3, reps: '10 each side' },
-      { name: 'Bicycle Crunches', sets: 3, reps: '20-30' }
+      { exerciseId: 'plank', sets: 3, reps: '30-60s' },
+      { exerciseId: 'russian-twists', sets: 3, reps: '20-30' },
+      { exerciseId: 'dead-bug', sets: 3, reps: '10 each side' },
+      { exerciseId: 'bicycle-crunches', sets: 3, reps: '20-30' }
     ],
     targetMuscles: ['Core', 'Abs', 'Obliques'],
     equipment: ['Bodyweight'],
@@ -123,11 +125,11 @@ const WORKOUT_TEMPLATES: WorkoutTemplate[] = [
     difficulty: 'intermediate',
     type: 'full_body',
     exercises: [
-      { name: 'Deadlifts', sets: 3, reps: '6-8', restTime: 120 },
-      { name: 'Push-ups', sets: 3, reps: '8-12' },
-      { name: 'Squats', sets: 3, reps: '10-15' },
-      { name: 'Pull-ups', sets: 3, reps: '5-10' },
-      { name: 'Plank', sets: 2, reps: '45-60s' }
+      { exerciseId: 'deadlift', sets: 3, reps: '6-8', restTime: 120 },
+      { exerciseId: 'push-ups', sets: 3, reps: '8-12' },
+      { exerciseId: 'squat', sets: 3, reps: '10-15' },
+      { exerciseId: 'pull-up', sets: 3, reps: '5-10' },
+      { exerciseId: 'plank', sets: 2, reps: '45-60s' }
     ],
     targetMuscles: ['Full Body'],
     equipment: ['Barbell', 'Pull-up Bar'],
@@ -174,19 +176,36 @@ export function QuickWorkoutTemplates() {
 
   const startWorkout = (template: WorkoutTemplate) => {
     // Convert template exercises to workout format
-    const workoutExercises = template.exercises.map((exercise, index) => ({
-      id: `template_${template.id}_${index}`,
-      name: exercise.name,
-      sets: Array.from({ length: exercise.sets }, () => ({
-        weight: 0,
-        reps: 0,
-        rpe: 8,
-        isWarmup: false,
-        isExecuted: false
-      })),
-      muscleGroups: template.targetMuscles,
-      equipment: template.equipment[0] || 'Bodyweight'
-    }));
+    const workoutExercises = template.exercises.map((templateExercise, index) => {
+      // Find the exercise in the EXERCISES constant
+      const exerciseData = EXERCISES.find(ex => ex.id === templateExercise.exerciseId);
+
+      if (!exerciseData) {
+        console.warn(`Exercise with id ${templateExercise.exerciseId} not found in EXERCISES`);
+        return null;
+      }
+
+      return {
+        id: `template_${template.id}_${index}`,
+        name: exerciseData.name,
+        sets: Array.from({ length: templateExercise.sets }, () => ({
+          weight: 0,
+          reps: 0,
+          rpe: 8,
+          isWarmup: false,
+          isExecuted: false
+        })),
+        muscleGroups: exerciseData.primaryMuscles,
+        equipment: 'Bodyweight', // Default equipment
+        primaryMuscles: exerciseData.primaryMuscles,
+        secondaryMuscles: exerciseData.secondaryMuscles || []
+      };
+    }).filter(Boolean); // Remove any null entries
+
+    if (workoutExercises.length === 0) {
+      console.error('No valid exercises found for template:', template.id);
+      return;
+    }
 
     setCurrentWorkoutExercises(workoutExercises);
     router.push('/workout');
@@ -260,12 +279,17 @@ export function QuickWorkoutTemplates() {
                   <div className="mt-4 pt-3 border-t border-gray-100">
                     <div className="space-y-2 mb-4">
                       <h4 className="text-sm font-medium text-gray-700">Exercises:</h4>
-                      {template.exercises.map((exercise, index) => (
-                        <div key={index} className="flex justify-between items-center text-sm">
-                          <span className="text-gray-600">{exercise.name}</span>
-                          <span className="text-gray-500">{exercise.sets} × {exercise.reps}</span>
-                        </div>
-                      ))}
+                      {template.exercises.map((templateExercise, index) => {
+                        const exerciseData = EXERCISES.find(ex => ex.id === templateExercise.exerciseId);
+                        return (
+                          <div key={index} className="flex justify-between items-center text-sm">
+                            <span className="text-gray-600">
+                              {exerciseData?.name || templateExercise.exerciseId}
+                            </span>
+                            <span className="text-gray-500">{templateExercise.sets} × {templateExercise.reps}</span>
+                          </div>
+                        );
+                      })}
                     </div>
                     
                     <div className="mb-4">

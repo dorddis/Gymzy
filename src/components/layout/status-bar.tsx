@@ -15,14 +15,14 @@ import { useRouter } from 'next/navigation';
 import { NotificationsDropdown } from './notifications-dropdown';
 
 export function StatusBar() {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
-      await logout();
+      await signOut();
       router.push('/auth');
     } catch (error) {
       console.error('Error logging out:', error);

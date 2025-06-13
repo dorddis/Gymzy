@@ -9,13 +9,13 @@ interface WelcomeStepProps {
 }
 
 export function WelcomeStep({ onNext }: WelcomeStepProps) {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleSwitchAccount = async () => {
     try {
       setIsLoggingOut(true);
-      await logout();
+      await signOut();
       // The auth context will redirect to /auth automatically
     } catch (error) {
       console.error('Error logging out:', error);

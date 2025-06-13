@@ -276,5 +276,77 @@
       "Calves",
       "Peroneus Longus"
     ]
+  },
+  {
+    "id": "push-ups",
+    "name": "Push-ups",
+    "primaryMuscles": ["Pectoralis Major"],
+    "secondaryMuscles": ["Anterior Deltoid", "Triceps Brachii"]
+  },
+  {
+    "id": "dips",
+    "name": "Dips",
+    "primaryMuscles": ["Triceps Brachii", "Pectoralis Major"],
+    "secondaryMuscles": ["Anterior Deltoid"]
+  },
+  {
+    "id": "lateral-raises",
+    "name": "Lateral Raises",
+    "primaryMuscles": ["Lateral Deltoid"],
+    "secondaryMuscles": ["Anterior Deltoid", "Posterior Deltoid"]
+  },
+  {
+    "id": "burpees",
+    "name": "Burpees",
+    "primaryMuscles": ["Quadriceps", "Pectoralis Major"],
+    "secondaryMuscles": ["Anterior Deltoid", "Triceps Brachii", "Gluteus Maximus"]
+  },
+  {
+    "id": "mountain-climbers",
+    "name": "Mountain Climbers",
+    "primaryMuscles": ["Rectus Abdominis"],
+    "secondaryMuscles": ["Anterior Deltoid", "Quadriceps"]
+  },
+  {
+    "id": "jump-squats",
+    "name": "Jump Squats",
+    "primaryMuscles": ["Quadriceps", "Gluteus Maximus"],
+    "secondaryMuscles": ["Hamstrings", "Calves"]
+  },
+  {
+    "id": "high-knees",
+    "name": "High Knees",
+    "primaryMuscles": ["Quadriceps"],
+    "secondaryMuscles": ["Calves", "Rectus Abdominis"]
+  },
+  {
+    "id": "plank",
+    "name": "Plank",
+    "primaryMuscles": ["Rectus Abdominis"],
+    "secondaryMuscles": ["Erector Spinae", "Anterior Deltoid"]
+  },
+  {
+    "id": "russian-twists",
+    "name": "Russian Twists",
+    "primaryMuscles": ["Obliques"],
+    "secondaryMuscles": ["Rectus Abdominis"]
+  },
+  {
+    "id": "dead-bug",
+    "name": "Dead Bug",
+    "primaryMuscles": ["Rectus Abdominis"],
+    "secondaryMuscles": ["Obliques"]
+  },
+  {
+    "id": "bicycle-crunches",
+    "name": "Bicycle Crunches",
+    "primaryMuscles": ["Rectus Abdominis", "Obliques"],
+    "secondaryMuscles": []
+  },
+  {
+    "id": "calf-raises",
+    "name": "Calf Raises",
+    "primaryMuscles": ["Calves"],
+    "secondaryMuscles": []
   }
 ]

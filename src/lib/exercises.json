@@ -3,30 +3,350 @@
     "id": "bench-press",
     "name": "Bench Press",
     "primaryMuscles": ["Pectoralis Major"],
+    "secondaryMuscles": ["Triceps Brachii", "Anterior Deltoid"]
+  },
+  {
+    "id": "incline-dumbbell-press",
+    "name": "Incline Dumbbell Press",
+    "primaryMuscles": ["Pectoralis Major"],
     "secondaryMuscles": ["Anterior Deltoid", "Triceps Brachii"]
   },
   {
-    "id": "squat",
-    "name": "Squat",
-    "primaryMuscles": ["Quadriceps", "Gluteus Maximus"],
-    "secondaryMuscles": ["Hamstrings", "Erector Spinae"]
+    "id": "bar-dips",
+    "name": "Bar Dips",
+    "primaryMuscles": ["Pectoralis Major", "Triceps Brachii"],
+    "secondaryMuscles": ["Anterior Deltoid", "Serratus Anterior"]
   },
   {
-    "id": "deadlift",
-    "name": "Deadlift",
-    "primaryMuscles": ["Erector Spinae", "Gluteus Maximus"],
-    "secondaryMuscles": ["Hamstrings", "Trapezius", "Forearms"]
+    "id": "standing-cable-chest-fly",
+    "name": "Standing Cable Chest Fly",
+    "primaryMuscles": ["Pectoralis Major"],
+    "secondaryMuscles": []
   },
   {
     "id": "overhead-press",
     "name": "Overhead Press",
     "primaryMuscles": ["Anterior Deltoid", "Lateral Deltoid"],
-    "secondaryMuscles": ["Triceps Brachii", "Upper Rectus Abdominis"]
+    "secondaryMuscles": ["Triceps Brachii", "Trapezius"]
+  },
+  {
+    "id": "seated-dumbbell-shoulder-press",
+    "name": "Seated Dumbbell Shoulder Press",
+    "primaryMuscles": ["Anterior Deltoid", "Lateral Deltoid"],
+    "secondaryMuscles": ["Triceps Brachii", "Trapezius"]
+  },
+  {
+    "id": "dumbbell-lateral-raise",
+    "name": "Dumbbell Lateral Raise",
+    "primaryMuscles": ["Lateral Deltoid"],
+    "secondaryMuscles": []
+  },
+  {
+    "id": "reverse-dumbbell-fly",
+    "name": "Reverse Dumbbell Fly",
+    "primaryMuscles": ["Posterior Deltoid"],
+    "secondaryMuscles": [
+      "Trapezius",
+      "Infraspinatus"
+    ]
+  },
+  {
+    "id": "deadlift",
+    "name": "Deadlift",
+    "primaryMuscles": ["Hamstrings", "Gluteus Maximus", "Erector Spinae"],
+    "secondaryMuscles": [
+      "Latissimus Dorsi",
+      "Trapezius",
+      "Forearms",
+      "Quadriceps",
+      "Lower Trapezius"
+    ]
+  },
+  {
+    "id": "lat-pulldown",
+    "name": "Lat Pulldown",
+    "primaryMuscles": ["Latissimus Dorsi"],
+    "secondaryMuscles": [
+      "Biceps Brachii",
+      "Trapezius",
+      "Forearms",
+      "Teres Major"
+    ]
   },
   {
     "id": "pull-up",
-    "name": "Pull Up",
+    "name": "Pull-Up / Lat Pulldown",
     "primaryMuscles": ["Latissimus Dorsi"],
-    "secondaryMuscles": ["Biceps Brachii", "Trapezius"]
+    "secondaryMuscles": [
+      "Biceps Brachii",
+      "Trapezius",
+      "Forearms",
+      "Teres Major"
+    ]
+  },
+  {
+    "id": "barbell-row",
+    "name": "Barbell Row",
+    "primaryMuscles": ["Latissimus Dorsi", "Trapezius", "Rhomboids"],
+    "secondaryMuscles": [
+      "Biceps Brachii",
+      "Posterior Deltoid",
+      "Lower Trapezius"
+    ]
+  },
+  {
+    "id": "dumbbell-row",
+    "name": "Dumbbell Row",
+    "primaryMuscles": ["Latissimus Dorsi"],
+    "secondaryMuscles": [
+      "Biceps Brachii",
+      "Posterior Deltoid",
+      "Lower Trapezius"
+    ]
+  },
+  {
+    "id": "barbell-curl",
+    "name": "Barbell Curl",
+    "primaryMuscles": ["Biceps Brachii"],
+    "secondaryMuscles": ["Forearms"]
+  },
+  {
+    "id": "dumbbell-curl",
+    "name": "Dumbbell Curl",
+    "primaryMuscles": ["Biceps Brachii"],
+    "secondaryMuscles": ["Forearms"]
+  },
+  {
+    "id": "hammer-curl",
+    "name": "Hammer Curl",
+    "primaryMuscles": ["Brachialis"],
+    "secondaryMuscles": [
+      "Biceps Brachii",
+      "Forearms",
+      "Brachioradialis"
+    ]
+  },
+  {
+    "id": "barbell-lying-triceps-extension",
+    "name": "Barbell Lying Triceps Extension",
+    "primaryMuscles": ["Triceps Brachii"],
+    "secondaryMuscles": [
+      "Triceps Long Head",
+      "Triceps Lateral Head"
+    ]
+  },
+  {
+    "id": "overhead-cable-triceps-extension",
+    "name": "Overhead Cable Triceps Extension",
+    "primaryMuscles": ["Triceps Brachii"],
+    "secondaryMuscles": [
+      "Triceps Long Head",
+      "Triceps Lateral Head"
+    ]
+  },
+  {
+    "id": "tricep-pushdown",
+    "name": "Tricep Pushdown",
+    "primaryMuscles": ["Triceps Brachii"],
+    "secondaryMuscles": [
+      "Forearms",
+      "Triceps Long Head",
+      "Triceps Lateral Head"
+    ]
+  },
+  {
+    "id": "close-grip-bench-press",
+    "name": "Close-Grip Bench Press",
+    "primaryMuscles": ["Pectoralis Major", "Triceps Brachii"],
+    "secondaryMuscles": ["Anterior Deltoid"]
+  },
+  {
+    "id": "squat",
+    "name": "Squat",
+    "primaryMuscles": ["Quadriceps", "Gluteus Maximus"],
+    "secondaryMuscles": [
+      "Hamstrings",
+      "Erector Spinae",
+      "Gluteus Medius",
+      "Adductor Magnus"
+    ]
+  },
+  {
+    "id": "hack-squats",
+    "name": "Hack Squats",
+    "primaryMuscles": ["Quadriceps"],
+    "secondaryMuscles": [
+      "Gluteus Maximus",
+      "Gluteus Medius",
+      "Adductor Magnus"
+    ]
+  },
+  {
+    "id": "leg-extension",
+    "name": "Leg Extension",
+    "primaryMuscles": ["Quadriceps"],
+    "secondaryMuscles": []
+  },
+  {
+    "id": "bulgarian-split-squat",
+    "name": "Bulgarian Split Squat",
+    "primaryMuscles": ["Quadriceps", "Gluteus Maximus"],
+    "secondaryMuscles": [
+      "Hamstrings",
+      "Gluteus Medius",
+      "Adductor Magnus",
+      "Sartorius"
+    ]
+  },
+  {
+    "id": "seated-leg-curl",
+    "name": "Seated Leg Curl",
+    "primaryMuscles": ["Hamstrings"],
+    "secondaryMuscles": [
+      "Gluteus Maximus",
+      "Gluteus Medius"
+    ]
+  },
+  {
+    "id": "lying-leg-curl",
+    "name": "Lying Leg Curl",
+    "primaryMuscles": ["Hamstrings"],
+    "secondaryMuscles": []
+  },
+  {
+    "id": "romanian-deadlift",
+    "name": "Romanian Deadlift",
+    "primaryMuscles": ["Hamstrings", "Gluteus Maximus"],
+    "secondaryMuscles": [
+      "Erector Spinae",
+      "Gluteus Medius"
+    ]
+  },
+  {
+    "id": "hip-thrust",
+    "name": "Hip Thrust",
+    "primaryMuscles": ["Gluteus Maximus"],
+    "secondaryMuscles": [
+      "Hamstrings",
+      "Gluteus Medius"
+    ]
+  },
+  {
+    "id": "cable-crunch",
+    "name": "Cable Crunch",
+    "primaryMuscles": ["Rectus Abdominis"],
+    "secondaryMuscles": ["Obliques"]
+  },
+  {
+    "id": "hanging-leg-raise",
+    "name": "Hanging Leg Raise",
+    "primaryMuscles": ["Rectus Abdominis"],
+    "secondaryMuscles": ["Obliques"]
+  },
+  {
+    "id": "high-to-low-wood-chop",
+    "name": "High to Low Wood Chop",
+    "primaryMuscles": ["Obliques"],
+    "secondaryMuscles": [
+      "Serratus Anterior",
+      "Rectus Abdominis",
+      "Sternocleidomastoid"
+    ]
+  },
+  {
+    "id": "crunch",
+    "name": "Crunch",
+    "primaryMuscles": ["Rectus Abdominis"],
+    "secondaryMuscles": []
+  },
+  {
+    "id": "standing-calf-raise",
+    "name": "Standing Calf Raise",
+    "primaryMuscles": ["Calves"],
+    "secondaryMuscles": [
+      "Soleus",
+      "Peroneus Longus"
+    ]
+  },
+  {
+    "id": "seated-calf-raise",
+    "name": "Seated Calf Raise",
+    "primaryMuscles": ["Soleus"],
+    "secondaryMuscles": [
+      "Calves",
+      "Peroneus Longus"
+    ]
+  },
+  {
+    "id": "push-ups",
+    "name": "Push-ups",
+    "primaryMuscles": ["Pectoralis Major"],
+    "secondaryMuscles": ["Anterior Deltoid", "Triceps Brachii"]
+  },
+  {
+    "id": "dips",
+    "name": "Dips",
+    "primaryMuscles": ["Triceps Brachii", "Pectoralis Major"],
+    "secondaryMuscles": ["Anterior Deltoid"]
+  },
+  {
+    "id": "lateral-raises",
+    "name": "Lateral Raises",
+    "primaryMuscles": ["Lateral Deltoid"],
+    "secondaryMuscles": ["Anterior Deltoid", "Posterior Deltoid"]
+  },
+  {
+    "id": "burpees",
+    "name": "Burpees",
+    "primaryMuscles": ["Quadriceps", "Pectoralis Major"],
+    "secondaryMuscles": ["Anterior Deltoid", "Triceps Brachii", "Gluteus Maximus"]
+  },
+  {
+    "id": "mountain-climbers",
+    "name": "Mountain Climbers",
+    "primaryMuscles": ["Rectus Abdominis"],
+    "secondaryMuscles": ["Anterior Deltoid", "Quadriceps"]
+  },
+  {
+    "id": "jump-squats",
+    "name": "Jump Squats",
+    "primaryMuscles": ["Quadriceps", "Gluteus Maximus"],
+    "secondaryMuscles": ["Hamstrings", "Calves"]
+  },
+  {
+    "id": "high-knees",
+    "name": "High Knees",
+    "primaryMuscles": ["Quadriceps"],
+    "secondaryMuscles": ["Calves", "Rectus Abdominis"]
+  },
+  {
+    "id": "plank",
+    "name": "Plank",
+    "primaryMuscles": ["Rectus Abdominis"],
+    "secondaryMuscles": ["Erector Spinae", "Anterior Deltoid"]
+  },
+  {
+    "id": "russian-twists",
+    "name": "Russian Twists",
+    "primaryMuscles": ["Obliques"],
+    "secondaryMuscles": ["Rectus Abdominis"]
+  },
+  {
+    "id": "dead-bug",
+    "name": "Dead Bug",
+    "primaryMuscles": ["Rectus Abdominis"],
+    "secondaryMuscles": ["Obliques"]
+  },
+  {
+    "id": "bicycle-crunches",
+    "name": "Bicycle Crunches",
+    "primaryMuscles": ["Rectus Abdominis", "Obliques"],
+    "secondaryMuscles": []
+  },
+  {
+    "id": "calf-raises",
+    "name": "Calf Raises",
+    "primaryMuscles": ["Calves"],
+    "secondaryMuscles": []
   }
-] 
+]
