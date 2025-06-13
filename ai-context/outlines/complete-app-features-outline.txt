@@ -730,14 +730,20 @@ interface CalorieBurn {
 - Sleep pattern, stress level, and energy tracking
 - Activity level assessment with metabolic calculations
 - Privacy notices and comprehensive health data management
+- AI Coach Settings with communication styles and personality testing
+- Privacy & Security Dashboard with session management and security scoring
+- Data export functionality and account deletion options
+- Active session monitoring with device tracking and remote logout
+- Comprehensive privacy controls for profile visibility and data sharing
+- Security recommendations and privacy score calculation
 
 **🚧 REMAINING FEATURES:**
-- AI coach settings customization interface
-- Privacy and security dashboard with session management
 - Notification settings management
 - Profile picture history management interface
 - Two-factor authentication setup
-- Data export and backup functionality
+- Advanced data backup and restore functionality
+- Workout sharing permissions granular controls
+- Social media integration settings
 
 **Tasks:**
 1. **Profile Icon Menu**
