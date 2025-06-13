@@ -4,14 +4,15 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
-  Sparkles, 
-  RefreshCw, 
-  MessageCircle, 
-  Target, 
+import {
+  Sparkles,
+  RefreshCw,
+  MessageCircle,
+  Target,
   TrendingUp,
   Calendar,
-  Loader2
+  Loader2,
+  Brain
 } from 'lucide-react';
 import { generateDailyMotivation } from '@/services/ai-chat-service';
 import { useWorkout } from '@/contexts/WorkoutContext';
@@ -307,15 +308,26 @@ export function AIWelcomeMessage() {
             )}
           </div>
           
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => window.location.href = '/chat'}
-            className="text-xs h-7 px-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50"
-          >
-            <MessageCircle className="h-3 w-3 mr-1" />
-            Reply in chat...
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => window.location.href = '/recommendations'}
+              className="text-xs h-7 px-2 text-purple-600 hover:text-purple-800 hover:bg-purple-50"
+            >
+              <Brain className="h-3 w-3 mr-1" />
+              View recommendations
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => window.location.href = '/chat'}
+              className="text-xs h-7 px-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+            >
+              <MessageCircle className="h-3 w-3 mr-1" />
+              Reply in chat...
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
