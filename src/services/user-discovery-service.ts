@@ -70,9 +70,8 @@ export const searchUsers = async (searchTerm: string, currentUserId: string, lim
 
     querySnapshot.forEach((doc) => {
       const userData = doc.data();
-      if (userData.uid !== currentUserId) { // Exclude current user
-        users.push(userData as PublicUserProfile);
-      }
+      // Include all users (including current user for profile access)
+      users.push(userData as PublicUserProfile);
     });
 
     return users;

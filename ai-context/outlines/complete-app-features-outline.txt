@@ -433,6 +433,70 @@ interface AIRecommendation {
    - Celebration of achievements
    - Supportive guidance during plateaus
 
+### Step 25.5: AI Welcome & Daily Motivation System
+**Goal:** Provide personalized AI-generated welcome messages and daily motivation on the home page
+**Priority:** High
+**Estimated Time:** 3-4 days
+
+**Tasks:**
+1. **Dynamic Welcome Messages**
+   - AI-generated personalized greetings based on time of day
+   - Context-aware messages based on user's recent activity
+   - Motivational content aligned with user's goals and personality
+   - Adaptive messaging based on workout streaks and progress
+
+2. **Daily Guidance System**
+   - Morning motivation and workout planning suggestions
+   - Pre-workout pump-up messages and preparation tips
+   - Post-workout celebration and recovery guidance
+   - Rest day motivation and alternative activity suggestions
+
+3. **Contextual AI Responses**
+   - **No Recent Workouts:** Gentle encouragement to get back on track
+   - **Consistent Streak:** Celebration and momentum building
+   - **Goal Progress:** Updates on goal achievement and next steps
+   - **Plateau Detection:** Motivation and strategy suggestions
+   - **Personal Milestones:** Recognition and celebration
+
+4. **Smart Message Generation**
+   - Integration with user's AI personality profile
+   - Reference to personal goals, values, and motivation factors
+   - Consideration of current challenges and support system
+   - Seasonal and contextual relevance (weather, holidays, etc.)
+
+5. **Message Delivery System**
+   - Prominent placement below the muscle heatmap SVG
+   - Smooth animations and engaging visual presentation
+   - Message refresh on app open and periodic updates
+   - Fallback messages for API failures
+
+**Database Schema:**
+```typescript
+interface DailyMotivation {
+  id: string;
+  userId: string;
+  message: string;
+  messageType: 'welcome' | 'motivation' | 'celebration' | 'guidance' | 'tip';
+  context: {
+    timeOfDay: 'morning' | 'afternoon' | 'evening';
+    lastWorkout?: Timestamp;
+    currentStreak: number;
+    goalProgress: number;
+    recentAchievements: string[];
+  };
+  personalizedFactors: string[];
+  createdAt: Timestamp;
+  expiresAt: Timestamp;
+}
+```
+
+**AI Prompt Engineering:**
+- **User Context Integration:** Include personality profile, goals, and recent activity
+- **Tone Adaptation:** Match user's preferred communication style
+- **Actionable Content:** Provide specific, achievable next steps
+- **Emotional Intelligence:** Recognize and respond to user's likely emotional state
+- **Variety and Freshness:** Ensure messages don't become repetitive
+
 ### Step 26: Smart Notifications & Daily Engagement
 **Goal:** Keep users engaged with intelligent, personalized notifications
 **Priority:** Medium

@@ -4,10 +4,13 @@ import React, { createContext, useContext, useState, useCallback, useEffect, use
 import { useAuth } from '@/contexts/AuthContext';
 import { db } from '@/lib/firebase';
 import { collection, query, orderBy, limit, getDocs, addDoc, Timestamp, doc, getDoc, setDoc, serverTimestamp, deleteDoc } from 'firebase/firestore';
+import { sendChatMessage, ChatMessage as AIChatMessage } from '@/services/ai-chat-service';
 
 interface ChatMessage {
-  role: 'user' | 'ai';
+  role: 'user' | 'assistant';
   content: string;
+  id?: string;
+  timestamp?: Date;
 }
 
 interface ChatContextType {
@@ -22,8 +25,8 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 export function ChatProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
-  const initialFirstChatPrompt: ChatMessage = { role: 'ai', content: 'Hello! I am your personalized Gymzy AI assistant. How can I help you with your fitness journey today?' };
-  const initialSubsequentChatPrompt: ChatMessage = { role: 'ai', content: 'Ask about your health or track a workout...' };
+  const initialFirstChatPrompt: ChatMessage = { role: 'assistant', content: 'Hello! I am your personalized Gymzy AI assistant. How can I help you with your fitness journey today?' };
+  const initialSubsequentChatPrompt: ChatMessage = { role: 'assistant', content: 'Welcome back! How can I help you with your fitness journey today?' };
 
   const [messages, setMessages] = useState<ChatMessage[]>([initialFirstChatPrompt]); // Default to first-time message
   const [isLoading, setIsLoading] = useState(false);
@@ -129,25 +132,30 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     setError(null);
 
     try {
-      // 1. Send message to AI API
-      const apiResponse = await fetch('/api/ai/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: user.uid,
-          messages: updatedMessages,
-          modelId: modelId,
-        }),
-      });
+      // 1. Send message to AI service
+      console.log('ChatContext: Sending message to AI service');
 
-      if (!apiResponse.ok) {
-        throw new Error(`HTTP error! status: ${apiResponse.status}`);
+      // Convert messages to the format expected by AI service
+      const conversationHistory: AIChatMessage[] = currentMessagesWithoutInitial.map(msg => ({
+        id: Math.random().toString(36),
+        role: msg.role === 'ai' ? 'assistant' : msg.role,
+        content: msg.content,
+        timestamp: new Date(),
+        userId: user.uid
+      }));
+
+      const aiResponse = await sendChatMessage(user.uid, content, conversationHistory);
+
+      if (!aiResponse.success) {
+        throw new Error(aiResponse.error || 'Failed to get AI response');
       }
 
-      const data = await apiResponse.json();
-      const newAiMessage: ChatMessage = { role: 'ai', content: data.content };
+      const newAiMessage: ChatMessage = {
+        role: 'assistant',
+        content: aiResponse.message,
+        id: Math.random().toString(36),
+        timestamp: new Date()
+      };
       const finalMessages = [...updatedMessages, newAiMessage];
       setMessages(finalMessages);
 
@@ -177,7 +185,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       setMessages((prev) => {
         const revertedMessages = prev.filter((msg: ChatMessage) => msg !== newUserMessage && msg.content !== initialFirstChatPrompt.content && msg.content !== initialSubsequentChatPrompt.content);
         const fallbackMessage = user.hasChatted ? initialSubsequentChatPrompt : initialFirstChatPrompt;
-        return [fallbackMessage, ...revertedMessages, { role: 'ai', content: 'Sorry, I encountered an error. Please try again.' }];
+        return [fallbackMessage, ...revertedMessages, { role: 'assistant', content: 'Sorry, I encountered an error. Please try again.' }];
       });
     } finally {
       setIsLoading(false);

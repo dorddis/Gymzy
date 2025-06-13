@@ -8,18 +8,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Users, UserPlus, UserCheck, Loader2 } from 'lucide-react';
-import { 
-  searchUsers, 
-  getSuggestedUsers, 
-  followUser, 
-  unfollowUser, 
+import { Search, Users, UserPlus, UserCheck, Loader2, ArrowLeft } from 'lucide-react';
+import {
+  searchUsers,
+  getSuggestedUsers,
+  followUser,
+  unfollowUser,
   isFollowing,
-  PublicUserProfile 
+  PublicUserProfile
 } from '@/services/user-discovery-service';
+import { useRouter } from 'next/navigation';
 
 export default function DiscoverPage() {
   const { user } = useAuth();
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<PublicUserProfile[]>([]);
   const [suggestedUsers, setSuggestedUsers] = useState<PublicUserProfile[]>([]);
@@ -194,7 +196,19 @@ export default function DiscoverPage() {
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-4xl">
+      {/* Header with Back Button */}
       <div className="mb-6">
+        <div className="flex items-center gap-4 mb-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.back()}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
+        </div>
         <h1 className="text-2xl font-bold mb-2">Discover People</h1>
         <p className="text-muted-foreground">
           Find and connect with other fitness enthusiasts

@@ -1,22 +1,23 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  UserPlus, 
-  UserCheck, 
-  Users, 
-  Calendar, 
-  Target, 
+import {
+  UserPlus,
+  UserCheck,
+  Users,
+  Calendar,
+  Target,
   TrendingUp,
   Loader2,
-  Settings
+  Settings,
+  ArrowLeft
 } from 'lucide-react';
 import { 
   followUser, 
@@ -31,6 +32,7 @@ import { db } from '@/lib/firebase';
 
 export default function UserProfilePage() {
   const params = useParams();
+  const router = useRouter();
   const { user: currentUser } = useAuth();
   const userId = params.userId as string;
   
@@ -163,6 +165,19 @@ export default function UserProfilePage() {
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-4xl">
+      {/* Back Button */}
+      <div className="mb-4">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => router.back()}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </Button>
+      </div>
+
       {/* Profile Header */}
       <Card className="mb-6">
         <CardContent className="p-6">

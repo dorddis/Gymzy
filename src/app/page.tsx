@@ -7,6 +7,7 @@ import { StatsCardsRow } from "@/components/dashboard/stats-cards-row";
 import { RecentWorkoutsCarousel } from "@/components/dashboard/recent-workouts-carousel";
 import { CommunityFeed } from "@/components/dashboard/community-feed";
 import { BottomNav } from "@/components/layout/bottom-nav";
+import { AIWelcomeMessage } from "@/components/dashboard/ai-welcome-message";
 import { useWorkout } from "@/contexts/WorkoutContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
@@ -60,6 +61,9 @@ export default function HomePage() {
       <StatusBar />
       <main className="flex-1 overflow-y-auto pb-20">
         <div className="container mx-auto px-4 py-6 space-y-6">
+          {/* AI Welcome Message */}
+          <AIWelcomeMessage />
+
           <div className="space-y-4">
             {/* <h2 className="text-2xl font-bold">Weekly Activation</h2> */}
             <div className="grid gap-4">
