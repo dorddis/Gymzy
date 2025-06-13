@@ -173,16 +173,22 @@ function ChatContent() {
         userId: user.uid
       }));
 
+      console.log('💬 ChatPage: Sending message to AI service...');
       const aiResponse = await sendChatMessage(user.uid, messageToSend, conversationHistory);
-      
+      console.log('💬 ChatPage: AI response received:', aiResponse);
+
       if (aiResponse.success) {
         await saveChatMessage(targetSessionId, 'assistant', aiResponse.message);
-        
-        setMessages(prev => [...prev, {
+
+        const newMessage: ChatMessage = {
           role: 'assistant',
           content: aiResponse.message,
-          timestamp: new Date()
-        }]);
+          timestamp: new Date(),
+          workoutData: aiResponse.workoutData
+        };
+
+        console.log('💬 ChatPage: Adding AI message with workout data:', newMessage);
+        setMessages(prev => [...prev, newMessage]);
       }
       
       await loadChatSessions();

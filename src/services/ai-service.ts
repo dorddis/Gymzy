@@ -66,121 +66,45 @@ export const generateAIResponse = async (prompt: string): Promise<string> => {
   }
 };
 
-// Streaming AI response
+// Streaming AI response (Google AI doesn't support true streaming, so we simulate it)
 export const generateStreamingAIResponse = async (
   prompt: string,
   onChunk: (chunk: string) => void
 ): Promise<string> => {
   try {
-    const apiKey = getAPIKey();
+    console.log('Starting streaming AI response...');
 
-    const response = await fetch(`${GOOGLE_AI_STREAMING_ENDPOINT}?key=${apiKey}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: prompt
-          }]
-        }],
-        generationConfig: {
-          temperature: 0.7,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 1000,
-        },
-        safetySettings: [
-          {
-            category: "HARM_CATEGORY_HARASSMENT",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
-          },
-          {
-            category: "HARM_CATEGORY_HATE_SPEECH",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
-          }
-        ]
-      })
-    });
+    // Get the full response first
+    const fullResponse = await generateAIResponse(prompt);
+    console.log('Full response received, starting streaming simulation...');
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`Google AI API Error: ${errorData.error?.message || 'Unknown error'}`);
-    }
-
-    if (!response.body) {
-      throw new Error('No response body for streaming');
-    }
-
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let fullResponse = '';
-
-    try {
-      while (true) {
-        const { done, value } = await reader.read();
-        
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split('\n');
-
-        for (const line of lines) {
-          if (line.trim() === '') continue;
-          
-          try {
-            // Parse the JSON response from the streaming API
-            const jsonLine = line.replace(/^data: /, '');
-            if (jsonLine === '[DONE]') continue;
-            
-            const parsed = JSON.parse(jsonLine);
-            const text = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
-            
-            if (text) {
-              fullResponse += text;
-              onChunk(text);
-            }
-          } catch (parseError) {
-            // Skip invalid JSON lines
-            continue;
-          }
-        }
-      }
-    } finally {
-      reader.releaseLock();
-    }
-
-    return fullResponse;
+    // Simulate streaming by sending chunks
+    return simulateStreamingResponse(fullResponse, onChunk);
 
   } catch (error) {
     console.error('Error in streaming AI response:', error);
-    
-    // Fallback to word-by-word simulation if streaming fails
-    console.log('Falling back to simulated streaming...');
-    return simulateStreamingResponse(prompt, onChunk);
+    throw error;
   }
 };
 
-// Fallback: Simulate streaming by breaking response into words
+// Simulate streaming by breaking response into words
 const simulateStreamingResponse = async (
-  prompt: string,
+  fullResponse: string,
   onChunk: (chunk: string) => void
 ): Promise<string> => {
   try {
-    const fullResponse = await generateAIResponse(prompt);
     const words = fullResponse.split(' ');
     let currentResponse = '';
-    
+
     for (let i = 0; i < words.length; i++) {
       const word = words[i] + (i < words.length - 1 ? ' ' : '');
       currentResponse += word;
       onChunk(word);
-      
+
       // Add a small delay to simulate streaming
       await new Promise(resolve => setTimeout(resolve, 30));
     }
-    
+
     return currentResponse;
   } catch (error) {
     console.error('Error in simulated streaming:', error);
@@ -194,18 +118,22 @@ export const generateCharacterStreamingResponse = async (
   onChunk: (chunk: string) => void
 ): Promise<string> => {
   try {
+    console.log('Starting character streaming for prompt:', prompt.substring(0, 100) + '...');
     const fullResponse = await generateAIResponse(prompt);
+    console.log('Full response received, length:', fullResponse.length);
+
     let currentResponse = '';
-    
+
     for (let i = 0; i < fullResponse.length; i++) {
       const char = fullResponse[i];
       currentResponse += char;
       onChunk(char);
-      
+
       // Add a small delay between characters
       await new Promise(resolve => setTimeout(resolve, 15));
     }
-    
+
+    console.log('Character streaming completed');
     return currentResponse;
   } catch (error) {
     console.error('Error in character streaming:', error);

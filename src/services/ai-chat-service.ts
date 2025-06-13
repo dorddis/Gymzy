@@ -1,4 +1,5 @@
 import { getAIPersonalityProfile, generateAIContext } from './ai-personality-service';
+import { AgenticAIService } from './agentic-ai-service';
 
 // Google AI Studio Configuration
 const GOOGLE_AI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
@@ -15,6 +16,12 @@ export interface ChatResponse {
   message: string;
   success: boolean;
   error?: string;
+  toolCalls?: any[];
+  workoutData?: {
+    exercises: any[];
+    workoutId: string;
+  };
+  isStreaming?: boolean;
 }
 
 // Get Google AI API Key from environment
@@ -68,81 +75,55 @@ Remember: You're not just a fitness bot - you're their personal coach who unders
   }
 };
 
-// Send message to AI and get response
+// Send message to AI and get response using Agentic AI
 export const sendChatMessage = async (
   userId: string,
   message: string,
   conversationHistory: ChatMessage[] = []
 ): Promise<ChatResponse> => {
   try {
-    const apiKey = getAPIKey();
-    const systemPrompt = await generateSystemPrompt(userId);
+    console.log('💬 ChatService: ===== SENDING CHAT MESSAGE =====');
+    console.log('💬 ChatService: User ID:', userId);
+    console.log('💬 ChatService: Message:', message);
+    console.log('💬 ChatService: History length:', conversationHistory.length);
 
-    // Prepare conversation history for Google AI
-    let conversationText = systemPrompt + '\n\n';
+    // Initialize the agentic AI service
+    const agenticAI = new AgenticAIService();
 
-    // Add conversation history
-    conversationHistory.slice(-10).forEach(msg => {
-      if (msg.role === 'user') {
-        conversationText += `User: ${msg.content}\n`;
-      } else {
-        conversationText += `Assistant: ${msg.content}\n`;
-      }
-    });
+    // Convert conversation history to the format expected by agentic AI
+    const chatHistory = conversationHistory.map((msg, index) => ({
+      id: msg.id || `msg_${index}`,
+      role: msg.role as 'user' | 'assistant',
+      content: msg.content,
+      timestamp: msg.timestamp,
+      userId: msg.userId
+    }));
 
-    // Add current message
-    conversationText += `User: ${message}\nAssistant:`;
+    console.log('🤖 ChatService: Calling agentic AI service...');
 
-    const response = await fetch(`${GOOGLE_AI_ENDPOINT}?key=${apiKey}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: conversationText
-          }]
-        }],
-        generationConfig: {
-          temperature: 0.7,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 500,
-        },
-        safetySettings: [
-          {
-            category: "HARM_CATEGORY_HARASSMENT",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
-          },
-          {
-            category: "HARM_CATEGORY_HATE_SPEECH",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
-          }
-        ]
-      })
-    });
+    // Call the agentic AI service (without streaming for now)
+    const result = await agenticAI.generateAgenticResponse(
+      message,
+      chatHistory
+    );
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`Google AI API Error: ${errorData.error?.message || 'Unknown error'}`);
-    }
-
-    const data = await response.json();
-    const aiMessage = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if (!aiMessage) {
-      throw new Error('No response from Google AI');
-    }
+    console.log('✅ ChatService: Agentic AI response received');
+    console.log('✅ ChatService: Response length:', result.content.length);
+    console.log('✅ ChatService: Tool calls:', result.toolCalls?.length || 0);
+    console.log('✅ ChatService: Has workout data:', !!result.workoutData);
 
     return {
-      message: aiMessage.trim(),
-      success: true
+      message: result.content,
+      success: true,
+      toolCalls: result.toolCalls,
+      workoutData: result.workoutData,
+      isStreaming: result.isStreaming
     };
 
   } catch (error) {
-    console.error('Error sending chat message:', error);
-    
+    console.error('❌ ChatService: Error sending chat message:', error);
+    console.error('❌ ChatService: Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+
     // Return a fallback response
     return {
       message: "I'm having trouble connecting right now, but I'm here to help with your fitness journey! Try asking me about workouts, nutrition, or motivation.",

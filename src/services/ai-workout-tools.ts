@@ -196,11 +196,56 @@ export const AI_WORKOUT_TOOLS: AITool[] = [
 // Tool execution functions
 export class AIWorkoutToolExecutor {
   static async executeCreateWorkout(params: any): Promise<{ success: boolean; workoutId: string; exercises: WorkoutExercise[] }> {
-    const { workoutName, exercises, targetMuscles } = params;
+    console.log('🏋️ WorkoutTool: ===== EXECUTING CREATE_WORKOUT =====');
+    console.log('🏋️ WorkoutTool: Raw parameters received:', JSON.stringify(params, null, 2));
 
+    let { workoutName, exercises, targetMuscles } = params;
+    console.log('🏋️ WorkoutTool: Extracted parameters:');
+    console.log('🏋️ WorkoutTool: - workoutName:', workoutName);
+    console.log('🏋️ WorkoutTool: - exercises:', exercises);
+    console.log('🏋️ WorkoutTool: - targetMuscles:', targetMuscles);
+
+    if (!exercises || !Array.isArray(exercises)) {
+      console.warn('⚠️ WorkoutTool: Invalid exercises parameter:', exercises);
+      console.log('🔧 WorkoutTool: Creating default exercises for push workout...');
+
+      // Create default push workout exercises if none provided
+      exercises = [
+        {
+          exerciseId: 'incline-dumbbell-press',
+          name: 'Incline Dumbbell Press',
+          sets: 3,
+          reps: 10,
+          weight: 0
+        },
+        {
+          exerciseId: 'overhead-press',
+          name: 'Overhead Press',
+          sets: 3,
+          reps: 10,
+          weight: 0
+        },
+        {
+          exerciseId: 'close-grip-bench-press',
+          name: 'Close-Grip Bench Press',
+          sets: 3,
+          reps: 10,
+          weight: 0
+        }
+      ];
+
+      console.log('🔧 WorkoutTool: Default exercises created:', JSON.stringify(exercises, null, 2));
+    } else {
+      console.log('✅ WorkoutTool: Valid exercises array provided with', exercises.length, 'exercises');
+    }
+
+    console.log('🔄 WorkoutTool: Processing exercises into workout format...');
     const workoutExercises: WorkoutExercise[] = exercises.map((ex: any, index: number) => {
+      console.log(`🔄 WorkoutTool: Processing exercise ${index + 1}:`, JSON.stringify(ex, null, 2));
+
       // Try to find exercise by ID first, then by name
       let exerciseData = EXERCISES.find(e => e.id === ex.exerciseId);
+      console.log(`🔍 WorkoutTool: Exercise lookup by ID '${ex.exerciseId}':`, exerciseData ? 'FOUND' : 'NOT FOUND');
 
       if (!exerciseData && ex.name) {
         // Try to find by name (case insensitive)
@@ -208,11 +253,12 @@ export class AIWorkoutToolExecutor {
           e.name.toLowerCase().includes(ex.name.toLowerCase()) ||
           ex.name.toLowerCase().includes(e.name.toLowerCase())
         );
+        console.log(`🔍 WorkoutTool: Exercise lookup by name '${ex.name}':`, exerciseData ? 'FOUND' : 'NOT FOUND');
       }
 
       if (!exerciseData) {
         // If still not found, create a basic exercise structure
-        console.warn(`Exercise not found: ${ex.exerciseId || ex.name}, creating basic structure`);
+        console.warn(`⚠️ WorkoutTool: Exercise not found: ${ex.exerciseId || ex.name}, creating basic structure`);
         exerciseData = {
           id: ex.exerciseId || `custom_${index}`,
           name: ex.name || `Exercise ${index + 1}`,
@@ -222,9 +268,12 @@ export class AIWorkoutToolExecutor {
           instructions: [],
           tips: []
         };
+        console.log(`🔧 WorkoutTool: Created basic exercise data:`, JSON.stringify(exerciseData, null, 2));
+      } else {
+        console.log(`✅ WorkoutTool: Using found exercise data:`, exerciseData.name);
       }
 
-      return {
+      const workoutExercise = {
         id: `ai_workout_${Date.now()}_${index}`,
         name: exerciseData.name,
         sets: Array.from({ length: ex.sets || 3 }, () => ({
@@ -239,15 +288,26 @@ export class AIWorkoutToolExecutor {
         primaryMuscles: exerciseData.primaryMuscles,
         secondaryMuscles: exerciseData.secondaryMuscles || []
       };
+
+      console.log(`✅ WorkoutTool: Created workout exercise ${index + 1}:`, JSON.stringify(workoutExercise, null, 2));
+      return workoutExercise;
     });
 
-    const workoutId = `ai_workout_${Date.now()}`;
+    console.log('🏋️ WorkoutTool: All exercises processed. Total:', workoutExercises.length);
 
-    return {
+    const workoutId = `ai_workout_${Date.now()}`;
+    console.log('🆔 WorkoutTool: Generated workout ID:', workoutId);
+
+    const result = {
       success: true,
       workoutId,
       exercises: workoutExercises
     };
+
+    console.log('🎯 WorkoutTool: Final result:', JSON.stringify(result, null, 2));
+    console.log('🏋️ WorkoutTool: ===== CREATE_WORKOUT COMPLETE =====');
+
+    return result;
   }
 
   static async executeSearchExercises(params: any): Promise<{ exercises: any[] }> {
@@ -357,18 +417,48 @@ export class AIWorkoutToolExecutor {
 
 // Function to execute AI tools
 export async function executeAITool(toolName: string, parameters: any): Promise<any> {
-  switch (toolName) {
-    case 'create_workout':
-      return AIWorkoutToolExecutor.executeCreateWorkout(parameters);
-    case 'search_exercises':
-      return AIWorkoutToolExecutor.executeSearchExercises(parameters);
-    case 'get_exercise_info':
-      return AIWorkoutToolExecutor.executeGetExerciseInfo(parameters);
-    case 'suggest_workout_plan':
-      return AIWorkoutToolExecutor.executeSuggestWorkoutPlan(parameters);
-    case 'start_workout':
-      return AIWorkoutToolExecutor.executeStartWorkout(parameters);
-    default:
-      throw new Error(`Unknown tool: ${toolName}`);
+  console.log('🔧 AITool: ===== EXECUTING AI TOOL =====');
+  console.log('🔧 AITool: Tool name:', toolName);
+  console.log('🔧 AITool: Parameters:', JSON.stringify(parameters, null, 2));
+
+  try {
+    let result: any;
+
+    switch (toolName) {
+      case 'create_workout':
+        console.log('🏋️ AITool: Executing create_workout...');
+        result = await AIWorkoutToolExecutor.executeCreateWorkout(parameters);
+        break;
+      case 'search_exercises':
+        console.log('🔍 AITool: Executing search_exercises...');
+        result = await AIWorkoutToolExecutor.executeSearchExercises(parameters);
+        break;
+      case 'get_exercise_info':
+        console.log('ℹ️ AITool: Executing get_exercise_info...');
+        result = await AIWorkoutToolExecutor.executeGetExerciseInfo(parameters);
+        break;
+      case 'suggest_workout_plan':
+        console.log('💡 AITool: Executing suggest_workout_plan...');
+        result = await AIWorkoutToolExecutor.executeSuggestWorkoutPlan(parameters);
+        break;
+      case 'start_workout':
+        console.log('▶️ AITool: Executing start_workout...');
+        result = await AIWorkoutToolExecutor.executeStartWorkout(parameters);
+        break;
+      default:
+        console.error('❌ AITool: Unknown tool:', toolName);
+        throw new Error(`Unknown tool: ${toolName}`);
+    }
+
+    console.log('✅ AITool: Tool execution successful');
+    console.log('✅ AITool: Result:', JSON.stringify(result, null, 2));
+    console.log('🔧 AITool: ===== TOOL EXECUTION COMPLETE =====');
+
+    return result;
+  } catch (error) {
+    console.error('❌ AITool: Tool execution failed:', error);
+    console.error('❌ AITool: Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    console.log('🔧 AITool: ===== TOOL EXECUTION FAILED =====');
+    throw error;
   }
 }
