@@ -16,6 +16,7 @@ import { LifestyleTracker } from "@/components/lifestyle/lifestyle-tracker";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { AIRecommendationsPanel } from "@/components/recommendations/ai-recommendations-panel";
+import { SmartNotificationsPanel } from "@/components/notifications/smart-notifications-panel";
 
 export default function HomePage() {
   const { combinedMuscleVolumes } = useWorkout();
@@ -69,6 +70,9 @@ export default function HomePage() {
         <div className="container mx-auto px-4 py-6 space-y-6">
           {/* AI Welcome Message */}
           <AIWelcomeMessage />
+
+          {/* Smart Notifications */}
+          <SmartNotificationsPanel maxNotifications={3} showOnlyHighPriority={true} />
 
           {/* Daily Check-in */}
           <div className="flex justify-center">
