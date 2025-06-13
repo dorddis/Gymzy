@@ -21,11 +21,13 @@ export function StatusBar() {
 
   const handleLogout = async () => {
     try {
+      console.log('StatusBar: Starting logout process...');
       setIsLoggingOut(true);
       await signOut();
+      console.log('StatusBar: SignOut successful, redirecting to auth...');
       router.push('/auth');
     } catch (error) {
-      console.error('Error logging out:', error);
+      console.error('StatusBar: Error logging out:', error);
     } finally {
       setIsLoggingOut(false);
     }

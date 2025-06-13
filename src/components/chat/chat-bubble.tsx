@@ -1,13 +1,20 @@
 "use client";
 
 import React from 'react';
+import { Button } from '@/components/ui/button';
+import { Play } from 'lucide-react';
 
 interface ChatBubbleProps {
   role: 'user' | 'assistant';
   content: string;
+  workoutData?: {
+    exercises: any[];
+    workoutId: string;
+  };
+  onStartWorkout?: (workoutData: any) => void;
 }
 
-export function ChatBubble({ role, content }: ChatBubbleProps) {
+export function ChatBubble({ role, content, workoutData, onStartWorkout }: ChatBubbleProps) {
   const isUser = role === 'user';
 
   // Format content with basic markdown-like formatting
@@ -78,6 +85,20 @@ export function ChatBubble({ role, content }: ChatBubbleProps) {
         }`}
     >
       {isUser ? content : formatContent(content)}
+
+      {/* Workout Start Button */}
+      {!isUser && workoutData && onStartWorkout && (
+        <div className="mt-3 pt-3 border-t border-gray-200">
+          <Button
+            onClick={() => onStartWorkout(workoutData)}
+            size="sm"
+            className="bg-green-600 hover:bg-green-700 text-white"
+          >
+            <Play className="h-4 w-4 mr-2" />
+            Start This Workout
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

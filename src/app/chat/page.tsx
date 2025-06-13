@@ -15,15 +15,22 @@ import {
   ChatSession
 } from '@/services/chat-history-service';
 import { sendChatMessage } from '@/services/ai-chat-service';
+import { executeAITool } from '@/services/ai-workout-tools';
+import { useWorkout } from '@/contexts/WorkoutContext';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp?: Date;
+  workoutData?: {
+    exercises: any[];
+    workoutId: string;
+  };
 }
 
 function ChatContent() {
   const { user } = useAuth();
+  const { setCurrentWorkoutExercises } = useWorkout();
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -203,6 +210,13 @@ function ChatContent() {
     }
   };
 
+  const handleStartWorkout = (workoutData: any) => {
+    if (workoutData?.exercises) {
+      setCurrentWorkoutExercises(workoutData.exercises);
+      router.push('/workout');
+    }
+  };
+
   if (!user) {
     return (
       <div className="flex flex-col h-screen bg-background">
@@ -261,6 +275,8 @@ function ChatContent() {
               key={index}
               role={message.role}
               content={message.content}
+              workoutData={message.workoutData}
+              onStartWorkout={handleStartWorkout}
             />
           ))}
           {isLoading && (

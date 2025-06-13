@@ -19,6 +19,7 @@ import { useRouter } from 'next/navigation';
 import { useWorkout } from '@/contexts/WorkoutContext';
 import { EXERCISES } from '@/lib/constants';
 import { Exercise } from '@/types/exercise';
+import { getRecentWorkouts } from '@/services/workout-service';
 
 interface WorkoutTemplate {
   id: string;
@@ -58,7 +59,7 @@ const WORKOUT_TEMPLATES: WorkoutTemplate[] = [
     equipment: ['Dumbbells', 'Dip Station'],
     calories: 250,
     icon: Dumbbell,
-    color: 'bg-blue-500'
+    color: 'bg-blue-400'
   },
   {
     id: 'hiit_cardio',
@@ -77,7 +78,7 @@ const WORKOUT_TEMPLATES: WorkoutTemplate[] = [
     equipment: ['Bodyweight'],
     calories: 300,
     icon: Flame,
-    color: 'bg-red-500'
+    color: 'bg-red-400'
   },
   {
     id: 'leg_power',
@@ -96,7 +97,7 @@ const WORKOUT_TEMPLATES: WorkoutTemplate[] = [
     equipment: ['Barbell', 'Dumbbells'],
     calories: 350,
     icon: Target,
-    color: 'bg-green-500'
+    color: 'bg-green-400'
   },
   {
     id: 'core_blast',
@@ -135,14 +136,47 @@ const WORKOUT_TEMPLATES: WorkoutTemplate[] = [
     equipment: ['Barbell', 'Pull-up Bar'],
     calories: 400,
     icon: Zap,
-    color: 'bg-orange-500'
+    color: 'bg-orange-400'
   }
 ];
 
 export function QuickWorkoutTemplates() {
   const router = useRouter();
+  const { user } = useAuth();
   const { setCurrentWorkoutExercises } = useWorkout();
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+
+  // Function to get default values from previous workouts
+  const getDefaultValues = async (exerciseName: string) => {
+    if (!user?.uid) return { weight: 0, reps: 8 };
+
+    try {
+      const recentWorkouts = await getRecentWorkouts(user.uid, 5);
+
+      // Find the most recent workout that contains this exercise
+      for (const workout of recentWorkouts) {
+        const exercise = workout.exercises?.find(ex => ex.name === exerciseName);
+        if (exercise && exercise.sets && exercise.sets.length > 0) {
+          // Get the last set that was executed
+          const lastExecutedSet = exercise.sets
+            .filter(set => set.isExecuted && set.weight > 0 && set.reps > 0)
+            .pop();
+
+          if (lastExecutedSet) {
+            return {
+              weight: lastExecutedSet.weight,
+              reps: lastExecutedSet.reps
+            };
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching previous workout data:', error);
+    }
+
+    // Default values if no previous data found
+    return { weight: 0, reps: 8 };
+  };
 
   const getDifficultyColor = (difficulty: WorkoutTemplate['difficulty']) => {
     switch (difficulty) {
@@ -174,40 +208,47 @@ export function QuickWorkoutTemplates() {
     }
   };
 
-  const startWorkout = (template: WorkoutTemplate) => {
+  const startWorkout = async (template: WorkoutTemplate) => {
     // Convert template exercises to workout format
-    const workoutExercises = template.exercises.map((templateExercise, index) => {
-      // Find the exercise in the EXERCISES constant
-      const exerciseData = EXERCISES.find(ex => ex.id === templateExercise.exerciseId);
+    const workoutExercises = await Promise.all(
+      template.exercises.map(async (templateExercise, index) => {
+        // Find the exercise in the EXERCISES constant
+        const exerciseData = EXERCISES.find(ex => ex.id === templateExercise.exerciseId);
 
-      if (!exerciseData) {
-        console.warn(`Exercise with id ${templateExercise.exerciseId} not found in EXERCISES`);
-        return null;
-      }
+        if (!exerciseData) {
+          console.warn(`Exercise with id ${templateExercise.exerciseId} not found in EXERCISES`);
+          return null;
+        }
 
-      return {
-        id: `template_${template.id}_${index}`,
-        name: exerciseData.name,
-        sets: Array.from({ length: templateExercise.sets }, () => ({
-          weight: 0,
-          reps: 0,
-          rpe: 8,
-          isWarmup: false,
-          isExecuted: false
-        })),
-        muscleGroups: exerciseData.primaryMuscles,
-        equipment: 'Bodyweight', // Default equipment
-        primaryMuscles: exerciseData.primaryMuscles,
-        secondaryMuscles: exerciseData.secondaryMuscles || []
-      };
-    }).filter(Boolean); // Remove any null entries
+        // Get default values from previous workouts
+        const defaultValues = await getDefaultValues(exerciseData.name);
 
-    if (workoutExercises.length === 0) {
+        return {
+          id: `template_${template.id}_${index}`,
+          name: exerciseData.name,
+          sets: Array.from({ length: templateExercise.sets }, () => ({
+            weight: defaultValues.weight,
+            reps: defaultValues.reps,
+            rpe: 8,
+            isWarmup: false,
+            isExecuted: false
+          })),
+          muscleGroups: exerciseData.primaryMuscles,
+          equipment: 'Bodyweight', // Default equipment
+          primaryMuscles: exerciseData.primaryMuscles,
+          secondaryMuscles: exerciseData.secondaryMuscles || []
+        };
+      })
+    );
+
+    const validExercises = workoutExercises.filter(Boolean);
+
+    if (validExercises.length === 0) {
       console.error('No valid exercises found for template:', template.id);
       return;
     }
 
-    setCurrentWorkoutExercises(workoutExercises);
+    setCurrentWorkoutExercises(validExercises);
     router.push('/workout');
   };
 
