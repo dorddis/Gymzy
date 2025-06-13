@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { generateDailyMotivation } from '@/services/ai-chat-service';
 import { useWorkout } from '@/contexts/WorkoutContext';
+import { useRouter } from 'next/navigation';
 
 interface MotivationContext {
   timeOfDay: 'morning' | 'afternoon' | 'evening';
@@ -27,9 +28,10 @@ interface MotivationContext {
 export function AIWelcomeMessage() {
   const { user } = useAuth();
   const { workouts } = useWorkout();
+  const router = useRouter();
   
   const [message, setMessage] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastGenerated, setLastGenerated] = useState<Date | null>(null);
   const [motivationContext, setMotivationContext] = useState<MotivationContext | null>(null);
@@ -41,8 +43,13 @@ export function AIWelcomeMessage() {
   }, [user, workouts]);
 
   useEffect(() => {
-    if (motivationContext && shouldGenerateNewMessage()) {
-      generateMessage();
+    if (motivationContext) {
+      if (shouldGenerateNewMessage()) {
+        generateMessage();
+      } else if (!message) {
+        // Set fallback message immediately if no message exists
+        setMessage(getFallbackMessage());
+      }
     }
   }, [motivationContext]);
 
@@ -180,6 +187,23 @@ export function AIWelcomeMessage() {
     setIsRefreshing(false);
   };
 
+  const handleMessageClick = () => {
+    // Add a subtle animation before navigation
+    const messageElement = document.querySelector('.ai-message-clickable');
+    if (messageElement) {
+      messageElement.classList.add('animate-pulse');
+      setTimeout(() => {
+        messageElement.classList.remove('animate-pulse');
+      }, 300);
+    }
+
+    // Navigate to chat with the current message as context
+    setTimeout(() => {
+      const chatUrl = `/chat?message=${encodeURIComponent(message)}`;
+      router.push(chatUrl);
+    }, 150);
+  };
+
   const getMessageIcon = () => {
     if (!motivationContext) return <Sparkles className="h-5 w-5 text-primary" />;
 
@@ -228,12 +252,12 @@ export function AIWelcomeMessage() {
   if (!user) return null;
 
   return (
-    <Card className="mb-6 bg-gradient-to-r from-primary/5 to-secondary/5 border-primary/20">
+    <Card className="mb-6 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
       <CardContent className="p-4">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-2">
             {getMessageIcon()}
-            <span className="font-medium text-sm">Your AI Coach</span>
+            <span className="font-medium text-sm">Talk to Gymzy</span>
           </div>
           
           <div className="flex items-center gap-2">
@@ -254,14 +278,17 @@ export function AIWelcomeMessage() {
           </div>
         </div>
         
-        <div className="mb-3">
+        <div
+          className="ai-message-clickable mb-3 cursor-pointer hover:bg-primary/5 rounded-lg p-2 -m-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+          onClick={handleMessageClick}
+        >
           {isLoading ? (
             <div className="flex items-center gap-2 text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" />
               <span className="text-sm">Generating personalized message...</span>
             </div>
           ) : (
-            <p className="text-sm leading-relaxed">{message}</p>
+            <p className="text-sm leading-relaxed text-gray-800">{message}</p>
           )}
         </div>
         
@@ -279,7 +306,7 @@ export function AIWelcomeMessage() {
             className="text-xs h-7 px-2"
           >
             <MessageCircle className="h-3 w-3 mr-1" />
-            Chat with AI
+            Ask Gymzy
           </Button>
         </div>
       </CardContent>

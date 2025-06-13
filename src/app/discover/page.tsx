@@ -198,21 +198,22 @@ export default function DiscoverPage() {
     <div className="container mx-auto px-4 py-6 max-w-4xl">
       {/* Header with Back Button */}
       <div className="mb-6">
-        <div className="flex items-center gap-4 mb-4">
+        <div className="flex items-center gap-3 mb-4">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => router.back()}
-            className="flex items-center gap-2"
+            className="p-2 hover:bg-gray-100 rounded-full"
           >
-            <ArrowLeft className="h-4 w-4" />
-            Back
+            <ArrowLeft className="h-5 w-5 text-gray-700" />
           </Button>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Discover People</h1>
+            <p className="text-gray-600 text-sm">
+              Find and connect with other fitness enthusiasts
+            </p>
+          </div>
         </div>
-        <h1 className="text-2xl font-bold mb-2">Discover People</h1>
-        <p className="text-muted-foreground">
-          Find and connect with other fitness enthusiasts
-        </p>
       </div>
 
       <Tabs defaultValue="search" className="w-full">

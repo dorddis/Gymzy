@@ -1,14 +1,37 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { communityPosts } from '@/data/community-posts';
 import { Dumbbell, Heart, MessageSquare, Share2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export function CommunityFeed() {
+  const router = useRouter();
+  const [likedPosts, setLikedPosts] = useState<Record<string, boolean>>({});
+
+  const handleLike = (postId: string) => {
+    setLikedPosts(prev => ({
+      ...prev,
+      [postId]: !prev[postId]
+    }));
+  };
+
+  const handleViewAll = () => {
+    router.push('/feed');
+  };
+
   return (
     <div className="px-4">
       <div className="flex justify-between items-center mb-3">
         <h2 className="text-lg font-semibold">Community</h2>
-        <span className="text-secondary text-sm cursor-pointer">View All</span>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleViewAll}
+          className="text-blue-600 hover:text-blue-800 text-sm p-0 h-auto font-medium"
+        >
+          View All
+        </Button>
       </div>
       {communityPosts.map((post) => (
         <Card key={post.id} className="bg-white rounded-xl shadow-sm p-4 mb-4">
@@ -30,15 +53,31 @@ export function CommunityFeed() {
             </div>
           </div>
           <div className="flex justify-between text-sm text-gray-500">
-            <button className="flex items-center">
-              <Heart className="mr-1" /> {post.likes}
-            </button>
-            <button className="flex items-center">
-              <MessageSquare className="mr-1" /> {post.comments}
-            </button>
-            <button className="flex items-center">
-              <Share2 />
-            </button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleLike(post.id)}
+              className="flex items-center p-1 h-auto text-gray-500 hover:text-red-500"
+            >
+              <Heart className={`mr-1 w-4 h-4 ${likedPosts[post.id] ? 'fill-current text-red-500' : ''}`} />
+              {post.likes + (likedPosts[post.id] ? 1 : 0)}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => console.log('Comment on post:', post.id)}
+              className="flex items-center p-1 h-auto text-gray-500 hover:text-blue-500"
+            >
+              <MessageSquare className="mr-1 w-4 h-4" /> {post.comments}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => console.log('Share post:', post.id)}
+              className="flex items-center p-1 h-auto text-gray-500 hover:text-green-500"
+            >
+              <Share2 className="w-4 h-4" />
+            </Button>
           </div>
         </Card>
       ))}

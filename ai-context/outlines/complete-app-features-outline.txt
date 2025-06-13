@@ -146,7 +146,7 @@ interface AIPersonalityProfile {
 
 ## Phase 2: Social Features Implementation
 
-### Step 20: User Discovery & Following System
+### Step 20: User Discovery & Following System ✅ **COMPLETED**
 **Goal:** Enable users to find and follow each other
 **Priority:** High
 **Estimated Time:** 4-5 days
@@ -190,7 +190,7 @@ interface UserStats {
 }
 ```
 
-### Step 21: Enhanced Social Workout Features
+### Step 21: Enhanced Social Workout Features ✅ **COMPLETED**
 **Goal:** Transform workouts into social experiences
 **Priority:** High
 **Estimated Time:** 6-7 days
@@ -241,7 +241,7 @@ interface WorkoutPost {
 }
 ```
 
-### Step 22: Advanced Social Feed
+### Step 22: Advanced Social Feed ✅ **COMPLETED**
 **Goal:** Create engaging, algorithm-driven social feed
 **Priority:** Medium
 **Estimated Time:** 5-6 days
@@ -433,38 +433,38 @@ interface AIRecommendation {
    - Celebration of achievements
    - Supportive guidance during plateaus
 
-### Step 25.5: AI Welcome & Daily Motivation System
+### Step 25.5: AI Welcome & Daily Motivation System ✅ **COMPLETED**
 **Goal:** Provide personalized AI-generated welcome messages and daily motivation on the home page
 **Priority:** High
 **Estimated Time:** 3-4 days
 
 **Tasks:**
-1. **Dynamic Welcome Messages**
+1. **Dynamic Welcome Messages** ✅
    - AI-generated personalized greetings based on time of day
    - Context-aware messages based on user's recent activity
    - Motivational content aligned with user's goals and personality
    - Adaptive messaging based on workout streaks and progress
 
-2. **Daily Guidance System**
+2. **Daily Guidance System** ✅
    - Morning motivation and workout planning suggestions
    - Pre-workout pump-up messages and preparation tips
    - Post-workout celebration and recovery guidance
    - Rest day motivation and alternative activity suggestions
 
-3. **Contextual AI Responses**
+3. **Contextual AI Responses** ✅
    - **No Recent Workouts:** Gentle encouragement to get back on track
    - **Consistent Streak:** Celebration and momentum building
    - **Goal Progress:** Updates on goal achievement and next steps
    - **Plateau Detection:** Motivation and strategy suggestions
    - **Personal Milestones:** Recognition and celebration
 
-4. **Smart Message Generation**
+4. **Smart Message Generation** ✅
    - Integration with user's AI personality profile
    - Reference to personal goals, values, and motivation factors
    - Consideration of current challenges and support system
    - Seasonal and contextual relevance (weather, holidays, etc.)
 
-5. **Message Delivery System**
+5. **Message Delivery System** ✅
    - Prominent placement below the muscle heatmap SVG
    - Smooth animations and engaging visual presentation
    - Message refresh on app open and periodic updates
@@ -496,6 +496,204 @@ interface DailyMotivation {
 - **Actionable Content:** Provide specific, achievable next steps
 - **Emotional Intelligence:** Recognize and respond to user's likely emotional state
 - **Variety and Freshness:** Ensure messages don't become repetitive
+
+### Step 25.6: Advanced AI Assistant with App Control (MCP-Style Integration)
+**Goal:** Create a comprehensive AI assistant that can control all app functions through natural language
+**Priority:** High
+**Estimated Time:** 5-7 days
+
+**Tasks:**
+1. **AI Function Registry System**
+   - Create a registry of all available app functions
+   - Define function schemas with parameters and descriptions
+   - Implement function calling interface for AI
+   - Add permission and validation layers
+
+2. **Workout Management Functions**
+   - **Add Workout:** "Add a push workout with bench press and push-ups"
+   - **Modify Workout:** "Change my last set to 15 reps"
+   - **Delete Workout:** "Remove yesterday's workout"
+   - **Schedule Workout:** "Schedule a leg workout for tomorrow"
+   - **Copy Workout:** "Repeat my Monday workout"
+
+3. **Social & Discovery Functions**
+   - **Search Users:** "Find users who do powerlifting"
+   - **Follow/Unfollow:** "Follow John Smith"
+   - **Share Workout:** "Share my today's workout with caption 'Great session!'"
+   - **Like/Comment:** "Like Sarah's latest workout post"
+   - **View Profile:** "Show me Alex's profile"
+
+4. **Settings & Preferences Functions**
+   - **Update Goals:** "Change my goal to muscle building"
+   - **Modify Preferences:** "Update my workout types to include yoga"
+   - **Change Communication Style:** "Make responses more motivational"
+   - **Update Equipment:** "Add resistance bands to my equipment"
+   - **Adjust Schedule:** "I can only workout in evenings now"
+
+5. **Analytics & Insights Functions**
+   - **View Stats:** "Show my progress this month"
+   - **Compare Performance:** "How does this week compare to last week?"
+   - **Generate Reports:** "Create a summary of my chest workouts"
+   - **Set Reminders:** "Remind me to workout at 6 PM"
+   - **Track Goals:** "How close am I to my strength goal?"
+
+6. **Navigation & UI Functions**
+   - **Navigate:** "Go to my workout history"
+   - **Search:** "Find my deadlift workouts"
+   - **Filter:** "Show only cardio workouts"
+   - **Sort:** "Sort workouts by date"
+   - **Export:** "Export my data as PDF"
+
+**Technical Implementation:**
+```typescript
+interface AIFunction {
+  name: string;
+  description: string;
+  parameters: {
+    type: 'object';
+    properties: Record<string, any>;
+    required: string[];
+  };
+  handler: (params: any, userId: string) => Promise<any>;
+  permissions: string[];
+}
+
+interface AIFunctionCall {
+  function: string;
+  parameters: Record<string, any>;
+  reasoning: string;
+}
+
+interface AIResponse {
+  message: string;
+  functionCalls?: AIFunctionCall[];
+  success: boolean;
+  data?: any;
+}
+```
+
+**Function Categories:**
+1. **Workout Functions** (15+ functions)
+2. **Social Functions** (10+ functions)
+3. **Settings Functions** (12+ functions)
+4. **Analytics Functions** (8+ functions)
+5. **Navigation Functions** (6+ functions)
+6. **Data Functions** (5+ functions)
+
+**AI Prompt Engineering:**
+- **Function Detection:** Identify when user wants to perform actions vs. get information
+- **Parameter Extraction:** Extract relevant parameters from natural language
+- **Confirmation Flow:** Ask for confirmation on destructive actions
+- **Error Handling:** Gracefully handle invalid requests or missing permissions
+- **Multi-step Actions:** Handle complex requests requiring multiple function calls
+
+**User Experience:**
+- **Natural Language:** "Add 3 sets of bench press with 135 lbs"
+- **Contextual Understanding:** "Add another set" (understands current context)
+- **Confirmation Dialogs:** "Are you sure you want to delete this workout?"
+- **Progress Feedback:** "Adding workout... Done! Your workout has been saved."
+- **Error Messages:** "I couldn't find a user named 'John'. Did you mean 'John Smith'?"
+
+### Step 25.7: Loading Skeletons & Enhanced UX
+**Goal:** Add skeleton loading states throughout the app for better perceived performance
+**Priority:** Medium
+**Estimated Time:** 2-3 days
+
+**Tasks:**
+1. **Page Loading Skeletons**
+   - Home page skeleton with heatmap placeholder
+   - Stats page skeleton with chart placeholders
+   - Feed page skeleton with post placeholders
+   - Profile page skeleton with user info placeholders
+   - Chat page skeleton with message placeholders
+
+2. **Component Loading States**
+   - Workout cards skeleton
+   - User profile cards skeleton
+   - Exercise list skeleton
+   - Chart loading animations
+   - Button loading states
+
+3. **Data Loading Indicators**
+   - Shimmer animations for content loading
+   - Progressive loading for images
+   - Smooth transitions between loading and loaded states
+   - Error state designs
+
+4. **Performance Optimizations**
+   - Lazy loading for images
+   - Virtual scrolling for long lists
+   - Debounced search inputs
+   - Optimistic UI updates
+
+### Step 25.8: Enhanced Onboarding with Physical Stats
+**Goal:** Collect comprehensive user physical data for better AI coaching and calorie calculations
+**Priority:** High
+**Estimated Time:** 3-4 days
+
+**Tasks:**
+1. **Physical Stats Collection**
+   - Age input with validation (13-100 years)
+   - Height input with metric/imperial units
+   - Weight input with metric/imperial units
+   - Gender selection (Male, Female, Other, Prefer not to say)
+   - Activity level assessment
+
+2. **Calorie Calculation Integration**
+   - BMR (Basal Metabolic Rate) calculation using Mifflin-St Jeor equation
+   - TDEE (Total Daily Energy Expenditure) calculation
+   - Exercise-specific calorie burn estimation
+   - Integration with workout tracking
+
+3. **AI Context Enhancement**
+   - Physical stats integration in AI personality profiles
+   - Gender-specific fitness recommendations
+   - Age-appropriate exercise modifications
+   - Weight-based progression suggestions
+
+4. **Health & Safety Features**
+   - Age-appropriate workout recommendations
+   - Weight progression safety checks
+   - Recovery time suggestions based on age
+   - Injury prevention based on physical profile
+
+**Database Schema Updates:**
+```typescript
+interface UserPhysicalStats {
+  age: number;
+  height: {
+    value: number;
+    unit: 'cm' | 'ft_in';
+    feet?: number; // for imperial
+    inches?: number; // for imperial
+  };
+  weight: {
+    value: number;
+    unit: 'kg' | 'lbs';
+  };
+  gender: 'male' | 'female' | 'other' | 'prefer_not_to_say';
+  activityLevel: 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active' | 'extremely_active';
+  bmr: number; // calculated
+  tdee: number; // calculated
+}
+
+interface CalorieBurn {
+  workoutId: string;
+  userId: string;
+  estimatedCalories: number;
+  duration: number;
+  intensity: 'low' | 'moderate' | 'high';
+  calculationMethod: 'met_based' | 'heart_rate' | 'estimated';
+  createdAt: Timestamp;
+}
+```
+
+**Calorie Calculation Formulas:**
+- **BMR (Men):** 10 × weight(kg) + 6.25 × height(cm) - 5 × age + 5
+- **BMR (Women):** 10 × weight(kg) + 6.25 × height(cm) - 5 × age - 161
+- **Exercise Calories:** METs × weight(kg) × duration(hours)
+- **Strength Training:** ~6-8 METs depending on intensity
+- **Cardio:** Variable METs based on activity type and intensity
 
 ### Step 26: Smart Notifications & Daily Engagement
 **Goal:** Keep users engaged with intelligent, personalized notifications

@@ -25,8 +25,8 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 export function ChatProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
-  const initialFirstChatPrompt: ChatMessage = { role: 'assistant', content: 'Hello! I am your personalized Gymzy AI assistant. How can I help you with your fitness journey today?' };
-  const initialSubsequentChatPrompt: ChatMessage = { role: 'assistant', content: 'Welcome back! How can I help you with your fitness journey today?' };
+  const initialFirstChatPrompt: ChatMessage = { role: 'assistant', content: 'Hello! I am Gymzy, your personalized AI fitness coach. How can I help you with your fitness journey today?' };
+  const initialSubsequentChatPrompt: ChatMessage = { role: 'assistant', content: 'Welcome back! I\'m Gymzy, ready to help with your fitness goals. What would you like to work on today?' };
 
   const [messages, setMessages] = useState<ChatMessage[]>([initialFirstChatPrompt]); // Default to first-time message
   const [isLoading, setIsLoading] = useState(false);

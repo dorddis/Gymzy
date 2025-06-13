@@ -269,21 +269,22 @@ export default function FeedPage() {
     <div className="container mx-auto px-4 py-6 max-w-2xl">
       {/* Header with Back Button */}
       <div className="mb-6">
-        <div className="flex items-center gap-4 mb-4">
+        <div className="flex items-center gap-3 mb-4">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => router.back()}
-            className="flex items-center gap-2"
+            className="p-2 hover:bg-gray-100 rounded-full"
           >
-            <ArrowLeft className="h-4 w-4" />
-            Back
+            <ArrowLeft className="h-5 w-5 text-gray-700" />
           </Button>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Gymzy Community</h1>
+            <p className="text-gray-600 text-sm">
+              Discover workouts and connect with the fitness community
+            </p>
+          </div>
         </div>
-        <h1 className="text-2xl font-bold mb-2">Social Feed</h1>
-        <p className="text-muted-foreground">
-          Discover workouts and connect with the community
-        </p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>

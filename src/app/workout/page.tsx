@@ -221,7 +221,7 @@ export default function WorkoutPage() {
           </Button>
           <Button
             className="flex-[1] bg-blue-500 text-white py-3 rounded-xl font-semibold shadow-sm hover:opacity-95"
-            onClick={() => console.log("Special set clicked")}
+            onClick={() => setIsAddExerciseModalOpen(true)}
           >
             + Special set
           </Button>

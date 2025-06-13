@@ -171,10 +171,9 @@ export default function UserProfilePage() {
           variant="ghost"
           size="sm"
           onClick={() => router.back()}
-          className="flex items-center gap-2"
+          className="p-2 hover:bg-gray-100 rounded-full"
         >
-          <ArrowLeft className="h-4 w-4" />
-          Back
+          <ArrowLeft className="h-5 w-5 text-gray-700" />
         </Button>
       </div>
 
