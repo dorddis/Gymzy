@@ -1,16 +1,16 @@
 import { db } from '@/lib/firebase';
-import { 
-  collection, 
-  doc, 
-  setDoc, 
-  getDoc, 
-  updateDoc, 
-  query, 
-  where, 
-  orderBy, 
-  limit, 
+import {
+  collection,
+  doc,
+  setDoc,
+  getDoc,
+  updateDoc,
+  query,
+  where,
+  orderBy,
+  limit as firestoreLimit,
   getDocs,
-  Timestamp 
+  Timestamp
 } from 'firebase/firestore';
 import { ContextualDataService, UserContext } from './contextual-data-service';
 import { getRecentWorkouts } from './workout-service';
@@ -494,7 +494,7 @@ export class AIRecommendationsService {
         where('expiresAt', '>', Timestamp.now()),
         orderBy('priority', 'desc'),
         orderBy('createdAt', 'desc'),
-        limit(limit)
+        firestoreLimit(limit)
       );
       
       const snapshot = await getDocs(q);

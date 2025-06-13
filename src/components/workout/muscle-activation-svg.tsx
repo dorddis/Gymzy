@@ -236,19 +236,37 @@ export function MuscleActivationSVG({
     const minSwipeDistance = 50; // Minimum distance for a swipe
 
     if (distance > minSwipeDistance) {
-      // Swiped right
-      setView('front');
+      // Swiped right - show front
+      handleViewChange('front');
     } else if (distance < -minSwipeDistance) {
-      // Swiped left
-      setView('back');
+      // Swiped left - show back
+      handleViewChange('back');
     }
   };
 
   const handleViewChange = (newView: 'front' | 'back') => {
-    if (isRotating) return;
+    if (newView === view || isRotating) return;
+
     setIsRotating(true);
-    setView(newView);
-    setTimeout(() => setIsRotating(false), 300); // Match the transition duration
+
+    // Add a smooth 3D flip transition effect
+    if (svgRef.current) {
+      svgRef.current.style.transition = 'transform 0.3s ease-in-out';
+      svgRef.current.style.transform = `scale(${scale}) rotateY(90deg)`;
+    }
+
+    setTimeout(() => {
+      setView(newView);
+      if (svgRef.current) {
+        svgRef.current.style.transform = `scale(${scale}) rotateY(0deg)`;
+      }
+      setTimeout(() => {
+        setIsRotating(false);
+        if (svgRef.current) {
+          svgRef.current.style.transition = '';
+        }
+      }, 150);
+    }, 150);
   };
 
   return (
@@ -257,18 +275,23 @@ export function MuscleActivationSVG({
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
+      style={{ perspective: '1000px' }}
     >
-      <BodySvg 
-        ref={svgRef} 
-        className="w-full h-full transition-transform duration-300 ease-in-out" 
-        style={{ transform: `scale(${scale})` }}
+      <BodySvg
+        ref={svgRef}
+        className="w-full h-full transition-transform duration-300 ease-in-out"
+        style={{
+          transform: `scale(${scale})`,
+          transformStyle: 'preserve-3d',
+          backfaceVisibility: 'hidden'
+        }}
       />
 
-      {/* Left Arrow Button */}
+      {/* Left Arrow Button - Show Back */}
       <Button
         variant="ghost"
         size="icon"
-        className={`absolute left-1 top-1/2 -translate-y-1/2 z-20 text-gray-600 hover:text-gray-800 transition-all duration-200 rounded-full border border-gray-200 hover:border-gray-300 hover:bg-gray-50 ${isRotating ? 'animate-spin' : ''}`}
+        className={`absolute left-1 top-1/2 -translate-y-1/2 z-20 text-gray-600 hover:text-blue-600 transition-all duration-300 rounded-full border border-gray-200 hover:border-blue-300 hover:bg-blue-50 hover:shadow-lg transform hover:scale-110 ${isRotating ? 'animate-pulse scale-95' : ''} ${view === 'back' ? 'bg-blue-100 text-blue-600 border-blue-300' : ''}`}
         onClick={(e) => {
           e.stopPropagation();
           handleViewChange('back');
@@ -276,14 +299,14 @@ export function MuscleActivationSVG({
         aria-label="Show Back View"
         disabled={isRotating}
       >
-        <RotateCcw className="h-5 w-5 transform rotate-180" />
+        <RotateCcw className={`h-5 w-5 transform rotate-180 transition-transform duration-300 ${isRotating ? 'rotate-360' : ''}`} />
       </Button>
 
-      {/* Right Arrow Button */}
+      {/* Right Arrow Button - Show Front */}
       <Button
         variant="ghost"
         size="icon"
-        className={`absolute right-1 top-1/2 -translate-y-1/2 z-20 text-gray-600 hover:text-gray-800 transition-all duration-200 rounded-full border border-gray-200 hover:border-gray-300 hover:bg-gray-50 ${isRotating ? 'animate-spin' : ''}`}
+        className={`absolute right-1 top-1/2 -translate-y-1/2 z-20 text-gray-600 hover:text-blue-600 transition-all duration-300 rounded-full border border-gray-200 hover:border-blue-300 hover:bg-blue-50 hover:shadow-lg transform hover:scale-110 ${isRotating ? 'animate-pulse scale-95' : ''} ${view === 'front' ? 'bg-blue-100 text-blue-600 border-blue-300' : ''}`}
         onClick={(e) => {
           e.stopPropagation();
           handleViewChange('front');
@@ -291,7 +314,7 @@ export function MuscleActivationSVG({
         aria-label="Show Front View"
         disabled={isRotating}
       >
-        <RotateCcw className="h-5 w-5" />
+        <RotateCcw className={`h-5 w-5 transition-transform duration-300 ${isRotating ? 'rotate-360' : ''}`} />
       </Button>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>

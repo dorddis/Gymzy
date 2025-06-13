@@ -15,7 +15,6 @@ import { Loader2, Heart } from "lucide-react";
 import { LifestyleTracker } from "@/components/lifestyle/lifestyle-tracker";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { AIRecommendationsPanel } from "@/components/recommendations/ai-recommendations-panel";
 
 export default function HomePage() {
   const { combinedMuscleVolumes } = useWorkout();
@@ -81,9 +80,6 @@ export default function HomePage() {
             </div>
           </div>
           <StatsCardsRow />
-
-          {/* AI Recommendations */}
-          <AIRecommendationsPanel maxRecommendations={3} />
 
           <QuickWorkoutTemplates />
 

@@ -137,6 +137,8 @@ export function AIChatInterface({ onStartWorkout }: AIChatInterfaceProps) {
           workoutId: result.workoutId
         };
 
+        console.log('Workout created successfully:', workoutData);
+
         responseContent = `I've created a ${workoutParams.workoutName} workout for you! Here's what I've prepared:\n\n`;
         result.exercises.forEach((ex: WorkoutExercise, index: number) => {
           responseContent += `${index + 1}. **${ex.name}** - ${ex.sets.length} sets of ${ex.sets[0]?.reps || 8} reps\n`;
@@ -365,7 +367,10 @@ export function AIChatInterface({ onStartWorkout }: AIChatInterfaceProps) {
                 {message.workoutData && (
                   <div className="mt-3">
                     <Button
-                      onClick={() => handleStartWorkout(message.workoutData)}
+                      onClick={() => {
+                        console.log('Start workout clicked:', message.workoutData);
+                        handleStartWorkout(message.workoutData);
+                      }}
                       size="sm"
                       className="bg-green-600 hover:bg-green-700 text-white"
                     >
