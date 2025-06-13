@@ -35,12 +35,17 @@ export function AIWelcomeMessage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastGenerated, setLastGenerated] = useState<Date | null>(null);
   const [motivationContext, setMotivationContext] = useState<MotivationContext | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    if (user?.uid) {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (user?.uid && isClient) {
       generateMotivationContext();
     }
-  }, [user, workouts]);
+  }, [user, workouts, isClient]);
 
   useEffect(() => {
     if (motivationContext) {
@@ -54,7 +59,7 @@ export function AIWelcomeMessage() {
   }, [motivationContext]);
 
   const generateMotivationContext = () => {
-    if (!user) return;
+    if (!user || !isClient) return;
 
     // If workouts is null or undefined, use empty array
     const userWorkouts = workouts || [];
@@ -252,7 +257,7 @@ export function AIWelcomeMessage() {
     return null;
   };
 
-  if (!user) return null;
+  if (!user || !isClient) return null;
 
   return (
     <Card className="mb-6 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">

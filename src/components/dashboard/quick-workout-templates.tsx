@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useWorkout } from '@/contexts/WorkoutContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { EXERCISES } from '@/lib/constants';
 import { Exercise } from '@/types/exercise';
 import { getRecentWorkouts } from '@/services/workout-service';
