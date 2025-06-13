@@ -8,6 +8,7 @@ import { RecentWorkoutsCarousel } from "@/components/dashboard/recent-workouts-c
 import { CommunityFeed } from "@/components/dashboard/community-feed";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { AIWelcomeMessage } from "@/components/dashboard/ai-welcome-message";
+import { QuickWorkoutTemplates } from "@/components/dashboard/quick-workout-templates";
 import { useWorkout } from "@/contexts/WorkoutContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
@@ -75,6 +76,7 @@ export default function HomePage() {
             </div>
           </div>
           <StatsCardsRow />
+          <QuickWorkoutTemplates />
           <RecentWorkoutsCarousel />
           <CommunityFeed />
         </div>
