@@ -205,34 +205,37 @@ export class AIWorkoutToolExecutor {
     console.log('🏋️ WorkoutTool: - exercises:', exercises);
     console.log('🏋️ WorkoutTool: - targetMuscles:', targetMuscles);
 
-    if (!exercises || !Array.isArray(exercises)) {
-      console.warn('⚠️ WorkoutTool: Invalid exercises parameter:', exercises);
-      console.log('🔧 WorkoutTool: Creating default exercises for push workout...');
+    if (!exercises || !Array.isArray(exercises) || exercises.length === 0) {
+      console.warn('⚠️ WorkoutTool: Invalid or empty exercises parameter:', exercises);
+      console.log('🔧 WorkoutTool: Creating default exercises based on workout type...');
 
-      // Create default push workout exercises if none provided
-      exercises = [
-        {
-          exerciseId: 'incline-dumbbell-press',
-          name: 'Incline Dumbbell Press',
-          sets: 3,
-          reps: 10,
-          weight: 0
-        },
-        {
-          exerciseId: 'overhead-press',
-          name: 'Overhead Press',
-          sets: 3,
-          reps: 10,
-          weight: 0
-        },
-        {
-          exerciseId: 'close-grip-bench-press',
-          name: 'Close-Grip Bench Press',
-          sets: 3,
-          reps: 10,
-          weight: 0
-        }
-      ];
+      // Determine workout type from parameters
+      const workoutType = params.workout_type || params.goal || 'general';
+      console.log('🔧 WorkoutTool: Detected workout type:', workoutType);
+
+      // Create appropriate default exercises based on workout type
+      if (workoutType.toLowerCase().includes('push') || workoutType.toLowerCase().includes('chest')) {
+        exercises = [
+          { name: 'Push-up', sets: 3, reps: 10, weight: 0 },
+          { name: 'Incline Dumbbell Press', sets: 3, reps: 8, weight: 0 },
+          { name: 'Overhead Press', sets: 3, reps: 8, weight: 0 }
+        ];
+      } else if (workoutType.toLowerCase().includes('pull') || workoutType.toLowerCase().includes('back')) {
+        exercises = [
+          { name: 'Pull-up', sets: 3, reps: 8, weight: 0 },
+          { name: 'Dumbbell Row', sets: 3, reps: 10, weight: 0 }
+        ];
+      } else if (workoutType.toLowerCase().includes('leg')) {
+        exercises = [
+          { name: 'Squat', sets: 3, reps: 10, weight: 0 },
+          { name: 'Lunge', sets: 3, reps: 10, weight: 0 }
+        ];
+      } else {
+        // Default single exercise for simple requests
+        exercises = [
+          { name: 'Push-up', sets: 3, reps: 10, weight: 0 }
+        ];
+      }
 
       console.log('🔧 WorkoutTool: Default exercises created:', JSON.stringify(exercises, null, 2));
     } else {
@@ -248,12 +251,48 @@ export class AIWorkoutToolExecutor {
       console.log(`🔍 WorkoutTool: Exercise lookup by ID '${ex.exerciseId}':`, exerciseData ? 'FOUND' : 'NOT FOUND');
 
       if (!exerciseData && ex.name) {
-        // Try to find by name (case insensitive)
+        // Try exact name match first
         exerciseData = EXERCISES.find(e =>
-          e.name.toLowerCase().includes(ex.name.toLowerCase()) ||
-          ex.name.toLowerCase().includes(e.name.toLowerCase())
+          e.name.toLowerCase() === ex.name.toLowerCase()
         );
-        console.log(`🔍 WorkoutTool: Exercise lookup by name '${ex.name}':`, exerciseData ? 'FOUND' : 'NOT FOUND');
+
+        if (!exerciseData) {
+          // Try partial name match
+          exerciseData = EXERCISES.find(e =>
+            e.name.toLowerCase().includes(ex.name.toLowerCase()) ||
+            ex.name.toLowerCase().includes(e.name.toLowerCase())
+          );
+        }
+
+        if (!exerciseData) {
+          // Try to find by common exercise name mappings
+          const exerciseNameMappings: { [key: string]: string } = {
+            'push-ups': 'push-up',
+            'pushups': 'push-up',
+            'push ups': 'push-up',
+            'squats': 'squat',
+            'pull-ups': 'pull-up',
+            'pullups': 'pull-up',
+            'pull ups': 'pull-up',
+            'dumbbell row': 'dumbbell-row',
+            'dumbbell rows': 'dumbbell-row',
+            'db row': 'dumbbell-row',
+            'barbell row': 'barbell-row',
+            'barbell rows': 'barbell-row',
+            'overhead press': 'overhead-press',
+            'incline dumbbell press': 'incline-dumbbell-press',
+            'bench press': 'bench-press',
+            'chest press': 'bench-press'
+          };
+
+          const mappedName = exerciseNameMappings[ex.name.toLowerCase()];
+          if (mappedName) {
+            exerciseData = EXERCISES.find(e => e.id === mappedName);
+            console.log(`🔍 WorkoutTool: Found exercise via mapping '${ex.name}' -> '${mappedName}':`, exerciseData ? exerciseData.name : 'NOT FOUND');
+          }
+        }
+
+        console.log(`🔍 WorkoutTool: Exercise lookup by name '${ex.name}':`, exerciseData ? `FOUND: ${exerciseData.name}` : 'NOT FOUND');
       }
 
       if (!exerciseData) {

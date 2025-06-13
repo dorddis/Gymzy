@@ -14,8 +14,7 @@ import {
   deleteChatSession,
   ChatSession
 } from '@/services/chat-history-service';
-import { sendChatMessage } from '@/services/ai-chat-service';
-import { executeAITool } from '@/services/ai-workout-tools';
+import { sendStreamingChatMessage } from '@/services/ai-chat-service';
 import { useWorkout } from '@/contexts/WorkoutContext';
 
 interface ChatMessage {
@@ -173,22 +172,47 @@ function ChatContent() {
         userId: user.uid
       }));
 
-      console.log('💬 ChatPage: Sending message to AI service...');
-      const aiResponse = await sendChatMessage(user.uid, messageToSend, conversationHistory);
-      console.log('💬 ChatPage: AI response received:', aiResponse);
+      console.log('💬 ChatPage: Sending message to AI service with streaming...');
+
+      // Create a placeholder message for streaming
+      const streamingMessage: ChatMessage = {
+        role: 'assistant',
+        content: '',
+        timestamp: new Date()
+      };
+
+      setMessages(prev => [...prev, streamingMessage]);
+
+      let fullStreamedContent = '';
+
+      const aiResponse = await sendStreamingChatMessage(
+        user.uid,
+        messageToSend,
+        conversationHistory,
+        (chunk: string) => {
+          fullStreamedContent += chunk;
+          console.log('💬 ChatPage: Received streaming chunk:', chunk);
+
+          // Update the streaming message with new content
+          setMessages(prev => prev.map((msg, index) =>
+            index === prev.length - 1 && msg.role === 'assistant' && msg.content.length <= fullStreamedContent.length
+              ? { ...msg, content: fullStreamedContent }
+              : msg
+          ));
+        }
+      );
+
+      console.log('💬 ChatPage: AI streaming response completed:', aiResponse);
 
       if (aiResponse.success) {
-        await saveChatMessage(targetSessionId, 'assistant', aiResponse.message);
+        await saveChatMessage(targetSessionId, 'assistant', fullStreamedContent);
 
-        const newMessage: ChatMessage = {
-          role: 'assistant',
-          content: aiResponse.message,
-          timestamp: new Date(),
-          workoutData: aiResponse.workoutData
-        };
-
-        console.log('💬 ChatPage: Adding AI message with workout data:', newMessage);
-        setMessages(prev => [...prev, newMessage]);
+        // Update the final message with workout data
+        setMessages(prev => prev.map((msg, index) =>
+          index === prev.length - 1 && msg.role === 'assistant'
+            ? { ...msg, content: fullStreamedContent, workoutData: aiResponse.workoutData }
+            : msg
+        ));
       }
       
       await loadChatSessions();

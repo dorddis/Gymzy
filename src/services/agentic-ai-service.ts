@@ -210,7 +210,14 @@ export class AgenticAIService {
   }
 
   private buildSystemPrompt(): string {
-    return `You are Gymzy, an advanced AI fitness coach and personal trainer. You are an agentic AI system with access to powerful tools for creating workouts, searching exercises, and providing personalized fitness guidance.
+    return `You are Gymzy, an advanced AI fitness coach and personal trainer with a friendly, helpful personality. You are an agentic AI system with access to powerful tools for creating workouts, searching exercises, and providing personalized fitness guidance.
+
+PERSONALITY & BEHAVIOR:
+- You are friendly, encouraging, and supportive
+- You can answer general questions and have casual conversations
+- You're knowledgeable about fitness, nutrition, wellness, and general topics
+- You maintain a positive, motivational tone
+- You can discuss non-fitness topics but always try to relate them back to health and wellness when appropriate
 
 Your capabilities include:
 - Creating custom workouts with specific exercises, sets, and reps
@@ -218,29 +225,76 @@ Your capabilities include:
 - Suggesting workout plans based on goals and experience
 - Providing form tips, nutrition advice, and motivation
 - Analyzing workout data and providing insights
+- Having friendly conversations about various topics
 
-You should:
-- Be encouraging, motivational, and supportive
-- Provide detailed, actionable advice
-- Use tools when appropriate to enhance your responses
-- Format responses clearly with markdown for better readability
-- Always prioritize user safety and proper form
-- Adapt recommendations based on user's experience level and goals
+IMPORTANT WORKOUT CREATION RULES:
+- ALWAYS specify real exercise names (e.g., "Push-ups", "Bench Press", "Squats")
+- NEVER use generic names like "Exercise 1" or "Exercise 2"
+- Use exercises from the database when possible
+- For chest workouts, use exercises like: Push-ups, Bench Press, Incline Dumbbell Press, Chest Flyes
+- For leg workouts, use exercises like: Squats, Lunges, Deadlifts, Leg Press
+- For back workouts, use exercises like: Pull-ups, Rows, Lat Pulldowns
+- Be specific with exercise names and include proper form cues
+
+RESPONSE FORMAT RULES:
+- Keep responses concise and well-formatted
+- Use markdown formatting for better readability
+- Focus on the workout details, not lengthy explanations
+- Include a clear "Start Workout" call-to-action when creating workouts
+- For non-fitness questions, provide helpful answers while maintaining your fitness coach personality
 
 Available tools: ${this.availableTools.map(tool => `${tool.name}: ${tool.description}`).join(', ')}`;
   }
 
   private buildContextualPrompt(userInput: string, chatHistory: ChatMessage[]): string {
-    const recentHistory = chatHistory.slice(-5).map(msg => 
+    let prompt = `Current user request: ${userInput}\n\n`;
+
+    // Add user profile context if available
+    try {
+      const userProfile = this.getUserProfileContext();
+      if (userProfile) {
+        prompt += `User Profile Context:\n${userProfile}\n\n`;
+      }
+    } catch (error) {
+      console.log('🔍 AgenticAI: Could not load user profile context:', error);
+    }
+
+    const recentHistory = chatHistory.slice(-5).map(msg =>
       `${msg.role}: ${msg.content}`
     ).join('\n');
-    
-    return `Recent conversation:
-${recentHistory}
 
-Current user request: ${userInput}
+    if (recentHistory) {
+      prompt += `Recent conversation:\n${recentHistory}\n\n`;
+    }
 
-Please analyze this request and provide a helpful response. Use tools when appropriate to enhance your answer.`;
+    prompt += `Please analyze this request and provide a helpful response. Use tools when appropriate to enhance your answer. Use the user profile context to personalize your response when creating workouts.`;
+
+    return prompt;
+  }
+
+  private getUserProfileContext(): string | null {
+    try {
+      // Try to get user profile from localStorage
+      const userProfileStr = localStorage.getItem('userProfile');
+      if (userProfileStr) {
+        const userProfile = JSON.parse(userProfileStr);
+
+        let context = `User Profile Information:\n`;
+        if (userProfile.fitnessLevel) context += `- Fitness Level: ${userProfile.fitnessLevel}\n`;
+        if (userProfile.goals) context += `- Goals: ${userProfile.goals.join(', ')}\n`;
+        if (userProfile.preferredWorkoutTypes) context += `- Preferred Workouts: ${userProfile.preferredWorkoutTypes.join(', ')}\n`;
+        if (userProfile.availableEquipment) context += `- Available Equipment: ${userProfile.availableEquipment.join(', ')}\n`;
+        if (userProfile.workoutFrequency) context += `- Workout Frequency: ${userProfile.workoutFrequency}\n`;
+        if (userProfile.timePerWorkout) context += `- Time Per Workout: ${userProfile.timePerWorkout}\n`;
+        if (userProfile.injuries) context += `- Injuries/Limitations: ${userProfile.injuries.join(', ')}\n`;
+
+        return context;
+      }
+    } catch (error) {
+      console.log('🔍 AgenticAI: Error loading user profile:', error);
+    }
+
+    return null;
   }
 
   private async getToolDecision(prompt: string): Promise<{
@@ -273,6 +327,24 @@ If no tools are needed, return an empty toolCalls array.`;
         console.log('🔍 AgenticAI: Found JSON in response:', jsonMatch[0]);
         const parsed = JSON.parse(jsonMatch[0]);
         console.log('🔍 AgenticAI: Parsed tool decision:', JSON.stringify(parsed, null, 2));
+
+        // Validate and enhance tool calls for workout creation
+        if (parsed.toolCalls) {
+          parsed.toolCalls = parsed.toolCalls.map((toolCall: any) => {
+            if (toolCall.name === 'create_workout') {
+              // Ensure exercises are properly specified
+              if (!toolCall.parameters.exercises || !Array.isArray(toolCall.parameters.exercises)) {
+                console.log('🔧 AgenticAI: Fixing missing exercises in tool call...');
+                // Add default exercises based on workout type
+                const workoutType = toolCall.parameters.workout_type || 'general';
+                toolCall.parameters.exercises = this.getDefaultExercisesForWorkoutType(workoutType);
+                console.log('🔧 AgenticAI: Added default exercises:', toolCall.parameters.exercises);
+              }
+            }
+            return toolCall;
+          });
+        }
+
         return parsed;
       }
 
@@ -286,12 +358,12 @@ If no tools are needed, return an empty toolCalls array.`;
   }
 
   private buildFinalResponsePrompt(
-    userInput: string, 
-    toolResults: any[], 
+    userInput: string,
+    toolResults: any[],
     reasoning: string
   ): string {
     let prompt = `Based on the user's request: "${userInput}"\n\n`;
-    
+
     if (toolResults.length > 0) {
       prompt += `I've executed the following tools:\n`;
       toolResults.forEach(tool => {
@@ -299,10 +371,19 @@ If no tools are needed, return an empty toolCalls array.`;
       });
       prompt += `\n`;
     }
-    
+
     prompt += `Reasoning: ${reasoning}\n\n`;
-    prompt += `Please provide a comprehensive, well-formatted response using markdown. Be encouraging and helpful. If you created a workout, explain the exercises and offer to start the workout.`;
-    
+    prompt += `RESPONSE REQUIREMENTS:
+- Keep response concise (max 200 words)
+- Use clear markdown formatting
+- Focus on the workout details, not lengthy explanations
+- If you created a workout, list the exercises clearly
+- End with "Ready to start your workout?" if a workout was created
+- Be encouraging but brief
+- Use bullet points and headers for clarity
+
+Please provide a well-formatted response following these requirements.`;
+
     return prompt;
   }
 
@@ -330,6 +411,37 @@ If no tools are needed, return an empty toolCalls array.`;
       console.log('🔄 AgenticAI: Fallback response length:', fallbackResult.length);
 
       return fallbackResult;
+    }
+  }
+
+  private getDefaultExercisesForWorkoutType(workoutType: string): any[] {
+    const workoutTypeLower = workoutType.toLowerCase();
+
+    if (workoutTypeLower.includes('push') || workoutTypeLower.includes('chest')) {
+      return [
+        { name: 'Push-ups', sets: 3, reps: 10, weight: 0 },
+        { name: 'Incline Dumbbell Press', sets: 3, reps: 8, weight: 0 },
+        { name: 'Overhead Press', sets: 3, reps: 8, weight: 0 }
+      ];
+    } else if (workoutTypeLower.includes('pull') || workoutTypeLower.includes('back')) {
+      return [
+        { name: 'Pull-up', sets: 3, reps: 8, weight: 0 },
+        { name: 'Dumbbell Row', sets: 3, reps: 10, weight: 0 },
+        { name: 'Lat Pulldown', sets: 3, reps: 10, weight: 0 }
+      ];
+    } else if (workoutTypeLower.includes('leg') || workoutTypeLower.includes('squat')) {
+      return [
+        { name: 'Squats', sets: 3, reps: 10, weight: 0 },
+        { name: 'Lunges', sets: 3, reps: 10, weight: 0 },
+        { name: 'Leg Press', sets: 3, reps: 12, weight: 0 }
+      ];
+    } else {
+      // Default full body workout
+      return [
+        { name: 'Push-ups', sets: 3, reps: 10, weight: 0 },
+        { name: 'Squats', sets: 3, reps: 10, weight: 0 },
+        { name: 'Dumbbell Row', sets: 3, reps: 10, weight: 0 }
+      ];
     }
   }
 }

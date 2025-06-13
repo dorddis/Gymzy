@@ -1,5 +1,4 @@
 import { getAIPersonalityProfile, generateAIContext } from './ai-personality-service';
-import { AgenticAIService } from './agentic-ai-service';
 
 // Google AI Studio Configuration
 const GOOGLE_AI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
@@ -22,6 +21,16 @@ export interface ChatResponse {
     workoutId: string;
   };
   isStreaming?: boolean;
+}
+
+export interface StreamingChatResponse {
+  success: boolean;
+  error?: string;
+  toolCalls?: any[];
+  workoutData?: {
+    exercises: any[];
+    workoutId: string;
+  };
 }
 
 // Get Google AI API Key from environment
@@ -87,30 +96,37 @@ export const sendChatMessage = async (
     console.log('💬 ChatService: Message:', message);
     console.log('💬 ChatService: History length:', conversationHistory.length);
 
-    // Initialize the agentic AI service
-    const agenticAI = new AgenticAIService();
+    // Import and use production agentic service
+    const { productionAgenticService } = await import('./production-agentic-service');
 
-    // Convert conversation history to the format expected by agentic AI
+    // Convert conversation history to the format expected by production AI
     const chatHistory = conversationHistory.map((msg, index) => ({
       id: msg.id || `msg_${index}`,
       role: msg.role as 'user' | 'assistant',
       content: msg.content,
       timestamp: msg.timestamp,
-      userId: msg.userId
+      userId: msg.userId || userId // Use current userId as fallback
     }));
 
-    console.log('🤖 ChatService: Calling agentic AI service...');
+    console.log('🤖 ChatService: Calling production agentic AI service...');
 
-    // Call the agentic AI service (without streaming for now)
-    const result = await agenticAI.generateAgenticResponse(
+    // Call the production agentic AI service with streaming enabled
+    let streamedContent = '';
+    const result = await productionAgenticService.generateAgenticResponse(
       message,
-      chatHistory
+      chatHistory,
+      (chunk: string) => {
+        streamedContent += chunk;
+        console.log('🌊 ChatService: Received streaming chunk:', chunk);
+      }
     );
 
-    console.log('✅ ChatService: Agentic AI response received');
+    console.log('✅ ChatService: Production AI response received');
     console.log('✅ ChatService: Response length:', result.content.length);
     console.log('✅ ChatService: Tool calls:', result.toolCalls?.length || 0);
     console.log('✅ ChatService: Has workout data:', !!result.workoutData);
+    console.log('✅ ChatService: Confidence:', result.confidence);
+    console.log('✅ ChatService: Execution time:', result.metadata?.executionTime, 'ms');
 
     return {
       message: result.content,
@@ -127,6 +143,66 @@ export const sendChatMessage = async (
     // Return a fallback response
     return {
       message: "I'm having trouble connecting right now, but I'm here to help with your fitness journey! Try asking me about workouts, nutrition, or motivation.",
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
+};
+
+// Send message to AI with streaming support using production system
+export const sendStreamingChatMessage = async (
+  userId: string,
+  message: string,
+  conversationHistory: ChatMessage[] = [],
+  onStreamChunk?: (chunk: string) => void
+): Promise<StreamingChatResponse> => {
+  try {
+    console.log('💬 ChatService: ===== SENDING STREAMING CHAT MESSAGE (PRODUCTION) =====');
+    console.log('💬 ChatService: User ID:', userId);
+    console.log('💬 ChatService: Message:', message);
+    console.log('💬 ChatService: History length:', conversationHistory.length);
+    console.log('💬 ChatService: Streaming enabled:', !!onStreamChunk);
+
+    // Import production agentic service
+    const { productionAgenticService } = await import('./production-agentic-service');
+
+    // Convert conversation history to the format expected by production AI
+    const chatHistory = conversationHistory.map((msg, index) => ({
+      id: msg.id || `msg_${index}`,
+      role: msg.role as 'user' | 'assistant',
+      content: msg.content,
+      timestamp: msg.timestamp,
+      userId: msg.userId || userId // Use current userId as fallback
+    }));
+
+    console.log('🤖 ChatService: Calling production agentic AI service...');
+
+    // Call the production agentic AI service with streaming enabled
+    const result = await productionAgenticService.generateAgenticResponse(
+      message,
+      chatHistory,
+      onStreamChunk
+    );
+
+    console.log('✅ ChatService: Production AI response received');
+    console.log('✅ ChatService: Response length:', result.content.length);
+    console.log('✅ ChatService: Tool calls:', result.toolCalls?.length || 0);
+    console.log('✅ ChatService: Has workout data:', !!result.workoutData);
+    console.log('✅ ChatService: Confidence:', result.confidence);
+    console.log('✅ ChatService: Execution time:', result.metadata?.executionTime, 'ms');
+
+    return {
+      success: true,
+      toolCalls: result.toolCalls,
+      workoutData: result.workoutData
+    };
+
+  } catch (error) {
+    console.error('❌ ChatService: Error sending streaming chat message:', error);
+    console.error('❌ ChatService: Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+
+    // Return a fallback response
+    return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error'
     };
