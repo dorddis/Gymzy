@@ -28,7 +28,7 @@ export function CommunityFeed() {
           variant="ghost"
           size="sm"
           onClick={handleViewAll}
-          className="text-blue-600 hover:text-blue-800 text-sm p-0 h-auto font-medium"
+          className="text-secondary hover:text-secondary/80 text-sm p-0 h-auto font-medium"
         >
           View All
         </Button>
@@ -57,7 +57,7 @@ export function CommunityFeed() {
               variant="ghost"
               size="sm"
               onClick={() => handleLike(post.id)}
-              className="flex items-center p-1 h-auto text-gray-500 hover:text-red-500"
+              className="flex items-center p-1 h-auto text-gray-600 hover:text-red-500"
             >
               <Heart className={`mr-1 w-4 h-4 ${likedPosts[post.id] ? 'fill-current text-red-500' : ''}`} />
               {post.likes + (likedPosts[post.id] ? 1 : 0)}
@@ -66,7 +66,7 @@ export function CommunityFeed() {
               variant="ghost"
               size="sm"
               onClick={() => console.log('Comment on post:', post.id)}
-              className="flex items-center p-1 h-auto text-gray-500 hover:text-blue-500"
+              className="flex items-center p-1 h-auto text-gray-600 hover:text-blue-500"
             >
               <MessageSquare className="mr-1 w-4 h-4" /> {post.comments}
             </Button>
@@ -74,7 +74,7 @@ export function CommunityFeed() {
               variant="ghost"
               size="sm"
               onClick={() => console.log('Share post:', post.id)}
-              className="flex items-center p-1 h-auto text-gray-500 hover:text-green-500"
+              className="flex items-center p-1 h-auto text-gray-600 hover:text-green-500"
             >
               <Share2 className="w-4 h-4" />
             </Button>

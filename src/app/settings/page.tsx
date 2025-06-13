@@ -11,6 +11,9 @@ import { ProfilePictureService } from '@/services/profile-picture-service';
 import { OnboardingContextService, OnboardingContext } from '@/services/onboarding-context-service';
 import { FitnessGoalsEditor } from '@/components/settings/fitness-goals-editor';
 import { EquipmentManager } from '@/components/settings/equipment-manager';
+import { ScheduleBuilder } from '@/components/settings/schedule-builder';
+import { HealthInfoManager } from '@/components/settings/health-info-manager';
+import { PhysicalStatsManager } from '@/components/settings/physical-stats-manager';
 import { 
   ArrowLeft, 
   User, 
@@ -124,10 +127,14 @@ export default function SettingsPage() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="profile" className="flex items-center gap-2">
               <User className="h-4 w-4" />
               <span className="hidden sm:inline">Profile</span>
+            </TabsTrigger>
+            <TabsTrigger value="physical" className="flex items-center gap-2">
+              <SettingsIcon className="h-4 w-4" />
+              <span className="hidden sm:inline">Physical</span>
             </TabsTrigger>
             <TabsTrigger value="goals" className="flex items-center gap-2">
               <Target className="h-4 w-4" />
@@ -223,34 +230,22 @@ export default function SettingsPage() {
             />
           </TabsContent>
 
+          <TabsContent value="physical" className="space-y-6">
+            <PhysicalStatsManager />
+          </TabsContent>
+
           <TabsContent value="schedule" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Workout Schedule</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-gray-500">
-                  <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                  <p>Schedule settings coming soon!</p>
-                  <p className="text-sm">You'll be able to customize your workout schedule here.</p>
-                </div>
-              </CardContent>
-            </Card>
+            <ScheduleBuilder
+              context={onboardingContext}
+              onUpdate={setOnboardingContext}
+            />
           </TabsContent>
 
           <TabsContent value="health" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Health & Medical Information</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-gray-500">
-                  <Heart className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                  <p>Health settings coming soon!</p>
-                  <p className="text-sm">You'll be able to update your health information here.</p>
-                </div>
-              </CardContent>
-            </Card>
+            <HealthInfoManager
+              context={onboardingContext}
+              onUpdate={setOnboardingContext}
+            />
           </TabsContent>
 
           <TabsContent value="app" className="space-y-6">
