@@ -2,7 +2,7 @@ import React, { useState, useMemo, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 // Removed: import { AddWorkoutModal } from '@/components/dashboard/add-workout-modal';
 import { Exercise, ExerciseWithSets } from '@/types/exercise';
-import { Plus, MoreVertical, HelpCircle, Trash2, Info, ArrowRight } from 'lucide-react';
+import { Plus, MoreVertical, HelpCircle, Trash2, Info, ArrowRight, Link } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 // import { ScrollArea } from '@/components/ui/scroll-area'; // Remove ScrollArea import
@@ -32,6 +32,8 @@ import {
 } from "@/components/ui/tooltip";
 import { AlertTriangle, ArrowDown, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { SupersetCreator } from './superset-creator';
+import { SupersetDisplay } from './superset-display';
 
 interface WorkoutSummaryScreenProps {
   showIncompleteSetsWarning: boolean;
@@ -55,6 +57,7 @@ export function WorkoutSummaryScreen({
   const [exerciseToDeleteIndex, setExerciseToDeleteIndex] = React.useState<number | null>(null);
   const [deletingExerciseId, setDeletingExerciseId] = React.useState<string | null>(null);
   const [expandedNotesExerciseId, setExpandedNotesExerciseId] = React.useState<string | null>(null);
+  const [showSupersetCreator, setShowSupersetCreator] = React.useState(false);
 
   // Calculate total sets
   const totalSets = React.useMemo(() => 
@@ -207,6 +210,43 @@ export function WorkoutSummaryScreen({
     setExpandedNotesExerciseId(prevId => (prevId === exerciseId ? null : exerciseId));
   };
 
+  const handleCreateSuperset = (exerciseIds: string[], parameters: any) => {
+    const supersetGroupId = `superset_${Date.now()}`;
+
+    setCurrentWorkoutExercises((prevExercises: ExerciseWithSets[]) => {
+      return prevExercises.map(exercise => {
+        if (exerciseIds.includes(exercise.id)) {
+          return {
+            ...exercise,
+            specialSetType: 'superset' as const,
+            specialSetGroup: supersetGroupId,
+            specialSetParameters: parameters
+          };
+        }
+        return exercise;
+      });
+    });
+  };
+
+  // Group exercises by superset
+  const groupedExercises = React.useMemo(() => {
+    const groups: { [key: string]: ExerciseWithSets[] } = {};
+    const standalone: ExerciseWithSets[] = [];
+
+    currentWorkoutExercises.forEach(exercise => {
+      if (exercise.specialSetGroup) {
+        if (!groups[exercise.specialSetGroup]) {
+          groups[exercise.specialSetGroup] = [];
+        }
+        groups[exercise.specialSetGroup].push(exercise);
+      } else {
+        standalone.push(exercise);
+      }
+    });
+
+    return { groups, standalone };
+  }, [currentWorkoutExercises]);
+
   return (
     <div className="space-y-6">
       <AnimatePresence>
@@ -279,8 +319,45 @@ export function WorkoutSummaryScreen({
       {currentWorkoutExercises.length === 0 ? (
         <p className="text-center text-gray-500">No exercises added yet. Click "Add Exercise" to start!</p>
       ) : (
+        <>
+          {/* Superset Creation Button */}
+          {currentWorkoutExercises.length >= 2 && (
+            <div className="flex justify-center mb-4">
+              <Button
+                variant="outline"
+                onClick={() => setShowSupersetCreator(true)}
+                className="flex items-center gap-2 border-blue-200 text-blue-600 hover:bg-blue-50"
+              >
+                <Link className="h-4 w-4" />
+                Create Superset
+              </Button>
+            </div>
+          )}
+        </>
+      )}
+
+      {currentWorkoutExercises.length > 0 && (
         <div className="space-y-4"> {/* Reduced vertical spacing between exercises */}
-          {currentWorkoutExercises.map((exercise, exerciseIndex) => (
+          {/* Render Supersets */}
+          {Object.entries(groupedExercises.groups).map(([groupId, exercises]) => (
+            <SupersetDisplay
+              key={groupId}
+              exercises={exercises}
+              groupId={groupId}
+              onSetExecuted={(exerciseIndex, setIndex) => {
+                const globalExerciseIndex = currentWorkoutExercises.findIndex(ex => ex.id === exercises[exerciseIndex].id);
+                if (globalExerciseIndex !== -1) {
+                  handleSetExecuted(globalExerciseIndex, setIndex);
+                }
+              }}
+              className="mb-4"
+            />
+          ))}
+
+          {/* Render Standalone Exercises */}
+          {groupedExercises.standalone.map((exercise) => {
+            const exerciseIndex = currentWorkoutExercises.findIndex(ex => ex.id === exercise.id);
+            return (
             <div 
               key={exercise.id}
               className={`bg-white rounded-xl shadow-sm p-3 border border-gray-200 transition-all duration-300 ease-in-out
@@ -415,8 +492,18 @@ export function WorkoutSummaryScreen({
                 ))}
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
+      )}
+
+      {/* Superset Creator Modal */}
+      {showSupersetCreator && (
+        <SupersetCreator
+          exercises={currentWorkoutExercises.filter(ex => !ex.specialSetGroup)}
+          onCreateSuperset={handleCreateSuperset}
+          onClose={() => setShowSupersetCreator(false)}
+        />
       )}
 
       <Dialog open={isConfirmDeleteOpen} onOpenChange={setIsConfirmDeleteOpen}>

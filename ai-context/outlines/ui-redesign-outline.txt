@@ -12,7 +12,12 @@ This document is the single source of truth for the AI agent. It contains:
 ## 1. Progress Tracker  
 Mark each step complete by changing `[ ]` to `[x]`.
 
-[x] 0. Integrate AI Agent Chat Interface 
+[x] 0. Integrate AI Agent Chat Interface
+- [x] Implement robust agentic AI system with tool decision making
+- [x] Add streaming response capability with typing indicators
+- [x] Integrate ReactMarkdown for proper message formatting
+- [x] Replace simple pattern matching with intelligent tool selection
+- [x] Add proper error handling and fallback responses
 [x] 1. Analyze Codebase  
 [x] 2. Configure Design System  
 [x] 3. Build Header (Status Bar)  
@@ -44,10 +49,12 @@ Mark each step complete by changing `[ ]` to `[x]`.
 - Do not display targeted muscle groups separately as they are shown in the svg
 - Add ability to reorder exercises
 [x] 11.4. Finish Workout Modal
-- Add date/time picker
-- Implement notes textarea
-- Add media upload functionality
-- Add public/private toggle
+- [x] Add date/time picker
+- [x] Implement notes textarea
+- [x] Add media upload functionality
+- [x] Add public/private toggle
+- [x] Fix UI styling issues (date selector outline, notes outline, optional labels)
+- [x] Improve public workout toggle visibility
 [x] 11.5. State Management & Data Flow
 - Implement proper state management for multi-step flow
 - [x] Add validation for all inputs
@@ -140,17 +147,6 @@ Mark each step complete by changing `[ ]` to `[x]`.
   6. Security measures are properly implemented
   7. Documentation is complete and accurate
 
-### Step 16: Address Photo Upload Error During Workout Save
-- **Goal:** Investigate and fix the error encountered during photo upload when saving a workout.
-- **Inputs:** Error logs, workout saving process, media upload service.
-- **Tasks:**
-  - Replicate the photo upload error during workout saving.
-  - Review relevant code in the workout saving and media upload logic (e.g., in `src/contexts/WorkoutContext.tsx`, `src/services/workout-service.ts`, and `MediaUpload.tsx`).
-  - Implement robust error handling and retry mechanisms for photo uploads.
-  - Provide clear user feedback on upload status or failures.
-  - Test the photo upload functionality thoroughly.
-- **Output:** Photo upload during workout save is stable and error-free.
-
 ### Step 17: Implement Consistent Header/Footer Styling & Back Navigation
 - **Goal:** Establish a consistent header/footer design across the app (referencing Instagram) and implement back navigation on the Stats page.
 - **Inputs:** `src/app/stats/page.tsx`, `StatusBar` component, routing configuration.
@@ -163,11 +159,49 @@ Mark each step complete by changing `[ ]` to `[x]`.
 - **Output:** Updated `ui-redesign-outline.txt` with consistent header/footer strategy, and the Stats page header is replaced with a back arrow.
 
 
-[ ] 15. Review & Polish
+### Step 16: Implement Advanced Workout Features
+- **Goal:** Add special sets functionality and improve workout experience
+- **Inputs:** Special sets outline, workout context, exercise components
+- **Tasks:**
+  - [ ] Implement basic superset functionality
+  - [ ] Add circuit training support
+  - [ ] Create drop set implementation
+  - [ ] Add rest-pause sets
+  - [ ] Implement cluster sets
+  - [ ] Add tempo control for exercises
+- **Output:** Enhanced workout creation with advanced set types
+
+### Step 17: Implement Payment Plans & Subscription System
+- **Goal:** Add monetization with Free, Plus, and Pro tiers
+- **Inputs:** Payment plans outline, Stripe integration
+- **Tasks:**
+  - [ ] Set up Stripe payment processing
+  - [ ] Implement subscription management
+  - [ ] Create pricing page UI
+  - [ ] Add feature gating system
+  - [ ] Implement usage tracking
+  - [ ] Add account management interface
+- **Output:** Complete subscription system with payment processing
+
+### Step 18: Enhanced AI Features
+- **Goal:** Improve AI capabilities and user experience
+- **Tasks:**
+  - [x] Implement agentic AI system with tool decision making
+  - [x] Add streaming responses with proper formatting
+  - [ ] Add workout analysis and recommendations
+  - [ ] Implement AI-powered form checking
+  - [ ] Add nutrition guidance integration
+  - [ ] Create personalized workout suggestions
+- **Output:** Advanced AI coaching capabilities
+
+[ ] 19. Review & Polish
   - **Goal:** Final quality pass, visual consistency, and new UI enhancements.
-  - **Tasks:**  
-    - Test responsiveness on mobile (390×844).  
-    - Verify color, typography, spacing per design. 
+  - **Tasks:**
+    - Test responsiveness on mobile (390×844).
+    - Verify color, typography, spacing per design.
+    - Performance optimization
+    - Security audit
+    - User testing and feedback integration
 
 ---
 

@@ -25,4 +25,13 @@ export interface ExerciseWithSets extends Exercise {
   sets: ExerciseSet[];
   notes?: string;
   order?: number;
-} 
+  specialSetType?: 'superset' | 'circuit' | 'dropset' | 'restpause' | 'cluster' | 'tempo';
+  specialSetGroup?: string; // ID to group exercises in the same special set
+  specialSetParameters?: {
+    restBetweenExercises?: number;
+    restBetweenSets?: number;
+    rounds?: number;
+    tempo?: string;
+    dropPercentages?: number[];
+  };
+}
