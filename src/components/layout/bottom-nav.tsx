@@ -11,7 +11,7 @@ export function BottomNav() {
   const navItems = [
     { id: 'home', label: 'Home', icon: Home, href: '/' },
     { id: 'stats', label: 'Stats', icon: BarChart2, href: '/stats' },
-    { id: 'social', label: 'Social', icon: Users, href: '/social' },
+    { id: 'discover', label: 'Discover', icon: Users, href: '/discover' },
     { id: 'workout', label: 'Workout', icon: Dumbbell, href: '/workout' },
     { id: 'chat', label: 'Chat', icon: MessageSquare, href: '/chat' },
   ];

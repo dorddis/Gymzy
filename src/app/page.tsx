@@ -1,5 +1,6 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { StatusBar } from "@/components/layout/header";
 import { HeatmapCard } from "@/components/dashboard/heatmap-card";
 import { StatsCardsRow } from "@/components/dashboard/stats-cards-row";
@@ -7,9 +8,52 @@ import { RecentWorkoutsCarousel } from "@/components/dashboard/recent-workouts-c
 import { CommunityFeed } from "@/components/dashboard/community-feed";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { useWorkout } from "@/contexts/WorkoutContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { Loader2 } from "lucide-react";
 
 export default function HomePage() {
   const { combinedMuscleVolumes } = useWorkout();
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  // Handle authentication and onboarding routing
+  useEffect(() => {
+    console.log('HomePage: Routing check', {
+      loading,
+      user: !!user,
+      hasProfile: !!user?.profile,
+      hasCompletedOnboarding: user?.profile?.hasCompletedOnboarding
+    });
+
+    if (!loading) {
+      if (!user) {
+        console.log('HomePage: No user, redirecting to auth');
+        router.replace('/auth');
+      } else if (user.profile === undefined) {
+        console.log('HomePage: Profile is undefined, waiting for profile to load');
+        // Don't redirect yet, wait for profile to load
+      } else if (user.profile && !user.profile.hasCompletedOnboarding) {
+        console.log('HomePage: User has not completed onboarding, redirecting');
+        router.replace('/onboarding');
+      } else {
+        console.log('HomePage: User is authenticated and onboarded, staying on home');
+      }
+    }
+  }, [user, loading, router]);
+
+  // Show loading while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  // Don't render if user is not authenticated or hasn't completed onboarding
+  if (!user || !user.profile?.hasCompletedOnboarding) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col pb-16">

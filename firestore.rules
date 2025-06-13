@@ -6,23 +6,77 @@
         // DO NOT use these in a production environment without significant modification!
 
         match /workouts/{workoutId} {
-          allow read: if request.auth != null && 
+          allow read: if request.auth != null &&
             (resource.data.userId == request.auth.uid || resource.data.isPublic);
-          allow create: if request.auth != null && 
+          allow create: if request.auth != null &&
             request.resource.data.userId == request.auth.uid;
-          allow update, delete: if request.auth != null && 
+          allow update, delete: if request.auth != null &&
             resource.data.userId == request.auth.uid;
         }
 
         match /user_workout_stats/{userId} {
           allow read: if request.auth != null;
-          allow write: if request.auth != null && 
+          allow write: if request.auth != null &&
             request.auth.uid == userId;
         }
 
         // Allow authenticated users to read and write their own user profiles
         match /users/{userId} {
           allow read, write: if request.auth != null && request.auth.uid == userId;
+        }
+
+        // Enhanced user profiles with social features
+        match /user_profiles/{userId} {
+          allow read: if request.auth != null;
+          allow write: if request.auth != null && request.auth.uid == userId;
+        }
+
+        // AI personality profiles - private to user (DEVELOPMENT - PERMISSIVE)
+        match /ai_personality_profiles/{userId} {
+          allow read, write: if request.auth != null;
+        }
+
+        // User context for AI - private to user
+        match /user_context/{userId} {
+          allow read, write: if request.auth != null && request.auth.uid == userId;
+        }
+
+        // Social following relationships (DEVELOPMENT - PERMISSIVE)
+        match /user_following/{followId} {
+          allow read, write: if request.auth != null;
+        }
+
+        // Workout posts for social feed
+        match /workout_posts/{postId} {
+          allow read: if request.auth != null;
+          allow create: if request.auth != null &&
+            request.resource.data.userId == request.auth.uid;
+          allow update, delete: if request.auth != null &&
+            resource.data.userId == request.auth.uid;
+        }
+
+        // Feed posts
+        match /feed_posts/{postId} {
+          allow read: if request.auth != null;
+          allow create: if request.auth != null &&
+            request.resource.data.userId == request.auth.uid;
+          allow update, delete: if request.auth != null &&
+            resource.data.userId == request.auth.uid;
+        }
+
+        // Workout interactions (likes, comments, etc.)
+        match /workout_interactions/{interactionId} {
+          allow read: if request.auth != null;
+          allow create: if request.auth != null &&
+            request.resource.data.userId == request.auth.uid;
+          allow update, delete: if request.auth != null &&
+            resource.data.userId == request.auth.uid;
+        }
+
+        // AI recommendations - private to user
+        match /ai_recommendations/{recommendationId} {
+          allow read, write: if request.auth != null &&
+            resource.data.userId == request.auth.uid;
         }
 
         // Allow authenticated users to read and write to any document in 'chats' collection. (For development/testing)
