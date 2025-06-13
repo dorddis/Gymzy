@@ -34,6 +34,7 @@ import { AlertTriangle, ArrowDown, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SupersetCreator } from './superset-creator';
 import { SupersetDisplay } from './superset-display';
+import { SpecialSetsModal } from './special-sets-modal';
 
 interface WorkoutSummaryScreenProps {
   showIncompleteSetsWarning: boolean;
@@ -57,7 +58,7 @@ export function WorkoutSummaryScreen({
   const [exerciseToDeleteIndex, setExerciseToDeleteIndex] = React.useState<number | null>(null);
   const [deletingExerciseId, setDeletingExerciseId] = React.useState<string | null>(null);
   const [expandedNotesExerciseId, setExpandedNotesExerciseId] = React.useState<string | null>(null);
-  const [showSupersetCreator, setShowSupersetCreator] = React.useState(false);
+  const [showSpecialSetsModal, setShowSpecialSetsModal] = React.useState(false);
 
   // Calculate total sets
   const totalSets = React.useMemo(() => 
@@ -320,16 +321,16 @@ export function WorkoutSummaryScreen({
         <p className="text-center text-gray-500">No exercises added yet. Click "Add Exercise" to start!</p>
       ) : (
         <>
-          {/* Superset Creation Button */}
+          {/* Special Sets Button */}
           {currentWorkoutExercises.length >= 2 && (
             <div className="flex justify-center mb-4">
               <Button
                 variant="outline"
-                onClick={() => setShowSupersetCreator(true)}
-                className="flex items-center gap-2 border-blue-200 text-blue-600 hover:bg-blue-50"
+                onClick={() => setShowSpecialSetsModal(true)}
+                className="flex items-center gap-2 border-purple-200 text-purple-600 hover:bg-purple-50"
               >
-                <Link className="h-4 w-4" />
-                Create Superset
+                <Plus className="h-4 w-4" />
+                Special Sets
               </Button>
             </div>
           )}
@@ -497,12 +498,12 @@ export function WorkoutSummaryScreen({
         </div>
       )}
 
-      {/* Superset Creator Modal */}
-      {showSupersetCreator && (
-        <SupersetCreator
+      {/* Special Sets Modal */}
+      {showSpecialSetsModal && (
+        <SpecialSetsModal
           exercises={currentWorkoutExercises.filter(ex => !ex.specialSetGroup)}
           onCreateSuperset={handleCreateSuperset}
-          onClose={() => setShowSupersetCreator(false)}
+          onClose={() => setShowSpecialSetsModal(false)}
         />
       )}
 

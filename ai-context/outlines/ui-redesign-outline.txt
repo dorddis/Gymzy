@@ -163,7 +163,13 @@ Mark each step complete by changing `[ ]` to `[x]`.
 - **Goal:** Add special sets functionality and improve workout experience
 - **Inputs:** Special sets outline, workout context, exercise components
 - **Tasks:**
-  - [ ] Implement basic superset functionality
+  - [x] Implement basic superset functionality
+    - [x] Create SupersetCreator component for exercise grouping
+    - [x] Implement SupersetDisplay component for workout execution
+    - [x] Add superset data structure to ExerciseWithSets type
+    - [x] Integrate superset creation UI in WorkoutSummaryScreen
+    - [x] Add round tracking and progress indicators
+    - [x] Implement superset-specific rest timer integration
   - [ ] Add circuit training support
   - [ ] Create drop set implementation
   - [ ] Add rest-pause sets

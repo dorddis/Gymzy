@@ -8,7 +8,7 @@ import { usePathname } from "next/navigation";
 import { MuscleActivationSVG } from "@/components/workout/muscle-activation-svg";
 import { useWorkout } from "@/contexts/WorkoutContext";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+
 import { AddWorkoutModal } from "@/components/dashboard/add-workout-modal";
 import { useContextualTracking } from "@/hooks/useContextualTracking";
 import { RotateCcw, Play, Pause } from "lucide-react";
@@ -26,7 +26,7 @@ export default function WorkoutPage() {
     currentWorkoutExercises,
     totalVolume,
     setCurrentWorkoutExercises,
-    toggleSetExecuted,
+    clearCurrentWorkout,
   } = useWorkout();
 
   const { trackWorkoutCompletion, trackFeatureUsage } = useContextualTracking();
@@ -93,9 +93,9 @@ export default function WorkoutPage() {
   }, [isRestTimerRunning, restTimeRemaining]);
 
   const handleTerminateWorkout = useCallback(() => {
-    setCurrentWorkoutExercises([]);
+    clearCurrentWorkout();
     router.push('/');
-  }, [router, setCurrentWorkoutExercises]);
+  }, [router, clearCurrentWorkout]);
 
   const handleCompleteWorkout = useCallback(() => {
     if (currentWorkoutExercises.length === 0) {

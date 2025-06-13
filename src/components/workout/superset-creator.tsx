@@ -51,8 +51,8 @@ export function SupersetCreator({ exercises, onCreateSuperset, onClose }: Supers
   const selectedExerciseObjects = exercises.filter(ex => selectedExercises.includes(ex.id));
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <Card className="w-full max-w-2xl max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4">
+      <Card className="w-full max-w-2xl max-h-[85vh] overflow-hidden shadow-2xl">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle className="text-xl font-bold flex items-center gap-2">
             <Link className="h-5 w-5 text-blue-600" />

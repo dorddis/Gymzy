@@ -45,6 +45,7 @@ interface WorkoutContextType {
   latestWorkout: Workout | null;
   fetchLatestWorkout: () => Promise<void>;
   allWorkouts: Workout[];
+  clearCurrentWorkout: () => void;
 }
 
 const WorkoutContext = createContext<WorkoutContextType | undefined>(undefined);
@@ -282,6 +283,11 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Function to clear current workout
+  const clearCurrentWorkout = useCallback(() => {
+    setCurrentWorkoutExercises([]);
+  }, []);
+
   const value = {
     recentWorkouts,
     loading,
@@ -299,6 +305,7 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
     latestWorkout,
     fetchLatestWorkout,
     allWorkouts,
+    clearCurrentWorkout,
   };
 
   return (
