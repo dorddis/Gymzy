@@ -116,8 +116,11 @@ export function AIChatInterface({ onStartWorkout }: AIChatInterfaceProps) {
     let workoutData: any = null;
     let responseContent = '';
 
-    // Check for workout creation requests
-    if (lowerInput.includes('create workout') || lowerInput.includes('make workout') || lowerInput.includes('design workout')) {
+    // Check for workout creation requests (more flexible triggers)
+    if (lowerInput.includes('create workout') || lowerInput.includes('make workout') || lowerInput.includes('design workout') ||
+        lowerInput.includes('build workout') || lowerInput.includes('workout for') || lowerInput.includes('give me a') ||
+        lowerInput.includes('push workout') || lowerInput.includes('pull workout') || lowerInput.includes('leg workout') ||
+        lowerInput.includes('upper body') || lowerInput.includes('full body') || lowerInput.includes('cardio workout')) {
       try {
         // Extract workout parameters from user input (simplified)
         const workoutParams = extractWorkoutParams(userInput);
@@ -198,43 +201,77 @@ export function AIChatInterface({ onStartWorkout }: AIChatInterfaceProps) {
   };
 
   const extractWorkoutParams = (input: string) => {
-    // Simplified parameter extraction - in a real app, you'd use more sophisticated NLP
+    // Enhanced parameter extraction with more workout types
     const lowerInput = input.toLowerCase();
-    
+
     let workoutName = 'Custom Workout';
     let exercises = [];
 
-    if (lowerInput.includes('push')) {
+    if (lowerInput.includes('push') || lowerInput.includes('chest') || lowerInput.includes('shoulder')) {
       workoutName = 'Push Day';
       exercises = [
-        { exerciseId: 'push-ups', sets: 3, reps: 10 },
-        { exerciseId: 'overhead-press', sets: 3, reps: 8 },
-        { exerciseId: 'dips', sets: 3, reps: 8 }
+        { exerciseId: 'push-ups', name: 'Push-ups', sets: 3, reps: 10 },
+        { exerciseId: 'overhead-press', name: 'Overhead Press', sets: 3, reps: 8 },
+        { exerciseId: 'dips', name: 'Dips', sets: 3, reps: 8 }
       ];
-    } else if (lowerInput.includes('leg')) {
+    } else if (lowerInput.includes('pull') || lowerInput.includes('back') || lowerInput.includes('bicep')) {
+      workoutName = 'Pull Day';
+      exercises = [
+        { exerciseId: 'pull-ups', name: 'Pull-ups', sets: 3, reps: 8 },
+        { exerciseId: 'barbell-rows', name: 'Barbell Rows', sets: 3, reps: 10 },
+        { exerciseId: 'bicep-curls', name: 'Bicep Curls', sets: 3, reps: 12 }
+      ];
+    } else if (lowerInput.includes('leg') || lowerInput.includes('squat') || lowerInput.includes('glute')) {
       workoutName = 'Leg Day';
       exercises = [
-        { exerciseId: 'squat', sets: 4, reps: 10 },
-        { exerciseId: 'romanian-deadlift', sets: 3, reps: 10 },
-        { exerciseId: 'calf-raises', sets: 3, reps: 15 }
+        { exerciseId: 'squat', name: 'Squats', sets: 4, reps: 10 },
+        { exerciseId: 'romanian-deadlift', name: 'Romanian Deadlifts', sets: 3, reps: 10 },
+        { exerciseId: 'calf-raises', name: 'Calf Raises', sets: 3, reps: 15 }
       ];
     } else if (lowerInput.includes('core') || lowerInput.includes('abs')) {
       workoutName = 'Core Workout';
       exercises = [
-        { exerciseId: 'plank', sets: 3, reps: 60 },
-        { exerciseId: 'russian-twists', sets: 3, reps: 20 },
-        { exerciseId: 'bicycle-crunches', sets: 3, reps: 20 }
+        { exerciseId: 'plank', name: 'Plank', sets: 3, reps: 60 },
+        { exerciseId: 'russian-twists', name: 'Russian Twists', sets: 3, reps: 20 },
+        { exerciseId: 'bicycle-crunches', name: 'Bicycle Crunches', sets: 3, reps: 20 }
+      ];
+    } else if (lowerInput.includes('upper') || lowerInput.includes('arms')) {
+      workoutName = 'Upper Body';
+      exercises = [
+        { exerciseId: 'push-ups', name: 'Push-ups', sets: 3, reps: 10 },
+        { exerciseId: 'pull-ups', name: 'Pull-ups', sets: 3, reps: 6 },
+        { exerciseId: 'overhead-press', name: 'Overhead Press', sets: 3, reps: 8 },
+        { exerciseId: 'barbell-rows', name: 'Barbell Rows', sets: 3, reps: 10 }
+      ];
+    } else if (lowerInput.includes('cardio') || lowerInput.includes('hiit')) {
+      workoutName = 'HIIT Cardio';
+      exercises = [
+        { exerciseId: 'burpees', name: 'Burpees', sets: 4, reps: 10 },
+        { exerciseId: 'mountain-climbers', name: 'Mountain Climbers', sets: 4, reps: 20 },
+        { exerciseId: 'jumping-jacks', name: 'Jumping Jacks', sets: 4, reps: 30 }
       ];
     } else {
-      // Default full body
+      // Default full body workout
+      workoutName = 'Full Body Workout';
       exercises = [
-        { exerciseId: 'push-ups', sets: 3, reps: 10 },
-        { exerciseId: 'squat', sets: 3, reps: 12 },
-        { exerciseId: 'plank', sets: 2, reps: 45 }
+        { exerciseId: 'push-ups', name: 'Push-ups', sets: 3, reps: 10 },
+        { exerciseId: 'squat', name: 'Squats', sets: 3, reps: 12 },
+        { exerciseId: 'plank', name: 'Plank', sets: 2, reps: 45 },
+        { exerciseId: 'pull-ups', name: 'Pull-ups', sets: 2, reps: 5 }
       ];
     }
 
-    return { workoutName, exercises };
+    return {
+      workoutName,
+      exercises,
+      targetMuscles: exercises.map(ex => {
+        if (ex.name.toLowerCase().includes('chest') || ex.name.toLowerCase().includes('push')) return 'chest';
+        if (ex.name.toLowerCase().includes('back') || ex.name.toLowerCase().includes('pull') || ex.name.toLowerCase().includes('row')) return 'back';
+        if (ex.name.toLowerCase().includes('leg') || ex.name.toLowerCase().includes('squat') || ex.name.toLowerCase().includes('deadlift')) return 'legs';
+        if (ex.name.toLowerCase().includes('shoulder') || ex.name.toLowerCase().includes('press')) return 'shoulders';
+        return 'arms';
+      })
+    };
   };
 
   const extractSearchQuery = (input: string): string => {

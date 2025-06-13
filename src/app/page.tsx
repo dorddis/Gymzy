@@ -16,7 +16,6 @@ import { LifestyleTracker } from "@/components/lifestyle/lifestyle-tracker";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { AIRecommendationsPanel } from "@/components/recommendations/ai-recommendations-panel";
-import { SmartNotificationsPanel } from "@/components/notifications/smart-notifications-panel";
 
 export default function HomePage() {
   const { combinedMuscleVolumes } = useWorkout();
@@ -71,24 +70,6 @@ export default function HomePage() {
           {/* AI Welcome Message */}
           <AIWelcomeMessage />
 
-          {/* Smart Notifications */}
-          <SmartNotificationsPanel maxNotifications={3} showOnlyHighPriority={true} />
-
-          {/* Daily Check-in */}
-          <div className="flex justify-center">
-            <Dialog open={isLifestyleDialogOpen} onOpenChange={setIsLifestyleDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="flex items-center gap-2">
-                  <Heart className="h-4 w-4" />
-                  Daily Check-in
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
-                <LifestyleTracker onClose={() => setIsLifestyleDialogOpen(false)} />
-              </DialogContent>
-            </Dialog>
-          </div>
-
           <div className="space-y-4">
             {/* <h2 className="text-2xl font-bold">Weekly Activation</h2> */}
             <div className="grid gap-4">
@@ -105,6 +86,21 @@ export default function HomePage() {
           <AIRecommendationsPanel maxRecommendations={3} />
 
           <QuickWorkoutTemplates />
+
+          {/* Daily Check-in */}
+          <div className="flex justify-center">
+            <Dialog open={isLifestyleDialogOpen} onOpenChange={setIsLifestyleDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="flex items-center gap-2">
+                  <Heart className="h-4 w-4" />
+                  Daily Check-in
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <LifestyleTracker onClose={() => setIsLifestyleDialogOpen(false)} />
+              </DialogContent>
+            </Dialog>
+          </div>
           <RecentWorkoutsCarousel />
           <CommunityFeed />
         </div>

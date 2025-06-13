@@ -197,18 +197,37 @@ export const AI_WORKOUT_TOOLS: AITool[] = [
 export class AIWorkoutToolExecutor {
   static async executeCreateWorkout(params: any): Promise<{ success: boolean; workoutId: string; exercises: WorkoutExercise[] }> {
     const { workoutName, exercises, targetMuscles } = params;
-    
+
     const workoutExercises: WorkoutExercise[] = exercises.map((ex: any, index: number) => {
-      const exerciseData = EXERCISES.find(e => e.id === ex.exerciseId);
-      
+      // Try to find exercise by ID first, then by name
+      let exerciseData = EXERCISES.find(e => e.id === ex.exerciseId);
+
+      if (!exerciseData && ex.name) {
+        // Try to find by name (case insensitive)
+        exerciseData = EXERCISES.find(e =>
+          e.name.toLowerCase().includes(ex.name.toLowerCase()) ||
+          ex.name.toLowerCase().includes(e.name.toLowerCase())
+        );
+      }
+
       if (!exerciseData) {
-        throw new Error(`Exercise with ID ${ex.exerciseId} not found`);
+        // If still not found, create a basic exercise structure
+        console.warn(`Exercise not found: ${ex.exerciseId || ex.name}, creating basic structure`);
+        exerciseData = {
+          id: ex.exerciseId || `custom_${index}`,
+          name: ex.name || `Exercise ${index + 1}`,
+          primaryMuscles: targetMuscles || ['chest'],
+          secondaryMuscles: [],
+          equipment: 'bodyweight',
+          instructions: [],
+          tips: []
+        };
       }
 
       return {
         id: `ai_workout_${Date.now()}_${index}`,
         name: exerciseData.name,
-        sets: Array.from({ length: ex.sets }, () => ({
+        sets: Array.from({ length: ex.sets || 3 }, () => ({
           weight: ex.weight || 0,
           reps: ex.reps || 8,
           rpe: 8,
@@ -216,14 +235,14 @@ export class AIWorkoutToolExecutor {
           isExecuted: false
         })),
         muscleGroups: exerciseData.primaryMuscles,
-        equipment: 'Mixed',
+        equipment: exerciseData.equipment || 'Mixed',
         primaryMuscles: exerciseData.primaryMuscles,
         secondaryMuscles: exerciseData.secondaryMuscles || []
       };
     });
 
     const workoutId = `ai_workout_${Date.now()}`;
-    
+
     return {
       success: true,
       workoutId,

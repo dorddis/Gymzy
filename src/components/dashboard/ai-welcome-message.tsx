@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useSmartNotifications } from '@/hooks/useSmartNotifications';
 import {
   Sparkles,
   RefreshCw,
@@ -30,6 +31,7 @@ export function AIWelcomeMessage() {
   const { user } = useAuth();
   const { workouts } = useWorkout();
   const router = useRouter();
+  const { getHighPriorityNotifications, shouldShowNotifications } = useSmartNotifications();
   
   const [message, setMessage] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
@@ -176,11 +178,25 @@ export function AIWelcomeMessage() {
     if (!motivationContext) return "Welcome back to Gymzy! Ready to crush your fitness goals? 💪";
 
     const { timeOfDay, hasWorkoutToday, currentStreak } = motivationContext;
-    
+
+    // Check for high priority notifications and incorporate them
+    const highPriorityNotifs = getHighPriorityNotifications();
+    if (highPriorityNotifs.length > 0 && shouldShowNotifications()) {
+      const notif = highPriorityNotifs[0];
+      // Incorporate notification message into the AI welcome
+      if (notif.type === 'workout_reminder') {
+        return notif.message + " Let's get moving! 💪";
+      } else if (notif.type === 'recovery') {
+        return notif.message + " Your body will thank you! 🧘‍♀️";
+      } else if (notif.type === 'habit_support') {
+        return notif.message + " You've got this! 🔥";
+      }
+    }
+
     if (hasWorkoutToday) {
       return `Great job on today's workout! 🎉 ${currentStreak > 1 ? `You're on a ${currentStreak}-day streak!` : 'Keep the momentum going!'} 💪`;
     }
-    
+
     if (timeOfDay === 'morning') {
       return `Good morning! ${currentStreak > 0 ? `Don't break your ${currentStreak}-day streak!` : 'Today is a perfect day to start your fitness journey!'} 🌅`;
     } else if (timeOfDay === 'afternoon') {
