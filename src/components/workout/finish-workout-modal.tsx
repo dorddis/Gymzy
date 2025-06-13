@@ -155,7 +155,7 @@ export function FinishWorkoutModal({ open, onOpenChange, onSave }: FinishWorkout
                 <Button
                   variant="outline"
                   className={cn(
-                    "w-full justify-start text-left font-normal focus-visible:ring-0 focus-visible:ring-offset-0",
+                    "w-full justify-start text-left font-normal border-gray-300 hover:border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200",
                     !date && "text-muted-foreground"
                   )}
                   onClick={() => setShowCalendar(!showCalendar)}
@@ -190,13 +190,13 @@ export function FinishWorkoutModal({ open, onOpenChange, onSave }: FinishWorkout
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="notes">Notes</Label>
+              <Label htmlFor="notes">Notes <span className="text-sm text-gray-500 font-normal">(optional)</span></Label>
               <Textarea
                 id="notes"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Add any notes about your workout..."
-                className="min-h-[100px] focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="min-h-[100px] border-gray-300 hover:border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus-visible:ring-2 focus-visible:ring-blue-200"
               />
             </div>
 
@@ -210,10 +210,10 @@ export function FinishWorkoutModal({ open, onOpenChange, onSave }: FinishWorkout
               />
             </div>
 
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
               <Label htmlFor="public" className="flex flex-col gap-1">
-                <span>Public Workout</span>
-                <span className="text-sm text-muted-foreground">
+                <span className="font-medium">Public Workout <span className="text-sm text-gray-500 font-normal">(optional)</span></span>
+                <span className="text-sm text-gray-600">
                   Share your workout with the community
                 </span>
               </Label>
@@ -222,6 +222,7 @@ export function FinishWorkoutModal({ open, onOpenChange, onSave }: FinishWorkout
                 checked={isPublic}
                 onCheckedChange={setIsPublic}
                 disabled={isSaving}
+                className="data-[state=checked]:bg-blue-600"
               />
             </div>
 

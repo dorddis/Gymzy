@@ -21,6 +21,8 @@ import { useWorkout } from '@/contexts/WorkoutContext';
 import { useRouter } from 'next/navigation';
 import { AI_WORKOUT_TOOLS, executeAITool, WorkoutExercise } from '@/services/ai-workout-tools';
 import { generateAIResponse } from '@/services/ai-service';
+import { agenticAI, AgenticAIResponse, ChatMessage as AgenticChatMessage } from '@/services/agentic-ai-service';
+import ReactMarkdown from 'react-markdown';
 
 interface ChatMessage {
   id: string;
@@ -50,12 +52,13 @@ export function AIChatInterface({ onStartWorkout }: AIChatInterfaceProps) {
     {
       id: '1',
       role: 'assistant',
-      content: "Hi! I'm your AI fitness coach. I can help you create workouts, find exercises, and start training sessions. What would you like to work on today?",
+      content: "Hi! I'm **Gymzy**, your AI fitness coach. I can help you create workouts, find exercises, and start training sessions. What would you like to work on today?",
       timestamp: new Date()
     }
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [streamingMessageId, setStreamingMessageId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -77,249 +80,69 @@ export function AIChatInterface({ onStartWorkout }: AIChatInterfaceProps) {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentInput = inputMessage;
     setInputMessage('');
     setIsLoading(true);
 
-    try {
-      // Generate AI response with tool capabilities
-      const aiResponse = await generateAIResponseWithTools(inputMessage, messages);
-      
-      const assistantMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: aiResponse.content,
-        timestamp: new Date(),
-        toolCalls: aiResponse.toolCalls,
-        workoutData: aiResponse.workoutData
-      };
+    // Create a placeholder message for streaming
+    const assistantMessageId = (Date.now() + 1).toString();
+    setStreamingMessageId(assistantMessageId);
 
-      setMessages(prev => [...prev, assistantMessage]);
+    const assistantMessage: ChatMessage = {
+      id: assistantMessageId,
+      role: 'assistant',
+      content: '',
+      timestamp: new Date()
+    };
+
+    setMessages(prev => [...prev, assistantMessage]);
+
+    try {
+      // Use the new agentic AI service with streaming
+      const aiResponse = await agenticAI.generateAgenticResponse(
+        currentInput,
+        messages,
+        (chunk: string) => {
+          // Update the streaming message
+          setMessages(prev => prev.map(msg =>
+            msg.id === assistantMessageId
+              ? { ...msg, content: msg.content + chunk }
+              : msg
+          ));
+        }
+      );
+
+      // Update the final message with tool calls and workout data
+      setMessages(prev => prev.map(msg =>
+        msg.id === assistantMessageId
+          ? {
+              ...msg,
+              content: aiResponse.content,
+              toolCalls: aiResponse.toolCalls,
+              workoutData: aiResponse.workoutData
+            }
+          : msg
+      ));
+
     } catch (error) {
       console.error('Error generating AI response:', error);
-      const errorMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: "I'm sorry, I encountered an error. Please try again.",
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages(prev => prev.map(msg =>
+        msg.id === assistantMessageId
+          ? {
+              ...msg,
+              content: "I'm sorry, I encountered an error. Please try again."
+            }
+          : msg
+      ));
     } finally {
       setIsLoading(false);
+      setStreamingMessageId(null);
     }
   };
 
-  const generateAIResponseWithTools = async (userInput: string, chatHistory: ChatMessage[]) => {
-    // Analyze user input to determine if tools should be used
-    const lowerInput = userInput.toLowerCase();
-    
-    let toolCalls: any[] = [];
-    let workoutData: any = null;
-    let responseContent = '';
 
-    // Check for workout creation requests (more flexible triggers)
-    if (lowerInput.includes('create workout') || lowerInput.includes('make workout') || lowerInput.includes('design workout') ||
-        lowerInput.includes('build workout') || lowerInput.includes('workout for') || lowerInput.includes('give me a') ||
-        lowerInput.includes('push workout') || lowerInput.includes('pull workout') || lowerInput.includes('leg workout') ||
-        lowerInput.includes('upper body') || lowerInput.includes('full body') || lowerInput.includes('cardio workout')) {
-      try {
-        // Extract workout parameters from user input (simplified)
-        const workoutParams = extractWorkoutParams(userInput);
-        const result = await executeAITool('create_workout', workoutParams);
-        
-        toolCalls.push({
-          name: 'create_workout',
-          parameters: workoutParams,
-          result
-        });
 
-        workoutData = {
-          exercises: result.exercises,
-          workoutId: result.workoutId
-        };
 
-        console.log('Workout created successfully:', workoutData);
-
-        responseContent = `I've created a ${workoutParams.workoutName} workout for you! Here's what I've prepared:\n\n`;
-        result.exercises.forEach((ex: WorkoutExercise, index: number) => {
-          responseContent += `${index + 1}. **${ex.name}** - ${ex.sets.length} sets of ${ex.sets[0]?.reps || 8} reps\n`;
-        });
-        responseContent += '\nWould you like to start this workout now?';
-      } catch (error) {
-        responseContent = "I had trouble creating that workout. Could you be more specific about what exercises you'd like to include?";
-      }
-    }
-    // Check for exercise search requests
-    else if (lowerInput.includes('find exercise') || lowerInput.includes('search exercise') || lowerInput.includes('what exercises')) {
-      try {
-        const searchQuery = extractSearchQuery(userInput);
-        const result = await executeAITool('search_exercises', { query: searchQuery, limit: 5 });
-        
-        toolCalls.push({
-          name: 'search_exercises',
-          parameters: { query: searchQuery },
-          result
-        });
-
-        responseContent = `I found these exercises for "${searchQuery}":\n\n`;
-        result.exercises.forEach((ex: any, index: number) => {
-          responseContent += `${index + 1}. **${ex.name}** - Targets: ${ex.primaryMuscles.join(', ')}\n`;
-        });
-      } catch (error) {
-        responseContent = "I couldn't find exercises matching your request. Try being more specific!";
-      }
-    }
-    // Check for workout suggestions
-    else if (lowerInput.includes('suggest workout') || lowerInput.includes('recommend workout') || lowerInput.includes('workout plan')) {
-      try {
-        const planParams = extractPlanParams(userInput);
-        const result = await executeAITool('suggest_workout_plan', planParams);
-        
-        toolCalls.push({
-          name: 'suggest_workout_plan',
-          parameters: planParams,
-          result
-        });
-
-        const plan = result.workoutPlan;
-        responseContent = `Here's a ${plan.name} I recommend:\n\n**Duration:** ${plan.duration} minutes\n**Difficulty:** ${plan.difficulty}\n\n**Exercises:**\n`;
-        plan.exercises.forEach((ex: any, index: number) => {
-          responseContent += `${index + 1}. ${ex.name} - ${ex.sets} sets of ${ex.reps} reps\n`;
-        });
-        responseContent += '\nWould you like me to create this workout for you?';
-      } catch (error) {
-        responseContent = "I can suggest a workout! Tell me your fitness goal (strength, muscle gain, weight loss, etc.) and how much time you have.";
-      }
-    }
-    // Default AI response
-    else {
-      responseContent = await generateContextualResponse(userInput, chatHistory);
-    }
-
-    return {
-      content: responseContent,
-      toolCalls,
-      workoutData
-    };
-  };
-
-  const extractWorkoutParams = (input: string) => {
-    // Enhanced parameter extraction with more workout types
-    const lowerInput = input.toLowerCase();
-
-    let workoutName = 'Custom Workout';
-    let exercises = [];
-
-    if (lowerInput.includes('push') || lowerInput.includes('chest') || lowerInput.includes('shoulder')) {
-      workoutName = 'Push Day';
-      exercises = [
-        { exerciseId: 'push-ups', name: 'Push-ups', sets: 3, reps: 10 },
-        { exerciseId: 'overhead-press', name: 'Overhead Press', sets: 3, reps: 8 },
-        { exerciseId: 'dips', name: 'Dips', sets: 3, reps: 8 }
-      ];
-    } else if (lowerInput.includes('pull') || lowerInput.includes('back') || lowerInput.includes('bicep')) {
-      workoutName = 'Pull Day';
-      exercises = [
-        { exerciseId: 'pull-ups', name: 'Pull-ups', sets: 3, reps: 8 },
-        { exerciseId: 'barbell-rows', name: 'Barbell Rows', sets: 3, reps: 10 },
-        { exerciseId: 'bicep-curls', name: 'Bicep Curls', sets: 3, reps: 12 }
-      ];
-    } else if (lowerInput.includes('leg') || lowerInput.includes('squat') || lowerInput.includes('glute')) {
-      workoutName = 'Leg Day';
-      exercises = [
-        { exerciseId: 'squat', name: 'Squats', sets: 4, reps: 10 },
-        { exerciseId: 'romanian-deadlift', name: 'Romanian Deadlifts', sets: 3, reps: 10 },
-        { exerciseId: 'calf-raises', name: 'Calf Raises', sets: 3, reps: 15 }
-      ];
-    } else if (lowerInput.includes('core') || lowerInput.includes('abs')) {
-      workoutName = 'Core Workout';
-      exercises = [
-        { exerciseId: 'plank', name: 'Plank', sets: 3, reps: 60 },
-        { exerciseId: 'russian-twists', name: 'Russian Twists', sets: 3, reps: 20 },
-        { exerciseId: 'bicycle-crunches', name: 'Bicycle Crunches', sets: 3, reps: 20 }
-      ];
-    } else if (lowerInput.includes('upper') || lowerInput.includes('arms')) {
-      workoutName = 'Upper Body';
-      exercises = [
-        { exerciseId: 'push-ups', name: 'Push-ups', sets: 3, reps: 10 },
-        { exerciseId: 'pull-ups', name: 'Pull-ups', sets: 3, reps: 6 },
-        { exerciseId: 'overhead-press', name: 'Overhead Press', sets: 3, reps: 8 },
-        { exerciseId: 'barbell-rows', name: 'Barbell Rows', sets: 3, reps: 10 }
-      ];
-    } else if (lowerInput.includes('cardio') || lowerInput.includes('hiit')) {
-      workoutName = 'HIIT Cardio';
-      exercises = [
-        { exerciseId: 'burpees', name: 'Burpees', sets: 4, reps: 10 },
-        { exerciseId: 'mountain-climbers', name: 'Mountain Climbers', sets: 4, reps: 20 },
-        { exerciseId: 'jumping-jacks', name: 'Jumping Jacks', sets: 4, reps: 30 }
-      ];
-    } else {
-      // Default full body workout
-      workoutName = 'Full Body Workout';
-      exercises = [
-        { exerciseId: 'push-ups', name: 'Push-ups', sets: 3, reps: 10 },
-        { exerciseId: 'squat', name: 'Squats', sets: 3, reps: 12 },
-        { exerciseId: 'plank', name: 'Plank', sets: 2, reps: 45 },
-        { exerciseId: 'pull-ups', name: 'Pull-ups', sets: 2, reps: 5 }
-      ];
-    }
-
-    return {
-      workoutName,
-      exercises,
-      targetMuscles: exercises.map(ex => {
-        if (ex.name.toLowerCase().includes('chest') || ex.name.toLowerCase().includes('push')) return 'chest';
-        if (ex.name.toLowerCase().includes('back') || ex.name.toLowerCase().includes('pull') || ex.name.toLowerCase().includes('row')) return 'back';
-        if (ex.name.toLowerCase().includes('leg') || ex.name.toLowerCase().includes('squat') || ex.name.toLowerCase().includes('deadlift')) return 'legs';
-        if (ex.name.toLowerCase().includes('shoulder') || ex.name.toLowerCase().includes('press')) return 'shoulders';
-        return 'arms';
-      })
-    };
-  };
-
-  const extractSearchQuery = (input: string): string => {
-    // Extract search terms from user input
-    const words = input.toLowerCase().split(' ');
-    const searchWords = words.filter(word => 
-      !['find', 'search', 'exercise', 'exercises', 'for', 'what', 'are', 'some'].includes(word)
-    );
-    return searchWords.join(' ') || 'chest';
-  };
-
-  const extractPlanParams = (input: string) => {
-    const lowerInput = input.toLowerCase();
-    
-    let goal = 'general_fitness';
-    let experience = 'intermediate';
-    let duration = 30;
-
-    if (lowerInput.includes('strength')) goal = 'strength';
-    else if (lowerInput.includes('muscle') || lowerInput.includes('gain')) goal = 'muscle_gain';
-    else if (lowerInput.includes('weight loss') || lowerInput.includes('lose weight')) goal = 'weight_loss';
-    else if (lowerInput.includes('endurance') || lowerInput.includes('cardio')) goal = 'endurance';
-
-    if (lowerInput.includes('beginner')) experience = 'beginner';
-    else if (lowerInput.includes('advanced')) experience = 'advanced';
-
-    const durationMatch = lowerInput.match(/(\d+)\s*min/);
-    if (durationMatch) duration = parseInt(durationMatch[1]);
-
-    return { goal, experience, duration };
-  };
-
-  const generateContextualResponse = async (input: string, history: ChatMessage[]): Promise<string> => {
-    // Generate contextual responses based on input
-    const lowerInput = input.toLowerCase();
-    
-    if (lowerInput.includes('hello') || lowerInput.includes('hi')) {
-      return "Hello! I'm here to help you with your fitness journey. I can create custom workouts, find exercises, and help you start training. What would you like to do?";
-    }
-    
-    if (lowerInput.includes('help')) {
-      return "I can help you with:\n• Creating custom workouts\n• Finding specific exercises\n• Suggesting workout plans\n• Starting workout sessions\n\nJust tell me what you'd like to work on!";
-    }
-
-    return "I'm here to help with your fitness goals! You can ask me to create workouts, find exercises, or suggest training plans. What would you like to do?";
-  };
 
   const handleStartWorkout = (workoutData: any) => {
     if (workoutData?.exercises) {
@@ -347,7 +170,24 @@ export function AIChatInterface({ onStartWorkout }: AIChatInterfaceProps) {
                   ? 'bg-blue-500 text-white' 
                   : 'bg-gray-100 text-gray-900'
               }`}>
-                <div className="whitespace-pre-wrap">{message.content}</div>
+                <div className="prose prose-sm max-w-none">
+                  <ReactMarkdown
+                    components={{
+                      p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                      strong: ({ children }) => <strong className="font-semibold text-gray-900">{children}</strong>,
+                      ul: ({ children }) => <ul className="list-disc list-inside mb-2">{children}</ul>,
+                      ol: ({ children }) => <ol className="list-decimal list-inside mb-2">{children}</ol>,
+                      li: ({ children }) => <li className="mb-1">{children}</li>,
+                      h1: ({ children }) => <h1 className="text-lg font-bold mb-2">{children}</h1>,
+                      h2: ({ children }) => <h2 className="text-base font-bold mb-2">{children}</h2>,
+                      h3: ({ children }) => <h3 className="text-sm font-bold mb-1">{children}</h3>,
+                      code: ({ children }) => <code className="bg-gray-100 px-1 py-0.5 rounded text-sm">{children}</code>,
+                      blockquote: ({ children }) => <blockquote className="border-l-4 border-blue-200 pl-3 italic">{children}</blockquote>
+                    }}
+                  >
+                    {message.content}
+                  </ReactMarkdown>
+                </div>
                 
                 {/* Tool Results */}
                 {message.toolCalls && message.toolCalls.length > 0 && (
@@ -384,14 +224,37 @@ export function AIChatInterface({ onStartWorkout }: AIChatInterfaceProps) {
           </div>
         ))}
         
-        {isLoading && (
+        {isLoading && !streamingMessageId && (
           <div className="flex justify-start">
             <div className="flex items-start gap-3">
               <div className="p-2 rounded-full bg-gray-500">
                 <Bot className="h-4 w-4 text-white" />
               </div>
               <div className="p-3 rounded-lg bg-gray-100">
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <div className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span className="text-sm text-gray-600">Gymzy is thinking...</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {streamingMessageId && (
+          <div className="flex justify-start">
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-full bg-gray-500">
+                <Bot className="h-4 w-4 text-white" />
+              </div>
+              <div className="p-3 rounded-lg bg-gray-100">
+                <div className="flex items-center gap-2">
+                  <div className="flex space-x-1">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  </div>
+                  <span className="text-sm text-gray-600">Typing...</span>
+                </div>
               </div>
             </div>
           </div>
