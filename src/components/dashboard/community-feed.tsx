@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton, FeedPostSkeleton } from '@/components/ui/skeleton';
 import { communityPosts } from '@/data/community-posts';
 import { Dumbbell, Heart, MessageSquare, Share2, Clock, MapPin, Flame, Trophy } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -146,26 +146,7 @@ export function CommunityFeed() {
           </Button>
         </div>
         {[1, 2, 3].map((i) => (
-          <Card key={i} className="bg-white rounded-xl shadow-sm p-4 mb-4">
-            <div className="flex items-center mb-3">
-              <Skeleton className="w-10 h-10 rounded-full mr-3" />
-              <div className="flex-1">
-                <Skeleton className="h-4 w-24 mb-1" />
-                <Skeleton className="h-3 w-16" />
-              </div>
-            </div>
-            <Skeleton className="h-4 w-full mb-2" />
-            <Skeleton className="h-4 w-3/4 mb-3" />
-            <div className="bg-gray-100 rounded-lg p-3 mb-3">
-              <Skeleton className="h-4 w-32 mb-1" />
-              <Skeleton className="h-3 w-48" />
-            </div>
-            <div className="flex justify-between">
-              <Skeleton className="h-6 w-12" />
-              <Skeleton className="h-6 w-12" />
-              <Skeleton className="h-6 w-8" />
-            </div>
-          </Card>
+          <FeedPostSkeleton key={i} />
         ))}
       </div>
     );

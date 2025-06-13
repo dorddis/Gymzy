@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { MuscleActivationSVG } from '@/components/workout/muscle-activation-svg';
 import { Muscle } from '@/lib/constants';
+import { MuscleMapSkeleton } from '@/components/ui/skeleton';
 
 interface HeatmapCardProps {
   title?: string;
@@ -9,14 +10,16 @@ interface HeatmapCardProps {
   className?: string;
   height?: string;
   scale?: number;
+  loading?: boolean;
 }
 
-export function HeatmapCard({ 
-  title = "Weekly Muscle Activation", 
-  muscleVolumes, 
+export function HeatmapCard({
+  title = "Weekly Muscle Activation",
+  muscleVolumes,
   className = "",
   height = "350px",
-  scale = 1.3 // Adjusted scale for dashboard
+  scale = 1.3, // Adjusted scale for dashboard
+  loading = false
 }: HeatmapCardProps) {
   return (
     <Card className={`bg-white rounded-xl shadow-md p-4 ${className}`}>
@@ -31,11 +34,15 @@ export function HeatmapCard({
 
         <CardContent className="bg-white rounded-lg w-full flex items-center justify-center overflow-hidden" style={{ height }}>
           <div className="w-full h-full flex items-center justify-center">
-            <MuscleActivationSVG 
-              muscleVolumes={muscleVolumes} 
-              className="w-full h-full" 
-              scale={scale}
-            />
+            {loading ? (
+              <MuscleMapSkeleton />
+            ) : (
+              <MuscleActivationSVG
+                muscleVolumes={muscleVolumes}
+                className="w-full h-full"
+                scale={scale}
+              />
+            )}
           </div>
         </CardContent>
 

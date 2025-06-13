@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useWorkout } from '@/contexts/WorkoutContext';
 import { Dumbbell, Clock, TrendingUp, Activity } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { WorkoutCardSkeleton } from '@/components/ui/skeleton';
 
 export function RecentWorkoutsCarousel() {
   const { recentWorkouts, loading, error } = useWorkout();
@@ -27,7 +28,13 @@ export function RecentWorkoutsCarousel() {
             View All
           </Button>
         </div>
-        <div className="text-center text-gray-500">Loading workouts...</div>
+        <div className="flex overflow-x-auto gap-4 pb-4 -mx-4 px-4">
+          {Array.from({ length: 2 }).map((_, i) => (
+            <div key={i} className="min-w-[280px]">
+              <WorkoutCardSkeleton />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }

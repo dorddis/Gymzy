@@ -2,12 +2,19 @@ import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Flame, TrendingUp, RefreshCcw } from 'lucide-react';
 import { useWorkout } from '@/contexts/WorkoutContext';
+import { StatCardSkeleton } from '@/components/ui/skeleton';
 
 export function StatsCardsRow() {
   const { recentWorkouts, loading, error } = useWorkout();
 
   if (loading) {
-    return <div className="px-4 text-center text-gray-500">Loading stats...</div>;
+    return (
+      <div className="grid grid-cols-3 gap-4 px-4 mb-4">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <StatCardSkeleton key={i} />
+        ))}
+      </div>
+    );
   }
 
   if (error) {

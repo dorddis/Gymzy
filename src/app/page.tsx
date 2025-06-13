@@ -15,6 +15,7 @@ import { Loader2, Heart } from "lucide-react";
 import { LifestyleTracker } from "@/components/lifestyle/lifestyle-tracker";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { MuscleMapSkeleton, StatCardSkeleton, WorkoutCardSkeleton } from "@/components/ui/skeleton";
 
 export default function HomePage() {
   const { combinedMuscleVolumes } = useWorkout();

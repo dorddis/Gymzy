@@ -23,6 +23,7 @@ import { AI_WORKOUT_TOOLS, executeAITool, WorkoutExercise } from '@/services/ai-
 import { generateAIResponse } from '@/services/ai-service';
 import { agenticAI, AgenticAIResponse, ChatMessage as AgenticChatMessage } from '@/services/agentic-ai-service';
 import ReactMarkdown from 'react-markdown';
+import { ChatMessageSkeleton } from '@/components/ui/skeleton';
 
 interface ChatMessage {
   id: string;
