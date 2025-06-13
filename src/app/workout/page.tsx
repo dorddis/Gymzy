@@ -26,6 +26,7 @@ export default function WorkoutPage() {
     currentWorkoutExercises,
     totalVolume,
     setCurrentWorkoutExercises,
+    toggleSetExecuted,
   } = useWorkout();
 
   const { trackWorkoutCompletion, trackFeatureUsage } = useContextualTracking();
@@ -177,13 +178,7 @@ export default function WorkoutPage() {
     setIsAddExerciseModalOpen(false);
   };
 
-  const toggleSetExecuted = (exerciseIndex: number, setIndex: number) => {
-    setCurrentWorkoutExercises((prev) => {
-      const clone = [...prev];
-      const set = clone[exerciseIndex].sets[setIndex];
-      clone[exerciseIndex].sets[setIndex] = { ...set, isExecuted: !set.isExecuted };
-      return clone;
-    });
+  const startRestTimer = () => {
     setIsRestTimerRunning(true);
     setRestTimeRemaining(totalRestTime);
   };
@@ -223,11 +218,12 @@ export default function WorkoutPage() {
         </div>
 
         <div className="mt-4 px-4 relative z-10">
-          <WorkoutSummaryScreen 
+          <WorkoutSummaryScreen
             showIncompleteSetsWarning={showIncompleteSetsWarning}
-            remainingSets={currentWorkoutExercises.reduce((total, exercise) => 
+            remainingSets={currentWorkoutExercises.reduce((total, exercise) =>
               total + exercise.sets.filter((set) => !set.isExecuted).length, 0)}
             showInvalidSetsWarning={showInvalidSetsWarning}
+            onSetExecuted={startRestTimer}
           />
         </div>
       </main>
@@ -264,7 +260,7 @@ export default function WorkoutPage() {
               variant="ghost"
               size="icon"
               onClick={toggleRestTimer}
-              className="absolute left-2 top-1/2 -translate-y-1/2 focus:ring-0 focus:ring-offset-0 active:bg-transparent"
+              className="absolute left-2 top-1/2 -translate-y-1/2 focus:ring-0 focus:ring-offset-0 active:bg-blue-100 hover:bg-blue-50 text-gray-700 hover:text-blue-600"
             >
               {isRestTimerRunning ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
             </Button>
@@ -272,7 +268,7 @@ export default function WorkoutPage() {
               variant="ghost"
               size="icon"
               onClick={resetRestTimer}
-              className="absolute right-2 top-1/2 -translate-y-1/2 focus:ring-0 focus:ring-offset-0 active:bg-transparent"
+              className="absolute right-2 top-1/2 -translate-y-1/2 focus:ring-0 focus:ring-offset-0 active:bg-blue-100 hover:bg-blue-50 text-gray-700 hover:text-blue-600"
             >
               <RotateCcw className="h-5 w-5" />
             </Button>

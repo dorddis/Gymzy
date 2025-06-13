@@ -37,14 +37,20 @@ interface WorkoutSummaryScreenProps {
   showIncompleteSetsWarning: boolean;
   remainingSets: number;
   showInvalidSetsWarning?: boolean;
+  onSetExecuted?: () => void;
 }
 
-export function WorkoutSummaryScreen({ 
+export function WorkoutSummaryScreen({
   showIncompleteSetsWarning,
   remainingSets,
-  showInvalidSetsWarning = false
+  showInvalidSetsWarning = false,
+  onSetExecuted
 }: WorkoutSummaryScreenProps) {
   const { currentWorkoutExercises, setCurrentWorkoutExercises, toggleSetExecuted } = useWorkout();
+
+  const handleSetExecuted = (exerciseIndex: number, setIndex: number) => {
+    toggleSetExecuted(exerciseIndex, setIndex, onSetExecuted);
+  };
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = React.useState(false);
   const [exerciseToDeleteIndex, setExerciseToDeleteIndex] = React.useState<number | null>(null);
   const [deletingExerciseId, setDeletingExerciseId] = React.useState<string | null>(null);
@@ -353,7 +359,7 @@ export function WorkoutSummaryScreen({
                             ? 'bg-green-500 text-white' 
                             : 'bg-secondary/10 text-secondary'
                         }`}
-                        onClick={() => toggleSetExecuted(exerciseIndex, setIndex)}
+                        onClick={() => handleSetExecuted(exerciseIndex, setIndex)}
                       >
                         {set.isWarmup ? "W" : setIndex + 1}
                       </button>

@@ -39,7 +39,7 @@ interface WorkoutContextType {
   muscleVolumes: MuscleVolumes;
   currentWorkoutExercises: ExerciseWithSets[];
   setCurrentWorkoutExercises: React.Dispatch<React.SetStateAction<ExerciseWithSets[]>>;
-  toggleSetExecuted: (exerciseIndex: number, setIndex: number) => void;
+  toggleSetExecuted: (exerciseIndex: number, setIndex: number, onSetExecuted?: () => void) => void;
   totalVolume: number;
   combinedMuscleVolumes: MuscleVolumes;
   latestWorkout: Workout | null;
@@ -102,25 +102,30 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
   const [allWorkouts, setAllWorkouts] = useState<Workout[]>([]);
 
   // Add a function to toggle set execution
-  const toggleSetExecuted = useCallback((exerciseIndex: number, setIndex: number) => {
+  const toggleSetExecuted = useCallback((exerciseIndex: number, setIndex: number, onSetExecuted?: () => void) => {
     setCurrentWorkoutExercises(prevExercises => {
       const newExercises = [...prevExercises];
       const exercise = newExercises[exerciseIndex];
       const set = exercise.sets[setIndex];
-      
+
       // Create a new set with toggled isExecuted
       const updatedSet = { ...set, isExecuted: !set.isExecuted };
-      
+
       // Create a new array of sets with the updated set
       const newSets = [...exercise.sets];
       newSets[setIndex] = updatedSet;
-      
+
       // Create a new exercise with the updated sets
       const updatedExercise = { ...exercise, sets: newSets };
-      
+
       // Create a new array of exercises with the updated exercise
       newExercises[exerciseIndex] = updatedExercise;
-      
+
+      // If set is being marked as executed, trigger callback
+      if (!set.isExecuted && updatedSet.isExecuted && onSetExecuted) {
+        onSetExecuted();
+      }
+
       return newExercises;
     });
   }, []);

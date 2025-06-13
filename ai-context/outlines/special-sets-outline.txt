@@ -1,0 +1,274 @@
+# Special Sets & Advanced Workout Features Outline
+
+## Overview
+Implement advanced workout features including circuits, supersets, drop sets, and other special set types to enhance training variety and effectiveness.
+
+## Phase 1: Core Special Set Types
+
+### 1. Superset Implementation
+**Goal:** Allow users to group exercises together for back-to-back execution
+**Features:**
+- Pair 2-3 exercises together
+- No rest between superset exercises
+- Rest only after completing the full superset
+- Visual grouping in workout interface
+- Superset timer management
+
+**UI Components:**
+- Superset creation modal
+- Grouped exercise display
+- Superset progress indicator
+- Modified rest timer for supersets
+
+### 2. Circuit Training
+**Goal:** Create timed circuits with multiple exercises
+**Features:**
+- Multiple exercises in sequence
+- Timed intervals (work/rest periods)
+- Circuit rounds tracking
+- Audio/visual cues for transitions
+- Circuit completion tracking
+
+**UI Components:**
+- Circuit builder interface
+- Circuit timer with exercise transitions
+- Round counter
+- Circuit progress visualization
+
+### 3. Drop Sets
+**Goal:** Implement progressive weight reduction sets
+**Features:**
+- Automatic weight reduction suggestions
+- Multiple drop levels (double drop, triple drop)
+- Drop set tracking and progression
+- Weight calculation assistance
+- Drop set performance analytics
+
+**UI Components:**
+- Drop set configuration
+- Weight reduction calculator
+- Drop set progress tracker
+- Performance metrics display
+
+## Phase 2: Advanced Set Types
+
+### 4. Rest-Pause Sets
+**Goal:** Implement rest-pause training methodology
+**Features:**
+- Initial set to failure
+- Short rest periods (10-15 seconds)
+- Additional mini-sets
+- Total rep counting
+- Rest-pause timer
+
+**UI Components:**
+- Rest-pause set builder
+- Mini-rest timer
+- Rep accumulation tracker
+- Rest-pause completion indicator
+
+### 5. Cluster Sets
+**Goal:** Break sets into smaller clusters with mini-rests
+**Features:**
+- Intra-set rest periods
+- Cluster configuration (reps per cluster)
+- Cluster rest timing
+- Total volume tracking
+- Cluster progression
+
+**UI Components:**
+- Cluster set configuration
+- Cluster timer interface
+- Cluster progress tracking
+- Volume calculation display
+
+### 6. Tempo Sets
+**Goal:** Control exercise tempo for specific training adaptations
+**Features:**
+- Tempo notation (eccentric-pause-concentric-pause)
+- Tempo timer/metronome
+- Tempo tracking and compliance
+- Tempo progression suggestions
+- Form focus indicators
+
+**UI Components:**
+- Tempo configuration interface
+- Tempo metronome/timer
+- Tempo compliance tracker
+- Form reminder system
+
+## Phase 3: Workout Programming Features
+
+### 7. Pyramid Sets
+**Goal:** Implement ascending/descending pyramid training
+**Features:**
+- Ascending pyramids (increasing weight/decreasing reps)
+- Descending pyramids (decreasing weight/increasing reps)
+- Diamond pyramids (up then down)
+- Automatic weight/rep calculations
+- Pyramid progression tracking
+
+**UI Components:**
+- Pyramid set builder
+- Weight/rep progression display
+- Pyramid visualization
+- Progress tracking interface
+
+### 8. EMOM (Every Minute on the Minute)
+**Goal:** Implement EMOM training protocols
+**Features:**
+- Minute-based exercise scheduling
+- Multiple exercises per minute
+- EMOM duration setting
+- Automatic minute transitions
+- EMOM completion tracking
+
+**UI Components:**
+- EMOM builder interface
+- Minute timer with exercise cues
+- EMOM progress tracker
+- Exercise rotation display
+
+### 9. AMRAP (As Many Rounds As Possible)
+**Goal:** Implement AMRAP workout format
+**Features:**
+- Time-based AMRAP sessions
+- Round counting
+- Exercise sequence management
+- AMRAP leaderboards
+- Performance comparison
+
+**UI Components:**
+- AMRAP timer interface
+- Round counter
+- Exercise sequence display
+- Performance metrics
+
+## Phase 4: Integration & Analytics
+
+### 10. Special Set Analytics
+**Goal:** Provide insights into special set performance
+**Features:**
+- Special set performance tracking
+- Volume and intensity metrics
+- Progress comparisons
+- Training load analysis
+- Recovery recommendations
+
+**UI Components:**
+- Special set analytics dashboard
+- Performance trend charts
+- Training load indicators
+- Recovery status display
+
+### 11. Workout Templates with Special Sets
+**Goal:** Create and save workout templates including special sets
+**Features:**
+- Template creation with special sets
+- Template sharing and discovery
+- Template customization
+- Template performance tracking
+- Community template library
+
+**UI Components:**
+- Template builder with special sets
+- Template library interface
+- Template customization tools
+- Template performance dashboard
+
+### 12. AI-Powered Special Set Recommendations
+**Goal:** Intelligent suggestions for special set implementation
+**Features:**
+- Training goal-based recommendations
+- Fatigue-aware special set suggestions
+- Progressive overload with special sets
+- Recovery-based special set timing
+- Personalized special set protocols
+
+**UI Components:**
+- AI recommendation interface
+- Special set suggestion cards
+- Implementation guidance
+- Progress tracking integration
+
+## Technical Implementation
+
+### Database Schema Extensions
+```
+special_sets: {
+  id: string,
+  type: 'superset' | 'circuit' | 'dropset' | 'restpause' | 'cluster' | 'tempo' | 'pyramid' | 'emom' | 'amrap',
+  exercises: Exercise[],
+  parameters: {
+    restBetweenExercises?: number,
+    restBetweenSets?: number,
+    rounds?: number,
+    duration?: number,
+    tempo?: string,
+    dropPercentages?: number[],
+    clusterReps?: number[],
+    clusterRest?: number
+  },
+  createdAt: timestamp,
+  userId: string
+}
+
+workout_special_sets: {
+  workoutId: string,
+  specialSetId: string,
+  position: number,
+  completed: boolean,
+  performance: {
+    totalTime?: number,
+    roundsCompleted?: number,
+    totalReps?: number,
+    averageRPE?: number
+  }
+}
+```
+
+### API Endpoints
+- `POST /api/special-sets` - Create special set
+- `GET /api/special-sets` - Get user's special sets
+- `PUT /api/special-sets/:id` - Update special set
+- `DELETE /api/special-sets/:id` - Delete special set
+- `POST /api/workouts/:id/special-sets` - Add special set to workout
+- `GET /api/special-sets/templates` - Get special set templates
+
+### State Management
+- Special set creation state
+- Active special set execution state
+- Special set timer states
+- Special set performance tracking
+- Special set template management
+
+## Priority Implementation Order
+
+### High Priority (Phase 1)
+1. **Supersets** - Most commonly requested feature
+2. **Circuits** - Popular for conditioning workouts
+3. **Drop Sets** - Common strength training technique
+
+### Medium Priority (Phase 2)
+4. **Rest-Pause Sets** - Advanced strength technique
+5. **Cluster Sets** - Powerlifting/strength focus
+6. **Tempo Sets** - Form and control focus
+
+### Lower Priority (Phase 3-4)
+7. **Pyramid Sets** - Specialized training method
+8. **EMOM/AMRAP** - CrossFit-style workouts
+9. **Analytics & AI Integration** - Enhancement features
+
+## Success Metrics
+- Special set usage adoption rate
+- Workout completion rates with special sets
+- User engagement with advanced features
+- Training progression with special sets
+- User feedback and satisfaction scores
+
+## Timeline Estimate
+- **Phase 1:** 3-4 weeks
+- **Phase 2:** 2-3 weeks  
+- **Phase 3:** 2-3 weeks
+- **Phase 4:** 3-4 weeks
+- **Total:** 10-14 weeks for complete implementation

@@ -72,8 +72,14 @@ export function WorkoutHeader({ onTerminateWorkout, onCompleteWorkout, className
   return (
     <>
       <header className={`w-full bg-background px-4 py-4 flex justify-between items-center border-b border-gray-200 ${className || ''}`}>
-        <Button variant="ghost" size="icon" onClick={handleTerminateClick}>
-          <X className="h-5 w-5 text-red-500" />
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleTerminateClick}
+          className="border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 px-3 py-2"
+        >
+          <X className="h-4 w-4 mr-1" />
+          Exit
         </Button>
 
         <div className="flex items-center space-x-2">
@@ -83,8 +89,14 @@ export function WorkoutHeader({ onTerminateWorkout, onCompleteWorkout, className
           <span className="text-xl font-semibold">{formatTime(time)}</span>
         </div>
 
-        <Button variant="ghost" size="icon" onClick={handleCompleteClick}>
-          <Check className="h-5 w-5 text-green-500" />
+        <Button
+          variant="default"
+          size="sm"
+          onClick={handleCompleteClick}
+          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 font-semibold shadow-lg"
+        >
+          <Check className="h-4 w-4 mr-2" />
+          Finish
         </Button>
       </header>
 
@@ -101,10 +113,10 @@ export function WorkoutHeader({ onTerminateWorkout, onCompleteWorkout, className
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex gap-2 sm:gap-0">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setIsExitDialogOpen(false)}
-              className="flex-1 sm:flex-none"
+              className="flex-1 sm:flex-none border-gray-300 text-gray-700 hover:bg-gray-50"
             >
               Cancel
             </Button>
