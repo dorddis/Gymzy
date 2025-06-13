@@ -14,6 +14,8 @@ import { EquipmentManager } from '@/components/settings/equipment-manager';
 import { ScheduleBuilder } from '@/components/settings/schedule-builder';
 import { HealthInfoManager } from '@/components/settings/health-info-manager';
 import { PhysicalStatsManager } from '@/components/settings/physical-stats-manager';
+import { AICoachSettings } from '@/components/settings/ai-coach-settings';
+import { PrivacySecurityDashboard } from '@/components/settings/privacy-security-dashboard';
 import { 
   ArrowLeft, 
   User, 
@@ -127,7 +129,7 @@ export default function SettingsPage() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
             <TabsTrigger value="profile" className="flex items-center gap-2">
               <User className="h-4 w-4" />
               <span className="hidden sm:inline">Profile</span>
@@ -152,9 +154,13 @@ export default function SettingsPage() {
               <Heart className="h-4 w-4" />
               <span className="hidden sm:inline">Health</span>
             </TabsTrigger>
-            <TabsTrigger value="app" className="flex items-center gap-2">
+            <TabsTrigger value="ai" className="flex items-center gap-2">
               <SettingsIcon className="h-4 w-4" />
-              <span className="hidden sm:inline">App</span>
+              <span className="hidden sm:inline">AI Coach</span>
+            </TabsTrigger>
+            <TabsTrigger value="privacy" className="flex items-center gap-2">
+              <SettingsIcon className="h-4 w-4" />
+              <span className="hidden sm:inline">Privacy</span>
             </TabsTrigger>
           </TabsList>
 
@@ -246,6 +252,17 @@ export default function SettingsPage() {
               context={onboardingContext}
               onUpdate={setOnboardingContext}
             />
+          </TabsContent>
+
+          <TabsContent value="ai" className="space-y-6">
+            <AICoachSettings
+              context={onboardingContext}
+              onUpdate={setOnboardingContext}
+            />
+          </TabsContent>
+
+          <TabsContent value="privacy" className="space-y-6">
+            <PrivacySecurityDashboard />
           </TabsContent>
 
           <TabsContent value="app" className="space-y-6">
