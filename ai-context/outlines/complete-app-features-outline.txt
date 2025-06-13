@@ -695,6 +695,177 @@ interface CalorieBurn {
 - **Strength Training:** ~6-8 METs depending on intensity
 - **Cardio:** Variable METs based on activity type and intensity
 
+### Step 25.9: User Settings & Profile Management
+**Goal:** Comprehensive user settings, profile management, and logout functionality
+**Priority:** High
+**Estimated Time:** 4-5 days
+
+**Tasks:**
+1. **Profile Icon Menu**
+   - Dropdown menu from profile icon in header
+   - User avatar display with fallback initials
+   - Quick access to key settings
+   - Visual hierarchy for menu items
+
+2. **User Settings Page**
+   - **Personal Information**
+     - Edit display name and bio
+     - Update profile picture
+     - Change email (with verification)
+     - Phone number (optional)
+
+   - **Physical Stats Management**
+     - Update age, height, weight, gender
+     - Activity level adjustment
+     - Unit preferences (metric/imperial)
+     - BMR/TDEE recalculation on changes
+
+   - **Fitness Preferences**
+     - Modify fitness goals
+     - Update preferred workout types
+     - Equipment availability changes
+     - Workout schedule preferences
+
+   - **AI Coach Settings**
+     - Communication style preferences
+     - Feedback type (detailed/concise/visual)
+     - Learning style adjustment
+     - Motivation level settings
+     - Personal challenges and support system updates
+
+3. **Privacy & Security**
+   - **Account Security**
+     - Change password
+     - Two-factor authentication setup
+     - Active sessions management
+     - Account deletion option
+
+   - **Privacy Controls**
+     - Profile visibility settings
+     - Workout sharing preferences
+     - Data export options
+     - Analytics opt-out
+
+4. **Notification Settings**
+   - **Workout Reminders**
+     - Daily workout notifications
+     - Rest day reminders
+     - Streak maintenance alerts
+     - Goal progress updates
+
+   - **Social Notifications**
+     - New followers
+     - Workout likes and comments
+     - Friend achievements
+     - Community updates
+
+   - **AI Coach Notifications**
+     - Daily motivation messages
+     - Personalized tips
+     - Progress insights
+     - Challenge suggestions
+
+5. **App Preferences**
+   - **Display Settings**
+     - Theme selection (light/dark/auto)
+     - Font size preferences
+     - Color scheme options
+     - Animation preferences
+
+   - **Data & Storage**
+     - Offline data sync
+     - Cache management
+     - Backup preferences
+     - Data usage settings
+
+6. **Logout & Session Management**
+   - **Secure Logout**
+     - Clear local data
+     - Revoke authentication tokens
+     - Redirect to login screen
+     - Session timeout settings
+
+   - **Multi-device Management**
+     - View active sessions
+     - Remote logout capability
+     - Device trust settings
+     - Sync preferences across devices
+
+**Database Schema Updates:**
+```typescript
+interface UserSettings {
+  userId: string;
+
+  // Display preferences
+  theme: 'light' | 'dark' | 'auto';
+  fontSize: 'small' | 'medium' | 'large';
+  animations: boolean;
+
+  // Privacy settings
+  profileVisibility: 'public' | 'friends' | 'private';
+  workoutSharing: 'public' | 'friends' | 'private';
+  showInSearch: boolean;
+
+  // Notification preferences
+  workoutReminders: boolean;
+  socialNotifications: boolean;
+  aiCoachNotifications: boolean;
+  emailNotifications: boolean;
+
+  // Units and preferences
+  unitSystem: 'metric' | 'imperial';
+  timeFormat: '12h' | '24h';
+  firstDayOfWeek: 'sunday' | 'monday';
+
+  // Security settings
+  twoFactorEnabled: boolean;
+  sessionTimeout: number; // minutes
+
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}
+
+interface UserSession {
+  id: string;
+  userId: string;
+  deviceInfo: {
+    type: 'mobile' | 'desktop' | 'tablet';
+    browser: string;
+    os: string;
+    location?: string;
+  };
+  lastActive: Timestamp;
+  createdAt: Timestamp;
+  isActive: boolean;
+}
+```
+
+**UI Components:**
+1. **Settings Navigation**
+   - Categorized settings sections
+   - Search functionality within settings
+   - Quick access toggles
+   - Save/cancel confirmation
+
+2. **Profile Management**
+   - Image upload with cropping
+   - Real-time preview of changes
+   - Validation and error handling
+   - Progress indicators for updates
+
+3. **Security Dashboard**
+   - Active sessions list
+   - Security score indicator
+   - Recent activity log
+   - Security recommendations
+
+**User Experience Flow:**
+1. **Profile Icon Click** → Dropdown menu with quick actions
+2. **Settings Access** → Categorized settings page
+3. **Edit Profile** → Form with real-time validation
+4. **Security Settings** → Dashboard with active sessions
+5. **Logout** → Confirmation dialog with options
+
 ### Step 26: Smart Notifications & Daily Engagement
 **Goal:** Keep users engaged with intelligent, personalized notifications
 **Priority:** Medium

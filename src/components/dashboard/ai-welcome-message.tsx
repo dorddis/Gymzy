@@ -54,7 +54,10 @@ export function AIWelcomeMessage() {
   }, [motivationContext]);
 
   const generateMotivationContext = () => {
-    if (!user || !workouts) return;
+    if (!user) return;
+
+    // If workouts is null or undefined, use empty array
+    const userWorkouts = workouts || [];
 
     const now = new Date();
     const hour = now.getHours();
@@ -70,7 +73,7 @@ export function AIWelcomeMessage() {
     }
 
     // Find last workout
-    const sortedWorkouts = [...workouts].sort((a, b) => 
+    const sortedWorkouts = [...userWorkouts].sort((a, b) =>
       new Date(b.date).getTime() - new Date(a.date).getTime()
     );
     const lastWorkout = sortedWorkouts.length > 0 ? new Date(sortedWorkouts[0].date) : undefined;
@@ -78,7 +81,7 @@ export function AIWelcomeMessage() {
     // Check if user worked out today
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const hasWorkoutToday = workouts.some(workout => {
+    const hasWorkoutToday = userWorkouts.some(workout => {
       const workoutDate = new Date(workout.date);
       workoutDate.setHours(0, 0, 0, 0);
       return workoutDate.getTime() === today.getTime();
@@ -95,7 +98,7 @@ export function AIWelcomeMessage() {
     }
 
     while (true) {
-      const hasWorkoutOnDate = workouts.some(workout => {
+      const hasWorkoutOnDate = userWorkouts.some(workout => {
         const workoutDate = new Date(workout.date);
         workoutDate.setHours(0, 0, 0, 0);
         return workoutDate.getTime() === checkDate.getTime();
@@ -113,8 +116,8 @@ export function AIWelcomeMessage() {
     const weekStart = new Date();
     weekStart.setDate(weekStart.getDate() - weekStart.getDay());
     weekStart.setHours(0, 0, 0, 0);
-    
-    const workoutsThisWeek = workouts.filter(workout => {
+
+    const workoutsThisWeek = userWorkouts.filter(workout => {
       const workoutDate = new Date(workout.date);
       return workoutDate >= weekStart;
     });
@@ -303,10 +306,10 @@ export function AIWelcomeMessage() {
             variant="ghost"
             size="sm"
             onClick={() => window.location.href = '/chat'}
-            className="text-xs h-7 px-2"
+            className="text-xs h-7 px-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50"
           >
             <MessageCircle className="h-3 w-3 mr-1" />
-            Ask Gymzy
+            Reply in chat...
           </Button>
         </div>
       </CardContent>
