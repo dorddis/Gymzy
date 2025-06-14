@@ -8,6 +8,7 @@ import { FirebaseStateAdapter, MemoryStateAdapter } from './firebase-state-adapt
 import { RobustToolExecutor } from './robust-tool-executor';
 import { EnhancedWorkoutTools } from './enhanced-workout-tools';
 import { generateAIResponse, generateCharacterStreamingResponse } from './ai-service';
+import { ComprehensiveFixesService } from './comprehensive-fixes-service';
 
 export interface ChatMessage {
   id: string;
@@ -108,7 +109,7 @@ export class ProductionAgenticService {
 
     const startTime = Date.now();
     const sessionId = this.getSessionId(chatHistory);
-    const userId = this.getUserId(chatHistory);
+    const userId = await this.getUserId(chatHistory);
 
     try {
       console.log('🤖 ProductionAgenticService: Starting response generation...');
@@ -193,7 +194,9 @@ export class ProductionAgenticService {
 
     } catch (error) {
       console.error('❌ ProductionAgenticService: Error in response generation:', error);
-      return this.generateFallbackResponse(userInput, sessionId, error, startTime);
+
+      // Use comprehensive fixes for better error handling
+      return ComprehensiveFixesService.handleAIResponseError(error, 'generateAgenticResponse');
     }
   }
 
@@ -230,7 +233,9 @@ GENERAL CONVERSATION (use "general_response"):
 - Greetings: "Hi", "Hello", "Hey", "What's up"
 - Questions: "How are you?", "What can you do?"
 - Statements: "There's no button", "I'm tired"
+- Emotional expressions: "I'm demotivated", "I'm sad", "I'm stressed"
 - Complaints or feedback
+- Any statement about feelings or mood
 
 Respond with JSON only:
 {
@@ -246,7 +251,9 @@ Examples:
 - "Create a chest workout" → {"intent": "workout_creation", "requiresTools": true, "tools": ["create_workout"], "reasoning": "Explicit workout creation request", "confidence": 0.9, "parameters": {}}
 - "Hey there" → {"intent": "general_chat", "requiresTools": false, "tools": [], "reasoning": "Greeting - general conversation", "confidence": 0.9, "parameters": {}}
 - "What's up?" → {"intent": "general_chat", "requiresTools": false, "tools": [], "reasoning": "Casual greeting", "confidence": 0.9, "parameters": {}}
-- "There's no button" → {"intent": "general_chat", "requiresTools": false, "tools": [], "reasoning": "User feedback/complaint", "confidence": 0.9, "parameters": {}}`;
+- "There's no button" → {"intent": "general_chat", "requiresTools": false, "tools": [], "reasoning": "User feedback/complaint", "confidence": 0.9, "parameters": {}}
+- "I'm demotivated" → {"intent": "general_chat", "requiresTools": false, "tools": [], "reasoning": "Emotional statement - provide support", "confidence": 0.9, "parameters": {}}
+- "I'm feeling tired" → {"intent": "general_chat", "requiresTools": false, "tools": [], "reasoning": "Emotional/physical state - general conversation", "confidence": 0.9, "parameters": {}}`;
 
     try {
       const analysisResponse = await generateAIResponse(analysisPrompt);
@@ -424,13 +431,18 @@ Requirements:
 
   // Helper methods
   private getSessionId(chatHistory: ChatMessage[]): string {
-    // Try to get from existing session or generate new one
-    return `session_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+    return ComprehensiveFixesService.getOrCreateSessionId();
   }
 
-  private getUserId(chatHistory: ChatMessage[]): string {
-    // Extract from chat history or use default
-    return chatHistory.length > 0 ? chatHistory[0].userId : 'anonymous';
+  private async getUserId(chatHistory: ChatMessage[]): Promise<string> {
+    // Extract from chat history first
+    const userIdFromHistory = chatHistory.find(msg => msg.userId)?.userId;
+    if (userIdFromHistory && userIdFromHistory !== 'anonymous') {
+      return userIdFromHistory;
+    }
+
+    // Use comprehensive fixes service for robust user ID extraction
+    return await ComprehensiveFixesService.getUserId();
   }
 
   private getFallbackIntentAnalysis(userInput: string): any {
@@ -442,15 +454,17 @@ Requirements:
     const greetingKeywords = ['hi', 'hello', 'hey', 'sup', 'what\'s up', 'how are you', 'good morning', 'good afternoon', 'good evening'];
     const casualKeywords = ['thanks', 'thank you', 'ok', 'okay', 'cool', 'nice', 'great', 'awesome'];
     const feedbackKeywords = ['no button', 'doesn\'t work', 'error', 'problem', 'issue', 'bug'];
+    const emotionalKeywords = ['demotivated', 'sad', 'tired', 'stressed', 'frustrated', 'angry', 'upset', 'down', 'depressed', 'anxious', 'worried', 'feeling', 'mood'];
 
     if (greetingKeywords.some(keyword => lowerInput.includes(keyword)) ||
         casualKeywords.some(keyword => lowerInput.includes(keyword)) ||
-        feedbackKeywords.some(keyword => lowerInput.includes(keyword))) {
+        feedbackKeywords.some(keyword => lowerInput.includes(keyword)) ||
+        emotionalKeywords.some(keyword => lowerInput.includes(keyword))) {
       return {
         intent: 'general_chat',
         requiresTools: false,
         tools: [],
-        reasoning: 'Detected greeting, casual conversation, or feedback',
+        reasoning: 'Detected greeting, casual conversation, feedback, or emotional statement',
         confidence: 0.9,
         parameters: {}
       };

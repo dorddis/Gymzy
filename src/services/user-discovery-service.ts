@@ -1,20 +1,22 @@
 import { db } from '@/lib/firebase';
-import { 
-  collection, 
-  query, 
-  where, 
-  orderBy, 
-  limit, 
-  getDocs, 
-  doc, 
-  getDoc, 
-  setDoc, 
-  deleteDoc, 
-  updateDoc, 
+import {
+  collection,
+  query,
+  where,
+  orderBy,
+  limit,
+  getDocs,
+  doc,
+  getDoc,
+  setDoc,
+  deleteDoc,
+  updateDoc,
   increment,
   Timestamp,
   QuerySnapshot,
-  DocumentData
+  DocumentData,
+  runTransaction,
+  writeBatch
 } from 'firebase/firestore';
 
 export interface UserFollowing {
@@ -49,34 +51,80 @@ export interface PublicUserProfile {
   createdAt: Timestamp;
 }
 
-// Search users by name or username
+// Enhanced search users with fuzzy matching
 export const searchUsers = async (searchTerm: string, currentUserId: string, limitCount: number = 20): Promise<PublicUserProfile[]> => {
   try {
     if (!searchTerm.trim()) return [];
 
+    console.log('🔍 UserDiscovery: Searching for users with term:', searchTerm);
+
     const usersRef = collection(db, 'user_profiles');
-    
-    // Search by display name (case-insensitive)
-    const searchQuery = query(
+    const searchTermLower = searchTerm.toLowerCase();
+
+    // Get all public users first (since Firestore doesn't support full-text search)
+    const allUsersQuery = query(
       usersRef,
       where('isPublic', '==', true),
-      where('displayName', '>=', searchTerm),
-      where('displayName', '<=', searchTerm + '\uf8ff'),
-      limit(limitCount)
+      limit(100) // Get more users to filter locally
     );
 
-    const querySnapshot = await getDocs(searchQuery);
-    const users: PublicUserProfile[] = [];
+    const querySnapshot = await getDocs(allUsersQuery);
+    const allUsers: PublicUserProfile[] = [];
 
     querySnapshot.forEach((doc) => {
-      const userData = doc.data();
-      // Include all users (including current user for profile access)
-      users.push(userData as PublicUserProfile);
+      const userData = doc.data() as PublicUserProfile;
+      allUsers.push(userData);
     });
 
-    return users;
+    // Filter users with fuzzy matching
+    const matchedUsers = allUsers.filter(user => {
+      if (!user.displayName) return false;
+
+      const displayNameLower = user.displayName.toLowerCase();
+
+      // Exact match (highest priority)
+      if (displayNameLower === searchTermLower) return true;
+
+      // Starts with search term
+      if (displayNameLower.startsWith(searchTermLower)) return true;
+
+      // Contains search term
+      if (displayNameLower.includes(searchTermLower)) return true;
+
+      // Fuzzy matching - check if search term words are in display name
+      const searchWords = searchTermLower.split(' ');
+      const nameWords = displayNameLower.split(' ');
+
+      return searchWords.some(searchWord =>
+        nameWords.some(nameWord =>
+          nameWord.includes(searchWord) || searchWord.includes(nameWord)
+        )
+      );
+    });
+
+    // Sort by relevance
+    const sortedUsers = matchedUsers.sort((a, b) => {
+      const aName = a.displayName.toLowerCase();
+      const bName = b.displayName.toLowerCase();
+
+      // Exact match first
+      if (aName === searchTermLower && bName !== searchTermLower) return -1;
+      if (bName === searchTermLower && aName !== searchTermLower) return 1;
+
+      // Starts with search term
+      if (aName.startsWith(searchTermLower) && !bName.startsWith(searchTermLower)) return -1;
+      if (bName.startsWith(searchTermLower) && !aName.startsWith(searchTermLower)) return 1;
+
+      // Alphabetical order
+      return aName.localeCompare(bName);
+    });
+
+    const result = sortedUsers.slice(0, limitCount);
+    console.log(`✅ UserDiscovery: Found ${result.length} matching users`);
+
+    return result;
   } catch (error) {
-    console.error('Error searching users:', error);
+    console.error('❌ UserDiscovery: Error searching users:', error);
     return [];
   }
 };
@@ -119,76 +167,168 @@ export const getSuggestedUsers = async (currentUserId: string, limitCount: numbe
   }
 };
 
-// Follow a user
+// Follow a user with transaction support
 export const followUser = async (followerId: string, followingId: string): Promise<void> => {
   try {
-    const followId = `${followerId}_${followingId}`;
-    const followRef = doc(db, 'user_following', followId);
-    
-    const followData: UserFollowing = {
-      id: followId,
-      followerId,
-      followingId,
-      status: 'accepted', // For now, auto-accept. Can add pending status later
-      createdAt: Timestamp.now()
-    };
+    console.log(`🔄 UserDiscovery: Following user ${followingId} by ${followerId}`);
 
-    await setDoc(followRef, followData);
+    if (followerId === followingId) {
+      throw new Error('Cannot follow yourself');
+    }
 
-    // Update follower counts
-    const followerRef = doc(db, 'user_profiles', followerId);
-    const followingRef = doc(db, 'user_profiles', followingId);
+    // Use transaction to ensure data consistency
+    await runTransaction(db, async (transaction) => {
+      const followId = `${followerId}_${followingId}`;
+      const followRef = doc(db, 'user_following', followId);
+      const followerRef = doc(db, 'user_profiles', followerId);
+      const followingRef = doc(db, 'user_profiles', followingId);
 
-    await updateDoc(followerRef, {
-      followingCount: increment(1)
-    });
+      // Check if already following
+      const existingFollow = await transaction.get(followRef);
+      if (existingFollow.exists()) {
+        throw new Error('Already following this user');
+      }
 
-    await updateDoc(followingRef, {
-      followersCount: increment(1)
+      // Check if both users exist
+      const [followerDoc, followingDoc] = await Promise.all([
+        transaction.get(followerRef),
+        transaction.get(followingRef)
+      ]);
+
+      if (!followerDoc.exists()) {
+        throw new Error('Follower profile not found');
+      }
+      if (!followingDoc.exists()) {
+        throw new Error('User to follow not found');
+      }
+
+      // Create follow relationship
+      const followData: UserFollowing = {
+        id: followId,
+        followerId,
+        followingId,
+        status: 'accepted',
+        createdAt: Timestamp.now()
+      };
+
+      transaction.set(followRef, followData);
+
+      // Update counters atomically
+      const followerData = followerDoc.data();
+      const followingData = followingDoc.data();
+
+      transaction.update(followerRef, {
+        followingCount: (followerData?.followingCount || 0) + 1,
+        updatedAt: Timestamp.now()
+      });
+
+      transaction.update(followingRef, {
+        followersCount: (followingData?.followersCount || 0) + 1,
+        updatedAt: Timestamp.now()
+      });
+
+      console.log(`✅ UserDiscovery: Successfully followed user ${followingId}`);
     });
 
   } catch (error) {
-    console.error('Error following user:', error);
-    throw error;
+    console.error('❌ UserDiscovery: Error following user:', error);
+
+    // Provide more specific error messages
+    if (error instanceof Error) {
+      if (error.message.includes('permission')) {
+        throw new Error('Permission denied. Please check your account settings.');
+      } else if (error.message.includes('not found')) {
+        throw new Error('User not found or profile is private.');
+      } else {
+        throw error;
+      }
+    }
+
+    throw new Error('Failed to follow user. Please try again.');
   }
 };
 
-// Unfollow a user
+// Unfollow a user with transaction support
 export const unfollowUser = async (followerId: string, followingId: string): Promise<void> => {
   try {
-    const followId = `${followerId}_${followingId}`;
-    const followRef = doc(db, 'user_following', followId);
-    
-    await deleteDoc(followRef);
+    console.log(`🔄 UserDiscovery: Unfollowing user ${followingId} by ${followerId}`);
 
-    // Update follower counts
-    const followerRef = doc(db, 'user_profiles', followerId);
-    const followingRef = doc(db, 'user_profiles', followingId);
+    // Use transaction to ensure data consistency
+    await runTransaction(db, async (transaction) => {
+      const followId = `${followerId}_${followingId}`;
+      const followRef = doc(db, 'user_following', followId);
+      const followerRef = doc(db, 'user_profiles', followerId);
+      const followingRef = doc(db, 'user_profiles', followingId);
 
-    await updateDoc(followerRef, {
-      followingCount: increment(-1)
-    });
+      // Check if follow relationship exists
+      const existingFollow = await transaction.get(followRef);
+      if (!existingFollow.exists()) {
+        throw new Error('Not following this user');
+      }
 
-    await updateDoc(followingRef, {
-      followersCount: increment(-1)
+      // Get current profiles
+      const [followerDoc, followingDoc] = await Promise.all([
+        transaction.get(followerRef),
+        transaction.get(followingRef)
+      ]);
+
+      if (!followerDoc.exists() || !followingDoc.exists()) {
+        throw new Error('User profile not found');
+      }
+
+      // Delete follow relationship
+      transaction.delete(followRef);
+
+      // Update counters atomically
+      const followerData = followerDoc.data();
+      const followingData = followingDoc.data();
+
+      transaction.update(followerRef, {
+        followingCount: Math.max(0, (followerData?.followingCount || 0) - 1),
+        updatedAt: Timestamp.now()
+      });
+
+      transaction.update(followingRef, {
+        followersCount: Math.max(0, (followingData?.followersCount || 0) - 1),
+        updatedAt: Timestamp.now()
+      });
+
+      console.log(`✅ UserDiscovery: Successfully unfollowed user ${followingId}`);
     });
 
   } catch (error) {
-    console.error('Error unfollowing user:', error);
-    throw error;
+    console.error('❌ UserDiscovery: Error unfollowing user:', error);
+
+    if (error instanceof Error) {
+      if (error.message.includes('permission')) {
+        throw new Error('Permission denied. Please check your account settings.');
+      } else {
+        throw error;
+      }
+    }
+
+    throw new Error('Failed to unfollow user. Please try again.');
   }
 };
 
-// Check if user is following another user
+// Check if user is following another user with better error handling
 export const isFollowing = async (followerId: string, followingId: string): Promise<boolean> => {
   try {
+    if (!followerId || !followingId) {
+      console.warn('⚠️ UserDiscovery: Invalid user IDs provided for follow check');
+      return false;
+    }
+
     const followId = `${followerId}_${followingId}`;
     const followRef = doc(db, 'user_following', followId);
     const followSnap = await getDoc(followRef);
-    
-    return followSnap.exists();
+
+    const isFollowingUser = followSnap.exists();
+    console.log(`🔍 UserDiscovery: Follow status ${followerId} -> ${followingId}: ${isFollowingUser}`);
+
+    return isFollowingUser;
   } catch (error) {
-    console.error('Error checking follow status:', error);
+    console.error('❌ UserDiscovery: Error checking follow status:', error);
     return false;
   }
 };

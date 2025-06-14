@@ -1,4 +1,5 @@
 import { getAIPersonalityProfile, generateAIContext } from './ai-personality-service';
+import { ComprehensiveFixesService } from './comprehensive-fixes-service';
 
 // Google AI Studio Configuration
 const GOOGLE_AI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
@@ -99,14 +100,8 @@ export const sendChatMessage = async (
     // Import and use production agentic service
     const { productionAgenticService } = await import('./production-agentic-service');
 
-    // Convert conversation history to the format expected by production AI
-    const chatHistory = conversationHistory.map((msg, index) => ({
-      id: msg.id || `msg_${index}`,
-      role: msg.role as 'user' | 'assistant',
-      content: msg.content,
-      timestamp: msg.timestamp,
-      userId: msg.userId || userId // Use current userId as fallback
-    }));
+    // Convert conversation history using comprehensive fixes
+    const chatHistory = ComprehensiveFixesService.validateAndCleanChatHistory(conversationHistory);
 
     console.log('🤖 ChatService: Calling production agentic AI service...');
 

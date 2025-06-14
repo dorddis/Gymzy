@@ -469,6 +469,34 @@ export class EnhancedWorkoutTools {
     return null;
   }
 
+  /**
+   * Map muscle names to valid enum values for Zod validation
+   */
+  private mapMuscleNamesToValidEnum(muscleNames: string[]): string[] {
+    const muscleMapping: { [key: string]: string } = {
+      'Rectus Abdominis': 'Upper Rectus Abdominis',
+      'Core': 'Upper Rectus Abdominis',
+      'Abs': 'Upper Rectus Abdominis',
+      'Abdominals': 'Upper Rectus Abdominis',
+      'Chest': 'Pectoralis Major',
+      'Pecs': 'Pectoralis Major',
+      'Back': 'Latissimus Dorsi',
+      'Lats': 'Latissimus Dorsi',
+      'Shoulders': 'Deltoid',
+      'Delts': 'Deltoid',
+      'Arms': 'Biceps Brachii',
+      'Legs': 'Quadriceps',
+      'Quads': 'Quadriceps',
+      'Glutes': 'Gluteus Maximus',
+      'Butt': 'Gluteus Maximus'
+    };
+
+    return muscleNames.map(muscle => {
+      // Return mapped value if exists, otherwise return original (assuming it's already valid)
+      return muscleMapping[muscle] || muscle;
+    });
+  }
+
   private generateSuccessMessage(matched: number, total: number, unmatched: string[]): string {
     if (matched === total) {
       return `🎉 Perfect! Successfully created your workout with all ${total} exercises.`;

@@ -25,10 +25,19 @@
           allow read, write: if request.auth != null && request.auth.uid == userId;
         }
 
-        // Enhanced user profiles with social features
+        // Enhanced user profiles with social features - Fixed permissions
         match /user_profiles/{userId} {
-          allow read: if request.auth != null;
-          allow write: if request.auth != null && request.auth.uid == userId;
+          // Allow read if user is authenticated AND (profile is public OR user owns it)
+          allow read: if request.auth != null &&
+            (resource.data.isPublic == true || request.auth.uid == userId);
+
+          // Allow create/update only by the owner with valid data
+          allow create, update: if request.auth != null &&
+            request.auth.uid == userId &&
+            request.resource.data.uid == userId;
+
+          // Allow delete only by the owner
+          allow delete: if request.auth != null && request.auth.uid == userId;
         }
 
         // AI personality profiles - private to user (DEVELOPMENT - PERMISSIVE)
@@ -41,9 +50,21 @@
           allow read, write: if request.auth != null && request.auth.uid == userId;
         }
 
-        // Social following relationships (DEVELOPMENT - PERMISSIVE)
+        // Social following relationships - Fixed permissions
         match /user_following/{followId} {
-          allow read, write: if request.auth != null;
+          // Allow read if user is involved in the relationship
+          allow read: if request.auth != null &&
+            (request.auth.uid == resource.data.followerId ||
+             request.auth.uid == resource.data.followingId);
+
+          // Allow create if user is the follower and data is valid
+          allow create: if request.auth != null &&
+            request.auth.uid == request.resource.data.followerId &&
+            request.resource.data.followerId != request.resource.data.followingId;
+
+          // Allow delete if user is the follower (unfollowing)
+          allow delete: if request.auth != null &&
+            request.auth.uid == resource.data.followerId;
         }
 
         // Workout posts for social feed (DEVELOPMENT - PERMISSIVE)
@@ -106,6 +127,14 @@
 
         // User sessions - private to user
         match /user_sessions/{sessionId} {
+          allow read, write: if request.auth != null &&
+            resource.data.userId == request.auth.uid;
+          allow create: if request.auth != null &&
+            request.resource.data.userId == request.auth.uid;
+        }
+
+        // Conversation states for agentic AI - private to user
+        match /conversation_states/{sessionId} {
           allow read, write: if request.auth != null &&
             resource.data.userId == request.auth.uid;
           allow create: if request.auth != null &&

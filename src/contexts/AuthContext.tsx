@@ -18,28 +18,9 @@ import {
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, deleteDoc, Timestamp } from 'firebase/firestore';
 
-// Enhanced user profile interface
-interface UserProfile {
-  uid: string;
-  email: string;
-  displayName: string;
-  profilePicture?: string;
-  bio?: string;
-  fitnessGoals: string[];
-  experienceLevel: 'beginner' | 'intermediate' | 'advanced';
-  preferredWorkoutTypes: string[];
-  isPublic: boolean;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-  // Social features
-  followersCount: number;
-  followingCount: number;
-  workoutsCount: number;
-  // Legacy field for backward compatibility
-  hasChatted?: boolean;
-  // Onboarding status
-  hasCompletedOnboarding: boolean;
-}
+// Import unified user profile types
+import { UserProfile, UserProfileUpdate } from '@/types/user-profile';
+import { UnifiedUserProfileService } from '@/services/unified-user-profile-service';
 
 interface CustomUser extends User {
   profile?: UserProfile;
@@ -55,7 +36,7 @@ interface AuthContextType {
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
-  updateUserProfile: (updates: Partial<UserProfile>) => Promise<void>;
+  updateUserProfile: (updates: UserProfileUpdate) => Promise<void>;
   deleteAccount: () => Promise<void>;
   // Profile management
   refreshUserProfile: () => Promise<void>;
@@ -71,72 +52,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Google Auth Provider
   const googleProvider = new GoogleAuthProvider();
 
-  // Helper function to create user profile
+  // Helper function to create user profile using unified service
   const createUserProfile = async (firebaseUser: User, additionalData?: Partial<UserProfile>): Promise<UserProfile> => {
-    // Clean up undefined values
-    const cleanData = (obj: any): any => {
-      const cleaned: any = {};
-      for (const [key, value] of Object.entries(obj)) {
-        if (value !== undefined) {
-          cleaned[key] = value;
-        }
+    console.log('AuthContext: Creating user profile using unified service');
+
+    return await UnifiedUserProfileService.createProfile(
+      firebaseUser.uid,
+      firebaseUser.email || '',
+      firebaseUser.displayName || '',
+      {
+        profilePicture: firebaseUser.photoURL || undefined,
+        ...additionalData
       }
-      return cleaned;
-    };
-
-    const baseProfile: UserProfile = {
-      uid: firebaseUser.uid,
-      email: firebaseUser.email || '',
-      displayName: firebaseUser.displayName || '',
-      bio: '',
-      fitnessGoals: [],
-      experienceLevel: 'beginner',
-      preferredWorkoutTypes: [],
-      isPublic: true,
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
-      followersCount: 0,
-      followingCount: 0,
-      workoutsCount: 0,
-      hasChatted: false,
-      hasCompletedOnboarding: false,
-      ...additionalData
-    };
-
-    // Add profilePicture only if it exists
-    if (firebaseUser.photoURL) {
-      baseProfile.profilePicture = firebaseUser.photoURL;
-    }
-
-    // Clean the profile to remove any undefined values
-    const userProfile = cleanData(baseProfile) as UserProfile;
-
-    console.log('Creating user profile:', userProfile);
-
-    const userProfileRef = doc(db, 'user_profiles', firebaseUser.uid);
-    await setDoc(userProfileRef, userProfile);
-
-    return userProfile;
+    );
   };
 
-  // Helper function to load user profile
+  // Helper function to load user profile using unified service
   const loadUserProfile = async (firebaseUser: User): Promise<UserProfile | null> => {
     try {
-      console.log('AuthContext: Loading user profile for', firebaseUser.uid);
-      const userProfileRef = doc(db, 'user_profiles', firebaseUser.uid);
-      const userProfileSnap = await getDoc(userProfileRef);
+      console.log('AuthContext: Loading user profile using unified service for', firebaseUser.uid);
 
-      if (userProfileSnap.exists()) {
-        const profile = userProfileSnap.data() as UserProfile;
-        console.log('AuthContext: Profile found', { hasCompletedOnboarding: profile.hasCompletedOnboarding });
-        return profile;
-      } else {
+      let profile = await UnifiedUserProfileService.getProfile(firebaseUser.uid);
+
+      if (!profile) {
         console.log('AuthContext: No profile found, creating new profile');
         // Create profile if it doesn't exist (for legacy users)
-        const newProfile = await createUserProfile(firebaseUser);
-        console.log('AuthContext: New profile created', { hasCompletedOnboarding: newProfile.hasCompletedOnboarding });
-        return newProfile;
+        profile = await createUserProfile(firebaseUser);
+        console.log('AuthContext: New profile created', { hasCompletedOnboarding: profile.hasCompletedOnboarding });
+      } else {
+        console.log('AuthContext: Profile found', { hasCompletedOnboarding: profile.hasCompletedOnboarding });
       }
+
+      return profile;
     } catch (error) {
       console.error('Error loading user profile:', error);
       return null;
@@ -233,38 +180,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Update user profile
-  const updateUserProfile = async (updates: Partial<UserProfile>): Promise<void> => {
+  // Update user profile using unified service
+  const updateUserProfile = async (updates: UserProfileUpdate): Promise<void> => {
     if (!user) throw new Error('No user logged in');
 
     try {
-      const userProfileRef = doc(db, 'user_profiles', user.uid);
+      console.log('AuthContext: Updating profile using unified service with:', updates);
 
       // Check if profile exists first
-      const profileSnap = await getDoc(userProfileRef);
+      const profileExists = await UnifiedUserProfileService.profileExists(user.uid);
 
-      if (!profileSnap.exists()) {
+      if (!profileExists) {
         console.log('AuthContext: Profile does not exist, creating new profile...');
         // Create profile if it doesn't exist
         await createUserProfile(user, updates);
       } else {
-        console.log('AuthContext: Updating existing profile with:', updates);
-        // Clean up undefined values
-        const cleanUpdates: any = {};
-        for (const [key, value] of Object.entries(updates)) {
-          if (value !== undefined) {
-            cleanUpdates[key] = value;
-          }
-        }
-
-        const updatedData = {
-          ...cleanUpdates,
-          updatedAt: Timestamp.now()
-        };
-
-        console.log('AuthContext: Writing to Firestore:', updatedData);
-        await updateDoc(userProfileRef, updatedData);
-        console.log('AuthContext: Profile updated in Firestore');
+        console.log('AuthContext: Updating existing profile');
+        await UnifiedUserProfileService.updateProfile(user.uid, updates);
+        console.log('AuthContext: Profile updated successfully');
       }
 
       // Refresh user profile

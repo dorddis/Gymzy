@@ -55,20 +55,12 @@ export interface TaskError {
   timestamp: Date;
 }
 
-export interface UserProfile {
-  fitnessLevel: string;
-  goals: string[];
-  preferredWorkoutTypes: string[];
-  availableEquipment: string[];
-  workoutFrequency: string;
-  timePerWorkout: string;
-  injuries: string[];
-  preferences: {
-    communicationStyle: 'casual' | 'professional' | 'motivational';
-    detailLevel: 'brief' | 'detailed' | 'comprehensive';
-    workoutComplexity: 'beginner' | 'intermediate' | 'advanced';
-  };
-}
+// Import unified profile types
+import { FitnessProfile, ProfileConverter } from '@/types/user-profile';
+import { UnifiedUserProfileService } from './unified-user-profile-service';
+
+// Use FitnessProfile for AI context (alias for backward compatibility)
+export type UserProfile = FitnessProfile;
 
 export interface WorkoutContext {
   currentWorkout?: {
@@ -265,10 +257,10 @@ export class AgenticStateManager {
     const { userProfile, conversationHistory, currentTask, workoutContext } = state.context;
     
     let context = `User Profile:\n`;
-    context += `- Fitness Level: ${userProfile.fitnessLevel}\n`;
-    context += `- Goals: ${userProfile.goals.join(', ')}\n`;
-    context += `- Equipment: ${userProfile.availableEquipment.join(', ')}\n`;
-    context += `- Workout Frequency: ${userProfile.workoutFrequency}\n`;
+    context += `- Fitness Level: ${userProfile.fitnessLevel || 'beginner'}\n`;
+    context += `- Goals: ${Array.isArray(userProfile.goals) ? userProfile.goals.join(', ') : 'general_fitness'}\n`;
+    context += `- Equipment: ${Array.isArray(userProfile.availableEquipment) ? userProfile.availableEquipment.join(', ') : 'bodyweight'}\n`;
+    context += `- Workout Frequency: ${userProfile.workoutFrequency || '2-3 times per week'}\n`;
     
     if (currentTask) {
       context += `\nCurrent Task: ${currentTask.type} (${currentTask.status})\n`;
@@ -333,13 +325,17 @@ export class AgenticStateManager {
         return this.normalizeUserProfile(profile);
       }
 
-      // Fallback to Firebase if localStorage is empty
-      console.log('🔍 StateManager: Loading user profile from Firebase...');
+      // Load from unified profile service
+      console.log('🔍 StateManager: Loading user profile from unified service...');
 
-      // Note: This would integrate with your existing user profile service
-      // For now, we'll use a default profile but log the intent
-      console.log(`⚠️ StateManager: Firebase user profile loading not implemented for user ${userId}`);
+      const fullProfile = await UnifiedUserProfileService.getProfile(userId);
+      if (fullProfile) {
+        const fitnessProfile = ProfileConverter.toFitnessProfile(fullProfile);
+        console.log('✅ StateManager: Profile loaded from unified service');
+        return fitnessProfile;
+      }
 
+      console.log('📭 StateManager: No profile found, using default');
       return this.getDefaultUserProfile();
     } catch (error) {
       console.error('❌ StateManager: Error loading user profile:', error);

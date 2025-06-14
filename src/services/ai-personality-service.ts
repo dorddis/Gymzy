@@ -1,5 +1,7 @@
 import { db } from '@/lib/firebase';
 import { doc, setDoc, getDoc, updateDoc, Timestamp } from 'firebase/firestore';
+import { UnifiedUserProfileService } from './unified-user-profile-service';
+import { FitnessProfile, ProfileConverter } from '@/types/user-profile';
 import { OnboardingData } from '@/app/onboarding/page';
 
 export interface AIPersonalityProfile {
