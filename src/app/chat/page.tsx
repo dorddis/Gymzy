@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, Suspense } from 'react';
-import { Send, ChevronLeft, Loader2, MessageSquare, Trash2, Plus, X, AlignRight } from 'lucide-react';
+import { Send, ChevronLeft, Loader2, MessageSquare, Trash2, Plus, X, AlignRight, Square } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { ChatBubble } from '@/components/chat/chat-bubble';
@@ -36,7 +36,10 @@ function ChatContent() {
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
   const [showSidebar, setShowSidebar] = useState(false);
+  const [isInitialMessageHandled, setIsInitialMessageHandled] = useState(false);
+  const [isAiStreaming, setIsAiStreaming] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const isAiStreamingRef = useRef(isAiStreaming);
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -48,21 +51,33 @@ function ChatContent() {
     scrollToBottom();
   }, [messages]);
 
-  // Load chat sessions on mount
+  // Update the ref whenever isAiStreaming changes
   useEffect(() => {
-    if (user?.uid) {
-      loadChatSessions();
-      createNewChat();
-    }
-  }, [user]);
+    isAiStreamingRef.current = isAiStreaming;
+  }, [isAiStreaming]);
 
-  // Handle initial message from URL params
+  // New consolidated useEffect for chat initialization logic
   useEffect(() => {
-    const initialMessage = searchParams.get('message');
-    if (initialMessage && user?.uid && !currentSessionId) {
-      createNewChatWithMessage(initialMessage);
+    if (!user?.uid) return;
+
+    const initialUrlMessage = searchParams.get('message');
+
+    if (initialUrlMessage && !isInitialMessageHandled) {
+      console.log("ChatPage: Initial message from URL detected:", initialUrlMessage);
+      if (currentSessionId || messages.length > 0) {
+          setCurrentSessionId(null);
+          setMessages([]);
+      }
+      createNewChatWithMessage(initialUrlMessage);
+    } else if (!currentSessionId && !isInitialMessageHandled && !initialUrlMessage) {
+      console.log("ChatPage: No initial message, no current session. Loading sessions or creating new generic chat.");
+      loadChatSessions().then(_sessions => {
+        if (!currentSessionId) {
+          createNewChat();
+        }
+      });
     }
-  }, [searchParams, user, currentSessionId]);
+  }, [user?.uid, searchParams, currentSessionId, isInitialMessageHandled]);
 
   const loadChatSessions = async () => {
     if (!user?.uid) return;
@@ -76,7 +91,12 @@ function ChatContent() {
 
   const createNewChat = async () => {
     if (!user?.uid) return;
+    console.log("ChatPage: createNewChat called");
+    if (searchParams.get('message') && !isInitialMessageHandled) {
+      console.warn("ChatPage: createNewChat called while an initial message was present but not handled.");
+    }
     try {
+      setIsLoading(true);
       const sessionId = await createChatSession(user.uid);
       setCurrentSessionId(sessionId);
       setMessages([{
@@ -84,15 +104,21 @@ function ChatContent() {
         content: 'Hello! I\'m Gymzy, your personalized AI fitness coach. How can I help you with your fitness journey today?',
         timestamp: new Date()
       }]);
+      setIsInitialMessageHandled(true);
       await loadChatSessions();
     } catch (error) {
       console.error('Error creating new chat:', error);
+      setMessages([{ role: 'assistant', content: 'Sorry, I couldn\'t start a new chat. Please try again.', timestamp: new Date() }]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const createNewChatWithMessage = async (initialMessage: string) => {
     if (!user?.uid) return;
+    console.log("ChatPage: createNewChatWithMessage called with:", initialMessage);
     try {
+      setIsLoading(true);
       const sessionId = await createChatSession(user.uid, initialMessage);
       setCurrentSessionId(sessionId);
       // Set the initial message as an assistant message
@@ -101,20 +127,17 @@ function ChatContent() {
         content: initialMessage,
         timestamp: new Date()
       }]);
-      setInput(''); // Clear input field as the user hasn't typed anything yet
-      
-      // Do NOT call handleSendMessage here. The message is from the assistant.
-      // The chat session is created, and the first message is set.
-      // The user will type their first actual reply.
+      setInput('');
+      setIsInitialMessageHandled(true);
 
-      // It's good practice to save this initial assistant message to the history.
-      // This might already be handled by createChatSession or might need an explicit save.
-      // For now, let's assume createChatSession handles it or we add it later if needed.
-      await saveChatMessage(sessionId, 'assistant', initialMessage); // Explicitly save assistant's first message
-
-      await loadChatSessions(); // Refresh session list
+      // Save the initial assistant message to the history
+      await saveChatMessage(sessionId, 'assistant', initialMessage);
+      await loadChatSessions();
     } catch (error) {
       console.error('Error creating new chat with message:', error);
+      setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, there was an error starting our chat. Please try again.', timestamp: new Date() }]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -150,20 +173,21 @@ function ChatContent() {
 
   const handleSendMessage = async (message?: string, sessionId?: string) => {
     if (!user?.uid) return;
-    
+
     const messageToSend = message || input.trim();
     const targetSessionId = sessionId || currentSessionId;
     if (!messageToSend || !targetSessionId) return;
 
+    const isInitialAutomatedCall = !!(message && sessionId);
+
     try {
       setIsLoading(true);
+      setIsAiStreaming(true); // Start streaming indication
+      isAiStreamingRef.current = true; // Set ref before starting
       
-      if (!message) {
+      if (!isInitialAutomatedCall) {
         setInput('');
-      }
-      
-      if (!sessionId) {
-        setMessages(prev => [...prev, {
+        setMessages(prevMessages => [...prevMessages, {
           role: 'user',
           content: messageToSend,
           timestamp: new Date()
@@ -172,67 +196,102 @@ function ChatContent() {
       
       await saveChatMessage(targetSessionId, 'user', messageToSend);
 
-      const conversationHistory = messages.map(msg => ({
-        id: Math.random().toString(36),
-        role: msg.role,
-        content: msg.content,
-        timestamp: msg.timestamp || new Date(),
-        userId: user.uid
-      }));
+      let conversationHistoryForAI: Array<{id: string, role: 'user' | 'assistant' | 'system', content: string, timestamp: Date, userId?: string}>;
+      if (isInitialAutomatedCall) {
+          // For the initial automated call, history should only contain the user's first message
+          conversationHistoryForAI = [{
+              id: new Date().toISOString() + Math.random().toString(), // Generate a simple unique ID
+              role: 'user',
+              content: messageToSend,
+              timestamp: new Date(),
+              userId: user.uid
+          }];
+      } else {
+          // For subsequent messages, use the current messages state
+          // Ensure to use the `messages` state that includes the latest user message if just added
+          // This requires careful handling of async state updates.
+          // A functional update to setMessages OR passing the latest messages array directly would be more robust.
+          // For this subtask, we'll use the current `messages` state, assuming it's updated before this map.
+          // This might be an area for future refinement if race conditions appear with history.
+          const currentMessageList = messages; // This will capture messages before adding the new user one if not careful
+                                           // For isInitialAutomatedCall = false, the user message is added above.
+                                           // So `messages` here for that path is correct.
 
-      console.log('💬 ChatPage: Sending message to AI service with streaming...');
+          conversationHistoryForAI = currentMessageList.map(msg => ({
+            id: msg.timestamp?.toISOString() + Math.random().toString(),
+            role: msg.role,
+            content: msg.content,
+            timestamp: msg.timestamp || new Date(),
+            userId: user.uid
+          }));
+      }
 
-      // Create a placeholder message for streaming
-      const streamingMessage: ChatMessage = {
+      console.log('💬 ChatPage: Sending message to AI service with streaming. History length:', conversationHistoryForAI.length);
+
+      const streamingMessagePlaceholder: ChatMessage = {
         role: 'assistant',
         content: '',
         timestamp: new Date()
       };
-
-      setMessages(prev => [...prev, streamingMessage]);
+      setMessages(prevMessages => [...prevMessages, streamingMessagePlaceholder]);
 
       let fullStreamedContent = '';
-
+      // Assuming sendStreamingChatMessage and saveChatMessage can handle workoutData.
+      // These service functions might need updates if they don't already.
       const aiResponse = await sendStreamingChatMessage(
         user.uid,
         messageToSend,
-        conversationHistory,
+        conversationHistoryForAI,
         (chunk: string) => {
+          if (!isAiStreamingRef.current) {
+            return;
+          }
           fullStreamedContent += chunk;
-          console.log('💬 ChatPage: Received streaming chunk:', chunk);
-
-          // Update the streaming message with new content
-          setMessages(prev => prev.map((msg, index) =>
-            index === prev.length - 1 && msg.role === 'assistant' && msg.content.length <= fullStreamedContent.length
-              ? { ...msg, content: fullStreamedContent }
-              : msg
-          ));
+          setMessages(prevMsgs => prevMsgs.map((msg, index) => {
+            if (index === prevMsgs.length - 1 && msg.role === 'assistant') {
+              return { ...msg, content: msg.content + chunk };
+            }
+            return msg;
+          }));
         }
       );
 
-      console.log('💬 ChatPage: AI streaming response completed:', aiResponse);
+      console.log('💬 ChatPage: AI streaming response completed.');
 
+      // After streaming is complete, update the message with the fullStreamedContent
+      // to ensure consistency and save the complete message.
+      // This is important because the chunk-by-chunk update might have slight variations
+      // or if any chunk processing was missed.
       if (aiResponse.success) {
-        await saveChatMessage(targetSessionId, 'assistant', fullStreamedContent);
-
-        // Update the final message with workout data
-        setMessages(prev => prev.map((msg, index) =>
-          index === prev.length - 1 && msg.role === 'assistant'
-            ? { ...msg, content: fullStreamedContent, workoutData: aiResponse.workoutData }
+        await saveChatMessage(targetSessionId, 'assistant', fullStreamedContent, aiResponse.workoutData);
+        setMessages(prevMsgs => prevMsgs.map((msg, index) =>
+          index === prevMsgs.length - 1 && msg.role === 'assistant'
+            ? { ...msg, content: fullStreamedContent, workoutData: aiResponse.workoutData } // Ensure final content is fullStreamedContent
             : msg
         ));
+      } else {
+        // If AI response failed, remove the placeholder and add error message
+        // Or update the placeholder to show the error
+        setMessages(prevMsgs => {
+          const updatedMessages = prevMsgs.slice(0, -1); // Remove the streaming placeholder
+          return [...updatedMessages, { role: 'assistant', content: aiResponse.error || 'Sorry, an error occurred with the AI response.', timestamp: new Date() }];
+        });
       }
       
-      await loadChatSessions();
+      if (!isInitialAutomatedCall) {
+          await loadChatSessions();
+      }
+
     } catch (error) {
       console.error('Error sending message:', error);
-      setMessages(prev => [...prev, {
+      setMessages(prevMessages => [...prevMessages, {
         role: 'assistant',
-        content: 'Sorry, I encountered an error. Please try again.',
+        content: 'Sorry, I encountered an error sending your message. Please try again.',
         timestamp: new Date()
       }]);
     } finally {
       setIsLoading(false);
+      setIsAiStreaming(false); // Stop streaming indication
     }
   };
 
@@ -329,6 +388,27 @@ function ChatContent() {
 
         {/* Input */}
         <form onSubmit={handleSubmit} className="p-4 border-t border-gray-200 bg-white">
+          {isAiStreaming && (
+            <div className="flex justify-center mb-2">
+              <Button
+                variant="destructive" // Or "outline"
+                onClick={() => {
+                  isAiStreamingRef.current = false; // Use ref to signal stop to callback
+                  setIsAiStreaming(false); // Update state to hide button & re-enable input
+                  // Potentially save the partially streamed message here
+                  const lastMessageIdx = messages.length -1;
+                  if(messages[lastMessageIdx]?.role === 'assistant' && messages[lastMessageIdx]?.content){
+                      saveChatMessage(currentSessionId!, 'assistant', messages[lastMessageIdx].content)
+                          .then(() => console.log("ChatPage: Saved partially streamed message."))
+                          .catch(err => console.error("ChatPage: Error saving partially streamed message:", err));
+                  }
+                }}
+                className="flex items-center gap-2"
+              >
+                <Square className="h-4 w-4" /> Stop
+              </Button>
+            </div>
+          )}
           <div className="flex items-end gap-2">
             <div className="flex-1 relative">
               <textarea
@@ -339,11 +419,12 @@ function ChatContent() {
                 className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 rows={1}
                 style={{ minHeight: '40px', maxHeight: '120px' }}
+                disabled={isLoading || isAiStreaming} // Updated disabled logic
               />
             </div>
             <Button
               type="submit"
-              disabled={!input.trim() || isLoading}
+              disabled={!input.trim() || isLoading || isAiStreaming} // Updated disabled logic
               className="px-4 py-2"
             >
               <Send className="h-4 w-4" />
