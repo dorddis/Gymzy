@@ -1,5 +1,6 @@
 import { getAIPersonalityProfile, generateAIContext } from './ai-personality-service';
 import { ComprehensiveFixesService } from './comprehensive-fixes-service';
+import { ContextualDataService } from './contextual-data-service';
 
 // Google AI Studio Configuration
 const GOOGLE_AI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
@@ -212,7 +213,8 @@ export const generateDailyMotivation = async (
     lastWorkout?: Date;
     currentStreak: number;
     hasWorkoutToday: boolean;
-  }
+  },
+  messageType: 'motivational' | 'tip' | 'joke' | 'general' = 'general' // Added messageType parameter with default
 ): Promise<ChatResponse> => {
   try {
     const personalityProfile = await getAIPersonalityProfile(userId);
@@ -225,12 +227,12 @@ export const generateDailyMotivation = async (
     }
 
     const userContext = generateAIContext(personalityProfile);
-    const daysSinceLastWorkout = context.lastWorkout 
+    const daysSinceLastWorkout = context.lastWorkout
       ? Math.floor((Date.now() - context.lastWorkout.getTime()) / (1000 * 60 * 60 * 24))
       : null;
 
     let contextPrompt = '';
-    
+    // Default context prompt, can be overridden by messageType logic
     if (context.hasWorkoutToday) {
       contextPrompt = `The user has already completed a workout today. Celebrate their achievement and provide encouragement for recovery or additional activities.`;
     } else if (daysSinceLastWorkout === null || daysSinceLastWorkout > 3) {
@@ -241,23 +243,74 @@ export const generateDailyMotivation = async (
       contextPrompt = `The user is building momentum. Encourage them to keep going with their fitness routine.`;
     }
 
-    const systemPrompt = `You are Gymzy AI, this user's personal fitness coach. Generate a brief, personalized welcome/motivation message for the home page.
+    let systemPrompt = ''; // Initialize systemPrompt
 
+    // Logic based on messageType
+    switch (messageType) {
+      case 'motivational':
+        systemPrompt = `You are Gymzy AI, this user's personal fitness coach. Generate a brief, personalized motivational message for the home page.
 User Context:
 ${userContext}
-
 Current Situation:
 - Time of day: ${context.timeOfDay}
 - Current streak: ${context.currentStreak} days
 - ${contextPrompt}
-
 Instructions:
-- Keep the message to 1-2 sentences maximum
-- Use their preferred communication style: ${personalityProfile.communicationStyle}
-- Reference their personal goals or challenges when relevant
-- Make it feel personal and encouraging
-- Include a specific, actionable suggestion when appropriate
-- Match the tone to the time of day`;
+- Keep the message to 1-2 sentences maximum.
+- Use their preferred communication style: ${personalityProfile.communicationStyle}.
+- Focus on motivation, referencing their goals or challenges.
+- Make it feel personal and encouraging.
+- Match the tone to the time of day.`;
+        break;
+      case 'tip':
+        const userContextData = await ContextualDataService.getUserContext(userId);
+        const workoutPatternsTip = userContextData?.workoutPatterns;
+        const performanceMetricsTip = userContextData?.performanceMetrics;
+
+        systemPrompt = `You are Gymzy AI, this user's personal fitness coach. Generate a brief, actionable fitness tip based on their recent activity and performance.
+User Context:
+${userContext}
+User Activity & Performance:
+- Workout Patterns: ${JSON.stringify(workoutPatternsTip || {})}
+- Performance Metrics: ${JSON.stringify(performanceMetricsTip || {})}
+Current Situation:
+- Time of day: ${context.timeOfDay}
+- ${contextPrompt}
+Instructions:
+- Keep the tip to 1-2 sentences maximum.
+- Ensure the tip is directly relevant to their workout patterns or performance.
+- Use their preferred communication style: ${personalityProfile.communicationStyle}.
+- Make it actionable and easy to understand.`;
+        break;
+      case 'joke':
+        systemPrompt = `You are Gymzy AI, this user's personal fitness coach. Tell a lighthearted, fitness-related joke.
+User Context:
+${userContext}
+Current Situation:
+- Time of day: ${context.timeOfDay}
+Instructions:
+- Keep the joke short and SFW (safe for work).
+- Use their preferred communication style: ${personalityProfile.communicationStyle}.
+- Ensure the joke is related to fitness, exercise, or health.`;
+        break;
+      case 'general':
+      default:
+        systemPrompt = `You are Gymzy AI, this user's personal fitness coach. Generate a brief, personalized welcome/engagement message for the home page.
+User Context:
+${userContext}
+Current Situation:
+- Time of day: ${context.timeOfDay}
+- Current streak: ${context.currentStreak} days
+- ${contextPrompt}
+Instructions:
+- Keep the message to 1-2 sentences maximum.
+- Use their preferred communication style: ${personalityProfile.communicationStyle}.
+- Reference their personal goals or challenges when relevant.
+- Make it feel personal and encouraging.
+- Include a specific, actionable suggestion if appropriate.
+- Match the tone to the time of day.`;
+        break;
+    }
 
     const response = await fetch(`${GOOGLE_AI_ENDPOINT}?key=${getAPIKey()}`, {
       method: 'POST',

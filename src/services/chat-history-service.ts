@@ -52,8 +52,8 @@ export const createChatSession = async (
       id: sessionId,
       userId,
       title,
-      lastMessage: initialMessage || '',
-      messageCount: initialMessage ? 1 : 0,
+      lastMessage: initialMessage || 'Chat started.', // Placeholder, will be updated by the first actual message
+      messageCount: 0, // Will be incremented by saveChatMessage
       createdAt: now,
       updatedAt: now
     };
@@ -61,10 +61,9 @@ export const createChatSession = async (
     const sessionRef = doc(db, 'chat_sessions', sessionId);
     await setDoc(sessionRef, session);
 
-    // If there's an initial message, save it
-    if (initialMessage) {
-      await saveChatMessage(sessionId, 'user', initialMessage);
-    }
+    // Do NOT save the initialMessage here.
+    // The calling context (e.g., chat/page.tsx) is responsible for saving the first message with the correct role.
+    // For example, if it's a welcome message from AI, it should be saved as 'assistant'.
 
     return sessionId;
   } catch (error) {

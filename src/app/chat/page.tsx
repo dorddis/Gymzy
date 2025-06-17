@@ -95,16 +95,24 @@ function ChatContent() {
     try {
       const sessionId = await createChatSession(user.uid, initialMessage);
       setCurrentSessionId(sessionId);
+      // Set the initial message as an assistant message
       setMessages([{
-        role: 'user',
+        role: 'assistant',
         content: initialMessage,
         timestamp: new Date()
       }]);
-      setInput('');
+      setInput(''); // Clear input field as the user hasn't typed anything yet
       
-      // Send the message to AI and get response
-      await handleSendMessage(initialMessage, sessionId);
-      await loadChatSessions();
+      // Do NOT call handleSendMessage here. The message is from the assistant.
+      // The chat session is created, and the first message is set.
+      // The user will type their first actual reply.
+
+      // It's good practice to save this initial assistant message to the history.
+      // This might already be handled by createChatSession or might need an explicit save.
+      // For now, let's assume createChatSession handles it or we add it later if needed.
+      await saveChatMessage(sessionId, 'assistant', initialMessage); // Explicitly save assistant's first message
+
+      await loadChatSessions(); // Refresh session list
     } catch (error) {
       console.error('Error creating new chat with message:', error);
     }

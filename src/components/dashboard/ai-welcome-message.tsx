@@ -154,8 +154,25 @@ export function AIWelcomeMessage() {
 
     try {
       setIsLoading(true);
+
+      let selectedMessageType: 'motivational' | 'tip' | 'joke' | 'general';
+
+      if (motivationContext.hasWorkoutToday) {
+        selectedMessageType = 'tip';
+      } else {
+        // No workout today
+        if (Math.random() < 0.2) { // 20% chance for a joke
+          selectedMessageType = 'joke';
+        } else if (shouldGenerateNewMessage()) {
+          // Prioritize motivational or general if it's a "new" message session
+          selectedMessageType = Math.random() < 0.5 ? 'motivational' : 'general';
+        } else {
+          // If message is being refreshed but not "stale", default to general or motivational
+          selectedMessageType = Math.random() < 0.3 ? 'motivational' : 'general'; // Slight chance for motivational on refresh
+        }
+      }
       
-      const response = await generateDailyMotivation(user.uid, motivationContext);
+      const response = await generateDailyMotivation(user.uid, motivationContext, selectedMessageType);
       
       if (response.success) {
         setMessage(response.message);
