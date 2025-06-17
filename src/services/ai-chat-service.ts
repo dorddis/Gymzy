@@ -224,7 +224,7 @@ const sendStreamingChatMessageProduction = async (
   }
 };
 
-// Generate daily motivation message
+// Generate daily motivation message using agentic AI
 export const generateDailyMotivation = async (
   userId: string,
   context: {
@@ -236,8 +236,13 @@ export const generateDailyMotivation = async (
   messageType: 'motivational' | 'tip' | 'joke' | 'general' = 'general' // Added messageType parameter with default
 ): Promise<ChatResponse> => {
   try {
+    console.log('🎯 Generating agentic welcome message for user:', userId);
+
+    // Use production agentic service for welcome messages
+    const { productionAgenticService } = await import('./production-agentic-service');
+
     const personalityProfile = await getAIPersonalityProfile(userId);
-    
+
     if (!personalityProfile) {
       return {
         message: "Welcome back! Ready to crush your fitness goals today?",
@@ -245,123 +250,54 @@ export const generateDailyMotivation = async (
       };
     }
 
-    const userContext = generateAIContext(personalityProfile);
+    // Create a contextual prompt for the agentic AI
     const daysSinceLastWorkout = context.lastWorkout
       ? Math.floor((Date.now() - context.lastWorkout.getTime()) / (1000 * 60 * 60 * 24))
       : null;
 
-    let contextPrompt = '';
-    // Default context prompt, can be overridden by messageType logic
-    if (context.hasWorkoutToday) {
-      contextPrompt = `The user has already completed a workout today. Celebrate their achievement and provide encouragement for recovery or additional activities.`;
-    } else if (daysSinceLastWorkout === null || daysSinceLastWorkout > 3) {
-      contextPrompt = `The user hasn't worked out recently. Provide gentle motivation to get back on track without being pushy.`;
-    } else if (context.currentStreak > 5) {
-      contextPrompt = `The user is on a great workout streak (${context.currentStreak} days). Celebrate their consistency and motivate them to continue.`;
-    } else {
-      contextPrompt = `The user is building momentum. Encourage them to keep going with their fitness routine.`;
-    }
-
-    let systemPrompt = ''; // Initialize systemPrompt
-
-    // Logic based on messageType
+    let motivationPrompt = '';
     switch (messageType) {
       case 'motivational':
-        systemPrompt = `You are Gymzy AI, this user's personal fitness coach. Generate a brief, personalized motivational message for the home page.
-User Context:
-${userContext}
-Current Situation:
-- Time of day: ${context.timeOfDay}
-- Current streak: ${context.currentStreak} days
-- ${contextPrompt}
-Instructions:
-- Keep the message to 1-2 sentences maximum.
-- Use their preferred communication style: ${personalityProfile.communicationStyle}.
-- Focus on motivation, referencing their goals or challenges.
-- Make it feel personal and encouraging.
-- Match the tone to the time of day.`;
+        motivationPrompt = `Generate a brief, personalized motivational message for the home page. Focus on motivation and encouragement.`;
         break;
       case 'tip':
-        const userContextData = await ContextualDataService.getUserContext(userId);
-        const workoutPatternsTip = userContextData?.workoutPatterns;
-        const performanceMetricsTip = userContextData?.performanceMetrics;
-
-        systemPrompt = `You are Gymzy AI, this user's personal fitness coach. Generate a brief, actionable fitness tip based on their recent activity and performance.
-User Context:
-${userContext}
-User Activity & Performance:
-- Workout Patterns: ${JSON.stringify(workoutPatternsTip || {})}
-- Performance Metrics: ${JSON.stringify(performanceMetricsTip || {})}
-Current Situation:
-- Time of day: ${context.timeOfDay}
-- ${contextPrompt}
-Instructions:
-- Keep the tip to 1-2 sentences maximum.
-- Ensure the tip is directly relevant to their workout patterns or performance.
-- Use their preferred communication style: ${personalityProfile.communicationStyle}.
-- Make it actionable and easy to understand.`;
+        motivationPrompt = `Generate a brief, actionable fitness tip based on the user's activity. Make it practical and relevant.`;
         break;
       case 'joke':
-        systemPrompt = `You are Gymzy AI, this user's personal fitness coach. Tell a lighthearted, fitness-related joke.
-User Context:
-${userContext}
-Current Situation:
-- Time of day: ${context.timeOfDay}
-Instructions:
-- Keep the joke short and SFW (safe for work).
-- Use their preferred communication style: ${personalityProfile.communicationStyle}.
-- Ensure the joke is related to fitness, exercise, or health.`;
+        motivationPrompt = `Tell a lighthearted, fitness-related joke. Keep it short and fun.`;
         break;
       case 'general':
       default:
-        systemPrompt = `You are Gymzy AI, this user's personal fitness coach. Generate a brief, personalized welcome/engagement message for the home page.
-User Context:
-${userContext}
-Current Situation:
-- Time of day: ${context.timeOfDay}
-- Current streak: ${context.currentStreak} days
-- ${contextPrompt}
-Instructions:
-- Keep the message to 1-2 sentences maximum.
-- Use their preferred communication style: ${personalityProfile.communicationStyle}.
-- Reference their personal goals or challenges when relevant.
-- Make it feel personal and encouraging.
-- Include a specific, actionable suggestion if appropriate.
-- Match the tone to the time of day.`;
+        motivationPrompt = `Generate a brief, personalized welcome message for the home page. Make it engaging and encouraging.`;
         break;
     }
 
-    const response = await fetch(`${GOOGLE_AI_ENDPOINT}?key=${getAPIKey()}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: systemPrompt
-          }]
-        }],
-        generationConfig: {
-          temperature: 0.8,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 100,
-        }
-      })
-    });
+    const contextualMessage = `${motivationPrompt}
 
-    if (!response.ok) {
-      throw new Error('Failed to generate motivation message');
+Context:
+- Time of day: ${context.timeOfDay}
+- Current workout streak: ${context.currentStreak} days
+- Has worked out today: ${context.hasWorkoutToday}
+- Days since last workout: ${daysSinceLastWorkout || 'unknown'}
+
+Keep the message to 1-2 sentences maximum. Make it personal and encouraging.`;
+
+    // Use agentic service for intelligent, contextual responses
+    const agenticResponse = await productionAgenticService.generateAgenticResponse(
+      contextualMessage,
+      [], // No conversation history for welcome messages
+      undefined, // No streaming for welcome messages
+      undefined // No abort signal
+    );
+
+    if (agenticResponse.content) {
+      return {
+        message: agenticResponse.content,
+        success: true
+      };
+    } else {
+      throw new Error('Agentic service returned empty response');
     }
-
-    const data = await response.json();
-    const message = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-
-    return {
-      message: message || "Welcome back! Ready to make today count?",
-      success: true
-    };
 
   } catch (error) {
     console.error('Error generating daily motivation:', error);

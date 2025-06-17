@@ -125,7 +125,8 @@ function ChatContent() {
       setIsLoading(true);
       const sessionId = await createChatSession(user.uid, initialMessage);
       setCurrentSessionId(sessionId);
-      // Set the initial message as an assistant message
+
+      // Set the initial message as an assistant message (this is the welcome message from home page)
       setMessages([{
         role: 'assistant',
         content: initialMessage,
@@ -136,6 +137,10 @@ function ChatContent() {
 
       // Save the initial assistant message to the history
       await saveChatMessage(sessionId, 'assistant', initialMessage);
+
+      // The welcome message is now the first message in the conversation
+      // When user types their first message, it will have proper context
+
       await loadChatSessions();
     } catch (error) {
       console.error('Error creating new chat with message:', error);
@@ -204,28 +209,31 @@ function ChatContent() {
       
       await saveChatMessage(targetSessionId, 'user', messageToSend);
 
+      // Build conversation history for AI - include ALL messages for proper context
       let conversationHistoryForAI: Array<{id: string, role: 'user' | 'assistant' | 'system', content: string, timestamp: Date, userId?: string}>;
+
       if (isInitialAutomatedCall) {
           // For the initial automated call, history should only contain the user's first message
           conversationHistoryForAI = [{
-              id: new Date().toISOString() + Math.random().toString(), // Generate a simple unique ID
+              id: new Date().toISOString() + Math.random().toString(),
               role: 'user',
               content: messageToSend,
               timestamp: new Date(),
               userId: user.uid
           }];
       } else {
-          // For subsequent messages, use the current messages state
-          // Ensure to use the `messages` state that includes the latest user message if just added
-          // This requires careful handling of async state updates.
-          // A functional update to setMessages OR passing the latest messages array directly would be more robust.
-          // For this subtask, we'll use the current `messages` state, assuming it's updated before this map.
-          // This might be an area for future refinement if race conditions appear with history.
-          const currentMessageList = messages; // This will capture messages before adding the new user one if not careful
-                                           // For isInitialAutomatedCall = false, the user message is added above.
-                                           // So `messages` here for that path is correct.
+          // For subsequent messages, include ALL messages (including welcome message) for proper context
+          // This ensures the AI remembers the welcome message and conversation flow
+          const allMessages = [...messages];
 
-          conversationHistoryForAI = currentMessageList.map(msg => ({
+          // Add the current user message to the history for AI context
+          allMessages.push({
+            role: 'user',
+            content: messageToSend,
+            timestamp: new Date()
+          });
+
+          conversationHistoryForAI = allMessages.map(msg => ({
             id: msg.timestamp?.toISOString() + Math.random().toString(),
             role: msg.role,
             content: msg.content,
