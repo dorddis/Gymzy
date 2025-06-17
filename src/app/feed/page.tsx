@@ -47,6 +47,15 @@ export default function FeedPage() {
   const [loadingLikes, setLoadingLikes] = useState<Record<string, boolean>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('personalized');
+  const [isInitialRender, setIsInitialRender] = useState(true);
+
+  React.useEffect(() => {
+    // Show page structure immediately, load data progressively
+    const timer = setTimeout(() => {
+      setIsInitialRender(false);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (user?.uid) {
@@ -324,7 +333,7 @@ export default function FeedPage() {
         </TabsList>
         
         <TabsContent value="personalized" className="mt-6">
-          {isLoading ? (
+          {(isLoading || isInitialRender) ? (
             <div>
               <FeedPostSkeleton key="personalized-skeleton-1" />
               <FeedPostSkeleton key="personalized-skeleton-2" />
@@ -350,7 +359,7 @@ export default function FeedPage() {
         </TabsContent>
         
         <TabsContent value="trending" className="mt-6">
-          {isLoading ? (
+          {(isLoading || isInitialRender) ? (
             <div>
               <FeedPostSkeleton key="trending-skeleton-1" />
               <FeedPostSkeleton key="trending-skeleton-2" />
@@ -376,7 +385,7 @@ export default function FeedPage() {
         </TabsContent>
         
         <TabsContent value="following" className="mt-6">
-          {isLoading ? (
+          {(isLoading || isInitialRender) ? (
             <div>
               <FeedPostSkeleton key="following-skeleton-1" />
               <FeedPostSkeleton key="following-skeleton-2" />

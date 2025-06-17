@@ -54,6 +54,17 @@ export default function StatsTrendsScreen() {
   const { recentWorkouts, allWorkouts, loading, error } = useWorkout();
   const router = useRouter();
 
+  // Progressive loading state - show page immediately, load data in background
+  const [isInitialRender, setIsInitialRender] = React.useState(true);
+
+  React.useEffect(() => {
+    // Allow page to render immediately, then start showing data
+    const timer = setTimeout(() => {
+      setIsInitialRender(false);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
   // Helper function to get dates in user's local timezone
   const getLocalDateString = (date: Date) => {
     return date.toLocaleDateString('en-US', { 
@@ -219,70 +230,8 @@ export default function StatsTrendsScreen() {
     return labels;
   }, [last6MonthsDates]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col">
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 pb-20">
-          {/* Header Skeleton */}
-          <div className="mb-6">
-            <div className="flex items-center gap-3 mb-4">
-              <Skeleton className="h-8 w-8 rounded-full" />
-              <Skeleton className="h-7 w-1/3" />
-            </div>
-          </div>
-
-          {/* Summary Metrics Skeletons */}
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            {[...Array(6)].map((_, i) => (
-              <StatCardSkeleton key={`stat-skeleton-${i}`} />
-            ))}
-          </div>
-
-          {/* GitHub-style Progress Tracker Skeleton */}
-          <Card className="mb-6 shadow-md border-none bg-white p-4">
-            <CardHeader className="p-0 mb-4">
-              <Skeleton className="h-6 w-1/2" />
-            </CardHeader>
-            <CardContent className="p-0">
-              <Skeleton className="h-40 w-full rounded-lg" />
-            </CardContent>
-          </Card>
-
-          {/* Chart Skeletons */}
-          <Card className="mb-6 shadow-md border-none bg-white">
-            <CardHeader className="p-4 pb-0">
-              <Skeleton className="h-6 w-1/3 mb-2" />
-            </CardHeader>
-            <CardContent className="p-2">
-              <ChartSkeleton />
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-md border-none bg-white mb-6">
-            <CardHeader className="p-4 pb-0">
-              <Skeleton className="h-6 w-1/3 mb-2" />
-            </CardHeader>
-            <CardContent className="p-2">
-              <ChartSkeleton />
-            </CardContent>
-          </Card>
-
-          {/* Recent Workouts Skeleton */}
-          <Card className="shadow-md border-none bg-white">
-            <CardHeader className="p-4 pb-0">
-              <Skeleton className="h-6 w-1/4 mb-2" />
-            </CardHeader>
-            <CardContent className="p-4 space-y-3">
-              <WorkoutCardSkeleton key="workout-skeleton-1" />
-              <WorkoutCardSkeleton key="workout-skeleton-2" />
-              <WorkoutCardSkeleton key="workout-skeleton-3" />
-            </CardContent>
-          </Card>
-        </main>
-        <BottomNav />
-      </div>
-    );
-  }
+  // Show data loading state (not blocking page render)
+  const isDataLoading = loading || isInitialRender;
 
   if (error) {
     return <div className="text-center py-8 text-red-500">Error loading stats.</div>;
@@ -293,7 +242,7 @@ export default function StatsTrendsScreen() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <main className="flex-1 overflow-y-auto p-4 md:p-6 pb-20">
-        {/* Header with Back Button */}
+        {/* Header with Back Button - Always show immediately */}
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-4">
             <Button
@@ -308,11 +257,18 @@ export default function StatsTrendsScreen() {
           </div>
         </div>
 
-        {/* Summary Metrics */}
-        <div
-          className="grid grid-cols-2 gap-4 mb-6 animate-fadeInUp"
-          style={{ animationDelay: '100ms' }}
-        >
+        {/* Summary Metrics - Progressive Loading */}
+        {isDataLoading ? (
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            {[...Array(6)].map((_, i) => (
+              <StatCardSkeleton key={`stat-skeleton-${i}`} />
+            ))}
+          </div>
+        ) : (
+          <div
+            className="grid grid-cols-2 gap-4 mb-6 animate-fadeInUp"
+            style={{ animationDelay: '100ms' }}
+          >
           <Card className="shadow-md border-none bg-white p-4 hover:shadow-lg transition-shadow duration-200">
             <CardHeader className="p-0 mb-3">
               <CardTitle className="text-lg font-semibold flex items-center text-gray-700">
@@ -385,13 +341,24 @@ export default function StatsTrendsScreen() {
               </CardDescription>
             </CardContent>
           </Card>
-        </div>
+          </div>
+        )}
 
-        {/* GitHub-style Progress Tracker */}
-        <Card
-          className="mb-6 shadow-md border-none bg-white p-4 animate-fadeInUp"
-          style={{ animationDelay: '200ms' }}
-        >
+        {/* GitHub-style Progress Tracker - Progressive Loading */}
+        {isDataLoading ? (
+          <Card className="mb-6 shadow-md border-none bg-white p-4">
+            <CardHeader className="p-0 mb-4">
+              <Skeleton className="h-6 w-1/2" />
+            </CardHeader>
+            <CardContent className="p-0">
+              <Skeleton className="h-40 w-full rounded-lg" />
+            </CardContent>
+          </Card>
+        ) : (
+          <Card
+            className="mb-6 shadow-md border-none bg-white p-4 animate-fadeInUp"
+            style={{ animationDelay: '200ms' }}
+          >
           <CardHeader className="p-0 mb-4">
             <CardTitle className="text-lg font-semibold text-gray-700">Workout Progress (Last 6 Months)</CardTitle>
           </CardHeader>
@@ -475,12 +442,23 @@ export default function StatsTrendsScreen() {
             </div>
           </CardContent>
         </Card>
+        )}
 
-        {/* Volume Trend Chart */}
-        <Card
-          className="mb-6 shadow-md border-none bg-white animate-fadeInUp"
-          style={{ animationDelay: '300ms' }}
-        >
+        {/* Volume Trend Chart - Progressive Loading */}
+        {isDataLoading ? (
+          <Card className="mb-6 shadow-md border-none bg-white">
+            <CardHeader className="p-4 pb-0">
+              <Skeleton className="h-6 w-1/3 mb-2" />
+            </CardHeader>
+            <CardContent className="p-2">
+              <ChartSkeleton />
+            </CardContent>
+          </Card>
+        ) : (
+          <Card
+            className="mb-6 shadow-md border-none bg-white animate-fadeInUp"
+            style={{ animationDelay: '300ms' }}
+          >
           <CardHeader className="p-4 pb-0">
             <CardTitle className="text-lg font-semibold text-gray-700">Volume Trend (Last 14 Days)</CardTitle> {/* Changed title to 14 Days */}
           </CardHeader>
@@ -502,88 +480,113 @@ export default function StatsTrendsScreen() {
             </div>
           </CardContent>
         </Card>
+        )}
 
-        {/* Workout Frequency Chart */}
-        <Card
-          className="shadow-md border-none bg-white mb-6 animate-fadeInUp"
-          style={{ animationDelay: '400ms' }}
-        >
-          <CardHeader className="p-4 pb-0">
-            <CardTitle className="text-lg font-semibold text-gray-700">Workout Frequency (Last 14 Days)</CardTitle> {/* Changed title to 14 Days */}
-          </CardHeader>
-          <CardContent className="p-2 overflow-x-auto"> {/* Reduced padding and added overflow-x-auto */}
-            <div style={{ width: '700px' }}> {/* Fixed width container for chart content */}
-              <ResponsiveContainer width="100%" height={200}> {/* Reduced height. Width will fill parent */}
-                <BarChart data={weeklyFrequencyData}> {/* Removed margin prop */}
-                  <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" />
-                  <YAxis allowDecimals={false} stroke="hsl(var(--muted-foreground))" />
-                  <Tooltip
-                    contentStyle={{ backgroundColor: 'white', border: '1px solid hsl(var(--border))', borderRadius: '0.25rem' }}
-                    labelStyle={{ color: 'hsl(var(--primary))' }}
-                    itemStyle={{ color: 'hsl(var(--muted-foreground))' }}
-                  />
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <Bar dataKey="workouts" fill="hsl(var(--primary))" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Workout Frequency Chart - Progressive Loading */}
+        {isDataLoading ? (
+          <Card className="shadow-md border-none bg-white mb-6">
+            <CardHeader className="p-4 pb-0">
+              <Skeleton className="h-6 w-1/3 mb-2" />
+            </CardHeader>
+            <CardContent className="p-2">
+              <ChartSkeleton />
+            </CardContent>
+          </Card>
+        ) : (
+          <Card
+            className="shadow-md border-none bg-white mb-6 animate-fadeInUp"
+            style={{ animationDelay: '400ms' }}
+          >
+            <CardHeader className="p-4 pb-0">
+              <CardTitle className="text-lg font-semibold text-gray-700">Workout Frequency (Last 14 Days)</CardTitle>
+            </CardHeader>
+            <CardContent className="p-2 overflow-x-auto">
+              <div style={{ width: '700px' }}>
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={weeklyFrequencyData}>
+                    <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" />
+                    <YAxis allowDecimals={false} stroke="hsl(var(--muted-foreground))" />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: 'white', border: '1px solid hsl(var(--border))', borderRadius: '0.25rem' }}
+                      labelStyle={{ color: 'hsl(var(--primary))' }}
+                      itemStyle={{ color: 'hsl(var(--muted-foreground))' }}
+                    />
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <Bar dataKey="workouts" fill="hsl(var(--primary))" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-        {/* Recent Workouts Section */}
-        <Card
-          className="shadow-md border-none bg-white animate-fadeInUp"
-          style={{ animationDelay: '500ms' }}
-        >
-          <CardHeader className="p-4 pb-0">
-            <CardTitle className="text-lg font-semibold text-gray-700">Recent Workouts</CardTitle>
-          </CardHeader>
-          <CardContent className="p-4">
-            {recentWorkouts && recentWorkouts.length > 0 ? (
-              <div className="space-y-3">
-                {recentWorkouts.slice(0, 5).map((workout, index) => (
-                  <div key={index} className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-medium text-gray-800 flex items-center gap-2">
-                        <Dumbbell className="h-4 w-4 text-primary" />
-                        {workout.name}
-                      </h3>
-                      <span className="text-sm text-gray-500 flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {Math.floor(workout.duration / 60)}m
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm text-gray-600">
-                      <span>{workout.exercises.length} exercises</span>
-                      <span>{workout.totalVolume?.toLocaleString() || 0} kg total</span>
-                      <span>{workout.date.toDate().toLocaleDateString()}</span>
-                    </div>
-                    <div className="mt-2">
-                      <div className="flex flex-wrap gap-1">
-                        {workout.exercises.slice(0, 3).map((exercise, exerciseIndex) => (
-                          <span key={exerciseIndex} className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
-                            {exercise.name}
-                          </span>
-                        ))}
-                        {workout.exercises.length > 3 && (
-                          <span className="text-xs text-gray-500">
-                            +{workout.exercises.length - 3} more
-                          </span>
-                        )}
+        {/* Recent Workouts Section - Progressive Loading */}
+        {isDataLoading ? (
+          <Card className="shadow-md border-none bg-white">
+            <CardHeader className="p-4 pb-0">
+              <Skeleton className="h-6 w-1/4 mb-2" />
+            </CardHeader>
+            <CardContent className="p-4 space-y-3">
+              <WorkoutCardSkeleton key="workout-skeleton-1" />
+              <WorkoutCardSkeleton key="workout-skeleton-2" />
+              <WorkoutCardSkeleton key="workout-skeleton-3" />
+            </CardContent>
+          </Card>
+        ) : (
+          <Card
+            className="shadow-md border-none bg-white animate-fadeInUp"
+            style={{ animationDelay: '500ms' }}
+          >
+            <CardHeader className="p-4 pb-0">
+              <CardTitle className="text-lg font-semibold text-gray-700">Recent Workouts</CardTitle>
+            </CardHeader>
+            <CardContent className="p-4">
+              {recentWorkouts && recentWorkouts.length > 0 ? (
+                <div className="space-y-3">
+                  {recentWorkouts.slice(0, 5).map((workout, index) => (
+                    <div key={index} className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-medium text-gray-800 flex items-center gap-2">
+                          <Dumbbell className="h-4 w-4 text-primary" />
+                          {workout.name}
+                        </h3>
+                        <span className="text-sm text-gray-500 flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {Math.floor(workout.duration / 60)}m
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm text-gray-600">
+                        <span>{workout.exercises.length} exercises</span>
+                        <span>{workout.totalVolume?.toLocaleString() || 0} kg total</span>
+                        <span>{workout.date.toDate().toLocaleDateString()}</span>
+                      </div>
+                      <div className="mt-2">
+                        <div className="flex flex-wrap gap-1">
+                          {workout.exercises.slice(0, 3).map((exercise, exerciseIndex) => (
+                            <span key={exerciseIndex} className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                              {exercise.name}
+                            </span>
+                          ))}
+                          {workout.exercises.length > 3 && (
+                            <span className="text-xs text-gray-500">
+                              +{workout.exercises.length - 3} more
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-gray-500">
-                <Dumbbell className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                <p>No recent workouts found</p>
-                <p className="text-sm">Start working out to see your stats here!</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <Dumbbell className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                  <p>No recent workouts found</p>
+                  <p className="text-sm">Start working out to see your stats here!</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
       </main>
       <BottomNav />
     </div>
