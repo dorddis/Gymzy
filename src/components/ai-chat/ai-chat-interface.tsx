@@ -21,7 +21,8 @@ import { useWorkout } from '@/contexts/WorkoutContext';
 import { useRouter } from 'next/navigation';
 import { AI_WORKOUT_TOOLS, executeAITool, WorkoutExercise } from '@/services/ai-workout-tools';
 import { generateAIResponse } from '@/services/ai-service';
-import { sendStreamingChatMessage, ChatMessage as ServiceChatMessage, StreamingChatResponse } from '@/services/ai-chat-service';
+// import { sendStreamingChatMessage, ChatMessage as ServiceChatMessage, StreamingChatResponse } from '@/services/ai-chat-service'; // Old import
+import { sendLangchainMessage, LangchainServiceResponse } from '@/services/langchain-chat-service'; // New import
 import ReactMarkdown from 'react-markdown';
 import { ChatMessageSkeleton } from '@/components/ui/skeleton';
 
@@ -99,37 +100,30 @@ export function AIChatInterface({ onStartWorkout }: AIChatInterfaceProps) {
     setMessages(prev => [...prev, assistantMessage]);
 
     try {
-      let accumulatedContent = ""; // To store the full response content
-      const streamingChatResponse = await sendStreamingChatMessage(
-        user!.uid, // Assuming user object is available and has uid
+      // No need for accumulatedContent here if onStreamChunk updates UI directly
+      // and serviceResponse.content will hold the final full content.
+      const serviceResponse = await sendLangchainMessage(
+        user!.uid,
         currentInput,
-        messages.map(m => ({ // Map to ServiceChatMessage if necessary
-          id: m.id,
-          role: m.role === 'user' ? 'user' : 'assistant', // Ensure role is 'user'|'assistant'|'system'
-          content: m.content,
-          timestamp: m.timestamp,
-          // userId: user!.uid // userId might be needed per message in history for some services
-        })),
-        (chunk: string) => {
-          accumulatedContent += chunk;
+        messages, // Pass the existing UI messages array (ChatMessage[] should be compatible with UIChatMessage[])
+        (chunk: string) => { // This is the onStreamChunk callback
           setMessages(prev => prev.map(msg =>
             msg.id === assistantMessageId
-              ? { ...msg, content: msg.content + chunk } // Append chunk for streaming display
+              ? { ...msg, content: msg.content + chunk }
               : msg
           ));
         }
       );
 
-      // After streaming is complete, streamingChatResponse contains toolCalls and workoutData
-      // The `accumulatedContent` has the full text.
-      // Update the assistant's message with the full content and any tool/workout data.
+      // After sendLangchainMessage completes (simulated or real streaming finishes)
+      // Update the final message with the full content and other data
       setMessages(prev => prev.map(msg =>
         msg.id === assistantMessageId
           ? {
               ...msg,
-              content: accumulatedContent, // Use the fully accumulated content
-              toolCalls: streamingChatResponse.toolCalls,
-              workoutData: streamingChatResponse.workoutData
+              content: serviceResponse.content, // Full content from the service
+              toolCalls: serviceResponse.toolCalls, // If provided by service
+              workoutData: serviceResponse.workoutData // If provided by service
             }
           : msg
       ));
