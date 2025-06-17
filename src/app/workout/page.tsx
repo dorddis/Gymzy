@@ -236,16 +236,10 @@ export default function WorkoutPage() {
 
         <div className="flex gap-2 mt-4">
           <Button
-            className="flex-[2] bg-primary text-white py-3 rounded-xl font-semibold shadow-sm hover:opacity-95"
+            className="w-full bg-primary text-white py-3 rounded-xl font-semibold shadow-sm hover:opacity-95"
             onClick={() => setIsAddExerciseModalOpen(true)}
           >
             + Add Exercise
-          </Button>
-          <Button
-            className="flex-[1] bg-blue-500 text-white py-3 rounded-xl font-semibold shadow-sm hover:opacity-95"
-            onClick={() => setIsAddExerciseModalOpen(true)}
-          >
-            + Special set
           </Button>
         </div>
 

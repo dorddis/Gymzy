@@ -104,8 +104,8 @@ export function SpecialSetsModal({ exercises, onCreateSuperset, onClose }: Speci
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4">
-      <Card className="w-full max-w-2xl max-h-[85vh] overflow-hidden shadow-2xl">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4 overflow-y-auto">
+      <Card className="w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl my-8">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle className="text-xl font-bold flex items-center gap-2">
             <Zap className="h-5 w-5 text-purple-600" />
@@ -116,7 +116,7 @@ export function SpecialSetsModal({ exercises, onCreateSuperset, onClose }: Speci
           </Button>
         </CardHeader>
         
-        <CardContent className="space-y-6 overflow-y-auto">
+        <CardContent className="space-y-6 overflow-y-auto max-h-[calc(90vh-8rem)]">
           {/* Instructions */}
           <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
             <h3 className="font-semibold text-purple-900 mb-2">Advanced Training Techniques</h3>

@@ -51,8 +51,8 @@ export function SupersetCreator({ exercises, onCreateSuperset, onClose }: Supers
   const selectedExerciseObjects = exercises.filter(ex => selectedExercises.includes(ex.id));
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4">
-      <Card className="w-full max-w-2xl max-h-[85vh] overflow-hidden shadow-2xl">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4 overflow-y-auto">
+      <Card className="w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl my-8">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle className="text-xl font-bold flex items-center gap-2">
             <Link className="h-5 w-5 text-blue-600" />
@@ -63,7 +63,7 @@ export function SupersetCreator({ exercises, onCreateSuperset, onClose }: Supers
           </Button>
         </CardHeader>
         
-        <CardContent className="space-y-6 overflow-y-auto">
+        <CardContent className="space-y-6 overflow-y-auto max-h-[calc(90vh-8rem)]">
           {/* Instructions */}
           <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
             <h3 className="font-semibold text-blue-900 mb-2">What is a Superset?</h3>
