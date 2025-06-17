@@ -150,7 +150,8 @@ export const sendStreamingChatMessage = async (
   userId: string,
   message: string,
   conversationHistory: ChatMessage[] = [],
-  onStreamChunk?: (chunk: string) => void
+  onStreamChunk?: (chunk: string) => void,
+  abortSignal?: AbortSignal
 ): Promise<StreamingChatResponse> => {
   try {
     console.log('💬 ChatService: ===== SENDING STREAMING CHAT MESSAGE (PRODUCTION) =====');
@@ -177,7 +178,8 @@ export const sendStreamingChatMessage = async (
     const result = await productionAgenticService.generateAgenticResponse(
       message,
       chatHistory,
-      onStreamChunk
+      onStreamChunk,
+      abortSignal
     );
 
     console.log('✅ ChatService: Production AI response received');

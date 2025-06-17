@@ -40,6 +40,7 @@ function ChatContent() {
   const [isAiStreaming, setIsAiStreaming] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isAiStreamingRef = useRef(isAiStreaming);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -184,6 +185,10 @@ function ChatContent() {
       setIsLoading(true);
       setIsAiStreaming(true); // Start streaming indication
       isAiStreamingRef.current = true; // Set ref before starting
+
+      // Create abort controller for this request
+      const abortController = new AbortController();
+      abortControllerRef.current = abortController;
       
       if (!isInitialAutomatedCall) {
         setInput('');
@@ -243,7 +248,7 @@ function ChatContent() {
         messageToSend,
         conversationHistoryForAI,
         (chunk: string) => {
-          if (!isAiStreamingRef.current) {
+          if (!isAiStreamingRef.current || abortController.signal.aborted) {
             return;
           }
           fullStreamedContent += chunk;
@@ -253,7 +258,8 @@ function ChatContent() {
             }
             return msg;
           }));
-        }
+        },
+        abortController.signal
       );
 
       console.log('💬 ChatPage: AI streaming response completed.');
@@ -292,18 +298,43 @@ function ChatContent() {
     } finally {
       setIsLoading(false);
       setIsAiStreaming(false); // Stop streaming indication
+      abortControllerRef.current = null; // Clear abort controller
+    }
+  };
+
+  const handleStopStreaming = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      isAiStreamingRef.current = false;
+      setIsAiStreaming(false);
+
+      // Save the partially streamed message
+      const lastMessageIdx = messages.length - 1;
+      if (messages[lastMessageIdx]?.role === 'assistant' && messages[lastMessageIdx]?.content) {
+        saveChatMessage(currentSessionId!, 'assistant', messages[lastMessageIdx].content)
+          .then(() => console.log("ChatPage: Saved partially streamed message."))
+          .catch(err => console.error("ChatPage: Error saving partially streamed message:", err));
+      }
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await handleSendMessage();
+    if (isAiStreaming) {
+      handleStopStreaming();
+    } else {
+      await handleSendMessage();
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSendMessage();
+      if (isAiStreaming) {
+        handleStopStreaming();
+      } else {
+        handleSendMessage();
+      }
     }
   };
 
@@ -388,27 +419,6 @@ function ChatContent() {
 
         {/* Input */}
         <form onSubmit={handleSubmit} className="p-4 border-t border-gray-200 bg-white">
-          {isAiStreaming && (
-            <div className="flex justify-center mb-2">
-              <Button
-                variant="destructive" // Or "outline"
-                onClick={() => {
-                  isAiStreamingRef.current = false; // Use ref to signal stop to callback
-                  setIsAiStreaming(false); // Update state to hide button & re-enable input
-                  // Potentially save the partially streamed message here
-                  const lastMessageIdx = messages.length -1;
-                  if(messages[lastMessageIdx]?.role === 'assistant' && messages[lastMessageIdx]?.content){
-                      saveChatMessage(currentSessionId!, 'assistant', messages[lastMessageIdx].content)
-                          .then(() => console.log("ChatPage: Saved partially streamed message."))
-                          .catch(err => console.error("ChatPage: Error saving partially streamed message:", err));
-                  }
-                }}
-                className="flex items-center gap-2"
-              >
-                <Square className="h-4 w-4" /> Stop
-              </Button>
-            </div>
-          )}
           <div className="flex items-end gap-2">
             <div className="flex-1 relative">
               <textarea
@@ -419,15 +429,20 @@ function ChatContent() {
                 className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 rows={1}
                 style={{ minHeight: '40px', maxHeight: '120px' }}
-                disabled={isLoading || isAiStreaming} // Updated disabled logic
+                disabled={isLoading && !isAiStreaming} // Only disable when loading but not streaming
               />
             </div>
             <Button
               type="submit"
-              disabled={!input.trim() || isLoading || isAiStreaming} // Updated disabled logic
+              disabled={(!input.trim() && !isAiStreaming) || isLoading}
               className="px-4 py-2"
+              variant={isAiStreaming ? "destructive" : "default"}
             >
-              <Send className="h-4 w-4" />
+              {isAiStreaming ? (
+                <Square className="h-4 w-4" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
             </Button>
           </div>
         </form>

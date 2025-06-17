@@ -103,7 +103,8 @@ export class ProductionAgenticService {
   async generateAgenticResponse(
     userInput: string,
     chatHistory: ChatMessage[] = [],
-    onStreamChunk?: (chunk: string) => void
+    onStreamChunk?: (chunk: string) => void,
+    abortSignal?: AbortSignal
   ): Promise<AgenticAIResponse> {
     await this.initialize();
 
@@ -155,7 +156,8 @@ export class ProductionAgenticService {
         intentAnalysis,
         toolResults,
         state,
-        onStreamChunk
+        onStreamChunk,
+        abortSignal
       );
 
       // Add AI response to conversation
@@ -414,7 +416,8 @@ Examples:
     intentAnalysis: any,
     toolResults: any[],
     state: any,
-    onStreamChunk?: (chunk: string) => void
+    onStreamChunk?: (chunk: string) => void,
+    abortSignal?: AbortSignal
   ): Promise<{ content: string; confidence: number }> {
     const context = this.stateManager.getContextForAI(state.sessionId);
     
@@ -454,9 +457,9 @@ Requirements:
 
     try {
       let content = '';
-      
+
       if (onStreamChunk) {
-        content = await generateCharacterStreamingResponse(responsePrompt, onStreamChunk);
+        content = await generateCharacterStreamingResponse(responsePrompt, onStreamChunk, abortSignal);
       } else {
         content = await generateAIResponse(responsePrompt);
       }

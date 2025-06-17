@@ -112,31 +112,41 @@ const simulateStreamingResponse = async (
   }
 };
 
-// Character-by-character streaming for even smoother effect
+// Token-based streaming with abort support for better performance
 export const generateCharacterStreamingResponse = async (
   prompt: string,
-  onChunk: (chunk: string) => void
+  onChunk: (chunk: string) => void,
+  abortSignal?: AbortSignal
 ): Promise<string> => {
   try {
-    console.log('Starting character streaming for prompt:', prompt.substring(0, 100) + '...');
+    console.log('Starting token streaming for prompt:', prompt.substring(0, 100) + '...');
     const fullResponse = await generateAIResponse(prompt);
     console.log('Full response received, length:', fullResponse.length);
 
     let currentResponse = '';
 
-    for (let i = 0; i < fullResponse.length; i++) {
-      const char = fullResponse[i];
-      currentResponse += char;
-      onChunk(char);
+    // Split into words/tokens instead of characters for better performance
+    const tokens = fullResponse.split(/(\s+|[.!?])/);
 
-      // Add a small delay between characters
-      await new Promise(resolve => setTimeout(resolve, 15));
+    for (let i = 0; i < tokens.length; i++) {
+      // Check for abort signal
+      if (abortSignal?.aborted) {
+        console.log('Token streaming aborted by user');
+        break;
+      }
+
+      const token = tokens[i];
+      currentResponse += token;
+      onChunk(token);
+
+      // Shorter delay for smoother but faster streaming
+      await new Promise(resolve => setTimeout(resolve, 25));
     }
 
-    console.log('Character streaming completed');
+    console.log('Token streaming completed');
     return currentResponse;
   } catch (error) {
-    console.error('Error in character streaming:', error);
+    console.error('Error in token streaming:', error);
     throw error;
   }
 };
