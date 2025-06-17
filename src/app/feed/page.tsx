@@ -20,6 +20,7 @@ import {
   ChevronLeft,
   Search
 } from 'lucide-react';
+import { FeedPostSkeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
 import { 
   getPersonalizedFeed, 
@@ -148,12 +149,15 @@ export default function FeedPage() {
     }
   };
 
-  const WorkoutPostCard = ({ post }: { post: FeedPost }) => {
+  const WorkoutPostCard = ({ post, index }: { post: FeedPost, index: number }) => {
     const isLiked = likedPosts[post.id];
     const isLikeLoading = loadingLikes[post.id];
 
     return (
-      <Card className="mb-4">
+      <Card
+        className="mb-4 animate-fadeInUp"
+        style={{ animationDelay: `${index * 100}ms` }}
+      >
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -321,14 +325,15 @@ export default function FeedPage() {
         
         <TabsContent value="personalized" className="mt-6">
           {isLoading ? (
-            <div className="text-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
-              <p className="text-muted-foreground">Loading personalized feed...</p>
+            <div>
+              <FeedPostSkeleton key="personalized-skeleton-1" />
+              <FeedPostSkeleton key="personalized-skeleton-2" />
+              <FeedPostSkeleton key="personalized-skeleton-3" />
             </div>
           ) : personalizedFeed.length > 0 ? (
             <div>
-              {personalizedFeed.map((post) => (
-                <WorkoutPostCard key={post.id} post={post} />
+              {personalizedFeed.map((post, index) => (
+                <WorkoutPostCard key={post.id} post={post} index={index} />
               ))}
             </div>
           ) : (
@@ -346,14 +351,15 @@ export default function FeedPage() {
         
         <TabsContent value="trending" className="mt-6">
           {isLoading ? (
-            <div className="text-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
-              <p className="text-muted-foreground">Loading trending posts...</p>
+            <div>
+              <FeedPostSkeleton key="trending-skeleton-1" />
+              <FeedPostSkeleton key="trending-skeleton-2" />
+              <FeedPostSkeleton key="trending-skeleton-3" />
             </div>
           ) : trendingPosts.length > 0 ? (
             <div>
-              {trendingPosts.map((post) => (
-                <WorkoutPostCard key={post.id} post={post} />
+              {trendingPosts.map((post, index) => (
+                <WorkoutPostCard key={post.id} post={post} index={index} />
               ))}
             </div>
           ) : (
@@ -371,14 +377,15 @@ export default function FeedPage() {
         
         <TabsContent value="following" className="mt-6">
           {isLoading ? (
-            <div className="text-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
-              <p className="text-muted-foreground">Loading following feed...</p>
+            <div>
+              <FeedPostSkeleton key="following-skeleton-1" />
+              <FeedPostSkeleton key="following-skeleton-2" />
+              <FeedPostSkeleton key="following-skeleton-3" />
             </div>
           ) : followingFeed.length > 0 ? (
             <div>
-              {followingFeed.map((post) => (
-                <WorkoutPostCard key={post.id} post={post} />
+              {followingFeed.map((post, index) => (
+                <WorkoutPostCard key={post.id} post={post} index={index} />
               ))}
             </div>
           ) : (

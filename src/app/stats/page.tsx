@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
 import { useWorkout } from '@/contexts/WorkoutContext';
-import { TrendingUp, Activity, Gauge, CalendarCheck, Flame, Award, ArrowLeft, Clock, Dumbbell } from 'lucide-react';
+import { TrendingUp, Activity, Gauge, CalendarCheck, Flame, Award, ArrowLeft, Clock, Dumbbell, Loader2 } from 'lucide-react';
 import { Muscle } from '@/lib/constants'; // Import Muscle enum
 import { useRouter } from 'next/navigation';
+import { StatCardSkeleton, ChartSkeleton, WorkoutCardSkeleton, Skeleton } from '@/components/ui/skeleton';
 
 // Constants for the GitHub-style progress tracker
 const DAY_SQUARE_SIZE = 20; // px
@@ -219,7 +220,68 @@ export default function StatsTrendsScreen() {
   }, [last6MonthsDates]);
 
   if (loading) {
-    return <div className="text-center py-8">Loading stats...</div>;
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 pb-20">
+          {/* Header Skeleton */}
+          <div className="mb-6">
+            <div className="flex items-center gap-3 mb-4">
+              <Skeleton className="h-8 w-8 rounded-full" />
+              <Skeleton className="h-7 w-1/3" />
+            </div>
+          </div>
+
+          {/* Summary Metrics Skeletons */}
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            {[...Array(6)].map((_, i) => (
+              <StatCardSkeleton key={`stat-skeleton-${i}`} />
+            ))}
+          </div>
+
+          {/* GitHub-style Progress Tracker Skeleton */}
+          <Card className="mb-6 shadow-md border-none bg-white p-4">
+            <CardHeader className="p-0 mb-4">
+              <Skeleton className="h-6 w-1/2" />
+            </CardHeader>
+            <CardContent className="p-0">
+              <Skeleton className="h-40 w-full rounded-lg" />
+            </CardContent>
+          </Card>
+
+          {/* Chart Skeletons */}
+          <Card className="mb-6 shadow-md border-none bg-white">
+            <CardHeader className="p-4 pb-0">
+              <Skeleton className="h-6 w-1/3 mb-2" />
+            </CardHeader>
+            <CardContent className="p-2">
+              <ChartSkeleton />
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-md border-none bg-white mb-6">
+            <CardHeader className="p-4 pb-0">
+              <Skeleton className="h-6 w-1/3 mb-2" />
+            </CardHeader>
+            <CardContent className="p-2">
+              <ChartSkeleton />
+            </CardContent>
+          </Card>
+
+          {/* Recent Workouts Skeleton */}
+          <Card className="shadow-md border-none bg-white">
+            <CardHeader className="p-4 pb-0">
+              <Skeleton className="h-6 w-1/4 mb-2" />
+            </CardHeader>
+            <CardContent className="p-4 space-y-3">
+              <WorkoutCardSkeleton key="workout-skeleton-1" />
+              <WorkoutCardSkeleton key="workout-skeleton-2" />
+              <WorkoutCardSkeleton key="workout-skeleton-3" />
+            </CardContent>
+          </Card>
+        </main>
+        <BottomNav />
+      </div>
+    );
   }
 
   if (error) {
@@ -247,7 +309,10 @@ export default function StatsTrendsScreen() {
         </div>
 
         {/* Summary Metrics */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
+        <div
+          className="grid grid-cols-2 gap-4 mb-6 animate-fadeInUp"
+          style={{ animationDelay: '100ms' }}
+        >
           <Card className="shadow-md border-none bg-white p-4 hover:shadow-lg transition-shadow duration-200">
             <CardHeader className="p-0 mb-3">
               <CardTitle className="text-lg font-semibold flex items-center text-gray-700">
@@ -323,7 +388,10 @@ export default function StatsTrendsScreen() {
         </div>
 
         {/* GitHub-style Progress Tracker */}
-        <Card className="mb-6 shadow-md border-none bg-white p-4">
+        <Card
+          className="mb-6 shadow-md border-none bg-white p-4 animate-fadeInUp"
+          style={{ animationDelay: '200ms' }}
+        >
           <CardHeader className="p-0 mb-4">
             <CardTitle className="text-lg font-semibold text-gray-700">Workout Progress (Last 6 Months)</CardTitle>
           </CardHeader>
@@ -409,7 +477,10 @@ export default function StatsTrendsScreen() {
         </Card>
 
         {/* Volume Trend Chart */}
-        <Card className="mb-6 shadow-md border-none bg-white">
+        <Card
+          className="mb-6 shadow-md border-none bg-white animate-fadeInUp"
+          style={{ animationDelay: '300ms' }}
+        >
           <CardHeader className="p-4 pb-0">
             <CardTitle className="text-lg font-semibold text-gray-700">Volume Trend (Last 14 Days)</CardTitle> {/* Changed title to 14 Days */}
           </CardHeader>
@@ -433,7 +504,10 @@ export default function StatsTrendsScreen() {
         </Card>
 
         {/* Workout Frequency Chart */}
-        <Card className="shadow-md border-none bg-white mb-6">
+        <Card
+          className="shadow-md border-none bg-white mb-6 animate-fadeInUp"
+          style={{ animationDelay: '400ms' }}
+        >
           <CardHeader className="p-4 pb-0">
             <CardTitle className="text-lg font-semibold text-gray-700">Workout Frequency (Last 14 Days)</CardTitle> {/* Changed title to 14 Days */}
           </CardHeader>
@@ -457,7 +531,10 @@ export default function StatsTrendsScreen() {
         </Card>
 
         {/* Recent Workouts Section */}
-        <Card className="shadow-md border-none bg-white">
+        <Card
+          className="shadow-md border-none bg-white animate-fadeInUp"
+          style={{ animationDelay: '500ms' }}
+        >
           <CardHeader className="p-4 pb-0">
             <CardTitle className="text-lg font-semibold text-gray-700">Recent Workouts</CardTitle>
           </CardHeader>
