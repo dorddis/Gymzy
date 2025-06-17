@@ -8,7 +8,6 @@ import { FirebaseStateAdapter, MemoryStateAdapter } from './firebase-state-adapt
 import { RobustToolExecutor } from './robust-tool-executor';
 import { EnhancedWorkoutTools } from './enhanced-workout-tools';
 import { generateAIResponse, generateCharacterStreamingResponse } from './ai-service';
-import { ComprehensiveFixesService } from './comprehensive-fixes-service';
 
 export interface ChatMessage {
   id: string;
@@ -197,8 +196,21 @@ export class ProductionAgenticService {
     } catch (error) {
       console.error('❌ ProductionAgenticService: Error in response generation:', error);
 
-      // Use comprehensive fixes for better error handling
-      return ComprehensiveFixesService.handleAIResponseError(error, 'generateAgenticResponse');
+      // Handle error gracefully
+      return {
+        content: 'I apologize, but I encountered an error processing your request. Please try again.',
+        success: false,
+        toolCalls: [],
+        isStreaming: false,
+        confidence: 0,
+        reasoning: 'Error occurred during response generation',
+        metadata: {
+          sessionId: 'error',
+          executionTime: 0,
+          toolsUsed: [],
+          fallbacksUsed: ['error_fallback']
+        }
+      };
     }
   }
 
@@ -476,7 +488,8 @@ Requirements:
 
   // Helper methods
   private getSessionId(chatHistory: ChatMessage[]): string {
-    return ComprehensiveFixesService.getOrCreateSessionId();
+    // Generate a simple session ID based on timestamp and random number
+    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
   private async getUserId(chatHistory: ChatMessage[]): Promise<string> {
@@ -486,8 +499,8 @@ Requirements:
       return userIdFromHistory;
     }
 
-    // Use comprehensive fixes service for robust user ID extraction
-    return await ComprehensiveFixesService.getUserId();
+    // Return anonymous as fallback
+    return 'anonymous';
   }
 
   private getFallbackIntentAnalysis(userInput: string): any {

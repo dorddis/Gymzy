@@ -1,5 +1,4 @@
 import { getAIPersonalityProfile, generateAIContext } from './ai-personality-service';
-import { ComprehensiveFixesService } from './comprehensive-fixes-service';
 import { ContextualDataService } from './contextual-data-service';
 // LangChain service will be dynamically imported when needed
 
@@ -105,8 +104,17 @@ export const sendChatMessage = async (
     // Import and use production agentic service
     const { productionAgenticService } = await import('./production-agentic-service');
 
-    // Convert conversation history using comprehensive fixes
-    const chatHistory = ComprehensiveFixesService.validateAndCleanChatHistory(conversationHistory);
+    // Validate and clean conversation history, filter out system messages for compatibility
+    const chatHistory = conversationHistory
+      .filter(msg => msg && msg.role && msg.content && typeof msg.content === 'string')
+      .filter(msg => msg.role !== 'system') // Remove system messages for compatibility
+      .map(msg => ({
+        id: msg.id,
+        role: msg.role as 'user' | 'assistant',
+        content: msg.content,
+        timestamp: msg.timestamp,
+        userId: msg.userId || 'anonymous'
+      }));
 
     console.log('🤖 ChatService: Calling production agentic AI service...');
 
