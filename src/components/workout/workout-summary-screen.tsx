@@ -319,23 +319,7 @@ export function WorkoutSummaryScreen({
 
       {currentWorkoutExercises.length === 0 ? (
         <p className="text-center text-gray-500">No exercises added yet. Click "Add Exercise" to start!</p>
-      ) : (
-        <>
-          {/* Special Sets Button */}
-          {currentWorkoutExercises.length >= 2 && (
-            <div className="flex justify-center mb-4">
-              <Button
-                variant="outline"
-                onClick={() => setShowSpecialSetsModal(true)}
-                className="flex items-center gap-2 border-purple-200 text-purple-600 hover:bg-purple-50"
-              >
-                <Plus className="h-4 w-4" />
-                Special Sets
-              </Button>
-            </div>
-          )}
-        </>
-      )}
+      ) : null}
 
       {currentWorkoutExercises.length > 0 && (
         <div className="space-y-4"> {/* Reduced vertical spacing between exercises */}

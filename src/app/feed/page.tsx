@@ -48,12 +48,21 @@ export default function FeedPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('personalized');
   const [isInitialRender, setIsInitialRender] = useState(true);
+  const [minSkeletonTimeElapsed, setMinSkeletonTimeElapsed] = useState(false);
+
+  React.useEffect(() => {
+    // Ensure skeletons show for minimum time for better UX
+    const timer = setTimeout(() => {
+      setMinSkeletonTimeElapsed(true);
+    }, 800); // Minimum skeleton display time
+    return () => clearTimeout(timer);
+  }, []);
 
   React.useEffect(() => {
     // Show page structure immediately, load data progressively
     const timer = setTimeout(() => {
       setIsInitialRender(false);
-    }, 100);
+    }, 50); // Reduced to 50ms for faster page structure
     return () => clearTimeout(timer);
   }, []);
 
@@ -333,7 +342,7 @@ export default function FeedPage() {
         </TabsList>
         
         <TabsContent value="personalized" className="mt-6">
-          {(isLoading || isInitialRender) ? (
+          {(isLoading || isInitialRender || !minSkeletonTimeElapsed) ? (
             <div>
               <FeedPostSkeleton key="personalized-skeleton-1" />
               <FeedPostSkeleton key="personalized-skeleton-2" />
@@ -359,7 +368,7 @@ export default function FeedPage() {
         </TabsContent>
         
         <TabsContent value="trending" className="mt-6">
-          {(isLoading || isInitialRender) ? (
+          {(isLoading || isInitialRender || !minSkeletonTimeElapsed) ? (
             <div>
               <FeedPostSkeleton key="trending-skeleton-1" />
               <FeedPostSkeleton key="trending-skeleton-2" />
@@ -385,7 +394,7 @@ export default function FeedPage() {
         </TabsContent>
         
         <TabsContent value="following" className="mt-6">
-          {(isLoading || isInitialRender) ? (
+          {(isLoading || isInitialRender || !minSkeletonTimeElapsed) ? (
             <div>
               <FeedPostSkeleton key="following-skeleton-1" />
               <FeedPostSkeleton key="following-skeleton-2" />

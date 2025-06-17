@@ -56,12 +56,21 @@ export default function StatsTrendsScreen() {
 
   // Progressive loading state - show page immediately, load data in background
   const [isInitialRender, setIsInitialRender] = React.useState(true);
+  const [minSkeletonTimeElapsed, setMinSkeletonTimeElapsed] = React.useState(false);
 
   React.useEffect(() => {
-    // Allow page to render immediately, then start showing data
+    // Ensure skeletons show for minimum time for better UX
+    const timer = setTimeout(() => {
+      setMinSkeletonTimeElapsed(true);
+    }, 800); // Minimum skeleton display time
+    return () => clearTimeout(timer);
+  }, []);
+
+  React.useEffect(() => {
+    // Allow page structure to render immediately
     const timer = setTimeout(() => {
       setIsInitialRender(false);
-    }, 100);
+    }, 50); // Reduced to 50ms for faster page structure
     return () => clearTimeout(timer);
   }, []);
 
@@ -231,7 +240,8 @@ export default function StatsTrendsScreen() {
   }, [last6MonthsDates]);
 
   // Show data loading state (not blocking page render)
-  const isDataLoading = loading || isInitialRender;
+  // Ensure skeletons show for minimum time AND until data is loaded
+  const isDataLoading = loading || isInitialRender || !minSkeletonTimeElapsed;
 
   if (error) {
     return <div className="text-center py-8 text-red-500">Error loading stats.</div>;

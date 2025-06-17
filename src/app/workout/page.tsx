@@ -14,6 +14,7 @@ import { useContextualTracking } from "@/hooks/useContextualTracking";
 import { RotateCcw, Play, Pause } from "lucide-react";
 import { AnimatedTimer } from "@/components/ui/animated-timer";
 import { FinishWorkoutModal } from "@/components/workout/finish-workout-modal";
+import { SpecialSetsModal } from "@/components/workout/special-sets-modal";
 import { useRouter } from "next/navigation";
 
 export default function WorkoutPage() {
@@ -33,6 +34,7 @@ export default function WorkoutPage() {
 
   const [isAddExerciseModalOpen, setIsAddExerciseModalOpen] = useState(false);
   const [isFinishWorkoutModalOpen, setIsFinishWorkoutModalOpen] = useState(false);
+  const [showSpecialSetsModal, setShowSpecialSetsModal] = useState(false);
   const [isRestTimerRunning, setIsRestTimerRunning] = useState(false);
   const [restTimeRemaining, setRestTimeRemaining] = useState(120);
   const [workoutStartTime] = useState(Date.now());
@@ -190,6 +192,25 @@ export default function WorkoutPage() {
 
   const toggleRestTimer = () => setIsRestTimerRunning((r) => !r);
 
+  const handleCreateSuperset = (exerciseIds: string[], parameters: any) => {
+    const supersetGroupId = `superset_${Date.now()}`;
+
+    setCurrentWorkoutExercises((prevExercises) => {
+      return prevExercises.map(exercise => {
+        if (exerciseIds.includes(exercise.id)) {
+          return {
+            ...exercise,
+            specialSetType: 'superset' as const,
+            specialSetGroup: supersetGroupId,
+            specialSetParameters: parameters
+          };
+        }
+        return exercise;
+      });
+    });
+    setShowSpecialSetsModal(false);
+  };
+
   return (
     <div className="flex flex-col h-full">
       <WorkoutHeader
@@ -236,10 +257,16 @@ export default function WorkoutPage() {
 
         <div className="flex gap-2 mt-4">
           <Button
-            className="w-full bg-primary text-white py-3 rounded-xl font-semibold shadow-sm hover:opacity-95"
+            className="flex-[2] bg-primary text-white py-3 rounded-xl font-semibold shadow-sm hover:opacity-95"
             onClick={() => setIsAddExerciseModalOpen(true)}
           >
             + Add Exercise
+          </Button>
+          <Button
+            className="flex-[1] bg-blue-500 text-white py-3 rounded-xl font-semibold shadow-sm hover:opacity-95"
+            onClick={() => setShowSpecialSetsModal(true)}
+          >
+            + Special set
           </Button>
         </div>
 
@@ -281,6 +308,14 @@ export default function WorkoutPage() {
         onOpenChange={setIsFinishWorkoutModalOpen}
         onSave={handleSaveWorkout}
       />
+
+      {showSpecialSetsModal && (
+        <SpecialSetsModal
+          exercises={currentWorkoutExercises.filter(ex => !ex.specialSetGroup)}
+          onCreateSuperset={handleCreateSuperset}
+          onClose={() => setShowSpecialSetsModal(false)}
+        />
+      )}
 
       {!isWorkoutPage && <BottomNav />}
     </div>
