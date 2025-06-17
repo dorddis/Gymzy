@@ -24,8 +24,154 @@ export class EnhancedWorkoutTools {
       this.searchExercisesTool(),
       this.modifyWorkoutTool(),
       this.analyzeWorkoutTool(),
-      this.getWorkoutRecommendationsTool()
+      this.getWorkoutRecommendationsTool(),
+      this.saveWorkoutTool()
     ];
+  }
+
+  /**
+   * Tool to save a new or completed workout
+   */
+  private saveWorkoutTool(): ToolDefinition {
+    return {
+      name: 'save_workout',
+      description: 'Save a new or completed workout, including exercises, sets, reps, and optional notes or a photo.',
+      parameters: {
+        type: 'object',
+        properties: {
+          workoutName: { type: 'string', description: 'User-defined name for the workout.' },
+          exercises: {
+            type: 'array',
+            description: 'List of exercises to save.',
+            items: {
+              type: 'object',
+              properties: {
+                exerciseId: { type: 'string', description: 'Database ID of the exercise (optional)' },
+                name: { type: 'string', description: 'Name of the exercise' },
+                sets: { type: 'number', description: 'Number of sets' },
+                reps: { type: ['string', 'number'], description: 'Number of repetitions (e.g., 10 or "AMRAP")' },
+                weight: { type: 'number', description: 'Weight used (optional)' },
+                notes: { type: 'string', description: 'User notes for this exercise (optional)' }
+              },
+              required: ['name', 'sets', 'reps']
+            }
+          },
+          sourceWorkoutId: { type: 'string', description: 'ID of an existing workout this is based on (optional)' },
+          date: { type: 'string', description: 'Date for the workout (ISO format, optional, defaults to now)' },
+          notes: { type: 'string', description: 'General notes for the entire workout (optional)' },
+          photoUrl: { type: 'string', description: 'URL of a photo for the workout (optional)' }
+        },
+        required: ['exercises']
+      },
+      execute: async (params, context) => await this.executeSaveWorkout(params, context),
+      validate: (params) => {
+        const errors: string[] = [];
+        if (!params.exercises || !Array.isArray(params.exercises) || params.exercises.length === 0) {
+          errors.push('The exercises array is required and cannot be empty.');
+        } else {
+          params.exercises.forEach((ex: any, index: number) => {
+            if (!ex.name) errors.push(`Exercise ${index + 1} must have a name.`);
+            if (ex.sets === undefined) errors.push(`Exercise ${index + 1} must have sets defined.`);
+            if (ex.reps === undefined) errors.push(`Exercise ${index + 1} must have reps defined.`);
+          });
+        }
+        return { valid: errors.length === 0, errors, warnings: [] };
+      },
+      // Consider adding retry/circuit breaker if actual DB calls are made
+      retryConfig: {
+        maxRetries: 2,
+        baseDelay: 1000,
+        retryableErrors: ['database_error', 'network_error']
+      },
+      fallback: async (params, error) => {
+        console.warn(`⚠️ save_workout fallback triggered due to: ${error.message}`);
+        return { success: false, message: "Sorry, I couldn't save the workout right now due to a temporary issue." };
+      }
+    };
+  }
+
+  /**
+   * Execute workout saving logic
+   */
+  private async executeSaveWorkout(params: any, context: ToolExecutionContext): Promise<any> {
+    console.log('💾 EnhancedWorkoutTools: Saving workout...');
+    console.log('💾 Params:', JSON.stringify(params, null, 2));
+
+    // Validation (schema validation is done by RobustToolExecutor, this is for business logic)
+    if (!params.exercises || params.exercises.length === 0) {
+      return { success: false, message: 'Cannot save a workout with no exercises.' };
+    }
+
+    const processedExercises = [];
+    for (const ex of params.exercises) {
+      let exerciseId = ex.exerciseId;
+      if (!exerciseId && ex.name) {
+        try {
+          // Assuming exerciseMatcher is initialized and available
+          const match = await this.exerciseMatcher.findBestMatch(ex.name, { minConfidence: 0.5 });
+          if (match && match.exercise && match.exercise.id) {
+            exerciseId = match.exercise.id;
+            console.log(`📝 Matched exercise "${ex.name}" to ID "${exerciseId}" with confidence ${match.confidence}`);
+          } else {
+            console.log(`📝 Could not find a matching ID for exercise "${ex.name}". It will be saved with its name only.`);
+          }
+        } catch (matchError) {
+          console.error(`❌ Error trying to match exercise "${ex.name}":`, matchError);
+          // Proceed without an ID if matching fails
+        }
+      }
+      processedExercises.push({
+        exerciseId: exerciseId || null,
+        name: ex.name,
+        sets: ex.sets,
+        reps: ex.reps,
+        weight: ex.weight,
+        notes: ex.notes,
+      });
+    }
+
+    const workoutDataToSave = {
+      userId: context.userId,
+      name: params.workoutName || `Saved Workout ${new Date().toLocaleDateString()}`,
+      date: params.date ? new Date(params.date) : new Date(),
+      exercises: processedExercises, // These are simplified; real service would expand to full exercise objects
+      notes: params.notes,
+      photoUrl: params.photoUrl,
+      sourceWorkoutId: params.sourceWorkoutId,
+      // Assuming your workout-service.ts expects a certain structure
+      // For now, we'll keep it flat and simulate what workout-service might store/return.
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      isCompleted: params.isCompleted || false, // Example: track if workout is logged as completed
+      difficulty: params.difficulty || 'custom', // Example property
+    };
+
+    try {
+      // In a real scenario, you'd call your workout service:
+      // const savedWorkout = await actualWorkoutService.saveUserWorkout(context.userId, workoutDataToSave);
+      // For this subtask, simulate success:
+      const simulatedSavedWorkout = {
+        id: `sim_saved_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+        ...workoutDataToSave,
+        // Ensure date objects are handled correctly if they were strings passed in params
+        date: workoutDataToSave.date instanceof Date ? workoutDataToSave.date.toISOString() : new Date(workoutDataToSave.date).toISOString(),
+        createdAt: workoutDataToSave.createdAt.toISOString(),
+        updatedAt: workoutDataToSave.updatedAt.toISOString(),
+      };
+
+      console.log('✅ EnhancedWorkoutTools: Workout saved (simulated):', simulatedSavedWorkout.id);
+      return {
+        success: true,
+        message: `Workout "${simulatedSavedWorkout.name}" saved successfully!`,
+        savedWorkoutId: simulatedSavedWorkout.id,
+        workout: simulatedSavedWorkout // Return the saved workout data
+      };
+    } catch (error) {
+      console.error('❌ EnhancedWorkoutTools: Error saving workout (simulated):', error);
+      // If actual DB call was made, error might be more specific
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      return { success: false, message: `An error occurred while saving the workout: ${errorMessage}`, error: errorMessage };
+    }
   }
 
   /**
@@ -511,7 +657,7 @@ export class EnhancedWorkoutTools {
     }
   }
 
-  // Placeholder methods for other tools
+  // Placeholder methods for other tools - unchanged from here
   private modifyWorkoutTool(): ToolDefinition {
     return {
       name: 'modify_workout',

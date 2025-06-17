@@ -21,7 +21,7 @@ import { useWorkout } from '@/contexts/WorkoutContext';
 import { useRouter } from 'next/navigation';
 import { AI_WORKOUT_TOOLS, executeAITool, WorkoutExercise } from '@/services/ai-workout-tools';
 import { generateAIResponse } from '@/services/ai-service';
-import { agenticAI, AgenticAIResponse, ChatMessage as AgenticChatMessage } from '@/services/agentic-ai-service';
+import { sendStreamingChatMessage, ChatMessage as ServiceChatMessage, StreamingChatResponse } from '@/services/ai-chat-service';
 import ReactMarkdown from 'react-markdown';
 import { ChatMessageSkeleton } from '@/components/ui/skeleton';
 
@@ -99,39 +99,42 @@ export function AIChatInterface({ onStartWorkout }: AIChatInterfaceProps) {
     setMessages(prev => [...prev, assistantMessage]);
 
     try {
-      // Use the new agentic AI service with streaming
-      const aiResponse = await agenticAI.generateAgenticResponse(
+      let accumulatedContent = ""; // To store the full response content
+      const streamingChatResponse = await sendStreamingChatMessage(
+        user!.uid, // Assuming user object is available and has uid
         currentInput,
-        messages,
+        messages.map(m => ({ // Map to ServiceChatMessage if necessary
+          id: m.id,
+          role: m.role === 'user' ? 'user' : 'assistant', // Ensure role is 'user'|'assistant'|'system'
+          content: m.content,
+          timestamp: m.timestamp,
+          // userId: user!.uid // userId might be needed per message in history for some services
+        })),
         (chunk: string) => {
-          // Update the streaming message
+          accumulatedContent += chunk;
           setMessages(prev => prev.map(msg =>
             msg.id === assistantMessageId
-              ? { ...msg, content: msg.content + chunk }
+              ? { ...msg, content: msg.content + chunk } // Append chunk for streaming display
               : msg
           ));
         }
       );
 
-      console.log('AI Response received:', {
-        content: aiResponse.content,
-        toolCalls: aiResponse.toolCalls,
-        workoutData: aiResponse.workoutData
-      });
-
-      // Update the final message with tool calls and workout data
+      // After streaming is complete, streamingChatResponse contains toolCalls and workoutData
+      // The `accumulatedContent` has the full text.
+      // Update the assistant's message with the full content and any tool/workout data.
       setMessages(prev => prev.map(msg =>
         msg.id === assistantMessageId
           ? {
               ...msg,
-              content: aiResponse.content,
-              toolCalls: aiResponse.toolCalls,
-              workoutData: aiResponse.workoutData
+              content: accumulatedContent, // Use the fully accumulated content
+              toolCalls: streamingChatResponse.toolCalls,
+              workoutData: streamingChatResponse.workoutData
             }
           : msg
       ));
 
-      // Force a re-render to ensure workout button appears
+      // Force a re-render to ensure workout button appears (if this is still needed)
       setTimeout(() => {
         setMessages(prev => [...prev]);
       }, 100);

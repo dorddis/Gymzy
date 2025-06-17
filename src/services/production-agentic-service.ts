@@ -213,8 +213,9 @@ User Request: "${userInput}"
 Context: ${context}
 
 AVAILABLE TOOLS (use these exact names):
-- create_workout: Create a personalized workout plan
-- search_exercises: Search for specific exercises
+- create_workout: Create a personalized workout plan. Extracts details like muscle groups, duration, specific exercises if mentioned.
+- search_exercises: Search for specific exercises.
+- save_workout: Save a new or completed workout. Can include exercises, name, notes, etc. If exercises are not provided, the AI should ask for them.
 - general_response: Handle general conversation
 
 CRITICAL RULES:
@@ -229,6 +230,14 @@ WORKOUT CREATION TRIGGERS (use "create_workout"):
 - "Build me a workout plan"
 - "I want a [muscle group] workout"
 
+WORKOUT SAVING TRIGGERS (use "save_workout"):
+- "Save my workout"
+- "Log this session"
+- "Log what I just did"
+- "I want to save the chest workout I finished"
+- "Save my leg day: 3 sets of squats, 3 sets of lunges"
+- "Can you save this workout for me?"
+
 GENERAL CONVERSATION (use "general_response"):
 - Greetings: "Hi", "Hello", "Hey", "What's up"
 - Questions: "How are you?", "What can you do?"
@@ -237,18 +246,43 @@ GENERAL CONVERSATION (use "general_response"):
 - Complaints or feedback
 - Any statement about feelings or mood
 
+// Rule for Ambiguity:
+// If a workout creation request is ambiguous (e.g., "make me a workout"), and you are confident it's a workout request,
+// set intent to "workout_creation" and use the "create_workout" tool.
+// The tool will attempt to create a sensible default. Do not ask clarifying questions at this stage unless the request is extremely vague.
+
 Respond with JSON only:
 {
-  "intent": "workout_creation" | "exercise_search" | "general_chat",
+  "intent": "workout_creation" | "exercise_search" | "save_workout" | "general_chat",
   "requiresTools": true/false,
-  "tools": ["tool_name"],
+  "tools": ["tool_name"], // Can be multiple like ["create_workout", "save_workout"] if user says "create and save this"
   "reasoning": "explanation",
   "confidence": 0.0-1.0,
-  "parameters": {}
+  "parameters": {
+    // For create_workout, populate if details are in user input:
+    // "targetMuscleGroups": ["chest", "triceps"],
+    // "workoutDuration": "45 minutes",
+    // "exerciseList": ["bench press", "tricep dips"],
+    // "numberOfExercises": 5
+    // For save_workout, populate if details are in user input:
+    // "workoutName": "My Awesome Leg Day",
+    // "exercises": [
+    //   {"name": "Squats", "sets": 3, "reps": 10},
+    //   {"name": "Lunges", "sets": 3, "reps": "12 per leg"}
+    // ],
+    // "notes": "Felt strong today!"
+  }
 }
 
 Examples:
-- "Create a chest workout" → {"intent": "workout_creation", "requiresTools": true, "tools": ["create_workout"], "reasoning": "Explicit workout creation request", "confidence": 0.9, "parameters": {}}
+- "Create a chest workout for 30 minutes with 4 exercises" →
+  {"intent": "workout_creation", "requiresTools": true, "tools": ["create_workout"], "reasoning": "Explicit workout creation request with details", "confidence": 0.95, "parameters": {"targetMuscleGroups": ["chest"], "workoutDuration": "30 minutes", "numberOfExercises": 4}}
+- "Make me a workout" →
+  {"intent": "workout_creation", "requiresTools": true, "tools": ["create_workout"], "reasoning": "General workout request, tool will use defaults", "confidence": 0.8, "parameters": {}}
+- "Save my leg day with 3 sets of squats, 10 reps each, and 3 sets of lunges, 12 reps per leg. Call it 'Leg Power'." →
+  {"intent": "save_workout", "requiresTools": true, "tools": ["save_workout"], "reasoning": "User wants to save a workout with specific exercises and a name.", "confidence": 0.95, "parameters": {"workoutName": "Leg Power", "exercises": [{"name": "squats", "sets": 3, "reps": 10}, {"name": "lunges", "sets": 3, "reps": "12 per leg"}]}}
+- "I want to save the workout I just did." →
+  {"intent": "save_workout", "requiresTools": true, "tools": ["save_workout"], "reasoning": "User wants to save a workout, details need to be collected.", "confidence": 0.9, "parameters": {}}
 - "Hey there" → {"intent": "general_chat", "requiresTools": false, "tools": [], "reasoning": "Greeting - general conversation", "confidence": 0.9, "parameters": {}}
 - "What's up?" → {"intent": "general_chat", "requiresTools": false, "tools": [], "reasoning": "Casual greeting", "confidence": 0.9, "parameters": {}}
 - "There's no button" → {"intent": "general_chat", "requiresTools": false, "tools": [], "reasoning": "User feedback/complaint", "confidence": 0.9, "parameters": {}}
@@ -402,8 +436,16 @@ Requirements:
 - Use the user's name if available
 - Include specific details from tool results
 - Use clean, readable formatting (avoid excessive markdown)
-- If a workout was created, provide a clear summary with exercise names, sets, and reps
-- Include a "Start This Workout" button/link at the end if workout was created
+- If a workout was created (e.g., from the "create_workout" tool):
+  - Clearly list the exercises in the workout (name, sets, reps).
+  - Check the tool results for details on exercise matching (e.g., a field named "matchingResults" or "unmatchedExercises" within the "create_workout" tool's results).
+  - If any user-requested exercises couldn't be matched or were substituted, clearly state this. For example: "I included [Exercise A] and [Exercise B]. I couldn't find an exact match for '[User's Requested Exercise C]', so I've added [Fallback Exercise D] as an alternative." or "I've included exercises based on your request for a [muscle group] workout. If you had specific exercises in mind that aren't listed, let me know!"
+  - This transparency helps the user understand how their request was processed.
+- If the user's intent was `save_workout`:
+  - And the `save_workout` tool was called and succeeded (check `toolResults` for a successful `save_workout` entry): Respond with a confirmation, like 'Okay, I've saved your workout "[Workout Name]"!' (extract workout name from tool result if possible, or use the one from parameters if tool doesn't return it).
+  - And the `save_workout` tool was intended (`intentAnalysis.tools` included `save_workout`) BUT crucial parameters like `exercises` were missing from the user's initial request (meaning the tool might not have been called or might have failed due to missing info from the `intentAnalysis.parameters`): **Ask clarifying questions to gather the necessary details.** For example: 'Sure, I can help you save that! What exercises did you do in your workout?' or 'Sounds good! To save your workout, could you tell me the exercises, sets, and reps?' or 'What would you like to name this workout and what exercises should I include?'.
+  - If the `save_workout` tool was called but failed for another reason (check `toolResults` for errors for the `save_workout` tool): Inform the user, e.g., 'I tried to save your workout, but something went wrong. [Optional: brief, non-technical error if available from tool result]'
+- Include a "Start This Workout" button/link at the end if a workout was created.
 - Match the user's communication style from their profile
 - Keep response concise but informative (max 250 words)
 - Format workout details in a simple, easy-to-read list
@@ -655,12 +697,14 @@ Requirements:
       'exercise_finder': 'search_exercises',
       'find_exercises': 'search_exercises',
       'exercise_lookup': 'search_exercises',
+      'log_workout': 'save_workout', // Alias for save_workout
+      'record_workout': 'save_workout', // Alias for save_workout
       'chat': 'general_response',
       'conversation': 'general_response',
       'general_chat': 'general_response'
     };
 
-    const validTools = ['create_workout', 'search_exercises', 'general_response'];
+    const validTools = ['create_workout', 'search_exercises', 'save_workout', 'general_response'];
     const correctedTools: string[] = [];
 
     for (const tool of tools) {
