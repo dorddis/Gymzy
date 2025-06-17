@@ -1,9 +1,13 @@
 import { getAIPersonalityProfile, generateAIContext } from './ai-personality-service';
 import { ComprehensiveFixesService } from './comprehensive-fixes-service';
 import { ContextualDataService } from './contextual-data-service';
+// LangChain service will be dynamically imported when needed
 
 // Google AI Studio Configuration
 const GOOGLE_AI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
+
+// Feature flag for LangChain integration
+const USE_LANGCHAIN = process.env.NEXT_PUBLIC_USE_LANGCHAIN === 'true';
 
 export interface ChatMessage {
   id: string;
@@ -145,7 +149,7 @@ export const sendChatMessage = async (
   }
 };
 
-// Send message to AI with streaming support using production system
+// Send message to AI with streaming support using hybrid system (LangChain or Production)
 export const sendStreamingChatMessage = async (
   userId: string,
   message: string,
@@ -154,11 +158,30 @@ export const sendStreamingChatMessage = async (
   abortSignal?: AbortSignal
 ): Promise<StreamingChatResponse> => {
   try {
-    console.log('💬 ChatService: ===== SENDING STREAMING CHAT MESSAGE (PRODUCTION) =====');
+    console.log(`💬 ChatService: ===== SENDING STREAMING CHAT MESSAGE (${USE_LANGCHAIN ? 'LANGCHAIN' : 'PRODUCTION'}) =====`);
     console.log('💬 ChatService: User ID:', userId);
     console.log('💬 ChatService: Message:', message);
     console.log('💬 ChatService: History length:', conversationHistory.length);
     console.log('💬 ChatService: Streaming enabled:', !!onStreamChunk);
+
+    // Use production service (LangChain integration will be added after dependencies are installed)
+    return await sendStreamingChatMessageProduction(userId, message, conversationHistory, onStreamChunk, abortSignal);
+  } catch (error: any) {
+    console.error('💬 ChatService: Error in service routing:', error);
+    return { success: false, error: error.message || 'Unknown error occurred' };
+  }
+};
+
+// Production implementation (preserved with all improvements)
+const sendStreamingChatMessageProduction = async (
+  userId: string,
+  message: string,
+  conversationHistory: ChatMessage[] = [],
+  onStreamChunk?: (chunk: string) => void,
+  abortSignal?: AbortSignal
+): Promise<StreamingChatResponse> => {
+  try {
+    console.log('🏭 ChatService: Using Production implementation');
 
     // Import production agentic service
     const { productionAgenticService } = await import('./production-agentic-service');
@@ -182,28 +205,22 @@ export const sendStreamingChatMessage = async (
       abortSignal
     );
 
-    console.log('✅ ChatService: Production AI response received');
-    console.log('✅ ChatService: Response length:', result.content.length);
-    console.log('✅ ChatService: Tool calls:', result.toolCalls?.length || 0);
-    console.log('✅ ChatService: Has workout data:', !!result.workoutData);
-    console.log('✅ ChatService: Confidence:', result.confidence);
-    console.log('✅ ChatService: Execution time:', result.metadata?.executionTime, 'ms');
+    console.log('✅ ChatService: Production agentic response received:', {
+      hasContent: !!result.content,
+      hasToolCalls: !!result.toolCalls?.length,
+      hasWorkoutData: !!result.workoutData,
+      confidence: result.confidence
+    });
 
     return {
-      success: true,
+      success: true, // Production service returns response on success, throws on error
       toolCalls: result.toolCalls,
       workoutData: result.workoutData
     };
 
-  } catch (error) {
-    console.error('❌ ChatService: Error sending streaming chat message:', error);
-    console.error('❌ ChatService: Error stack:', error instanceof Error ? error.stack : 'No stack trace');
-
-    // Return a fallback response
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
-    };
+  } catch (error: any) {
+    console.error('🏭 ChatService: Production service error:', error);
+    return { success: false, error: error.message || 'Production service error' };
   }
 };
 
