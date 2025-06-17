@@ -2,11 +2,12 @@
 
 import React from 'react';
 import { Home, BarChart2, Users, Dumbbell, MessageSquare } from 'lucide-react';
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useOptimizedNavigation } from '@/hooks/useOptimizedNavigation';
 
 export function BottomNav() {
   const pathname = usePathname();
+  const { navigateOptimized } = useOptimizedNavigation();
 
   const navItems = [
     { id: 'home', label: 'Home', icon: Home, href: '/' },
@@ -22,21 +23,21 @@ export function BottomNav() {
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
-          
+
           return (
-            <Link href={item.href} key={item.id} passHref>
-              <button
-                className={`flex flex-col items-center justify-center w-16 ${
-                  isActive ? 'text-secondary' : 'text-gray-500'
-                }`}
-              >
-                <Icon className={`w-6 h-6 ${isActive ? 'text-secondary' : 'text-gray-500'}`} />
-                <span className="text-xs mt-1">{item.label}</span>
-              </button>
-            </Link>
+            <button
+              key={item.id}
+              onClick={() => navigateOptimized(item.href)}
+              className={`flex flex-col items-center justify-center w-16 transition-colors duration-200 ${
+                isActive ? 'text-secondary' : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <Icon className={`w-6 h-6 ${isActive ? 'text-secondary' : 'text-gray-500'}`} />
+              <span className="text-xs mt-1">{item.label}</span>
+            </button>
           );
         })}
       </div>
     </nav>
   );
-} 
+}

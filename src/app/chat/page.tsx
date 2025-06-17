@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { Send, ChevronLeft, Loader2, MessageSquare, Trash2, Plus, X, AlignRight, Square } from 'lucide-react';
 import { ChatMessageSkeleton } from '@/components/ui/skeleton';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useOptimizedNavigation } from '@/hooks/useOptimizedNavigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { ChatBubble } from '@/components/chat/chat-bubble';
 import { Button } from '@/components/ui/button';
@@ -43,6 +44,7 @@ function ChatContent() {
   const isAiStreamingRef = useRef(isAiStreaming);
   const abortControllerRef = useRef<AbortController | null>(null);
   const router = useRouter();
+  const { navigateBack } = useOptimizedNavigation();
   const searchParams = useSearchParams();
 
   const scrollToBottom = () => {
@@ -376,7 +378,7 @@ function ChatContent() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => router.back()}
+              onClick={navigateBack}
               className="p-2 hover:bg-gray-100 rounded-full"
             >
               <ChevronLeft className="h-5 w-5 text-gray-700" />
