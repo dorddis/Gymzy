@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { Send, ChevronLeft, Loader2, MessageSquare, Trash2, Plus, X, AlignRight, Square } from 'lucide-react';
+import { ChatMessageSkeleton } from '@/components/ui/skeleton';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { ChatBubble } from '@/components/chat/chat-bubble';
@@ -233,12 +234,8 @@ function ChatContent() {
 
       console.log('💬 ChatPage: Sending message to AI service with streaming. History length:', conversationHistoryForAI.length);
 
-      const streamingMessagePlaceholder: ChatMessage = {
-        role: 'assistant',
-        content: '',
-        timestamp: new Date()
-      };
-      setMessages(prevMessages => [...prevMessages, streamingMessagePlaceholder]);
+      // Only add streaming placeholder when we start receiving chunks
+      let hasAddedPlaceholder = false;
 
       let fullStreamedContent = '';
       // Assuming sendStreamingChatMessage and saveChatMessage can handle workoutData.
@@ -251,6 +248,18 @@ function ChatContent() {
           if (!isAiStreamingRef.current || abortController.signal.aborted) {
             return;
           }
+
+          // Add placeholder on first chunk
+          if (!hasAddedPlaceholder) {
+            const streamingMessagePlaceholder: ChatMessage = {
+              role: 'assistant',
+              content: '',
+              timestamp: new Date()
+            };
+            setMessages(prevMessages => [...prevMessages, streamingMessagePlaceholder]);
+            hasAddedPlaceholder = true;
+          }
+
           fullStreamedContent += chunk;
           setMessages(prevMsgs => prevMsgs.map((msg, index) => {
             if (index === prevMsgs.length - 1 && msg.role === 'assistant') {
@@ -407,12 +416,8 @@ function ChatContent() {
               onStartWorkout={handleStartWorkout}
             />
           ))}
-          {isLoading && (
-            <div className="flex justify-start">
-              <div className="bg-gray-100 rounded-xl p-3 max-w-[75%]">
-                <Loader2 className="h-4 w-4 animate-spin" />
-              </div>
-            </div>
+          {isLoading && !isAiStreaming && (
+            <ChatMessageSkeleton />
           )}
           <div ref={messagesEndRef} />
         </div>
@@ -434,7 +439,7 @@ function ChatContent() {
             </div>
             <Button
               type="submit"
-              disabled={(!input.trim() && !isAiStreaming) || isLoading}
+              disabled={(!input.trim() && !isAiStreaming) || (isLoading && !isAiStreaming)}
               className="px-4 py-2"
               variant={isAiStreaming ? "destructive" : "default"}
             >
