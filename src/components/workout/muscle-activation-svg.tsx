@@ -291,7 +291,7 @@ export function MuscleActivationSVG({
       <Button
         variant="ghost"
         size="icon"
-        className={`absolute left-1 top-1/2 -translate-y-1/2 z-20 text-gray-600 hover:text-blue-600 transition-all duration-300 rounded-full border border-gray-200 hover:border-blue-300 hover:bg-blue-50 hover:shadow-lg transform hover:scale-110 ${isRotating ? 'animate-pulse scale-95' : ''} ${view === 'back' ? 'bg-blue-100 text-blue-600 border-blue-300' : ''}`}
+        className={`absolute left-1 top-1/2 -translate-y-1/2 z-20 transition-all duration-300 rounded-full transform hover:scale-110 bg-transparent hover:bg-transparent ${isRotating ? 'animate-pulse scale-95' : ''} ${view === 'back' ? 'text-primary' : 'text-white hover:text-primary'}`}
         onClick={(e) => {
           e.stopPropagation();
           handleViewChange('back');
@@ -306,7 +306,7 @@ export function MuscleActivationSVG({
       <Button
         variant="ghost"
         size="icon"
-        className={`absolute right-1 top-1/2 -translate-y-1/2 z-20 text-gray-600 hover:text-blue-600 transition-all duration-300 rounded-full border border-gray-200 hover:border-blue-300 hover:bg-blue-50 hover:shadow-lg transform hover:scale-110 ${isRotating ? 'animate-pulse scale-95' : ''} ${view === 'front' ? 'bg-blue-100 text-blue-600 border-blue-300' : ''}`}
+        className={`absolute right-1 top-1/2 -translate-y-1/2 z-20 transition-all duration-300 rounded-full transform hover:scale-110 bg-transparent hover:bg-transparent ${isRotating ? 'animate-pulse scale-95' : ''} ${view === 'front' ? 'text-primary' : 'text-white hover:text-primary'}`}
         onClick={(e) => {
           e.stopPropagation();
           handleViewChange('front');

@@ -61,9 +61,9 @@
   }
 }
 
-/* Ensure proper button text colors - ONLY for buttons */
+/* Enhanced button styles for better visibility and contrast */
 @layer components {
-  /* Only target actual button elements with colored backgrounds */
+  /* Ensure proper button text colors - ONLY for buttons */
   button[class*="bg-primary"]:not([class*="variant-outline"]):not([class*="variant-ghost"]):not([class*="variant-link"]) {
     color: hsl(var(--primary-foreground)) !important;
   }
@@ -81,17 +81,10 @@
     color: hsl(var(--primary-foreground)) !important;
   }
 
-  /* Ensure outline and ghost buttons keep proper text color */
-  button[class*="variant-outline"] {
-    color: hsl(var(--foreground)) !important;
-  }
-
-  button[class*="variant-ghost"] {
-    color: hsl(var(--foreground)) !important;
-  }
-
-  button[class*="variant-link"] {
-    color: hsl(var(--primary)) !important;
+  /* Ensure disabled buttons are still visible but clearly disabled */
+  button:disabled {
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
   }
 }
 

@@ -29,10 +29,10 @@ export function BottomNav() {
               key={item.id}
               onClick={() => navigateOptimized(item.href)}
               className={`flex flex-col items-center justify-center w-16 transition-colors duration-200 ${
-                isActive ? 'text-secondary' : 'text-gray-500 hover:text-gray-700'
+                isActive ? 'text-secondary' : 'text-primary/60 hover:text-primary'
               }`}
             >
-              <Icon className={`w-6 h-6 ${isActive ? 'text-secondary' : 'text-gray-500'}`} />
+              <Icon className={`w-6 h-6 ${isActive ? 'text-secondary' : 'text-primary/60'}`} />
               <span className="text-xs mt-1">{item.label}</span>
             </button>
           );

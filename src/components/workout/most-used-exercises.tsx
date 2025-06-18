@@ -46,7 +46,7 @@ export function MostUsedExercises({ exercises, onSelect }: MostUsedExercisesProp
       <Button
         variant="ghost"
         size="icon"
-        className="absolute left-0 top-1/2 -translate-y-1/2 bg-white/80 rounded-full shadow-md z-10"
+        className="absolute left-0 top-1/2 -translate-y-1/2 bg-white/95 border border-primary/20 text-primary/70 hover:text-primary hover:bg-primary/10 hover:border-primary/40 rounded-full shadow-md z-10"
         onClick={() => scroll('left')}
       >
         <ChevronLeft className="h-5 w-5" />
@@ -56,7 +56,7 @@ export function MostUsedExercises({ exercises, onSelect }: MostUsedExercisesProp
       <Button
         variant="ghost"
         size="icon"
-        className="absolute right-0 top-1/2 -translate-y-1/2 bg-white/80 rounded-full shadow-md z-10"
+        className="absolute right-0 top-1/2 -translate-y-1/2 bg-white/95 border border-primary/20 text-primary/70 hover:text-primary hover:bg-primary/10 hover:border-primary/40 rounded-full shadow-md z-10"
         onClick={() => scroll('right')}
       >
         <ChevronRight className="h-5 w-5" />

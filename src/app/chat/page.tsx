@@ -387,9 +387,9 @@ function ChatContent() {
               variant="ghost"
               size="sm"
               onClick={navigateBack}
-              className="p-2 hover:bg-gray-100 rounded-full"
+              className="p-2 rounded-full"
             >
-              <ChevronLeft className="h-5 w-5 text-gray-700" />
+              <ChevronLeft className="h-5 w-5" />
             </Button>
             <h1 className="text-lg font-semibold text-gray-900">Chat with Gymzy</h1>
           </div>

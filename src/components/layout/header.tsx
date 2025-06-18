@@ -46,13 +46,13 @@ export function StatusBar() {
       <h1 className="text-xl font-semibold text-primary font-inter">Gymzy</h1>
 
       <div className="flex items-center space-x-3">
-        <button className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
-          <Bell className="text-primary h-5 w-5" />
-        </button>
+        <Button variant="ghost" size="icon" className="rounded-full">
+          <Bell className="h-5 w-5" />
+        </Button>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 hover:bg-gray-100">
+            <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
               <Avatar className="h-10 w-10">
                 <AvatarImage src={user?.profile?.profilePicture} alt={user?.profile?.displayName} />
                 <AvatarFallback className="bg-primary text-white text-sm font-semibold">

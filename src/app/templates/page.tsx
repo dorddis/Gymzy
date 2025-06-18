@@ -1,37 +1,38 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  Dumbbell,
-  Clock,
-  Zap,
-  Target,
+import { Input } from '@/components/ui/input';
+import { 
+  Dumbbell, 
+  Clock, 
+  Zap, 
+  Target, 
   Play,
   Heart,
   Flame,
   Activity,
-  ChevronDown,
-  ChevronUp
+  ChevronLeft,
+  Search,
+  Filter
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useWorkout } from '@/contexts/WorkoutContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { EXERCISES } from '@/lib/constants';
-import { Exercise } from '@/types/exercise';
 import { getRecentWorkouts } from '@/services/workout-service';
 
 interface WorkoutTemplate {
   id: string;
   name: string;
   description: string;
-  duration: number; // in minutes
+  duration: number;
   difficulty: 'beginner' | 'intermediate' | 'advanced';
   type: 'strength' | 'cardio' | 'hiit' | 'flexibility' | 'full_body';
   exercises: Array<{
-    exerciseId: string; // This should match an ID from EXERCISES
+    exerciseId: string;
     sets: number;
     reps: string;
     restTime?: number;
@@ -139,14 +140,36 @@ const WORKOUT_TEMPLATES: WorkoutTemplate[] = [
     calories: 400,
     icon: Zap,
     color: 'bg-orange-400'
+  },
+  {
+    id: 'upper_body_strength',
+    name: 'Upper Body Strength',
+    description: 'Build upper body muscle and strength',
+    duration: 50,
+    difficulty: 'intermediate',
+    type: 'strength',
+    exercises: [
+      { exerciseId: 'bench-press', sets: 4, reps: '6-8', restTime: 120 },
+      { exerciseId: 'pull-up', sets: 3, reps: '8-12' },
+      { exerciseId: 'overhead-press', sets: 3, reps: '8-10' },
+      { exerciseId: 'barbell-rows', sets: 3, reps: '8-12' },
+      { exerciseId: 'dips', sets: 3, reps: '10-15' }
+    ],
+    targetMuscles: ['Chest', 'Back', 'Shoulders', 'Arms'],
+    equipment: ['Barbell', 'Pull-up Bar', 'Dip Station'],
+    calories: 380,
+    icon: Dumbbell,
+    color: 'bg-blue-500'
   }
 ];
 
-export function QuickWorkoutTemplates() {
+export default function TemplatesPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { setCurrentWorkoutExercises } = useWorkout();
-  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
+  const [selectedType, setSelectedType] = useState<string>('all');
 
   // Function to get default values from previous workouts
   const getDefaultValues = async (exerciseName: string) => {
@@ -155,11 +178,9 @@ export function QuickWorkoutTemplates() {
     try {
       const recentWorkouts = await getRecentWorkouts(user.uid, 5);
 
-      // Find the most recent workout that contains this exercise
       for (const workout of recentWorkouts) {
         const exercise = workout.exercises?.find(ex => ex.name === exerciseName);
         if (exercise && exercise.sets && exercise.sets.length > 0) {
-          // Get the last set that was executed
           const lastExecutedSet = exercise.sets
             .filter(set => set.isExecuted && set.weight > 0 && set.reps > 0)
             .pop();
@@ -176,7 +197,6 @@ export function QuickWorkoutTemplates() {
       console.error('Error fetching previous workout data:', error);
     }
 
-    // Default values if no previous data found
     return { weight: 0, reps: 8 };
   };
 
@@ -211,10 +231,8 @@ export function QuickWorkoutTemplates() {
   };
 
   const startWorkout = async (template: WorkoutTemplate) => {
-    // Convert template exercises to workout format
     const workoutExercises = await Promise.all(
       template.exercises.map(async (templateExercise, index) => {
-        // Find the exercise in the EXERCISES constant
         const exerciseData = EXERCISES.find(ex => ex.id === templateExercise.exerciseId);
 
         if (!exerciseData) {
@@ -222,7 +240,6 @@ export function QuickWorkoutTemplates() {
           return null;
         }
 
-        // Get default values from previous workouts
         const defaultValues = await getDefaultValues(exerciseData.name);
 
         return {
@@ -236,7 +253,7 @@ export function QuickWorkoutTemplates() {
             isExecuted: false
           })),
           muscleGroups: exerciseData.primaryMuscles,
-          equipment: 'Bodyweight', // Default equipment
+          equipment: 'Bodyweight',
           primaryMuscles: exerciseData.primaryMuscles,
           secondaryMuscles: exerciseData.secondaryMuscles || []
         };
@@ -254,74 +271,158 @@ export function QuickWorkoutTemplates() {
     router.push('/workout');
   };
 
-  const viewTemplate = (template: WorkoutTemplate) => {
-    setSelectedTemplate(selectedTemplate === template.id ? null : template.id);
-  };
+  // Filter templates based on search and filters
+  const filteredTemplates = WORKOUT_TEMPLATES.filter(template => {
+    const matchesSearch = template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         template.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         template.targetMuscles.some(muscle => muscle.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    const matchesDifficulty = selectedDifficulty === 'all' || template.difficulty === selectedDifficulty;
+    const matchesType = selectedType === 'all' || template.type === selectedType;
+
+    return matchesSearch && matchesDifficulty && matchesType;
+  });
 
   return (
-    <div className="px-4">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold">Quick Start Workouts</h2>
-        <Button
-          size="sm"
-          onClick={() => router.push('/templates')}
-          className="bg-secondary text-white hover:bg-secondary/90 text-sm px-2 py-1 h-auto font-medium rounded-md"
-        >
-          View All
-        </Button>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <div className="sticky top-0 z-10 bg-background border-b border-gray-200 px-4 py-3">
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.back()}
+            className="p-2"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </Button>
+          <h1 className="text-xl font-semibold">Workout Templates</h1>
+        </div>
       </div>
 
-      <div className="space-y-3">
-        {WORKOUT_TEMPLATES.slice(0, 3).map((template) => {
-          const Icon = template.icon;
-          const isExpanded = selectedTemplate === template.id;
-          
-          return (
-            <Card key={template.id} className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
+      {/* Search and Filters */}
+      <div className="px-4 py-4 space-y-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            placeholder="Search templates..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+
+        <div className="flex gap-2 overflow-x-auto pb-2">
+          <Button
+            variant={selectedDifficulty === 'all' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSelectedDifficulty('all')}
+          >
+            All Levels
+          </Button>
+          <Button
+            variant={selectedDifficulty === 'beginner' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSelectedDifficulty('beginner')}
+          >
+            Beginner
+          </Button>
+          <Button
+            variant={selectedDifficulty === 'intermediate' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSelectedDifficulty('intermediate')}
+          >
+            Intermediate
+          </Button>
+          <Button
+            variant={selectedDifficulty === 'advanced' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSelectedDifficulty('advanced')}
+          >
+            Advanced
+          </Button>
+        </div>
+
+        <div className="flex gap-2 overflow-x-auto pb-2">
+          <Button
+            variant={selectedType === 'all' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSelectedType('all')}
+          >
+            All Types
+          </Button>
+          <Button
+            variant={selectedType === 'strength' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSelectedType('strength')}
+          >
+            Strength
+          </Button>
+          <Button
+            variant={selectedType === 'cardio' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSelectedType('cardio')}
+          >
+            Cardio
+          </Button>
+          <Button
+            variant={selectedType === 'hiit' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSelectedType('hiit')}
+          >
+            HIIT
+          </Button>
+          <Button
+            variant={selectedType === 'full_body' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSelectedType('full_body')}
+          >
+            Full Body
+          </Button>
+        </div>
+      </div>
+
+      {/* Templates Grid */}
+      <div className="px-4 pb-6">
+        <div className="grid gap-4">
+          {filteredTemplates.map((template) => {
+            const Icon = template.icon;
+            
+            return (
+              <Card key={template.id} className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3 mb-3">
                     <div className={`p-2 rounded-lg ${template.color} text-white`}>
-                      <Icon className="h-4 w-4" />
+                      <Icon className="h-5 w-5" />
                     </div>
-                    <div>
-                      <h3 className="font-medium text-gray-900">{template.name}</h3>
-                      <p className="text-xs text-gray-600">{template.description}</p>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900">{template.name}</h3>
+                      <p className="text-sm text-gray-600">{template.description}</p>
                     </div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => viewTemplate(template)}
-                    className="p-1 h-auto text-secondary hover:text-secondary/80 hover:bg-transparent"
-                  >
-                    {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                  </Button>
-                </div>
 
-                <div className="flex items-center gap-2 mb-3">
-                  <Badge variant="outline" className="text-xs">
-                    <Clock className="h-3 w-3 mr-1" />
-                    {template.duration}m
-                  </Badge>
-                  <Badge variant="outline" className="text-xs">
-                    <Flame className="h-3 w-3 mr-1" />
-                    {template.calories} cal
-                  </Badge>
-                  <Badge className={`text-xs ${getDifficultyColor(template.difficulty)}`}>
-                    {template.difficulty}
-                  </Badge>
-                  <Badge variant="outline" className="text-xs">
-                    {getTypeIcon(template.type)}
-                    <span className="ml-1 capitalize">{template.type}</span>
-                  </Badge>
-                </div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Badge variant="outline" className="text-xs">
+                      <Clock className="h-3 w-3 mr-1" />
+                      {template.duration}m
+                    </Badge>
+                    <Badge variant="outline" className="text-xs">
+                      <Flame className="h-3 w-3 mr-1" />
+                      {template.calories} cal
+                    </Badge>
+                    <Badge className={`text-xs ${getDifficultyColor(template.difficulty)}`}>
+                      {template.difficulty}
+                    </Badge>
+                    <Badge variant="outline" className="text-xs">
+                      {getTypeIcon(template.type)}
+                      <span className="ml-1 capitalize">{template.type}</span>
+                    </Badge>
+                  </div>
 
-                {isExpanded && (
-                  <div className="mt-4 pt-3 border-t border-gray-100">
-                    <div className="space-y-2 mb-4">
-                      <h4 className="text-sm font-medium text-gray-700">Exercises:</h4>
-                      {template.exercises.map((templateExercise, index) => {
+                  <div className="mb-4">
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">Exercises:</h4>
+                    <div className="space-y-1">
+                      {template.exercises.slice(0, 3).map((templateExercise, index) => {
                         const exerciseData = EXERCISES.find(ex => ex.id === templateExercise.exerciseId);
                         return (
                           <div key={index} className="flex justify-between items-center text-sm">
@@ -332,53 +433,36 @@ export function QuickWorkoutTemplates() {
                           </div>
                         );
                       })}
-                    </div>
-                    
-                    <div className="mb-4">
-                      <h4 className="text-sm font-medium text-gray-700 mb-2">Target Muscles:</h4>
-                      <div className="flex flex-wrap gap-1">
-                        {template.targetMuscles.map((muscle, index) => (
-                          <Badge key={index} variant="secondary" className="text-xs">
-                            {muscle}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="mb-4">
-                      <h4 className="text-sm font-medium text-gray-700 mb-2">Equipment:</h4>
-                      <div className="flex flex-wrap gap-1">
-                        {template.equipment.map((item, index) => (
-                          <Badge key={index} variant="outline" className="text-xs">
-                            {item}
-                          </Badge>
-                        ))}
-                      </div>
+                      {template.exercises.length > 3 && (
+                        <div className="text-xs text-gray-500">
+                          +{template.exercises.length - 3} more exercises
+                        </div>
+                      )}
                     </div>
                   </div>
-                )}
 
-                <Button
-                  onClick={() => startWorkout(template)}
-                  className="w-full bg-primary text-white py-2 rounded-lg font-medium hover:opacity-95 flex items-center justify-center gap-2"
-                >
-                  <Play className="h-4 w-4" />
-                  Start Workout
-                </Button>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+                  <Button
+                    onClick={() => startWorkout(template)}
+                    className="w-full bg-primary text-white py-2 rounded-lg font-medium hover:opacity-95 flex items-center justify-center gap-2"
+                  >
+                    <Play className="h-4 w-4" />
+                    Start Workout
+                  </Button>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
 
-      <div className="mt-6 text-center">
-        <Button
-          variant="outline"
-          onClick={() => router.push('/templates')}
-          className="w-full py-3 text-secondary border-secondary/40 hover:border-secondary hover:bg-secondary/5 font-medium"
-        >
-          Browse All Templates
-        </Button>
+        {filteredTemplates.length === 0 && (
+          <div className="text-center py-12">
+            <div className="text-gray-400 mb-2">
+              <Search className="h-12 w-12 mx-auto" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-1">No templates found</h3>
+            <p className="text-gray-600">Try adjusting your search or filters</p>
+          </div>
+        )}
       </div>
     </div>
   );

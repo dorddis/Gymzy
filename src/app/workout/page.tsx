@@ -263,7 +263,7 @@ export default function WorkoutPage() {
             + Add Exercise
           </Button>
           <Button
-            className="flex-[1] bg-blue-500 text-white py-3 rounded-xl font-semibold shadow-sm hover:opacity-95"
+            className="flex-[1] bg-blue-500 text-white py-3 rounded-xl font-semibold shadow-sm hover:bg-blue-600"
             onClick={() => setShowSpecialSetsModal(true)}
           >
             + Special set
@@ -281,7 +281,7 @@ export default function WorkoutPage() {
               variant="ghost"
               size="icon"
               onClick={toggleRestTimer}
-              className="absolute left-2 top-1/2 -translate-y-1/2 focus:ring-0 focus:ring-offset-0 active:bg-blue-100 hover:bg-blue-50 text-gray-700 hover:text-blue-600"
+              className="absolute left-2 top-1/2 -translate-y-1/2 text-white hover:text-primary bg-transparent hover:bg-transparent"
             >
               {isRestTimerRunning ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
             </Button>
@@ -289,7 +289,7 @@ export default function WorkoutPage() {
               variant="ghost"
               size="icon"
               onClick={resetRestTimer}
-              className="absolute right-2 top-1/2 -translate-y-1/2 focus:ring-0 focus:ring-offset-0 active:bg-blue-100 hover:bg-blue-50 text-gray-700 hover:text-blue-600"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-white hover:text-primary bg-transparent hover:bg-transparent"
             >
               <RotateCcw className="h-5 w-5" />
             </Button>

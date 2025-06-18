@@ -15,7 +15,7 @@ import { Loader2, Heart } from "lucide-react";
 import { LifestyleTracker } from "@/components/lifestyle/lifestyle-tracker";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { MuscleMapSkeleton, StatCardSkeleton, WorkoutCardSkeleton } from "@/components/ui/skeleton";
+
 
 export default function HomePage() {
   const { combinedMuscleVolumes } = useWorkout();
@@ -63,10 +63,10 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col pb-16">
+    <div className="min-h-screen bg-background flex flex-col">
       <StatusBar />
-      <main className="flex-1 overflow-y-auto pb-20">
-        <div className="container mx-auto px-4 py-6 space-y-6">
+      <main className="flex-1 overflow-y-auto">
+        <div className="container mx-auto px-4 py-6 space-y-6 pb-24">
           {/* AI Welcome Message */}
           <AIWelcomeMessage />
 
@@ -85,10 +85,13 @@ export default function HomePage() {
           <QuickWorkoutTemplates />
 
           {/* Daily Check-in */}
-          <div className="flex justify-center">
+          <div className="flex justify-center px-4">
             <Dialog open={isLifestyleDialogOpen} onOpenChange={setIsLifestyleDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  className="flex items-center gap-2 px-6 py-3 text-purple-600 border-purple-400 hover:border-purple-600 hover:bg-purple-50 font-medium rounded-lg"
+                >
                   <Heart className="h-4 w-4" />
                   Daily Check-in
                 </Button>
