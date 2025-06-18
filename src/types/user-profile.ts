@@ -178,14 +178,18 @@ export class ProfileConverter {
    */
   static toFitnessProfile(userProfile: UserProfile): FitnessProfile {
     return {
-      fitnessLevel: userProfile.fitnessLevel,
-      goals: userProfile.fitnessGoals,
-      preferredWorkoutTypes: userProfile.preferredWorkoutTypes,
-      availableEquipment: userProfile.availableEquipment,
-      workoutFrequency: userProfile.workoutFrequency,
-      timePerWorkout: userProfile.timePerWorkout,
-      injuries: userProfile.injuries,
-      preferences: userProfile.preferences
+      fitnessLevel: userProfile.fitnessLevel || 'beginner',
+      goals: Array.isArray(userProfile.fitnessGoals) ? userProfile.fitnessGoals : ['general_fitness'],
+      preferredWorkoutTypes: Array.isArray(userProfile.preferredWorkoutTypes) ? userProfile.preferredWorkoutTypes : ['bodyweight'],
+      availableEquipment: Array.isArray(userProfile.availableEquipment) ? userProfile.availableEquipment : ['bodyweight'],
+      workoutFrequency: userProfile.workoutFrequency || '2-3 times per week',
+      timePerWorkout: userProfile.timePerWorkout || '30-45 minutes',
+      injuries: Array.isArray(userProfile.injuries) ? userProfile.injuries : [],
+      preferences: userProfile.preferences || {
+        communicationStyle: 'motivational',
+        detailLevel: 'detailed',
+        workoutComplexity: 'beginner'
+      }
     };
   }
 

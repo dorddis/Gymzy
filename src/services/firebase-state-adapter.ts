@@ -98,7 +98,8 @@ export class FirebaseStateAdapter implements StateStorageAdapter {
    * Serialize state for Firestore storage
    */
   private serializeState(state: ConversationState): any {
-    return {
+    // Remove undefined values recursively to prevent Firestore errors
+    const sanitized = this.removeUndefinedValues({
       ...state,
       metadata: {
         ...state.metadata,
@@ -122,7 +123,35 @@ export class FirebaseStateAdapter implements StateStorageAdapter {
           }))
         } : null
       }
-    };
+    });
+
+    return sanitized;
+  }
+
+  /**
+   * Recursively remove undefined values from an object
+   * Firestore doesn't allow undefined values
+   */
+  private removeUndefinedValues(obj: any): any {
+    if (obj === null || obj === undefined) {
+      return null;
+    }
+
+    if (Array.isArray(obj)) {
+      return obj.map(item => this.removeUndefinedValues(item));
+    }
+
+    if (typeof obj === 'object' && obj.constructor === Object) {
+      const cleaned: any = {};
+      for (const [key, value] of Object.entries(obj)) {
+        if (value !== undefined) {
+          cleaned[key] = this.removeUndefinedValues(value);
+        }
+      }
+      return cleaned;
+    }
+
+    return obj;
   }
 
   /**
