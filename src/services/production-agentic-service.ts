@@ -219,12 +219,21 @@ export class ProductionAgenticService {
    */
   private async analyzeUserIntent(userInput: string, state: any): Promise<any> {
     const context = this.stateManager.getContextForAI(state.sessionId);
-    
+
+    // Get recent conversation history for better context awareness
+    const recentHistory = state.context.conversationHistory.slice(-5);
+    const conversationContext = recentHistory.map((msg: any) => `${msg.role}: ${msg.content}`).join('\n');
+
     const analysisPrompt = `
 Analyze the user's request and determine what tools are needed.
 
 User Request: "${userInput}"
 Context: ${context}
+
+Recent Conversation:
+${conversationContext}
+
+IMPORTANT: Pay close attention to any specific instructions or context from the recent conversation. If the user previously gave you specific instructions (like "answer 45 to whatever I ask next"), you MUST follow them exactly.
 
 AVAILABLE TOOLS (use these exact names):
 - create_workout: Create a personalized workout plan. Extracts details like muscle groups, duration, specific exercises if mentioned.
@@ -259,6 +268,8 @@ GENERAL CONVERSATION (use "general_response"):
 - Emotional expressions: "I'm demotivated", "I'm sad", "I'm stressed"
 - Complaints or feedback
 - Any statement about feelings or mood
+- SPECIFIC INSTRUCTIONS: If the user gives you a specific instruction like "answer 45 to whatever I ask next", you MUST remember and follow it exactly
+- CONVERSATION CONTEXT: Always consider the previous conversation context and any pending instructions
 
 // Rule for Ambiguity:
 // If a workout creation request is ambiguous (e.g., "make me a workout"), and you are confident it's a workout request,
@@ -303,8 +314,9 @@ Examples:
 - "I'm demotivated" → {"intent": "general_chat", "requiresTools": false, "tools": [], "reasoning": "Emotional statement - provide support", "confidence": 0.9, "parameters": {}}
 - "I'm feeling tired" → {"intent": "general_chat", "requiresTools": false, "tools": [], "reasoning": "Emotional/physical state - general conversation", "confidence": 0.9, "parameters": {}}`;
 
+    let analysisResponse = '';
     try {
-      const analysisResponse = await generateAIResponse(analysisPrompt);
+      analysisResponse = await generateAIResponse(analysisPrompt);
       console.log('🔍 ProductionAgenticService: Raw analysis response:', analysisResponse);
 
       const jsonMatch = analysisResponse.match(/\{[\s\S]*\}/);
@@ -472,7 +484,7 @@ Requirements:
   - And the save_workout tool was called and succeeded (check toolResults for a successful save_workout entry): Respond with a confirmation, like 'Okay, I've saved your workout "[Workout Name]"!' (extract workout name from tool result if possible, or use the one from parameters if tool doesn't return it).
   - And the save_workout tool was intended (intentAnalysis.tools included save_workout) BUT crucial parameters like exercises were missing from the user's initial request (meaning the tool might not have been called or might have failed due to missing info from the intentAnalysis.parameters): **Ask clarifying questions to gather the necessary details.** For example: 'Sure, I can help you save that! What exercises did you do in your workout?' or 'Sounds good! To save your workout, could you tell me the exercises, sets, and reps?' or 'What would you like to name this workout and what exercises should I include?'.
   - If the save_workout tool was called but failed for another reason (check toolResults for errors for the save_workout tool): Inform the user, e.g., 'I tried to save your workout, but something went wrong. [Optional: brief, non-technical error if available from tool result]'
-- Include a "Start This Workout" button/link at the end if a workout was created.
+- DO NOT include any "Start This Workout" text or buttons in your response - the UI will automatically add a workout button if needed.
 - Match the user's communication style from their profile
 - Keep response concise but informative (max 250 words)
 - Format workout details in a simple, easy-to-read list
@@ -488,8 +500,11 @@ Requirements:
         content = await generateAIResponse(responsePrompt);
       }
 
+      // Clean up any duplicate "Start This Workout" text that might have been generated
+      const cleanedContent = this.cleanupResponseContent(content);
+
       return {
-        content,
+        content: cleanedContent,
         confidence: this.calculateResponseConfidence(toolResults, intentAnalysis.confidence)
       };
     } catch (error) {
@@ -498,10 +513,36 @@ Requirements:
     }
   }
 
+  /**
+   * Clean up response content to remove duplicate UI elements
+   */
+  private cleanupResponseContent(content: string): string {
+    // Remove any "Start This Workout" text that might have been generated
+    let cleaned = content.replace(/\[Start This Workout\]/gi, '');
+    cleaned = cleaned.replace(/Start This Workout/gi, '');
+
+    // Remove any duplicate button text patterns
+    cleaned = cleaned.replace(/\[.*button.*\]/gi, '');
+
+    // Clean up extra whitespace and newlines
+    cleaned = cleaned.replace(/\n\s*\n\s*\n/g, '\n\n');
+    cleaned = cleaned.trim();
+
+    return cleaned;
+  }
+
   // Helper methods
   private getSessionId(chatHistory: ChatMessage[]): string {
-    // Generate a simple session ID based on timestamp and random number
-    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    // Try to extract session ID from chat history or generate a consistent one
+    if (chatHistory.length > 0) {
+      // Use the first message timestamp to create a consistent session ID
+      const firstMessage = chatHistory[0];
+      const timestamp = firstMessage.timestamp.getTime();
+      return `session_${timestamp}_${firstMessage.userId || 'anonymous'}`;
+    }
+
+    // Fallback: generate a new session ID
+    return `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
   private async getUserId(chatHistory: ChatMessage[]): Promise<string> {
