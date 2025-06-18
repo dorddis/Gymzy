@@ -371,8 +371,8 @@ Examples:
             success: true
           });
 
-          // Extract workout data if this was a workout creation tool
-          if (toolName === 'create_workout' && result.data?.workout) {
+          // Extract workout data if this was a workout creation or modification tool
+          if ((toolName === 'create_workout' || toolName === 'modify_workout') && result.data?.workout) {
             workoutData = {
               exercises: result.data.workout.exercises,
               workoutId: result.data.workout.id
@@ -388,6 +388,17 @@ Examples:
           if (toolName === 'create_workout') {
             fallbackData = this.createBasicWorkoutFallback(userInput);
             console.log('🔄 ProductionAgenticService: Using workout creation fallback');
+
+            // Extract workout data from fallback
+            if (fallbackData?.workout) {
+              workoutData = {
+                exercises: fallbackData.workout.exercises,
+                workoutId: fallbackData.workout.id
+              };
+            }
+          } else if (toolName === 'modify_workout') {
+            fallbackData = this.createBasicWorkoutFallback(userInput);
+            console.log('🔄 ProductionAgenticService: Using workout modification fallback');
 
             // Extract workout data from fallback
             if (fallbackData?.workout) {
@@ -451,9 +462,10 @@ Requirements:
 - Use the user's name if available
 - Include specific details from tool results
 - Use clean, readable formatting (avoid excessive markdown)
-- If a workout was created (e.g., from the "create_workout" tool):
+- If a workout was created or modified (e.g., from the "create_workout" or "modify_workout" tool):
   - Clearly list the exercises in the workout (name, sets, reps).
-  - Check the tool results for details on exercise matching (e.g., a field named "matchingResults" or "unmatchedExercises" within the "create_workout" tool's results).
+  - If this was a modification (modify_workout tool), acknowledge what was changed (e.g., "I've doubled your workout" or "I've made it harder").
+  - Check the tool results for details on exercise matching (e.g., a field named "matchingResults" or "unmatchedExercises" within the tool's results).
   - If any user-requested exercises couldn't be matched or were substituted, clearly state this. For example: "I included [Exercise A] and [Exercise B]. I couldn't find an exact match for '[User's Requested Exercise C]', so I've added [Fallback Exercise D] as an alternative." or "I've included exercises based on your request for a [muscle group] workout. If you had specific exercises in mind that aren't listed, let me know!"
   - This transparency helps the user understand how their request was processed.
 - If the user's intent was save_workout:
@@ -528,6 +540,23 @@ Requirements:
       };
     }
 
+    // Workout modification keywords - check these BEFORE general workout creation
+    const modificationKeywords = ['double', 'triple', 'increase', 'decrease', 'add more', 'make it', 'modify', 'change', 'adjust', 'more sets', 'more reps', 'harder', 'easier'];
+    const workoutReferenceKeywords = ['workout', 'exercise', 'routine', 'it', 'this', 'that'];
+
+    if (modificationKeywords.some(keyword => lowerInput.includes(keyword)) &&
+        (workoutReferenceKeywords.some(keyword => lowerInput.includes(keyword)) ||
+         lowerInput.includes('double') || lowerInput.includes('triple'))) {
+      return {
+        intent: 'workout_modification',
+        requiresTools: true,
+        tools: ['modify_workout'],
+        reasoning: 'Detected workout modification request',
+        confidence: 0.9,
+        parameters: { modificationType: this.extractModificationType(lowerInput) }
+      };
+    }
+
     // Explicit workout creation - must be very specific
     const explicitWorkoutKeywords = ['create workout', 'make workout', 'build workout', 'design workout', 'workout plan', 'workout routine'];
     const muscleGroupRequests = ['chest workout', 'back workout', 'leg workout', 'arm workout', 'shoulder workout'];
@@ -568,10 +597,38 @@ Requirements:
     };
   }
 
+  /**
+   * Extract modification type from user input
+   */
+  private extractModificationType(input: string): string {
+    if (input.includes('double')) return 'double';
+    if (input.includes('triple')) return 'triple';
+    if (input.includes('increase') || input.includes('add more') || input.includes('more sets') || input.includes('more reps')) return 'increase';
+    if (input.includes('decrease') || input.includes('less') || input.includes('fewer')) return 'decrease';
+    if (input.includes('harder') || input.includes('difficult')) return 'harder';
+    if (input.includes('easier') || input.includes('simple')) return 'easier';
+    return 'general';
+  }
+
+  /**
+   * Extract modification parameters from user input
+   */
+  private extractModificationParameters(userInput: string, state: any): any {
+    const modificationType = this.extractModificationType(userInput);
+
+    return {
+      modificationType,
+      userInput,
+      conversationHistory: state?.context?.conversationHistory || []
+    };
+  }
+
   private buildToolParameters(toolName: string, userInput: string, state: any): any {
     switch (toolName) {
       case 'create_workout':
         return this.extractWorkoutParameters(userInput, state);
+      case 'modify_workout':
+        return this.extractModificationParameters(userInput, state);
       case 'search_exercises':
         return { query: userInput };
       default:
@@ -720,7 +777,7 @@ Requirements:
       'general_chat': 'general_response'
     };
 
-    const validTools = ['create_workout', 'search_exercises', 'save_workout', 'general_response'];
+    const validTools = ['create_workout', 'modify_workout', 'search_exercises', 'save_workout', 'general_response'];
     const correctedTools: string[] = [];
 
     for (const tool of tools) {

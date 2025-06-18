@@ -439,7 +439,7 @@ export class AIWorkoutToolExecutor {
 
   static async executeStartWorkout(params: any): Promise<{ success: boolean; message: string; exercises: WorkoutExercise[] }> {
     const { exercises } = params;
-    
+
     const workoutExercises = await this.executeCreateWorkout({
       workoutName: 'AI Generated Workout',
       exercises,
@@ -451,6 +451,158 @@ export class AIWorkoutToolExecutor {
       message: 'Workout started! Navigate to the workout page to begin.',
       exercises: workoutExercises.exercises
     };
+  }
+
+  static async executeModifyWorkout(params: any): Promise<{ success: boolean; message: string; exercises: WorkoutExercise[]; workoutId: string }> {
+    const { modificationType, userInput, conversationHistory } = params;
+
+    console.log('🔄 ModifyWorkout: ===== MODIFYING WORKOUT =====');
+    console.log('🔄 ModifyWorkout: Modification type:', modificationType);
+    console.log('🔄 ModifyWorkout: User input:', userInput);
+
+    // Find the last workout in conversation history
+    const lastWorkoutMessage = this.findLastWorkoutInHistory(conversationHistory);
+
+    if (!lastWorkoutMessage) {
+      console.log('❌ ModifyWorkout: No previous workout found in conversation');
+      // Create a new workout instead
+      return await this.executeCreateWorkout({
+        workoutName: 'Modified Workout',
+        exercises: [
+          { name: 'Push-ups', sets: 3, reps: 10 },
+          { name: 'Squats', sets: 3, reps: 12 },
+          { name: 'Plank', sets: 3, duration: '30 seconds' }
+        ],
+        targetMuscles: []
+      });
+    }
+
+    // Extract exercises from the last workout
+    const originalExercises = this.extractExercisesFromMessage(lastWorkoutMessage);
+    console.log('🔄 ModifyWorkout: Original exercises:', originalExercises);
+
+    // Apply modification based on type
+    const modifiedExercises = this.applyModification(originalExercises, modificationType);
+    console.log('🔄 ModifyWorkout: Modified exercises:', modifiedExercises);
+
+    // Create the modified workout
+    const result = await this.executeCreateWorkout({
+      workoutName: `Modified ${this.getModificationDescription(modificationType)} Workout`,
+      exercises: modifiedExercises,
+      targetMuscles: []
+    });
+
+    console.log('🔄 ModifyWorkout: ===== MODIFICATION COMPLETE =====');
+
+    return {
+      ...result,
+      message: `I've ${this.getModificationDescription(modificationType)} your workout! Here's your updated routine:`
+    };
+  }
+
+  private static findLastWorkoutInHistory(conversationHistory: any[]): any {
+    // Look for the most recent assistant message that contains workout information
+    for (let i = conversationHistory.length - 1; i >= 0; i--) {
+      const message = conversationHistory[i];
+      if (message.role === 'assistant' &&
+          (message.content.includes('sets') ||
+           message.content.includes('reps') ||
+           message.content.includes('Push-up') ||
+           message.content.includes('Squat') ||
+           message.content.includes('workout'))) {
+        return message;
+      }
+    }
+    return null;
+  }
+
+  private static extractExercisesFromMessage(message: any): any[] {
+    const content = message.content;
+    const exercises = [];
+
+    // Simple regex patterns to extract exercise information
+    const exercisePatterns = [
+      /\*\*([^:]+):\*\*\s*(\d+)\s*sets?\s*of\s*(\d+)\s*reps?/gi,
+      /\*\s*\*\*([^:]+):\*\*\s*(\d+)\s*sets?\s*of\s*(\d+)\s*reps?/gi,
+      /\*\s*\*\*([^:]+):\*\*\s*(\d+)\s*sets?,?\s*holding for\s*(\d+)\s*seconds/gi
+    ];
+
+    exercisePatterns.forEach(pattern => {
+      let match;
+      while ((match = pattern.exec(content)) !== null) {
+        const [, name, sets, repsOrDuration] = match;
+        exercises.push({
+          name: name.trim(),
+          sets: parseInt(sets),
+          reps: name.toLowerCase().includes('plank') ? undefined : parseInt(repsOrDuration),
+          duration: name.toLowerCase().includes('plank') ? `${repsOrDuration} seconds` : undefined
+        });
+      }
+    });
+
+    // Fallback: if no exercises found, return default
+    if (exercises.length === 0) {
+      return [
+        { name: 'Push-ups', sets: 3, reps: 10 },
+        { name: 'Squats', sets: 3, reps: 12 },
+        { name: 'Plank', sets: 3, duration: '30 seconds' }
+      ];
+    }
+
+    return exercises;
+  }
+
+  private static applyModification(exercises: any[], modificationType: string): any[] {
+    switch (modificationType) {
+      case 'double':
+        return exercises.map(ex => ({
+          ...ex,
+          sets: ex.sets * 2
+        }));
+      case 'triple':
+        return exercises.map(ex => ({
+          ...ex,
+          sets: ex.sets * 3
+        }));
+      case 'increase':
+        return exercises.map(ex => ({
+          ...ex,
+          sets: ex.sets + 1,
+          reps: ex.reps ? ex.reps + 2 : ex.reps
+        }));
+      case 'decrease':
+        return exercises.map(ex => ({
+          ...ex,
+          sets: Math.max(1, ex.sets - 1),
+          reps: ex.reps ? Math.max(5, ex.reps - 2) : ex.reps
+        }));
+      case 'harder':
+        return exercises.map(ex => ({
+          ...ex,
+          reps: ex.reps ? ex.reps + 5 : ex.reps,
+          duration: ex.duration ? ex.duration.replace(/\d+/, (match) => (parseInt(match) + 15).toString()) : ex.duration
+        }));
+      case 'easier':
+        return exercises.map(ex => ({
+          ...ex,
+          reps: ex.reps ? Math.max(5, ex.reps - 3) : ex.reps,
+          duration: ex.duration ? ex.duration.replace(/\d+/, (match) => Math.max(15, parseInt(match) - 10).toString()) : ex.duration
+        }));
+      default:
+        return exercises;
+    }
+  }
+
+  private static getModificationDescription(modificationType: string): string {
+    switch (modificationType) {
+      case 'double': return 'doubled';
+      case 'triple': return 'tripled';
+      case 'increase': return 'increased';
+      case 'decrease': return 'decreased';
+      case 'harder': return 'made harder';
+      case 'easier': return 'made easier';
+      default: return 'modified';
+    }
   }
 }
 
@@ -483,6 +635,10 @@ export async function executeAITool(toolName: string, parameters: any): Promise<
       case 'start_workout':
         console.log('▶️ AITool: Executing start_workout...');
         result = await AIWorkoutToolExecutor.executeStartWorkout(parameters);
+        break;
+      case 'modify_workout':
+        console.log('🔄 AITool: Executing modify_workout...');
+        result = await AIWorkoutToolExecutor.executeModifyWorkout(parameters);
         break;
       default:
         console.error('❌ AITool: Unknown tool:', toolName);

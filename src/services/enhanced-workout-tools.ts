@@ -661,9 +661,25 @@ export class EnhancedWorkoutTools {
   private modifyWorkoutTool(): ToolDefinition {
     return {
       name: 'modify_workout',
-      description: 'Modify an existing workout',
-      parameters: {},
-      execute: async () => ({ message: 'Workout modification not yet implemented' })
+      description: 'Modify an existing workout based on user requests like doubling, tripling, making it harder/easier, etc.',
+      parameters: {
+        type: 'object',
+        properties: {
+          modificationType: {
+            type: 'string',
+            description: 'Type of modification: double, triple, increase, decrease, harder, easier, general',
+            enum: ['double', 'triple', 'increase', 'decrease', 'harder', 'easier', 'general']
+          },
+          userInput: { type: 'string', description: 'Original user input for context' },
+          conversationHistory: {
+            type: 'array',
+            description: 'Conversation history to find the last workout',
+            items: { type: 'object' }
+          }
+        },
+        required: ['modificationType', 'userInput', 'conversationHistory']
+      },
+      execute: async (params, context) => await this.executeModifyWorkout(params, context)
     };
   }
 
@@ -683,5 +699,156 @@ export class EnhancedWorkoutTools {
       parameters: {},
       execute: async () => ({ message: 'Workout recommendations not yet implemented' })
     };
+  }
+
+  /**
+   * Execute workout modification
+   */
+  private async executeModifyWorkout(params: any, context: ToolExecutionContext): Promise<any> {
+    console.log('🔄 EnhancedWorkoutTools: Modifying workout...');
+    console.log('🔄 Modification type:', params.modificationType);
+    console.log('🔄 User input:', params.userInput);
+
+    // Find the last workout in conversation history
+    const lastWorkoutMessage = this.findLastWorkoutInHistory(params.conversationHistory);
+
+    if (!lastWorkoutMessage) {
+      console.log('❌ EnhancedWorkoutTools: No previous workout found in conversation');
+      // Create a new workout instead
+      return await this.executeCreateWorkout({
+        name: 'Modified Workout',
+        exercises: [
+          { name: 'Push-ups', sets: 3, reps: 10 },
+          { name: 'Squats', sets: 3, reps: 12 },
+          { name: 'Plank', sets: 3, duration: '30 seconds' }
+        ]
+      }, context);
+    }
+
+    // Extract exercises from the last workout
+    const originalExercises = this.extractExercisesFromMessage(lastWorkoutMessage);
+    console.log('🔄 EnhancedWorkoutTools: Original exercises:', originalExercises);
+
+    // Apply modification based on type
+    const modifiedExercises = this.applyModification(originalExercises, params.modificationType);
+    console.log('🔄 EnhancedWorkoutTools: Modified exercises:', modifiedExercises);
+
+    // Create the modified workout
+    const result = await this.executeCreateWorkout({
+      name: `Modified ${this.getModificationDescription(params.modificationType)} Workout`,
+      exercises: modifiedExercises
+    }, context);
+
+    console.log('🔄 EnhancedWorkoutTools: Modification complete');
+
+    return {
+      ...result,
+      message: `I've ${this.getModificationDescription(params.modificationType)} your workout! Here's your updated routine:`
+    };
+  }
+
+  private findLastWorkoutInHistory(conversationHistory: any[]): any {
+    // Look for the most recent assistant message that contains workout information
+    for (let i = conversationHistory.length - 1; i >= 0; i--) {
+      const message = conversationHistory[i];
+      if (message.role === 'assistant' &&
+          (message.content.includes('sets') ||
+           message.content.includes('reps') ||
+           message.content.includes('Push-up') ||
+           message.content.includes('Squat') ||
+           message.content.includes('workout'))) {
+        return message;
+      }
+    }
+    return null;
+  }
+
+  private extractExercisesFromMessage(message: any): any[] {
+    const content = message.content;
+    const exercises = [];
+
+    // Simple regex patterns to extract exercise information
+    const exercisePatterns = [
+      /\*\*([^:]+):\*\*\s*(\d+)\s*sets?\s*of\s*(\d+)\s*reps?/gi,
+      /\*\s*\*\*([^:]+):\*\*\s*(\d+)\s*sets?\s*of\s*(\d+)\s*reps?/gi,
+      /\*\s*\*\*([^:]+):\*\*\s*(\d+)\s*sets?,?\s*holding for\s*(\d+)\s*seconds/gi
+    ];
+
+    exercisePatterns.forEach(pattern => {
+      let match;
+      while ((match = pattern.exec(content)) !== null) {
+        const [, name, sets, repsOrDuration] = match;
+        exercises.push({
+          name: name.trim(),
+          sets: parseInt(sets),
+          reps: name.toLowerCase().includes('plank') ? undefined : parseInt(repsOrDuration),
+          duration: name.toLowerCase().includes('plank') ? `${repsOrDuration} seconds` : undefined
+        });
+      }
+    });
+
+    // Fallback: if no exercises found, return default
+    if (exercises.length === 0) {
+      return [
+        { name: 'Push-ups', sets: 3, reps: 10 },
+        { name: 'Squats', sets: 3, reps: 12 },
+        { name: 'Plank', sets: 3, duration: '30 seconds' }
+      ];
+    }
+
+    return exercises;
+  }
+
+  private applyModification(exercises: any[], modificationType: string): any[] {
+    switch (modificationType) {
+      case 'double':
+        return exercises.map(ex => ({
+          ...ex,
+          sets: ex.sets * 2
+        }));
+      case 'triple':
+        return exercises.map(ex => ({
+          ...ex,
+          sets: ex.sets * 3
+        }));
+      case 'increase':
+        return exercises.map(ex => ({
+          ...ex,
+          sets: ex.sets + 1,
+          reps: ex.reps ? ex.reps + 2 : ex.reps
+        }));
+      case 'decrease':
+        return exercises.map(ex => ({
+          ...ex,
+          sets: Math.max(1, ex.sets - 1),
+          reps: ex.reps ? Math.max(5, ex.reps - 2) : ex.reps
+        }));
+      case 'harder':
+        return exercises.map(ex => ({
+          ...ex,
+          reps: ex.reps ? ex.reps + 5 : ex.reps,
+          duration: ex.duration ? ex.duration.replace(/\d+/, (match) => (parseInt(match) + 15).toString()) : ex.duration
+        }));
+      case 'easier':
+        return exercises.map(ex => ({
+          ...ex,
+          reps: ex.reps ? Math.max(5, ex.reps - 3) : ex.reps,
+          duration: ex.duration ? ex.duration.replace(/\d+/, (match) => Math.max(15, parseInt(match) - 10).toString()) : ex.duration
+        }));
+      default:
+        return exercises;
+    }
+  }
+
+  private getModificationDescription(modificationType: string): string {
+    switch (modificationType) {
+      case 'double': return 'doubled';
+      case 'triple': return 'tripled';
+      case 'increase': return 'increased';
+      case 'decrease': return 'decreased';
+      case 'harder': return 'made harder';
+      case 'easier': return 'made easier';
+      default: return 'modified';
+    }
   }
 }
