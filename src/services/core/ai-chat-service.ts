@@ -80,21 +80,51 @@ const sendStreamingChatMessageIntelligent = async (
 
               if (workoutJson && workoutJson.exercises) {
                 // Convert the AI-generated workout format to the expected WorkoutExercise format
-                const formattedExercises = workoutJson.exercises.map((exercise: any, index: number) => ({
-                  id: `ai_workout_${Date.now()}_${index}`,
-                  name: exercise.name,
-                  sets: Array.from({ length: exercise.sets || 3 }, () => ({
-                    weight: 0,
-                    reps: exercise.reps || 8,
-                    rpe: 8,
-                    isWarmup: false,
-                    isExecuted: false
-                  })),
-                  muscleGroups: workoutJson.target_muscles || [],
-                  equipment: 'Mixed',
-                  primaryMuscles: workoutJson.target_muscles || [],
-                  secondaryMuscles: []
-                }));
+                const formattedExercises = workoutJson.exercises.map((exercise: any, index: number) => {
+                  // Try to map AI exercise to existing exercise in database
+                  const existingExercise = mapAIExerciseToExisting(exercise.name);
+
+                  if (existingExercise) {
+                    // Use existing exercise with exact muscle mappings
+                    return {
+                      id: existingExercise.id, // Use existing exercise ID for exact muscle mapping
+                      name: existingExercise.name, // Use existing exercise name
+                      sets: Array.from({ length: exercise.sets || 3 }, () => ({
+                        weight: 0,
+                        reps: exercise.reps || 8,
+                        rpe: 8,
+                        isWarmup: false,
+                        isExecuted: false
+                      })),
+                      muscleGroups: [], // Will be handled by existing exercise lookup
+                      equipment: exercise.equipment || 'Mixed',
+                      primaryMuscles: existingExercise.primaryMuscles, // Use exact muscle mapping
+                      secondaryMuscles: existingExercise.secondaryMuscles // Use exact muscle mapping
+                    };
+                  } else {
+                    // Create new exercise with AI-generated data (fallback)
+                    console.warn(`⚠️ Creating new exercise for unmapped AI exercise: ${exercise.name}`);
+                    const exerciseMuscles = exercise.target_muscles || exercise.primaryMuscles || workoutJson.target_muscles || [];
+                    const primaryMuscles = mapMuscleNamesToEnum(exerciseMuscles);
+                    const secondaryMuscles = exercise.secondaryMuscles ? mapMuscleNamesToEnum(exercise.secondaryMuscles) : [];
+
+                    return {
+                      id: `ai_workout_${Date.now()}_${index}`,
+                      name: exercise.name,
+                      sets: Array.from({ length: exercise.sets || 3 }, () => ({
+                        weight: 0,
+                        reps: exercise.reps || 8,
+                        rpe: 8,
+                        isWarmup: false,
+                        isExecuted: false
+                      })),
+                      muscleGroups: exerciseMuscles,
+                      equipment: exercise.equipment || 'Mixed',
+                      primaryMuscles,
+                      secondaryMuscles
+                    };
+                  }
+                });
 
                 workoutData = {
                   exercises: formattedExercises,
@@ -318,21 +348,47 @@ const extractWorkoutFromText = (text: string): any => {
         }
 
         if (exerciseName && sets && reps) {
-          exercises.push({
-            id: `ai_workout_${Date.now()}_${exerciseCount}`,
-            name: exerciseName.trim(),
-            sets: Array.from({ length: parseInt(sets) || 3 }, () => ({
-              weight: 0,
-              reps: parseInt(reps) || 8,
-              rpe: 8,
-              isWarmup: false,
-              isExecuted: false
-            })),
-            muscleGroups: ['back'], // Default to back since that was the request
-            equipment: 'Mixed',
-            primaryMuscles: ['back'],
-            secondaryMuscles: []
-          });
+          const cleanExerciseName = exerciseName.trim();
+          const existingExercise = mapAIExerciseToExisting(cleanExerciseName);
+
+          if (existingExercise) {
+            // Use existing exercise with exact muscle mappings
+            exercises.push({
+              id: existingExercise.id,
+              name: existingExercise.name,
+              sets: Array.from({ length: parseInt(sets) || 3 }, () => ({
+                weight: 0,
+                reps: parseInt(reps) || 8,
+                rpe: 8,
+                isWarmup: false,
+                isExecuted: false
+              })),
+              muscleGroups: [],
+              equipment: 'Mixed',
+              primaryMuscles: existingExercise.primaryMuscles,
+              secondaryMuscles: existingExercise.secondaryMuscles
+            });
+          } else {
+            // Fallback to creating new exercise
+            const defaultMuscles = ['back']; // Default to back since that was the request
+            const primaryMuscles = mapMuscleNamesToEnum(defaultMuscles);
+
+            exercises.push({
+              id: `ai_workout_${Date.now()}_${exerciseCount}`,
+              name: cleanExerciseName,
+              sets: Array.from({ length: parseInt(sets) || 3 }, () => ({
+                weight: 0,
+                reps: parseInt(reps) || 8,
+                rpe: 8,
+                isWarmup: false,
+                isExecuted: false
+              })),
+              muscleGroups: defaultMuscles,
+              equipment: 'Mixed',
+              primaryMuscles,
+              secondaryMuscles: []
+            });
+          }
           exerciseCount++;
         }
       }
@@ -345,21 +401,46 @@ const extractWorkoutFromText = (text: string): any => {
       const basicExercises = ['Pull-ups', 'Bent-over Rows', 'Lat Pulldowns', 'Deadlifts'];
 
       basicExercises.forEach((name, index) => {
-        exercises.push({
-          id: `ai_workout_${Date.now()}_${index}`,
-          name,
-          sets: Array.from({ length: 3 }, () => ({
-            weight: 0,
-            reps: 8,
-            rpe: 8,
-            isWarmup: false,
-            isExecuted: false
-          })),
-          muscleGroups: ['back'],
-          equipment: 'Mixed',
-          primaryMuscles: ['back'],
-          secondaryMuscles: []
-        });
+        const existingExercise = mapAIExerciseToExisting(name);
+
+        if (existingExercise) {
+          // Use existing exercise with exact muscle mappings
+          exercises.push({
+            id: existingExercise.id,
+            name: existingExercise.name,
+            sets: Array.from({ length: 3 }, () => ({
+              weight: 0,
+              reps: 8,
+              rpe: 8,
+              isWarmup: false,
+              isExecuted: false
+            })),
+            muscleGroups: [],
+            equipment: 'Mixed',
+            primaryMuscles: existingExercise.primaryMuscles,
+            secondaryMuscles: existingExercise.secondaryMuscles
+          });
+        } else {
+          // Fallback to creating new exercise
+          const defaultMuscles = ['back'];
+          const primaryMuscles = mapMuscleNamesToEnum(defaultMuscles);
+
+          exercises.push({
+            id: `ai_workout_${Date.now()}_${index}`,
+            name,
+            sets: Array.from({ length: 3 }, () => ({
+              weight: 0,
+              reps: 8,
+              rpe: 8,
+              isWarmup: false,
+              isExecuted: false
+            })),
+            muscleGroups: defaultMuscles,
+            equipment: 'Mixed',
+            primaryMuscles,
+            secondaryMuscles: []
+          });
+        }
       });
     }
 
@@ -574,6 +655,209 @@ const sendStreamingChatMessageProduction = async (
     console.error('🏭 ChatService: Production service error:', error);
     return { success: false, error: error.message || 'Production service error' };
   }
+};
+
+// Helper function to map AI-generated exercise names to existing exercises in the database
+const mapAIExerciseToExisting = (aiExerciseName: string): any => {
+  const { EXERCISES } = require('@/lib/constants');
+
+  // Normalize the AI exercise name for comparison
+  const normalizedAIName = aiExerciseName.toLowerCase().trim();
+
+  // Exercise name mapping - maps AI-generated names to existing exercise database names
+  const exerciseNameMapping: { [key: string]: string } = {
+    // Pull exercises
+    'pull-ups': 'pull-up',
+    'pullups': 'pull-up',
+    'pull ups': 'pull-up',
+    'lat pulldowns': 'lat-pulldown',
+    'lat pulldown': 'lat-pulldown',
+    'pulldowns': 'lat-pulldown',
+
+    // Row exercises
+    'bent-over rows': 'barbell-row',
+    'bent over rows': 'barbell-row',
+    'bent-over dumbbell rows': 'dumbbell-row',
+    'bent over dumbbell rows': 'dumbbell-row',
+    'dumbbell rows': 'dumbbell-row',
+    'barbell rows': 'barbell-row',
+    'rows': 'dumbbell-row',
+
+    // Push exercises
+    'push-ups': 'push-ups',
+    'pushups': 'push-ups',
+    'push ups': 'push-ups',
+    'bench press': 'bench-press',
+    'dumbbell press': 'incline-dumbbell-press',
+    'incline press': 'incline-dumbbell-press',
+
+    // Shoulder exercises
+    'overhead press': 'overhead-press',
+    'shoulder press': 'seated-dumbbell-shoulder-press',
+    'lateral raises': 'lateral-raises',
+    'side raises': 'lateral-raises',
+    'dumbbell lateral raises': 'dumbbell-lateral-raise',
+    'reverse flyes': 'reverse-dumbbell-fly',
+    'reverse flies': 'reverse-dumbbell-fly',
+    'rear delt flyes': 'reverse-dumbbell-fly',
+
+    // Leg exercises
+    'squats': 'squat',
+    'back squats': 'squat',
+    'deadlifts': 'deadlift',
+    'romanian deadlifts': 'romanian-deadlift',
+    'rdl': 'romanian-deadlift',
+    'leg curls': 'seated-leg-curl',
+    'hamstring curls': 'seated-leg-curl',
+    'leg extensions': 'leg-extension',
+    'quad extensions': 'leg-extension',
+    'hip thrusts': 'hip-thrust',
+    'glute bridges': 'hip-thrust',
+
+    // Arm exercises
+    'bicep curls': 'dumbbell-curl',
+    'biceps curls': 'dumbbell-curl',
+    'dumbbell curls': 'dumbbell-curl',
+    'barbell curls': 'barbell-curl',
+    'hammer curls': 'hammer-curl',
+    'tricep extensions': 'barbell-lying-triceps-extension',
+    'triceps extensions': 'barbell-lying-triceps-extension',
+    'tricep pushdowns': 'tricep-pushdown',
+    'triceps pushdowns': 'tricep-pushdown',
+    'close grip bench press': 'close-grip-bench-press',
+    'close-grip bench': 'close-grip-bench-press',
+
+    // Core exercises
+    'planks': 'plank',
+    'crunches': 'crunch',
+    'sit-ups': 'crunch',
+    'sit ups': 'crunch',
+    'russian twists': 'russian-twists',
+    'bicycle crunches': 'bicycle-crunches',
+    'leg raises': 'hanging-leg-raise',
+    'hanging leg raises': 'hanging-leg-raise',
+
+    // Calf exercises
+    'calf raises': 'calf-raises',
+    'standing calf raises': 'standing-calf-raise',
+    'seated calf raises': 'seated-calf-raise',
+
+    // Cardio/Bodyweight
+    'burpees': 'burpees',
+    'mountain climbers': 'mountain-climbers',
+    'jump squats': 'jump-squats',
+    'jumping squats': 'jump-squats',
+    'high knees': 'high-knees',
+    'dips': 'dips',
+    'chest dips': 'dips',
+    'tricep dips': 'dips'
+  };
+
+  // First try exact mapping
+  const mappedId = exerciseNameMapping[normalizedAIName];
+  if (mappedId) {
+    const existingExercise = EXERCISES.find((ex: any) => ex.id === mappedId);
+    if (existingExercise) {
+      console.log(`✅ Mapped AI exercise "${aiExerciseName}" to existing exercise "${existingExercise.name}" (${existingExercise.id})`);
+      return existingExercise;
+    }
+  }
+
+  // Try partial matching for more flexible mapping
+  for (const [aiName, exerciseId] of Object.entries(exerciseNameMapping)) {
+    if (normalizedAIName.includes(aiName) || aiName.includes(normalizedAIName)) {
+      const existingExercise = EXERCISES.find((ex: any) => ex.id === exerciseId);
+      if (existingExercise) {
+        console.log(`✅ Partially mapped AI exercise "${aiExerciseName}" to existing exercise "${existingExercise.name}" (${existingExercise.id})`);
+        return existingExercise;
+      }
+    }
+  }
+
+  // Try direct name matching with existing exercises
+  const directMatch = EXERCISES.find((ex: any) =>
+    ex.name.toLowerCase().trim() === normalizedAIName ||
+    normalizedAIName.includes(ex.name.toLowerCase().trim()) ||
+    ex.name.toLowerCase().trim().includes(normalizedAIName)
+  );
+
+  if (directMatch) {
+    console.log(`✅ Direct matched AI exercise "${aiExerciseName}" to existing exercise "${directMatch.name}" (${directMatch.id})`);
+    return directMatch;
+  }
+
+  console.warn(`⚠️ No mapping found for AI exercise "${aiExerciseName}"`);
+  return null;
+};
+
+// Helper function to map muscle names to Muscle enum values (fallback for unmapped exercises)
+const mapMuscleNamesToEnum = (muscleNames: string[]): string[] => {
+  const { Muscle } = require('@/lib/constants');
+
+  const muscleMapping: { [key: string]: string } = {
+    // Generic mappings
+    'back': Muscle.LatissimusDorsi,
+    'lats': Muscle.LatissimusDorsi,
+    'latissimus dorsi': Muscle.LatissimusDorsi,
+    'rhomboids': Muscle.Rhomboids,
+    'traps': Muscle.Trapezius,
+    'trapezius': Muscle.Trapezius,
+    'erector spinae': Muscle.ErectorSpinae,
+    'lower back': Muscle.ErectorSpinae,
+
+    // Chest
+    'chest': Muscle.PectoralisMajor,
+    'pecs': Muscle.PectoralisMajor,
+    'pectorals': Muscle.PectoralisMajor,
+    'pectoralis major': Muscle.PectoralisMajor,
+
+    // Shoulders
+    'shoulders': Muscle.Deltoid,
+    'delts': Muscle.Deltoid,
+    'deltoids': Muscle.Deltoid,
+    'deltoid': Muscle.Deltoid,
+    'anterior deltoid': Muscle.AnteriorDeltoid,
+    'lateral deltoid': Muscle.LateralDeltoid,
+    'posterior deltoid': Muscle.PosteriorDeltoid,
+
+    // Arms
+    'biceps': Muscle.BicepsBrachii,
+    'biceps brachii': Muscle.BicepsBrachii,
+    'triceps': Muscle.TricepsBrachii,
+    'triceps brachii': Muscle.TricepsBrachii,
+    'forearms': Muscle.Forearms,
+    'brachialis': Muscle.Brachialis,
+    'brachioradialis': Muscle.Brachioradialis,
+
+    // Legs
+    'quadriceps': Muscle.Quadriceps,
+    'quads': Muscle.Quadriceps,
+    'hamstrings': Muscle.Hamstrings,
+    'hams': Muscle.Hamstrings,
+    'glutes': Muscle.GluteusMaximus,
+    'gluteus maximus': Muscle.GluteusMaximus,
+    'gluteus medius': Muscle.GluteusMedius,
+    'calves': Muscle.Calves,
+    'gastrocnemius': Muscle.Calves,
+    'soleus': Muscle.Soleus,
+
+    // Core
+    'abs': Muscle.UpperRectusAbdominis,
+    'abdominals': Muscle.UpperRectusAbdominis,
+    'core': Muscle.UpperRectusAbdominis,
+    'rectus abdominis': Muscle.UpperRectusAbdominis,
+    'upper abs': Muscle.UpperRectusAbdominis,
+    'lower abs': Muscle.LowerRectusAbdominis,
+    'obliques': Muscle.Obliques,
+    'serratus anterior': Muscle.SerratusAnterior,
+  };
+
+  return muscleNames
+    .map(name => {
+      const normalizedName = name.toLowerCase().trim();
+      return muscleMapping[normalizedName] || muscleMapping[name] || name;
+    })
+    .filter(muscle => muscle); // Remove any undefined/empty values
 };
 
 // Generate daily motivation message using agentic AI

@@ -146,11 +146,25 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
     const volumes = initializeMuscleVolumes();
 
     currentWorkoutExercises.forEach(exercise => {
-      // Find the exercise details from EXERCISES constant
-      const exerciseDetails = EXERCISES.find(e => e.id === exercise.id);
+      // First try to find the exercise details from EXERCISES constant
+      let exerciseDetails = EXERCISES.find(e => e.id === exercise.id);
+
+      // If not found in EXERCISES (e.g., AI-generated exercise), use the exercise's own muscle data
       if (!exerciseDetails) {
-        console.warn(`Exercise not found: ${exercise.id}`);
-        return;
+        // Check if this is an AI-generated exercise with embedded muscle data
+        if (exercise.primaryMuscles || exercise.secondaryMuscles) {
+          exerciseDetails = {
+            id: exercise.id,
+            name: exercise.name,
+            primaryMuscles: exercise.primaryMuscles || [],
+            secondaryMuscles: exercise.secondaryMuscles || [],
+            equipment: exercise.equipment || 'Mixed',
+            muscleGroups: exercise.muscleGroups || []
+          };
+        } else {
+          console.warn(`Exercise not found and no muscle data available: ${exercise.id}`);
+          return;
+        }
       }
 
       // Calculate volume only from executed sets
@@ -167,7 +181,7 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
           volumes[muscle] = (volumes[muscle] || 0) + (exerciseVolume * 0.7); // Primary muscles get 70% of volume DO NOT CHANGE THIS
         });
       }
-      
+
       // Add volume to secondary muscles
       if (exerciseDetails.secondaryMuscles) {
         exerciseDetails.secondaryMuscles.forEach(muscle => {
