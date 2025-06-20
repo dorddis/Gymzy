@@ -375,7 +375,7 @@ export function QuickWorkoutTemplates() {
         <Button
           variant="outline"
           onClick={() => router.push('/templates')}
-          className="w-full py-3 text-secondary border-secondary/40 hover:border-secondary hover:bg-secondary/5 font-medium"
+          className="w-full py-3 text-green-600 border-green-400 hover:border-green-600 hover:bg-green-50 font-medium"
         >
           Browse All Templates
         </Button>

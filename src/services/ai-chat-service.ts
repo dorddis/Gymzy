@@ -1,12 +1,10 @@
 import { getAIPersonalityProfile, generateAIContext } from './ai-personality-service';
 import { ContextualDataService } from './contextual-data-service';
-// LangChain service will be dynamically imported when needed
+import { aiRouter, AIRequest } from './intelligent-ai-router';
+import { multiStepReasoning } from './multi-step-reasoning';
 
-// Google AI Studio Configuration
-const GOOGLE_AI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
-
-// Feature flag for LangChain integration
-const USE_LANGCHAIN = process.env.NEXT_PUBLIC_USE_LANGCHAIN === 'true';
+// Feature flag for intelligent multi-step reasoning
+const USE_INTELLIGENT_REASONING = true;
 
 export interface ChatMessage {
   id: string;
@@ -37,6 +35,348 @@ export interface StreamingChatResponse {
     workoutId: string;
   };
 }
+
+// Intelligent streaming chat message using multi-step reasoning
+const sendStreamingChatMessageIntelligent = async (
+  userId: string,
+  message: string,
+  conversationHistory: ChatMessage[] = [],
+  onStreamChunk?: (chunk: string) => void,
+  abortSignal?: AbortSignal
+): Promise<StreamingChatResponse> => {
+  try {
+    console.log('🧠 ChatService: Using intelligent multi-step reasoning');
+
+    // Convert conversation history to simple format
+    const simpleHistory = conversationHistory.map(msg => ({
+      role: msg.role,
+      content: msg.content
+    }));
+
+    // Check if this is a workout-related request that needs multi-step reasoning
+    if (isWorkoutRelated(message)) {
+      console.log('🏋️ ChatService: Detected workout request');
+
+      // Check if we can use multi-step reasoning (requires Groq for complex steps)
+      const groqKey = process.env.GROQ_API_KEY || process.env.NEXT_PUBLIC_GROQ_API_KEY;
+      const groqAvailable = !!(groqKey && groqKey.trim() !== '');
+
+      if (groqAvailable) {
+        console.log('🧠 ChatService: Using multi-step reasoning with Groq');
+        try {
+          const reasoningChain = await multiStepReasoning.executeWorkoutReasoning(
+            message,
+            simpleHistory,
+            onStreamChunk
+          );
+
+          // Extract workout data if available
+          let workoutData;
+          try {
+            const workoutStep = reasoningChain.steps.find(step => step.name === 'Workout Generation');
+            if (workoutStep && workoutStep.output) {
+              const workoutJson = extractJSON(workoutStep.output);
+              console.log('🔍 ChatService: Extracted workout JSON:', workoutJson);
+
+              if (workoutJson && workoutJson.exercises) {
+                // Convert the AI-generated workout format to the expected WorkoutExercise format
+                const formattedExercises = workoutJson.exercises.map((exercise: any, index: number) => ({
+                  id: `ai_workout_${Date.now()}_${index}`,
+                  name: exercise.name,
+                  sets: Array.from({ length: exercise.sets || 3 }, () => ({
+                    weight: 0,
+                    reps: exercise.reps || 8,
+                    rpe: 8,
+                    isWarmup: false,
+                    isExecuted: false
+                  })),
+                  muscleGroups: workoutJson.target_muscles || [],
+                  equipment: 'Mixed',
+                  primaryMuscles: workoutJson.target_muscles || [],
+                  secondaryMuscles: []
+                }));
+
+                workoutData = {
+                  exercises: formattedExercises,
+                  workoutId: `workout_${Date.now()}`
+                };
+
+                console.log('✅ ChatService: Formatted workout data:', workoutData);
+              } else {
+                // Fallback: Try to extract workout data from text if JSON parsing failed
+                console.log('⚠️ ChatService: JSON parsing failed, attempting text extraction fallback');
+                workoutData = extractWorkoutFromText(workoutStep.output);
+              }
+            }
+          } catch (error) {
+            console.log('⚠️ ChatService: Could not extract workout data:', error);
+            // Try text extraction as final fallback
+            const workoutStep = reasoningChain.steps.find(step => step.name === 'Workout Generation');
+            if (workoutStep && workoutStep.output) {
+              workoutData = extractWorkoutFromText(workoutStep.output);
+            }
+          }
+
+          return {
+            success: reasoningChain.success,
+            workoutData,
+            error: reasoningChain.success ? undefined : 'Failed to process workout request'
+          };
+
+        } catch (error) {
+          console.log('⚠️ ChatService: Multi-step reasoning failed, using simple routing fallback');
+
+          // Fallback to simple intelligent routing
+          const request: AIRequest = {
+            prompt: message,
+            conversationHistory: simpleHistory,
+            userId
+          };
+
+          const response = await aiRouter.routeRequest(request, onStreamChunk);
+
+          return {
+            success: response.success,
+            error: response.success ? undefined : response.error
+          };
+        }
+      } else {
+        console.log('💬 ChatService: Using simple intelligent routing for general conversation');
+
+        // For non-workout requests, use intelligent routing
+        const request: AIRequest = {
+          prompt: message,
+          conversationHistory: simpleHistory,
+          userId
+        };
+
+        const response = await aiRouter.routeRequest(request, onStreamChunk);
+
+        return {
+          success: response.success,
+          error: response.success ? undefined : response.error
+        };
+      }
+
+    } else {
+      console.log('💬 ChatService: Using simple intelligent routing for general conversation');
+
+      // For non-workout requests, use intelligent routing
+      const request: AIRequest = {
+        prompt: message,
+        conversationHistory: simpleHistory,
+        userId
+      };
+
+      const response = await aiRouter.routeRequest(request, onStreamChunk);
+
+      return {
+        success: response.success,
+        error: response.success ? undefined : response.error
+      };
+    }
+
+  } catch (error: any) {
+    console.error('❌ ChatService: Intelligent reasoning failed:', error);
+    return {
+      success: false,
+      error: error.message || 'Intelligent reasoning failed'
+    };
+  }
+};
+
+// Helper function to detect workout-related requests
+const isWorkoutRelated = (message: string): boolean => {
+  const workoutKeywords = [
+    'workout', 'exercise', 'training', 'fitness',
+    'create', 'generate', 'build', 'design',
+    'tricep', 'bicep', 'chest', 'back', 'legs', 'shoulders',
+    'abs', 'core', 'calves', 'glutes', 'arms',
+    'modify', 'change', 'adjust', 'double'
+  ];
+
+  const lowerMessage = message.toLowerCase();
+  return workoutKeywords.some(keyword => lowerMessage.includes(keyword));
+};
+
+// Helper function to extract JSON from text
+const extractJSON = (text: string): any => {
+  try {
+    console.log('🔍 Attempting to extract JSON from text:', text.substring(0, 500) + '...');
+
+    // Try to find JSON blocks with various patterns
+    const patterns = [
+      /```json\s*(\{[\s\S]*?\})\s*```/g,  // JSON in code blocks
+      /```\s*(\{[\s\S]*?\})\s*```/g,      // JSON in generic code blocks
+      /(\{[\s\S]*?\})/g                    // Any JSON-like structure
+    ];
+
+    for (const pattern of patterns) {
+      const matches = text.match(pattern);
+      if (matches) {
+        for (const match of matches) {
+          try {
+            // Clean the match
+            let jsonStr = match.replace(/```json|```/g, '').trim();
+
+            // Try to fix common JSON issues
+            jsonStr = fixCommonJSONIssues(jsonStr);
+
+            console.log('🔧 Attempting to parse cleaned JSON:', jsonStr.substring(0, 200) + '...');
+            const parsed = JSON.parse(jsonStr);
+            console.log('✅ Successfully parsed JSON:', parsed);
+            return parsed;
+          } catch (parseError) {
+            console.log('⚠️ Failed to parse this match:', parseError);
+            continue;
+          }
+        }
+      }
+    }
+
+    // If no patterns worked, try to extract the first complete JSON object
+    const firstBrace = text.indexOf('{');
+    if (firstBrace !== -1) {
+      let braceCount = 0;
+      let endIndex = firstBrace;
+
+      for (let i = firstBrace; i < text.length; i++) {
+        if (text[i] === '{') braceCount++;
+        if (text[i] === '}') braceCount--;
+        if (braceCount === 0) {
+          endIndex = i;
+          break;
+        }
+      }
+
+      if (braceCount === 0) {
+        const jsonStr = text.substring(firstBrace, endIndex + 1);
+        const fixedJson = fixCommonJSONIssues(jsonStr);
+        console.log('🔧 Attempting to parse extracted JSON:', fixedJson.substring(0, 200) + '...');
+        return JSON.parse(fixedJson);
+      }
+    }
+
+  } catch (error) {
+    console.log('❌ Could not parse JSON from text:', error);
+    console.log('📝 Original text:', text.substring(0, 300) + '...');
+  }
+  return null;
+};
+
+// Helper function to fix common JSON formatting issues
+const fixCommonJSONIssues = (jsonStr: string): string => {
+  let fixed = jsonStr;
+
+  // Remove trailing commas
+  fixed = fixed.replace(/,(\s*[}\]])/g, '$1');
+
+  // Fix unquoted property names
+  fixed = fixed.replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":');
+
+  // Fix single quotes to double quotes
+  fixed = fixed.replace(/'/g, '"');
+
+  // Remove comments
+  fixed = fixed.replace(/\/\/.*$/gm, '');
+  fixed = fixed.replace(/\/\*[\s\S]*?\*\//g, '');
+
+  // Fix missing quotes around string values (basic attempt)
+  fixed = fixed.replace(/:\s*([a-zA-Z][a-zA-Z0-9\s]*[a-zA-Z0-9])\s*([,}])/g, ': "$1"$2');
+
+  return fixed;
+};
+
+// Fallback function to extract workout data from text when JSON parsing fails
+const extractWorkoutFromText = (text: string): any => {
+  try {
+    console.log('🔧 ChatService: Attempting text-based workout extraction');
+
+    // Look for exercise patterns in the text
+    const exercisePatterns = [
+      /(\d+)\s*sets?\s*of\s*(\d+)\s*reps?\s*(.+)/gi,
+      /(.+):\s*(\d+)\s*sets?\s*x\s*(\d+)\s*reps?/gi,
+      /(\d+)\.\s*(.+)\s*-\s*(\d+)\s*sets?\s*x\s*(\d+)\s*reps?/gi
+    ];
+
+    const exercises = [];
+    let exerciseCount = 0;
+
+    for (const pattern of exercisePatterns) {
+      const matches = [...text.matchAll(pattern)];
+      for (const match of matches) {
+        if (exerciseCount >= 6) break; // Limit to 6 exercises
+
+        let exerciseName, sets, reps;
+
+        if (match.length === 4) {
+          [, sets, reps, exerciseName] = match;
+        } else if (match.length === 4) {
+          [, exerciseName, sets, reps] = match;
+        } else if (match.length === 5) {
+          [, , exerciseName, sets, reps] = match;
+        }
+
+        if (exerciseName && sets && reps) {
+          exercises.push({
+            id: `ai_workout_${Date.now()}_${exerciseCount}`,
+            name: exerciseName.trim(),
+            sets: Array.from({ length: parseInt(sets) || 3 }, () => ({
+              weight: 0,
+              reps: parseInt(reps) || 8,
+              rpe: 8,
+              isWarmup: false,
+              isExecuted: false
+            })),
+            muscleGroups: ['back'], // Default to back since that was the request
+            equipment: 'Mixed',
+            primaryMuscles: ['back'],
+            secondaryMuscles: []
+          });
+          exerciseCount++;
+        }
+      }
+      if (exercises.length > 0) break; // Stop if we found exercises
+    }
+
+    // If no structured exercises found, create a basic workout
+    if (exercises.length === 0) {
+      console.log('⚠️ ChatService: No exercises found in text, creating basic fallback workout');
+      const basicExercises = ['Pull-ups', 'Bent-over Rows', 'Lat Pulldowns', 'Deadlifts'];
+
+      basicExercises.forEach((name, index) => {
+        exercises.push({
+          id: `ai_workout_${Date.now()}_${index}`,
+          name,
+          sets: Array.from({ length: 3 }, () => ({
+            weight: 0,
+            reps: 8,
+            rpe: 8,
+            isWarmup: false,
+            isExecuted: false
+          })),
+          muscleGroups: ['back'],
+          equipment: 'Mixed',
+          primaryMuscles: ['back'],
+          secondaryMuscles: []
+        });
+      });
+    }
+
+    if (exercises.length > 0) {
+      console.log('✅ ChatService: Extracted exercises from text:', exercises.length);
+      return {
+        exercises,
+        workoutId: `workout_${Date.now()}`
+      };
+    }
+
+  } catch (error) {
+    console.log('❌ ChatService: Text extraction failed:', error);
+  }
+
+  return null;
+};
 
 // Get Google AI API Key from environment
 const getAPIKey = (): string => {
@@ -166,14 +506,18 @@ export const sendStreamingChatMessage = async (
   abortSignal?: AbortSignal
 ): Promise<StreamingChatResponse> => {
   try {
-    console.log(`💬 ChatService: ===== SENDING STREAMING CHAT MESSAGE (${USE_LANGCHAIN ? 'LANGCHAIN' : 'PRODUCTION'}) =====`);
+    console.log(`💬 ChatService: ===== SENDING STREAMING CHAT MESSAGE (${USE_INTELLIGENT_REASONING ? 'INTELLIGENT_REASONING' : 'PRODUCTION'}) =====`);
     console.log('💬 ChatService: User ID:', userId);
     console.log('💬 ChatService: Message:', message);
     console.log('💬 ChatService: History length:', conversationHistory.length);
     console.log('💬 ChatService: Streaming enabled:', !!onStreamChunk);
 
-    // Use production service (LangChain integration will be added after dependencies are installed)
-    return await sendStreamingChatMessageProduction(userId, message, conversationHistory, onStreamChunk, abortSignal);
+    // Use intelligent reasoning system for better responses
+    if (USE_INTELLIGENT_REASONING) {
+      return await sendStreamingChatMessageIntelligent(userId, message, conversationHistory, onStreamChunk, abortSignal);
+    } else {
+      return await sendStreamingChatMessageProduction(userId, message, conversationHistory, onStreamChunk, abortSignal);
+    }
   } catch (error: any) {
     console.error('💬 ChatService: Error in service routing:', error);
     return { success: false, error: error.message || 'Unknown error occurred' };

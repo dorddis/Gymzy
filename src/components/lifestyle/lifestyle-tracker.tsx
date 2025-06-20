@@ -5,13 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Moon, 
-  Zap, 
-  Brain, 
+import {
+  Moon,
+  Zap,
+  Brain,
   Heart,
   CheckCircle,
-  TrendingUp
+  TrendingUp,
+  X
 } from 'lucide-react';
 import { useContextualTracking } from '@/hooks/useContextualTracking';
 
@@ -108,10 +109,20 @@ export function LifestyleTracker({ onClose }: LifestyleTrackerProps) {
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <TrendingUp className="h-5 w-5" />
-          Daily Check-in
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" />
+            Daily Check-in
+          </CardTitle>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="h-8 w-8 p-0 text-gray-500 hover:text-gray-700"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
         <p className="text-sm text-muted-foreground">
           Help your AI coach understand how you're feeling today
         </p>

@@ -318,13 +318,7 @@ export function AIWelcomeMessage() {
           )}
         </div>
         
-        <div className="flex items-center justify-between">
-          <div className="text-xs text-muted-foreground">
-            {lastGenerated && (
-              <span>Updated {lastGenerated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-            )}
-          </div>
-          
+        <div className="flex items-center justify-end">
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
