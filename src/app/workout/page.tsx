@@ -180,10 +180,10 @@ export default function WorkoutPage() {
     setIsAddExerciseModalOpen(false);
   };
 
-  const startRestTimer = () => {
+  const startRestTimer = useCallback(() => {
     setIsRestTimerRunning(true);
     setRestTimeRemaining(totalRestTime);
-  };
+  }, [totalRestTime]);
 
   const resetRestTimer = () => {
     setIsRestTimerRunning(false);

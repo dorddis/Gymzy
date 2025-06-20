@@ -212,11 +212,11 @@ export class ContextualDataService {
           10
         ),
         preferredTimes: this.updatePreferredTimes(
-          context.workoutPatterns.preferredTimes,
+          Array.isArray(context.workoutPatterns.preferredTimes) ? context.workoutPatterns.preferredTimes : [],
           timeSlot
         ),
         preferredExercises: this.updatePreferredExercises(
-          context.workoutPatterns.preferredExercises,
+          Array.isArray(context.workoutPatterns.preferredExercises) ? context.workoutPatterns.preferredExercises : [],
           workoutData.exercises?.map((ex: any) => ex.name) || []
         ),
         lastUpdated: Timestamp.now()
@@ -392,12 +392,13 @@ export class ContextualDataService {
   }
 
   private static updatePreferredTimes(current: string[], newTime: string): string[] {
-    const updated = [...current, newTime];
+    const safeCurrentTimes = Array.isArray(current) ? current : [];
+    const updated = [...safeCurrentTimes, newTime];
     const counts = updated.reduce((acc, time) => {
       acc[time] = (acc[time] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
-    
+
     return Object.entries(counts)
       .sort(([,a], [,b]) => b - a)
       .slice(0, 3)
@@ -405,12 +406,14 @@ export class ContextualDataService {
   }
 
   private static updatePreferredExercises(current: string[], newExercises: string[]): string[] {
-    const updated = [...current, ...newExercises];
+    const safeCurrentExercises = Array.isArray(current) ? current : [];
+    const safeNewExercises = Array.isArray(newExercises) ? newExercises : [];
+    const updated = [...safeCurrentExercises, ...safeNewExercises];
     const counts = updated.reduce((acc, exercise) => {
       acc[exercise] = (acc[exercise] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
-    
+
     return Object.entries(counts)
       .sort(([,a], [,b]) => b - a)
       .slice(0, 10)

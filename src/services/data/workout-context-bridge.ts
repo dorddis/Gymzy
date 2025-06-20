@@ -3,7 +3,8 @@
  * Bridges the gap between React WorkoutContext and AI services
  */
 
-import { getRecentWorkouts } from './workout-service';
+import { getRecentWorkouts } from '../core/workout-service';
+import { EXERCISES } from '@/lib/constants';
 
 export interface MuscleVolumes {
   [muscle: string]: number;
@@ -91,8 +92,7 @@ export class WorkoutContextBridge {
   private calculateMuscleVolumesFromWorkouts(workouts: any[]): MuscleVolumes {
     const volumes: MuscleVolumes = {};
     
-    // Import exercise constants
-    const { EXERCISES } = require('../../home/user/studio/src/lib/constants');
+    // Use imported exercise constants
     
     workouts.forEach(workout => {
       if (!workout.exercises) return;

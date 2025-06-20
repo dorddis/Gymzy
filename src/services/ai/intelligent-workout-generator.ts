@@ -3,7 +3,7 @@
  * Generates workouts based on muscle volume data, recent workout history, and user preferences
  */
 
-import { EXERCISES, Exercise, Muscle } from '../../home/user/studio/src/lib/constants';
+import { EXERCISES, Exercise, Muscle } from '@/lib/constants';
 
 export interface MuscleVolumes {
   [key: string]: number;

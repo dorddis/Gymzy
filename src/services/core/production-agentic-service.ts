@@ -7,7 +7,7 @@ import { AgenticStateManager } from '@/services/infrastructure/agentic-state-man
 import { FirebaseStateAdapter, MemoryStateAdapter } from '@/services/infrastructure/firebase-state-adapter';
 import { RobustToolExecutor } from '@/services/infrastructure/robust-tool-executor';
 import { EnhancedWorkoutTools } from '@/services/ai/enhanced-workout-tools';
-import { generateAIResponse, generateCharacterStreamingResponse } from '../ai-service';
+import { generateAIResponse, generateCharacterStreamingResponse } from '../ai/groq-service';
 
 export interface ChatMessage {
   id: string;

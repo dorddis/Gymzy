@@ -157,6 +157,7 @@ export interface UserProfileUpdate {
   profilePicture?: string;
   fitnessGoals?: string[];
   fitnessLevel?: 'beginner' | 'intermediate' | 'advanced';
+  experienceLevel?: 'beginner' | 'intermediate' | 'advanced';
   preferredWorkoutTypes?: string[];
   availableEquipment?: string[];
   workoutFrequency?: string;

@@ -3,7 +3,7 @@
  * Routes AI requests to the most appropriate service based on complexity and requirements
  */
 
-import { generateAIResponse, generateCharacterStreamingResponse } from '../ai-service';
+import { generateAIResponse, generateCharacterStreamingResponse } from './groq-service';
 import { generateAIResponseServer } from './groq-service';
 
 export interface AIRequest {

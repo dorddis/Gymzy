@@ -101,6 +101,7 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
   const [currentWorkoutExercises, setCurrentWorkoutExercises] = useState<ExerciseWithSets[]>([]);
   const [latestWorkout, setLatestWorkout] = useState<Workout | null>(null);
   const [allWorkouts, setAllWorkouts] = useState<Workout[]>([]);
+  const [pendingSetExecutedCallback, setPendingSetExecutedCallback] = useState<(() => void) | null>(null);
 
   // Add a function to toggle set execution
   const toggleSetExecuted = useCallback((exerciseIndex: number, setIndex: number, onSetExecuted?: () => void) => {
@@ -122,14 +123,22 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
       // Create a new array of exercises with the updated exercise
       newExercises[exerciseIndex] = updatedExercise;
 
-      // If set is being marked as executed, trigger callback
+      // If set is being marked as executed, schedule callback for next tick
       if (!set.isExecuted && updatedSet.isExecuted && onSetExecuted) {
-        onSetExecuted();
+        setPendingSetExecutedCallback(() => onSetExecuted);
       }
 
       return newExercises;
     });
   }, []);
+
+  // Execute pending callback after state update
+  useEffect(() => {
+    if (pendingSetExecutedCallback) {
+      pendingSetExecutedCallback();
+      setPendingSetExecutedCallback(null);
+    }
+  }, [pendingSetExecutedCallback]);
 
   const totalVolume = useMemo(() => {
     return currentWorkoutExercises.reduce((totalExerciseVolume, exercise) => {

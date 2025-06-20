@@ -75,6 +75,7 @@ const sendStreamingChatMessageIntelligent = async (
           try {
             const workoutStep = reasoningChain.steps.find(step => step.name === 'Workout Generation');
             if (workoutStep && workoutStep.output) {
+              console.log('🔍 ChatService: Raw workout generation output:', workoutStep.output.substring(0, 500) + '...');
               const workoutJson = extractJSON(workoutStep.output);
               console.log('🔍 ChatService: Extracted workout JSON:', workoutJson);
 
@@ -258,6 +259,19 @@ const extractJSON = (text: string): any => {
             return parsed;
           } catch (parseError) {
             console.log('⚠️ Failed to parse this match:', parseError);
+
+            // Try to fix truncated JSON by completing incomplete objects/arrays
+            try {
+              const fixedJson = fixTruncatedJSON(match.replace(/```json|```/g, '').trim());
+              if (fixedJson) {
+                console.log('🔧 Attempting to parse fixed truncated JSON:', fixedJson.substring(0, 200) + '...');
+                const parsed = JSON.parse(fixedJson);
+                console.log('✅ Successfully parsed fixed JSON:', parsed);
+                return parsed;
+              }
+            } catch (fixError) {
+              console.log('⚠️ Failed to fix truncated JSON:', fixError);
+            }
             continue;
           }
         }
@@ -284,6 +298,14 @@ const extractJSON = (text: string): any => {
         const fixedJson = fixCommonJSONIssues(jsonStr);
         console.log('🔧 Attempting to parse extracted JSON:', fixedJson.substring(0, 200) + '...');
         return JSON.parse(fixedJson);
+      } else {
+        // Try to fix incomplete JSON
+        const incompleteJson = text.substring(firstBrace);
+        const fixedJson = fixTruncatedJSON(incompleteJson);
+        if (fixedJson) {
+          console.log('🔧 Attempting to parse fixed incomplete JSON:', fixedJson.substring(0, 200) + '...');
+          return JSON.parse(fixedJson);
+        }
       }
     }
 
@@ -317,16 +339,113 @@ const fixCommonJSONIssues = (jsonStr: string): string => {
   return fixed;
 };
 
+// Helper function to fix truncated JSON by completing incomplete structures
+const fixTruncatedJSON = (jsonStr: string): string | null => {
+  try {
+    let fixed = jsonStr.trim();
+
+    console.log('🔧 Attempting to fix truncated JSON:', fixed.substring(0, 200) + '...');
+
+    // Remove any trailing ellipsis or incomplete content
+    fixed = fixed.replace(/\.\.\..*$/, '');
+
+    // Remove any trailing incomplete strings or properties
+    fixed = fixed.replace(/,?\s*"[^"]*$/, '');
+    fixed = fixed.replace(/,?\s*[^,}\]]*$/, '');
+
+    // Apply common fixes
+    fixed = fixCommonJSONIssues(fixed);
+
+    // Count braces and brackets to see what's missing
+    let braceCount = 0;
+    let bracketCount = 0;
+    let inString = false;
+    let lastChar = '';
+
+    for (let i = 0; i < fixed.length; i++) {
+      const char = fixed[i];
+
+      if (char === '"' && lastChar !== '\\') {
+        inString = !inString;
+      }
+
+      if (!inString) {
+        if (char === '{') braceCount++;
+        if (char === '}') braceCount--;
+        if (char === '[') bracketCount++;
+        if (char === ']') bracketCount--;
+      }
+
+      lastChar = char;
+    }
+
+    // If we're in the middle of a string, close it
+    if (inString) {
+      fixed += '"';
+    }
+
+    // Remove trailing commas before closing
+    fixed = fixed.replace(/,(\s*)$/, '$1');
+
+    // Close any open arrays
+    while (bracketCount > 0) {
+      fixed += ']';
+      bracketCount--;
+    }
+
+    // Close any open objects
+    while (braceCount > 0) {
+      fixed += '}';
+      braceCount--;
+    }
+
+    console.log('🔧 Fixed JSON result:', fixed.substring(0, 200) + '...');
+
+    // Try to parse the fixed JSON
+    const parsed = JSON.parse(fixed);
+    console.log('✅ Successfully parsed fixed JSON:', parsed);
+    return fixed;
+
+  } catch (error) {
+    console.log('⚠️ Could not fix truncated JSON:', error);
+    return null;
+  }
+};
+
 // Fallback function to extract workout data from text when JSON parsing fails
 const extractWorkoutFromText = (text: string): any => {
   try {
     console.log('🔧 ChatService: Attempting text-based workout extraction');
+    console.log('📝 Text to extract from:', text.substring(0, 500) + '...');
 
-    // Look for exercise patterns in the text
+    // Enhanced exercise patterns to catch more variations
     const exercisePatterns = [
+      // Pattern: "**Exercise 1: Push-ups**"
+      /\*\*Exercise\s*\d+:\s*(.+?)\*\*/gi,
+      // Pattern: "**1. Push-ups**: 3 sets of 10 reps"
+      /\*\*\d+\.\s*(.+?)\*\*:\s*(\d+)\s*sets?\s*of\s*(\d+)\s*reps?/gi,
+      // Pattern: "1. **Push-ups**: 3 sets of 10 reps"
+      /\d+\.\s*\*\*(.+?)\*\*:\s*(\d+)\s*sets?\s*of\s*(\d+)\s*reps?/gi,
+      // Pattern: "Do 3 sets of 10 reps, resting for 60 seconds"
+      /Do\s*(\d+)\s*sets?\s*of\s*(\d+)\s*reps?.*?resting\s*for\s*(\d+)\s*seconds/gi,
+      // Pattern: "Complete 3 sets of 10 reps, resting for 60 seconds"
+      /Complete\s*(\d+)\s*sets?\s*of\s*(\d+)\s*reps?.*?resting\s*for\s*(\d+)\s*seconds/gi,
+      // Pattern: "Perform 3 sets of 10 reps, resting for 60 seconds"
+      /Perform\s*(\d+)\s*sets?\s*of\s*(\d+)\s*reps?.*?resting\s*for\s*(\d+)\s*seconds/gi,
+      // Pattern: "3 sets of 10 reps Push-ups"
       /(\d+)\s*sets?\s*of\s*(\d+)\s*reps?\s*(.+)/gi,
+      // Pattern: "Push-ups: 3 sets x 10 reps"
       /(.+):\s*(\d+)\s*sets?\s*x\s*(\d+)\s*reps?/gi,
-      /(\d+)\.\s*(.+)\s*-\s*(\d+)\s*sets?\s*x\s*(\d+)\s*reps?/gi
+      // Pattern: "1. Push-ups - 3 sets x 10 reps"
+      /(\d+)\.\s*(.+)\s*-\s*(\d+)\s*sets?\s*x\s*(\d+)\s*reps?/gi,
+      // Pattern: "Push-ups (3x10)"
+      /(.+)\s*\((\d+)x(\d+)\)/gi,
+      // Pattern: "Push-ups 3x10"
+      /(.+)\s+(\d+)x(\d+)/gi,
+      // Pattern: "- Push-ups: 3 sets, 10 reps"
+      /-\s*(.+):\s*(\d+)\s*sets?,\s*(\d+)\s*reps?/gi,
+      // Pattern: "Exercise: Push-ups, Sets: 3, Reps: 10"
+      /Exercise:\s*(.+),\s*Sets:\s*(\d+),\s*Reps:\s*(\d+)/gi
     ];
 
     const exercises = [];
@@ -395,10 +514,74 @@ const extractWorkoutFromText = (text: string): any => {
       if (exercises.length > 0) break; // Stop if we found exercises
     }
 
-    // If no structured exercises found, create a basic workout
+    // If still no exercises found, try to extract exercise names from conversational format
     if (exercises.length === 0) {
-      console.log('⚠️ ChatService: No exercises found in text, creating basic fallback workout');
-      const basicExercises = ['Pull-ups', 'Bent-over Rows', 'Lat Pulldowns', 'Deadlifts'];
+      console.log('🔍 No structured exercises found, trying to extract exercise names from conversational text');
+
+      // First try to extract from conversational format like "**Exercise 1: Dumbbell Chest Press**"
+      const conversationalPatterns = [
+        /\*\*Exercise\s*\d+:\s*(.+?)\*\*/gi,
+        /\*\*\d+\.\s*(.+?)\*\*/gi,
+        /Exercise\s*\d+:\s*(.+?)(?:\n|$)/gi,
+        /\d+\.\s*\*\*(.+?)\*\*/gi
+      ];
+
+      for (const pattern of conversationalPatterns) {
+        const matches = [...text.matchAll(pattern)];
+        console.log(`🔍 Pattern ${pattern.source} found ${matches.length} matches`);
+
+        for (const match of matches) {
+          const exerciseName = match[1].trim();
+          console.log(`🔍 Found exercise name: ${exerciseName}`);
+
+          const existingExercise = mapAIExerciseToExisting(exerciseName);
+
+          if (existingExercise && exerciseCount < 10) {
+            exercises.push({
+              id: existingExercise.id,
+              name: existingExercise.name,
+              sets: Array.from({ length: 3 }, () => ({
+                weight: 0,
+                reps: 10,
+                rpe: 8,
+                isWarmup: false,
+                isExecuted: false
+              })),
+              muscleGroups: [],
+              equipment: 'Mixed',
+              primaryMuscles: existingExercise.primaryMuscles,
+              secondaryMuscles: existingExercise.secondaryMuscles
+            });
+            exerciseCount++;
+            console.log(`✅ Added exercise from conversational extraction: ${existingExercise.name}`);
+          } else {
+            console.log(`⚠️ No mapping found for conversational exercise: ${exerciseName}`);
+          }
+        }
+      }
+    }
+
+    // If no structured exercises found, try to infer from text content
+    if (exercises.length === 0) {
+      console.log('⚠️ ChatService: No exercises found in text, attempting intelligent fallback');
+
+      // Try to infer workout type from text content
+      const textLower = text.toLowerCase();
+      let basicExercises = ['Pull-ups', 'Bent-over Rows', 'Lat Pulldowns', 'Deadlifts']; // Default back workout
+
+      if (textLower.includes('chest') || textLower.includes('push')) {
+        basicExercises = ['Push-ups', 'Bench Press', 'Incline Dumbbell Press', 'Dips'];
+      } else if (textLower.includes('leg') || textLower.includes('squat') || textLower.includes('lower body')) {
+        basicExercises = ['Squats', 'Deadlifts', 'Leg Curls', 'Calf Raises'];
+      } else if (textLower.includes('shoulder') || textLower.includes('delt')) {
+        basicExercises = ['Overhead Press', 'Lateral Raises', 'Reverse Flyes', 'Dumbbell Shoulder Press'];
+      } else if (textLower.includes('arm') || textLower.includes('bicep') || textLower.includes('tricep')) {
+        basicExercises = ['Bicep Curls', 'Tricep Extensions', 'Hammer Curls', 'Tricep Pushdowns'];
+      } else if (textLower.includes('full body') || textLower.includes('total body')) {
+        basicExercises = ['Squats', 'Push-ups', 'Pull-ups', 'Deadlifts', 'Overhead Press'];
+      }
+
+      console.log(`🎯 ChatService: Inferred workout type, using exercises: ${basicExercises.join(', ')}`);
 
       basicExercises.forEach((name, index) => {
         const existingExercise = mapAIExerciseToExisting(name);
@@ -689,11 +872,13 @@ const mapAIExerciseToExisting = (aiExerciseName: string): any => {
     'push ups': 'push-ups',
     'bench press': 'bench-press',
     'dumbbell press': 'incline-dumbbell-press',
+    'dumbbell chest press': 'incline-dumbbell-press',
     'incline press': 'incline-dumbbell-press',
 
     // Shoulder exercises
     'overhead press': 'overhead-press',
     'shoulder press': 'seated-dumbbell-shoulder-press',
+    'dumbbell shoulder press': 'seated-dumbbell-shoulder-press',
     'lateral raises': 'lateral-raises',
     'side raises': 'lateral-raises',
     'dumbbell lateral raises': 'dumbbell-lateral-raise',
@@ -703,6 +888,7 @@ const mapAIExerciseToExisting = (aiExerciseName: string): any => {
 
     // Leg exercises
     'squats': 'squat',
+    'bodyweight squats': 'squat',
     'back squats': 'squat',
     'deadlifts': 'deadlift',
     'romanian deadlifts': 'romanian-deadlift',
