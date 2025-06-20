@@ -14,7 +14,7 @@ import {
   Loader2,
   Brain
 } from 'lucide-react';
-import { generateDailyMotivation } from '@/services/ai-chat-service';
+import { generateDailyMotivation } from '@/services/core/ai-chat-service';
 import { useWorkout } from '@/contexts/WorkoutContext';
 import { useRouter } from 'next/navigation';
 

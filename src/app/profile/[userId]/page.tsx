@@ -19,14 +19,14 @@ import {
   Settings,
   ArrowLeft
 } from 'lucide-react';
-import { 
-  followUser, 
-  unfollowUser, 
+import {
+  followUser,
+  unfollowUser,
   isFollowing,
   getUserFollowers,
   getUserFollowing,
-  PublicUserProfile 
-} from '@/services/user-discovery-service';
+  PublicUserProfile
+} from '@/services/core/user-discovery-service';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 

@@ -11,9 +11,9 @@ import React, {
 } from 'react';
 import { Muscle, EXERCISES, Exercise } from '../../home/user/studio/src/lib/constants';
 import { useAuth } from '@/contexts/AuthContext';
-import { Workout, getRecentWorkouts, createWorkout, updateWorkout, deleteWorkout, getAllWorkouts } from '@/services/workout-service';
+import { Workout, getRecentWorkouts, createWorkout, updateWorkout, deleteWorkout, getAllWorkouts } from '@/services/core/workout-service';
 import { ExerciseWithSets } from '@/types/exercise';
-import { workoutService } from '@/services/workout-service';
+import { workoutService } from '@/services/core/workout-service';
 
 interface LoggedWorkout {
   id: string;

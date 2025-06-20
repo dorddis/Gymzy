@@ -21,7 +21,7 @@ import { useWorkout } from '@/contexts/WorkoutContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { EXERCISES } from '@/lib/constants';
 import { Exercise } from '@/types/exercise';
-import { getRecentWorkouts } from '@/services/workout-service';
+import { getRecentWorkouts } from '@/services/core/workout-service';
 
 interface WorkoutTemplate {
   id: string;

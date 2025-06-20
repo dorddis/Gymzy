@@ -10,7 +10,7 @@ import {
   limit, 
   Timestamp 
 } from 'firebase/firestore';
-import { getUserFollowing } from './user-discovery-service';
+import { getUserFollowing } from '@/services/core/user-discovery-service';
 import { WorkoutPost } from './workout-sharing-service';
 
 export interface FeedPost extends WorkoutPost {

@@ -13,8 +13,8 @@ import {
   Timestamp,
   addDoc 
 } from 'firebase/firestore';
-import { ContextualDataService } from './contextual-data-service';
-import { getRecentWorkouts } from './workout-service';
+import { ContextualDataService } from '@/services/data/contextual-data-service';
+import { getRecentWorkouts } from '@/services/core/workout-service';
 
 // Notification Types
 export interface SmartNotification {

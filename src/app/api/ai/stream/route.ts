@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { generateTokenStreamingResponseServer } from '@/services/groq-service';
+import { generateTokenStreamingResponseServer } from '@/services/ai/groq-service';
 
 export async function POST(request: NextRequest) {
   try {

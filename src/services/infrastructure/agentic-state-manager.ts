@@ -57,7 +57,7 @@ export interface TaskError {
 
 // Import unified profile types
 import { FitnessProfile, ProfileConverter } from '@/types/user-profile';
-import { UnifiedUserProfileService } from './unified-user-profile-service';
+import { UnifiedUserProfileService } from '@/services/core/unified-user-profile-service';
 
 // Use FitnessProfile for AI context (alias for backward compatibility)
 export type UserProfile = FitnessProfile;

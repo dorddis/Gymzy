@@ -8,7 +8,7 @@ import { communityPosts } from '@/data/community-posts';
 import { Dumbbell, Heart, MessageSquare, Share2, Clock, MapPin, Flame, Trophy } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { getWorkoutFeed } from '@/services/workout-sharing-service';
+import { getWorkoutFeed } from '@/services/social/workout-sharing-service';
 
 interface WorkoutPost {
   id: string;

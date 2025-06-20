@@ -3,9 +3,9 @@
  * Integrates with RobustToolExecutor and IntelligentExerciseMatcher
  */
 
-import { ToolDefinition, ToolExecutionContext, ToolResult } from './robust-tool-executor';
+import { ToolDefinition, ToolExecutionContext, ToolResult } from '../infrastructure/robust-tool-executor';
 import { IntelligentExerciseMatcher, ExerciseMatch } from './intelligent-exercise-matcher';
-import { createWorkout } from './workout-service';
+import { createWorkout } from '@/services/core/workout-service';
 import { Timestamp } from 'firebase/firestore';
 
 export class EnhancedWorkoutTools {

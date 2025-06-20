@@ -12,8 +12,8 @@ import {
   getDocs,
   Timestamp
 } from 'firebase/firestore';
-import { ContextualDataService, UserContext } from './contextual-data-service';
-import { getRecentWorkouts } from './workout-service';
+import { ContextualDataService, UserContext } from '@/services/data/contextual-data-service';
+import { getRecentWorkouts } from '@/services/core/workout-service';
 
 // AI Recommendation Interfaces
 export interface AIRecommendation {

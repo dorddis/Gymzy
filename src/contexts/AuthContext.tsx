@@ -20,7 +20,7 @@ import { doc, getDoc, setDoc, updateDoc, deleteDoc, Timestamp } from 'firebase/f
 
 // Import unified user profile types
 import { UserProfile, UserProfileUpdate } from '@/types/user-profile';
-import { UnifiedUserProfileService } from '@/services/unified-user-profile-service';
+import { UnifiedUserProfileService } from '@/services/core/unified-user-profile-service';
 
 interface CustomUser extends User {
   profile?: UserProfile;

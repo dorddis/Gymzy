@@ -128,7 +128,7 @@ async function callGroqAPI(prompt: string, maxTokens: number, temperature: numbe
 export async function POST(request: NextRequest) {
   try {
     // Get client IP for rate limiting
-    const clientIp = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
+    const clientIp = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
     
     // Check rate limit
     if (!checkRateLimit(clientIp)) {

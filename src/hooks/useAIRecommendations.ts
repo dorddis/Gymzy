@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { AIRecommendationsService, AIRecommendation } from '@/services/ai-recommendations-service';
+import { AIRecommendationsService, AIRecommendation } from '@/services/ai/ai-recommendations-service';
 
 export function useAIRecommendations() {
   const { user } = useAuth();

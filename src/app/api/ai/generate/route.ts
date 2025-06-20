@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateAIResponseServer } from '@/services/groq-service';
+import { generateAIResponseServer } from '@/services/ai/groq-service';
 
 export async function POST(request: NextRequest) {
   try {

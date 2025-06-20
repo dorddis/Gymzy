@@ -22,7 +22,7 @@ import { useRouter } from 'next/navigation';
 import { useWorkout } from '@/contexts/WorkoutContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { EXERCISES } from '@/lib/constants';
-import { getRecentWorkouts } from '@/services/workout-service';
+import { getRecentWorkouts } from '@/services/core/workout-service';
 
 interface WorkoutTemplate {
   id: string;

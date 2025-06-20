@@ -8,15 +8,15 @@ import { useOptimizedNavigation } from '@/hooks/useOptimizedNavigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { ChatBubble } from '@/components/chat/chat-bubble';
 import { Button } from '@/components/ui/button';
-import { 
-  createChatSession, 
-  getChatSessions, 
-  saveChatMessage, 
-  getChatMessages, 
+import {
+  createChatSession,
+  getChatSessions,
+  saveChatMessage,
+  getChatMessages,
   deleteChatSession,
   ChatSession
-} from '@/services/chat-history-service';
-import { sendStreamingChatMessage } from '@/services/ai-chat-service';
+} from '@/services/data/chat-history-service';
+import { sendStreamingChatMessage } from '@/services/core/ai-chat-service';
 import { useWorkout } from '@/contexts/WorkoutContext';
 
 interface ChatMessage {
@@ -288,7 +288,7 @@ function ChatContent() {
       // This is important because the chunk-by-chunk update might have slight variations
       // or if any chunk processing was missed.
       if (aiResponse.success) {
-        await saveChatMessage(targetSessionId, 'assistant', fullStreamedContent, aiResponse.workoutData);
+        await saveChatMessage(targetSessionId, 'assistant', fullStreamedContent);
         setMessages(prevMsgs => prevMsgs.map((msg, index) =>
           index === prevMsgs.length - 1 && msg.role === 'assistant'
             ? { ...msg, content: fullStreamedContent, workoutData: aiResponse.workoutData } // Ensure final content is fullStreamedContent

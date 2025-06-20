@@ -1,7 +1,7 @@
-import { getAIPersonalityProfile, generateAIContext } from './ai-personality-service';
-import { ContextualDataService } from './contextual-data-service';
-import { aiRouter, AIRequest } from './intelligent-ai-router';
-import { multiStepReasoning } from './multi-step-reasoning';
+import { getAIPersonalityProfile, generateAIContext } from '@/services/ai/ai-personality-service';
+import { ContextualDataService } from '@/services/data/contextual-data-service';
+import { aiRouter, AIRequest } from '@/services/ai/intelligent-ai-router';
+import { multiStepReasoning } from '@/services/ai/multi-step-reasoning';
 
 // Feature flag for intelligent multi-step reasoning
 const USE_INTELLIGENT_REASONING = true;

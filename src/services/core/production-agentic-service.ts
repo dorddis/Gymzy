@@ -3,11 +3,11 @@
  * Replaces the current agentic-ai-service.ts with production-grade capabilities
  */
 
-import { AgenticStateManager } from './agentic-state-manager';
-import { FirebaseStateAdapter, MemoryStateAdapter } from './firebase-state-adapter';
-import { RobustToolExecutor } from './robust-tool-executor';
-import { EnhancedWorkoutTools } from './enhanced-workout-tools';
-import { generateAIResponse, generateCharacterStreamingResponse } from './ai-service';
+import { AgenticStateManager } from '@/services/infrastructure/agentic-state-manager';
+import { FirebaseStateAdapter, MemoryStateAdapter } from '@/services/infrastructure/firebase-state-adapter';
+import { RobustToolExecutor } from '@/services/infrastructure/robust-tool-executor';
+import { EnhancedWorkoutTools } from '@/services/ai/enhanced-workout-tools';
+import { generateAIResponse, generateCharacterStreamingResponse } from '../ai-service';
 
 export interface ChatMessage {
   id: string;
