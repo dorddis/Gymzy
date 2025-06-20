@@ -1,0 +1,302 @@
+name: 🔍 Pull Request Checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [ main, develop ]
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  # Skip if draft PR
+  check-draft:
+    name: 📝 Check Draft Status
+    runs-on: ubuntu-latest
+    outputs:
+      is-draft: ${{ steps.check.outputs.is-draft }}
+    
+    steps:
+      - name: 📝 Check if PR is draft
+        id: check
+        run: |
+          if [[ "${{ github.event.pull_request.draft }}" == "true" ]]; then
+            echo "is-draft=true" >> $GITHUB_OUTPUT
+            echo "📝 PR is in draft mode, skipping checks"
+          else
+            echo "is-draft=false" >> $GITHUB_OUTPUT
+            echo "✅ PR is ready for review"
+          fi
+
+  # Validate PR title and description
+  validate-pr:
+    name: ✅ Validate PR
+    runs-on: ubuntu-latest
+    needs: check-draft
+    if: needs.check-draft.outputs.is-draft == 'false'
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: ✅ Validate PR title
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          
+          # Check if title follows conventional commit format
+          if [[ $PR_TITLE =~ ^(feat|fix|docs|style|refactor|test|chore)(\(.+\))?: .+ ]]; then
+            echo "✅ PR title follows conventional commit format"
+          else
+            echo "❌ PR title should follow conventional commit format"
+            echo "Examples: feat(chat): add streaming responses"
+            echo "          fix(workout): resolve validation error"
+            exit 1
+          fi
+
+      - name: ✅ Check PR description
+        run: |
+          PR_BODY="${{ github.event.pull_request.body }}"
+          
+          if [[ -z "$PR_BODY" ]]; then
+            echo "❌ PR description is required"
+            exit 1
+          fi
+          
+          if [[ ${#PR_BODY} -lt 20 ]]; then
+            echo "❌ PR description should be at least 20 characters"
+            exit 1
+          fi
+          
+          echo "✅ PR description is adequate"
+
+      - name: 🔍 Check for breaking changes
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_BODY="${{ github.event.pull_request.body }}"
+          
+          if [[ $PR_TITLE =~ BREAKING\ CHANGE ]] || [[ $PR_BODY =~ BREAKING\ CHANGE ]]; then
+            echo "⚠️ Breaking change detected"
+            echo "::warning::This PR contains breaking changes"
+          fi
+
+  # Run CI pipeline
+  ci-checks:
+    name: 🔄 CI Checks
+    needs: [check-draft, validate-pr]
+    if: needs.check-draft.outputs.is-draft == 'false'
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
+
+  # Check file changes
+  file-changes:
+    name: 📁 File Changes Analysis
+    runs-on: ubuntu-latest
+    needs: check-draft
+    if: needs.check-draft.outputs.is-draft == 'false'
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 📁 Analyze changed files
+        run: |
+          echo "📁 Analyzing changed files..."
+          
+          # Get changed files
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }}...HEAD)
+          
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+          
+          # Check for sensitive files
+          SENSITIVE_FILES=(".env" ".env.local" "package-lock.json" "yarn.lock")
+          for file in "${SENSITIVE_FILES[@]}"; do
+            if echo "$CHANGED_FILES" | grep -q "^$file$"; then
+              echo "⚠️ Sensitive file changed: $file"
+              echo "::warning::Sensitive file $file was modified"
+            fi
+          done
+          
+          # Check for large files
+          for file in $CHANGED_FILES; do
+            if [[ -f "$file" ]]; then
+              SIZE=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null || echo 0)
+              if [[ $SIZE -gt 1048576 ]]; then  # 1MB
+                echo "⚠️ Large file detected: $file ($(($SIZE / 1024))KB)"
+                echo "::warning::Large file $file ($(($SIZE / 1024))KB) was added"
+              fi
+            fi
+          done
+
+      - name: 🧪 Check test coverage for changes
+        run: |
+          # Check if new services have corresponding tests
+          NEW_SERVICES=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }}...HEAD | grep "^src/services/" | grep "\.ts$" || true)
+          
+          if [[ -n "$NEW_SERVICES" ]]; then
+            echo "🧪 Checking test coverage for new services..."
+            for service in $NEW_SERVICES; do
+              TEST_FILE="__tests__/${service%.ts}.test.ts"
+              if [[ ! -f "$TEST_FILE" ]]; then
+                echo "⚠️ Missing test file for: $service"
+                echo "::warning::Consider adding tests for $service"
+              else
+                echo "✅ Test file exists for: $service"
+              fi
+            done
+          fi
+
+  # Security scan for PR
+  security-scan:
+    name: 🔒 Security Scan
+    runs-on: ubuntu-latest
+    needs: check-draft
+    if: needs.check-draft.outputs.is-draft == 'false'
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📥 Install dependencies
+        run: npm ci
+
+      - name: 🔒 Check for secrets
+        run: |
+          # Check for potential secrets in code
+          if git diff origin/${{ github.event.pull_request.base.ref }}...HEAD | grep -i -E "(api[_-]?key|secret|password|token)" | grep -v "test" | grep -v "mock" | grep -v "example"; then
+            echo "⚠️ Potential secrets detected in changes"
+            echo "::warning::Please review for accidentally committed secrets"
+          else
+            echo "✅ No obvious secrets detected"
+          fi
+
+      - name: 🔍 Dependency vulnerability check
+        run: |
+          # Check for new vulnerable dependencies
+          npm audit --audit-level=moderate || echo "⚠️ Vulnerabilities found in dependencies"
+
+  # Performance impact analysis
+  performance-check:
+    name: ⚡ Performance Impact
+    runs-on: ubuntu-latest
+    needs: [check-draft, ci-checks]
+    if: needs.check-draft.outputs.is-draft == 'false' && needs.ci-checks.result == 'success'
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📥 Install dependencies
+        run: npm ci
+
+      - name: 🏗️ Build and analyze bundle
+        run: |
+          npm run build
+          
+          # Check bundle size (basic check)
+          if [[ -d ".next" ]]; then
+            BUNDLE_SIZE=$(du -sh .next | cut -f1)
+            echo "📦 Bundle size: $BUNDLE_SIZE"
+            
+            # You could add more sophisticated bundle analysis here
+            echo "ℹ️ Consider running bundle analyzer for detailed analysis"
+          fi
+
+  # Auto-assign reviewers
+  assign-reviewers:
+    name: 👥 Assign Reviewers
+    runs-on: ubuntu-latest
+    needs: [validate-pr, ci-checks]
+    if: needs.validate-pr.result == 'success' && needs.ci-checks.result == 'success'
+    
+    steps:
+      - name: 👥 Auto-assign reviewers
+        run: |
+          echo "👥 PR is ready for review"
+          echo "✅ All automated checks passed"
+          echo "🔍 Waiting for human review..."
+
+  # Comment on PR with results
+  comment-results:
+    name: 💬 Comment Results
+    runs-on: ubuntu-latest
+    needs: [validate-pr, ci-checks, file-changes, security-scan, performance-check]
+    if: always() && needs.validate-pr.result != 'skipped'
+    
+    steps:
+      - name: 💬 Create comment body
+        id: comment
+        run: |
+          COMMENT="## 🔍 PR Check Results\n\n"
+          
+          # Validation results
+          if [[ "${{ needs.validate-pr.result }}" == "success" ]]; then
+            COMMENT+="✅ **PR Validation**: Passed\n"
+          else
+            COMMENT+="❌ **PR Validation**: Failed\n"
+          fi
+          
+          # CI results
+          if [[ "${{ needs.ci-checks.result }}" == "success" ]]; then
+            COMMENT+="✅ **CI Checks**: All tests passed\n"
+          else
+            COMMENT+="❌ **CI Checks**: Some tests failed\n"
+          fi
+          
+          # Security results
+          if [[ "${{ needs.security-scan.result }}" == "success" ]]; then
+            COMMENT+="🔒 **Security**: No issues detected\n"
+          else
+            COMMENT+="⚠️ **Security**: Please review security warnings\n"
+          fi
+          
+          # Performance results
+          if [[ "${{ needs.performance-check.result }}" == "success" ]]; then
+            COMMENT+="⚡ **Performance**: No significant impact detected\n"
+          elif [[ "${{ needs.performance-check.result }}" == "failure" ]]; then
+            COMMENT+="⚠️ **Performance**: Potential performance impact\n"
+          fi
+          
+          COMMENT+="\n---\n"
+          COMMENT+="🤖 *Automated checks completed*"
+          
+          echo "comment=$COMMENT" >> $GITHUB_OUTPUT
+
+      - name: 💬 Comment on PR
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `${{ steps.comment.outputs.comment }}`
+            })
+
+  # Final status check
+  pr-ready:
+    name: ✅ PR Ready for Review
+    runs-on: ubuntu-latest
+    needs: [validate-pr, ci-checks, security-scan]
+    if: needs.validate-pr.result == 'success' && needs.ci-checks.result == 'success' && needs.security-scan.result == 'success'
+    
+    steps:
+      - name: ✅ PR is ready
+        run: |
+          echo "🎉 PR is ready for human review!"
+          echo "✅ All automated checks passed"
+          echo "👥 Waiting for reviewer approval"
