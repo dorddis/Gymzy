@@ -1102,6 +1102,8 @@ Context:
 - Has worked out today: ${context.hasWorkoutToday}
 - Days since last workout: ${daysSinceLastWorkout || 'unknown'}
 
+IMPORTANT: Return ONLY the welcome message text. Do not include any explanations, descriptions, or additional commentary. Just the message itself that will be displayed to the user.
+
 Keep the message to 1-2 sentences maximum. Make it personal and encouraging.`;
 
     // Use agentic service for intelligent, contextual responses

@@ -266,8 +266,11 @@ export class ContextualDataService {
         rpeValues.push(avgRpe);
       });
       
-      // Update RPE patterns
-      const updatedRpePatterns = [...context.performanceMetrics.rpePatterns, ...rpeValues].slice(-50);
+      // Update RPE patterns - ensure rpePatterns is always an array
+      const currentRpePatterns = Array.isArray(context.performanceMetrics.rpePatterns)
+        ? context.performanceMetrics.rpePatterns
+        : [];
+      const updatedRpePatterns = [...currentRpePatterns, ...rpeValues].slice(-50);
       
       await updateDoc(contextRef, {
         'performanceMetrics.strengthProgression': strengthProgression,

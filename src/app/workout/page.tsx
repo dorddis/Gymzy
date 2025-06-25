@@ -16,11 +16,14 @@ import { AnimatedTimer } from "@/components/ui/animated-timer";
 import { FinishWorkoutModal } from "@/components/workout/finish-workout-modal";
 import { SpecialSetsModal } from "@/components/workout/special-sets-modal";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
+import { Timestamp } from "firebase/firestore";
 
 export default function WorkoutPage() {
   const pathname = usePathname();
   const isWorkoutPage = pathname === "/workout";
   const router = useRouter();
+  const { user } = useAuth();
 
   const {
     muscleVolumes,
@@ -28,6 +31,7 @@ export default function WorkoutPage() {
     totalVolume,
     setCurrentWorkoutExercises,
     clearCurrentWorkout,
+    addWorkout,
   } = useWorkout();
 
   const { trackWorkoutCompletion, trackFeatureUsage } = useContextualTracking();
@@ -131,6 +135,34 @@ export default function WorkoutPage() {
 
   const handleSaveWorkout = async (data: { date: Date; notes: string; isPublic: boolean; mediaUrls: string[]; }) => {
     try {
+      if (!user?.uid) {
+        throw new Error('User not authenticated');
+      }
+
+      // Prepare workout data for saving to Firestore
+      const workoutDataForFirestore = {
+        userId: user.uid,
+        title: `Workout - ${data.date.toLocaleDateString()}`,
+        date: Timestamp.fromDate(data.date),
+        exercises: currentWorkoutExercises.map(exercise => ({
+          exerciseId: exercise.id,
+          name: exercise.name,
+          sets: exercise.sets,
+          targetedMuscles: exercise.targetedMuscles || [],
+          notes: exercise.notes || '',
+          order: exercise.order || 0
+        })),
+        notes: data.notes,
+        mediaUrls: data.mediaUrls,
+        isPublic: data.isPublic,
+        duration: Math.floor((Date.now() - workoutStartTime) / 1000 / 60), // duration in minutes
+      };
+
+      // Save workout to Firestore using context method
+      console.log('Saving workout to Firestore...', workoutDataForFirestore);
+      await addWorkout(workoutDataForFirestore);
+      console.log('Workout saved successfully');
+
       // Track workout completion with contextual data
       const workoutData = {
         exercises: currentWorkoutExercises,
@@ -148,12 +180,12 @@ export default function WorkoutPage() {
       // Track feature usage
       await trackFeatureUsage('workout_completion');
 
-      // The actual save logic is handled in the FinishWorkoutModal component
+      // Clear current workout and navigate back to home
       setCurrentWorkoutExercises([]);
       router.push('/'); // Navigate back to home after saving
     } catch (error) {
       console.error('Error saving workout:', error);
-      // Still proceed with navigation even if tracking fails
+      // Still proceed with navigation even if saving fails
       setCurrentWorkoutExercises([]);
       router.push('/');
     }

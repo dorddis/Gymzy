@@ -456,7 +456,26 @@ Examples:
   ): Promise<{ content: string; confidence: number }> {
     const context = this.stateManager.getContextForAI(state.sessionId);
     
-    let responsePrompt = `
+    // Check if this is a welcome message request (simple message generation without tools)
+    const isWelcomeMessage = userInput.includes('Generate a brief, personalized') &&
+                            userInput.includes('welcome message') &&
+                            toolResults.length === 0;
+
+    let responsePrompt = '';
+
+    if (isWelcomeMessage) {
+      // Simplified prompt for welcome messages - just return the message content
+      responsePrompt = `${userInput}
+
+CRITICAL: Return ONLY the welcome message text itself. Do not include any explanations, descriptions, commentary, or additional text. Just the exact message that should be displayed to the user.
+
+Example of what to return: "Good morning! Ready to crush your fitness goals today?"
+Example of what NOT to return: "Here's a personalized welcome message: 'Good morning! Ready to crush your fitness goals today?' This message is..."
+
+Return only the message content.`;
+    } else {
+      // Full conversational prompt for regular chat
+      responsePrompt = `
 Based on the user's request and any tool execution results, generate a helpful, conversational response.
 
 User Request: "${userInput}"
@@ -464,11 +483,11 @@ Intent: ${intentAnalysis.intent}
 Context: ${context}
 `;
 
-    if (toolResults.length > 0) {
-      responsePrompt += `\nTool Results:\n${JSON.stringify(toolResults, null, 2)}`;
-    }
+      if (toolResults.length > 0) {
+        responsePrompt += `\nTool Results:\n${JSON.stringify(toolResults, null, 2)}`;
+      }
 
-    responsePrompt += `
+      responsePrompt += `
 Requirements:
 - Be conversational and helpful
 - Use the user's name if available
@@ -490,6 +509,7 @@ Requirements:
 - Format workout details in a simple, easy-to-read list
 - Don't include technical metadata or confidence scores in the user response
 `;
+    }
 
     try {
       let content = '';
@@ -514,7 +534,7 @@ Requirements:
   }
 
   /**
-   * Clean up response content to remove duplicate UI elements
+   * Clean up response content to remove duplicate UI elements and explanatory text
    */
   private cleanupResponseContent(content: string): string {
     // Remove any "Start This Workout" text that might have been generated
@@ -523,6 +543,20 @@ Requirements:
 
     // Remove any duplicate button text patterns
     cleaned = cleaned.replace(/\[.*button.*\]/gi, '');
+
+    // For welcome messages, extract just the quoted message if it exists
+    const quotedMessageMatch = cleaned.match(/"([^"]+)"/);
+    if (quotedMessageMatch && cleaned.includes('welcome message') && cleaned.includes('personalized')) {
+      // If we find a quoted message in explanatory text, extract just the quote
+      cleaned = quotedMessageMatch[1];
+    }
+
+    // Remove common explanatory prefixes that might appear in welcome messages
+    cleaned = cleaned.replace(/^Here's a personalized welcome message[^:]*:\s*/i, '');
+    cleaned = cleaned.replace(/^Here's a[^:]*welcome message[^:]*:\s*/i, '');
+    cleaned = cleaned.replace(/^I've created a[^:]*message[^:]*:\s*/i, '');
+    cleaned = cleaned.replace(/^This message is[^.]*\.\s*/i, '');
+    cleaned = cleaned.replace(/\s*This message[^.]*\.$/i, '');
 
     // Clean up extra whitespace and newlines
     cleaned = cleaned.replace(/\n\s*\n\s*\n/g, '\n\n');
