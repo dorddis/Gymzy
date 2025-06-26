@@ -1,34 +1,111 @@
-import { AppHeader } from "@/components/layout/header";
-import { AnatomyVisualization } from "@/components/dashboard/anatomy-visualization";
-import { WorkoutLogger } from "@/components/dashboard/workout-logger";
-import { ProgressAnalytics } from "@/components/dashboard/progress-analytics";
+"use client";
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { StatusBar } from "@/components/layout/header";
+import { HeatmapCard } from "@/components/dashboard/heatmap-card";
+import { StatsCardsRow } from "@/components/dashboard/stats-cards-row";
+import { RecentWorkoutsCarousel } from "@/components/dashboard/recent-workouts-carousel";
+import { CommunityFeed } from "@/components/dashboard/community-feed";
+import { BottomNav } from "@/components/layout/bottom-nav";
+import { AIWelcomeMessage } from "@/components/dashboard/ai-welcome-message";
+import { QuickWorkoutTemplates } from "@/components/dashboard/quick-workout-templates";
+import { useWorkout } from "@/contexts/WorkoutContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { Loader2, Heart } from "lucide-react";
+import { LifestyleTracker } from "@/components/lifestyle/lifestyle-tracker";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+
 
 export default function HomePage() {
+  const { combinedMuscleVolumes } = useWorkout();
+  const { user, loading } = useAuth();
+  const router = useRouter();
+  const [isLifestyleDialogOpen, setIsLifestyleDialogOpen] = useState(false);
+
+  // Handle authentication and onboarding routing
+  useEffect(() => {
+    console.log('HomePage: Routing check', {
+      loading,
+      user: !!user,
+      hasProfile: !!user?.profile,
+      hasCompletedOnboarding: user?.profile?.hasCompletedOnboarding
+    });
+
+    if (!loading) {
+      if (!user) {
+        console.log('HomePage: No user, redirecting to auth');
+        router.replace('/auth');
+      } else if (user.profile === undefined) {
+        console.log('HomePage: Profile is undefined, waiting for profile to load');
+        // Don't redirect yet, wait for profile to load
+      } else if (user.profile && !user.profile.hasCompletedOnboarding) {
+        console.log('HomePage: User has not completed onboarding, redirecting');
+        router.replace('/onboarding');
+      } else {
+        console.log('HomePage: User is authenticated and onboarded, staying on home');
+      }
+    }
+  }, [user, loading, router]);
+
+  // Show loading while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  // Don't render if user is not authenticated or hasn't completed onboarding
+  if (!user || !user.profile?.hasCompletedOnboarding) {
+    return null;
+  }
+
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground">
-      <AppHeader />
-      <main className="flex-grow container mx-auto p-4 sm:p-6 lg:p-8">
-        <div className="grid grid-cols-1 xl:grid-cols-5 gap-6 items-stretch">
-          {/* Anatomy visualization takes 2/5ths width on extra large screens, full width on smaller */}
-          {/* Make it stretch to fill height if possible, or define a fixed aspect ratio */}
-          <div className="xl:col-span-2 flex">
-            <AnatomyVisualization />
-          </div>
-          
-          {/* Logger and Analytics take 3/5ths width, stacked, also stretching */}
-          <div className="xl:col-span-3 space-y-6 flex flex-col">
-            <div className="flex-1 flex">
-              <WorkoutLogger />
-            </div>
-            <div className="flex-1 flex">
-              <ProgressAnalytics />
+    <div className="min-h-screen bg-background flex flex-col">
+      <StatusBar />
+      <main className="flex-1 overflow-y-auto">
+        <div className="container mx-auto px-4 py-6 space-y-6 pb-24">
+          {/* AI Welcome Message */}
+          <AIWelcomeMessage />
+
+          <div className="space-y-4">
+            {/* <h2 className="text-2xl font-bold">Weekly Activation</h2> */}
+            <div className="grid gap-4">
+              <HeatmapCard
+                title="Weekly Muscle Activation"
+                muscleVolumes={combinedMuscleVolumes}
+                className="w-full"
+              />
             </div>
           </div>
+          <StatsCardsRow />
+
+          <QuickWorkoutTemplates />
+
+          {/* Daily Check-in */}
+          <div className="flex justify-center px-4">
+            <Dialog open={isLifestyleDialogOpen} onOpenChange={setIsLifestyleDialogOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="flex items-center gap-2 px-6 py-3 text-purple-600 border-purple-400 hover:border-purple-600 hover:bg-purple-50 font-medium rounded-lg"
+                >
+                  <Heart className="h-4 w-4" />
+                  Daily Check-in
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <LifestyleTracker onClose={() => setIsLifestyleDialogOpen(false)} />
+              </DialogContent>
+            </Dialog>
+          </div>
+          <RecentWorkoutsCarousel />
+          <CommunityFeed />
         </div>
       </main>
-      <footer className="py-6 text-center text-muted-foreground text-sm border-t border-border/40">
-        Gymzy &copy; {new Date().getFullYear()} - Train Smarter.
-      </footer>
+      <BottomNav />
     </div>
   );
 }

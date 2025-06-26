@@ -1,0 +1,1638 @@
+# Complete Gymzy App Features Implementation Guide
+
+This document outlines the comprehensive implementation plan for transforming Gymzy into a full-featured social fitness app with AI-powered personal coaching.
+
+## Current Status Summary
+Based on the existing UI redesign outline, the following core features are complete:
+- ✅ Basic UI components and design system
+- ✅ Workout logging system with media upload
+- ✅ Dashboard with muscle heatmap and stats
+- ✅ Basic community feed (dummy data)
+- ✅ AI chat interface (basic implementation)
+- ✅ Firebase authentication (anonymous)
+- ✅ Bottom navigation structure
+
+## Remaining UI Tasks from Original Outline
+
+### Step 15: Performance & Security Optimization
+- [ ] Implement lazy loading for media previews
+- [ ] Implement proper caching strategies
+- [ ] Implement proper access control for media
+- [ ] Add media deletion when workout is deleted
+- [ ] Implement proper cleanup of unused media
+- [ ] Add privacy controls for media visibility
+
+### Step 16: Testing & Documentation
+- [ ] Write unit tests for media upload functionality
+- [ ] Add integration tests for media workflow
+- [ ] Test on various devices and browsers
+- [ ] Document media upload process and limitations
+- [ ] Add error handling documentation
+
+### Step 17: Header/Footer Consistency
+- [ ] Define clear guidelines for header/footer across app
+- [ ] Implement back navigation on Stats page
+- [ ] Ensure consistent styling across all screens
+
+## Phase 1: User Authentication & Profile System
+
+### Step 18: Implement Proper User Authentication ✅ **COMPLETED**
+**Goal:** Replace anonymous auth with proper user registration/login system
+**Priority:** High
+**Estimated Time:** 3-4 days
+
+**✅ COMPLETED TASKS:**
+1. **Authentication Methods** ✅
+   - ✅ Email/password registration and login
+   - ✅ Google OAuth integration
+   - ✅ Comprehensive auth context with error handling
+   - ✅ Session management and state persistence
+
+2. **User Profile Creation** ✅
+   - ✅ Comprehensive profile setup (name, email, profile picture)
+   - ✅ Fitness goals and preferences integration
+   - ✅ Privacy settings and public/private profiles
+   - ✅ Account verification and onboarding tracking
+
+3. **Profile Management** ✅
+   - ✅ Edit profile information
+   - ✅ Update user profile with validation
+   - ✅ Account deletion functionality
+   - ✅ Privacy controls and profile visibility
+
+**Database Schema:**
+```typescript
+interface UserProfile {
+  uid: string;
+  email: string;
+  displayName: string;
+  profilePicture?: string;
+  bio?: string;
+  fitnessGoals: string[];
+  experienceLevel: 'beginner' | 'intermediate' | 'advanced';
+  preferredWorkoutTypes: string[];
+  isPublic: boolean;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+  // Social features
+  followersCount: number;
+  followingCount: number;
+  workoutsCount: number;
+  // AI context
+  aiPersonalityProfile?: AIPersonalityProfile;
+}
+```
+
+### Step 19: AI Onboarding & Personality Profiling
+**Goal:** Create comprehensive onboarding to build user's AI personality profile
+**Priority:** High
+**Estimated Time:** 5-6 days
+
+**Tasks:**
+1. **Onboarding Flow Design**
+   - Welcome screen with app overview
+   - Fitness assessment questionnaire
+   - Goal setting and motivation analysis
+   - Personality and preference mapping
+   - AI coach introduction
+
+2. **Questionnaire Categories**
+   - **Fitness Background:** Experience level, previous injuries, current activity
+   - **Goals & Motivation:** Primary goals, timeline, motivation factors
+   - **Preferences:** Workout types, time availability, equipment access
+   - **Personality:** Communication style, feedback preferences, challenge level
+   - **Lifestyle:** Schedule, stress levels, sleep patterns, nutrition habits
+
+3. **AI Personality Profile Creation**
+   - Process responses to create comprehensive user model
+   - Generate personalized coaching style
+   - Set initial workout recommendations
+   - Create motivation and communication preferences
+
+**Database Schema:**
+```typescript
+interface AIPersonalityProfile {
+  userId: string;
+  // Fitness Profile
+  experienceLevel: number; // 1-10 scale
+  fitnessGoals: {
+    primary: string;
+    secondary: string[];
+    timeline: string;
+  };
+  workoutPreferences: {
+    types: string[];
+    duration: number;
+    frequency: number;
+    intensity: number;
+  };
+  // Personality Traits
+  communicationStyle: 'motivational' | 'analytical' | 'supportive' | 'challenging';
+  feedbackPreference: 'detailed' | 'concise' | 'visual';
+  motivationFactors: string[];
+  // Lifestyle Context
+  schedule: {
+    availableDays: string[];
+    preferredTimes: string[];
+    timeConstraints: string[];
+  };
+  // Learning & Adaptation
+  learningStyle: 'visual' | 'auditory' | 'kinesthetic';
+  adaptationRate: number; // How quickly to adjust recommendations
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}
+```
+
+## Phase 2: Social Features Implementation
+
+### Step 20: User Discovery & Following System ✅ **COMPLETED**
+**Goal:** Enable users to find and follow each other
+**Priority:** High
+**Estimated Time:** 4-5 days
+
+**Tasks:**
+1. **User Discovery**
+   - Search users by name/username
+   - Suggested users based on similar goals/workouts
+   - Nearby users (optional location-based)
+   - Popular/trending users
+
+2. **Following System**
+   - Follow/unfollow functionality
+   - Followers/following lists
+   - Follow requests for private accounts
+   - Mutual followers display
+
+3. **User Profile Pages**
+   - Public profile view
+   - Workout history (public workouts only)
+   - Stats and achievements
+   - Follower/following counts
+
+**Database Schema:**
+```typescript
+interface UserFollowing {
+  followerId: string;
+  followingId: string;
+  status: 'pending' | 'accepted';
+  createdAt: Timestamp;
+}
+
+interface UserStats {
+  userId: string;
+  totalWorkouts: number;
+  totalVolume: number;
+  currentStreak: number;
+  longestStreak: number;
+  favoriteExercises: string[];
+  achievements: Achievement[];
+}
+```
+
+### Step 21: Enhanced Social Workout Features ✅ **COMPLETED**
+**Goal:** Transform workouts into social experiences
+**Priority:** High
+**Estimated Time:** 6-7 days
+
+**Tasks:**
+1. **Workout Sharing & Visibility**
+   - Public/private/friends-only visibility options
+   - Workout templates sharing
+   - Exercise recommendations from friends
+   - Workout challenges between users
+
+2. **Social Interactions**
+   - Like workouts and posts
+   - Comment on workouts
+   - Share workouts to feed
+   - Workout reactions (fire, strong, etc.)
+
+3. **Community Features**
+   - Workout leaderboards
+   - Group challenges
+   - Achievement celebrations
+   - Progress comparisons with friends
+
+**Database Schema:**
+```typescript
+interface WorkoutInteraction {
+  id: string;
+  workoutId: string;
+  userId: string;
+  type: 'like' | 'comment' | 'share' | 'reaction';
+  content?: string; // For comments
+  reactionType?: string; // For reactions
+  createdAt: Timestamp;
+}
+
+interface WorkoutPost {
+  id: string;
+  workoutId: string;
+  userId: string;
+  caption?: string;
+  hashtags: string[];
+  mentions: string[];
+  visibility: 'public' | 'private' | 'friends';
+  likesCount: number;
+  commentsCount: number;
+  sharesCount: number;
+  createdAt: Timestamp;
+}
+```
+
+### Step 22: Advanced Social Feed ✅ **COMPLETED**
+**Goal:** Create engaging, algorithm-driven social feed
+**Priority:** Medium
+**Estimated Time:** 5-6 days
+
+**Tasks:**
+1. **Feed Algorithm**
+   - Personalized feed based on following, interests, and engagement
+   - Trending workouts and challenges
+   - Recommended content from similar users
+   - Time-based feed optimization
+
+2. **Content Types**
+   - Workout posts with media
+   - Progress photos and videos
+   - Achievement announcements
+   - Motivational quotes and tips
+   - Exercise form videos
+
+3. **Feed Interactions**
+   - Infinite scroll with lazy loading
+   - Real-time like/comment updates
+   - Story-style temporary posts
+   - Save posts for later
+
+**Database Schema:**
+```typescript
+interface FeedPost {
+  id: string;
+  userId: string;
+  type: 'workout' | 'progress' | 'achievement' | 'tip' | 'story';
+  content: {
+    text?: string;
+    mediaUrls: string[];
+    workoutId?: string;
+    achievementId?: string;
+  };
+  engagement: {
+    likes: number;
+    comments: number;
+    shares: number;
+    saves: number;
+  };
+  visibility: 'public' | 'friends' | 'private';
+  isStory: boolean;
+  expiresAt?: Timestamp;
+  createdAt: Timestamp;
+}
+```
+
+## Phase 3: AI Personal Coach Integration
+
+### Step 23: Contextual AI Data Collection ✅ **COMPLETED**
+**Goal:** Continuously collect user context for personalized AI coaching
+**Priority:** High
+**Estimated Time:** 7-8 days
+
+**✅ COMPLETED TASKS:**
+1. **Workout Context Tracking** ✅
+   - ✅ Exercise performance trends tracking
+   - ✅ RPE patterns and fatigue indicators
+   - ✅ Volume progression tracking
+   - ✅ Recovery time analysis
+   - ✅ Workout duration and frequency tracking
+
+2. **Behavioral Pattern Analysis** ✅
+   - ✅ Workout frequency and consistency tracking
+   - ✅ Preferred workout times analysis
+   - ✅ Exercise selection patterns
+   - ✅ Social interaction preferences tracking
+   - ✅ Feature usage analytics
+
+3. **Lifestyle Integration** ✅
+   - ✅ Sleep quality tracking with daily check-in
+   - ✅ Stress level indicators
+   - ✅ Energy level patterns
+   - ✅ Motivation fluctuations tracking
+   - ✅ Comprehensive lifestyle tracker component
+
+**Database Schema:**
+```typescript
+interface UserContext {
+  userId: string;
+  workoutPatterns: {
+    frequency: number;
+    preferredTimes: string[];
+    averageVolume: number;
+    progressionRate: number;
+    consistencyScore: number;
+  };
+  performanceMetrics: {
+    strengthProgression: Record<string, number[]>;
+    enduranceProgression: Record<string, number[]>;
+    recoveryPatterns: number[];
+    injuryHistory: string[];
+  };
+  behavioralInsights: {
+    motivationTriggers: string[];
+    demotivationFactors: string[];
+    socialEngagement: number;
+    goalAdherence: number;
+  };
+  lastUpdated: Timestamp;
+}
+```
+
+### Step 24: AI-Powered Personalized Recommendations ✅ **COMPLETED**
+**Goal:** Provide intelligent, context-aware fitness guidance
+**Priority:** High
+**Estimated Time:** 8-10 days
+
+**✅ COMPLETED TASKS:**
+1. **Workout Recommendations** ✅
+   - ✅ Personalized workout plans based on goals and progress
+   - ✅ Exercise suggestions based on muscle recovery
+   - ✅ Volume and intensity recommendations
+   - ✅ Workout frequency analysis and recommendations
+   - ✅ Muscle group balance analysis
+
+2. **Real-time Coaching** ✅
+   - ✅ RPE-based intensity adjustments and overtraining detection
+   - ✅ Rest time optimization based on energy patterns
+   - ✅ Weight progression recommendations for plateau breaking
+   - ✅ Optimal workout timing suggestions
+
+3. **Motivation & Accountability** ✅
+   - ✅ Personalized motivational messages based on context
+   - ✅ Goal progress celebrations and streak tracking
+   - ✅ Motivation level analysis and boost recommendations
+   - ✅ Community engagement suggestions
+
+4. **Health & Recovery Insights** ✅
+   - ✅ Recovery recommendations based on RPE patterns
+   - ✅ Sleep quality impact analysis and suggestions
+   - ✅ Stress level monitoring and recovery guidance
+   - ✅ Energy level optimization tips
+
+**✅ IMPLEMENTATION FEATURES:**
+- ✅ Comprehensive AI Recommendations Service with contextual analysis
+- ✅ Smart recommendation generation based on user behavior patterns
+- ✅ Priority-based recommendation system (urgent, high, medium, low)
+- ✅ Multiple recommendation types (workout, recovery, motivation, progression)
+- ✅ AI Recommendations Panel component with expandable cards
+- ✅ Dedicated recommendations page with filtering and categorization
+- ✅ Real-time recommendation tracking and status management
+- ✅ Integration with contextual data collection for personalized insights
+- ✅ Recommendation expiration and refresh system
+- ✅ User interaction tracking (viewed, completed, dismissed)
+- ✅ Home page integration with quick access to recommendations
+- ✅ Navigation integration through AI welcome message
+
+**AI Integration Points:**
+```typescript
+interface AIRecommendation {
+  id: string;
+  userId: string;
+  type: 'workout' | 'exercise' | 'recovery' | 'motivation' | 'nutrition';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  content: {
+    title: string;
+    description: string;
+    actionItems: string[];
+    reasoning: string;
+  };
+  context: {
+    basedOn: string[];
+    confidence: number;
+    personalizedFactors: string[];
+  };
+  status: 'pending' | 'viewed' | 'acted_upon' | 'dismissed';
+  createdAt: Timestamp;
+  expiresAt?: Timestamp;
+}
+```
+
+### Step 25: Enhanced AI Chat & Coaching Interface ✅ **COMPLETED**
+**Goal:** Transform basic chat into comprehensive AI coaching experience
+**Priority:** High
+**Estimated Time:** 6-7 days
+
+**✅ COMPLETED FEATURES:**
+- Chat history system with persistent storage
+- ChatGPT-style interface with sidebar
+- Session management (create, load, delete)
+- Right-side chat history panel with proper icon
+- Elegant back button design across all pages
+- Fixed button visibility and text contrast issues
+- AI welcome message with "Reply in chat..." button
+- Profile dropdown with logout functionality
+- User settings outline with comprehensive features
+- **AI Workout Tools System (MCP-like Architecture)**
+- **Natural Language Workout Creation**
+- **Exercise Search and Discovery**
+- **Workout Plan Suggestions**
+- **Chat-to-Workout Navigation**
+- **Intelligent Parameter Extraction**
+- **Contextual AI Responses**
+- **Workout Start Buttons in Chat**
+- **Tool Execution Framework**
+- **Previous Workout Data Integration**
+
+**✅ COMPLETED TASKS:**
+1. **Advanced Chat Features** ✅
+   - ✅ AI Workout Tools System with MCP-like architecture
+   - ✅ Natural language workout creation ("Create a push day workout")
+   - ✅ Exercise search and discovery ("Find chest exercises")
+   - ✅ Workout plan suggestions based on goals and experience
+   - ✅ Chat-to-workout navigation with start buttons
+
+2. **Proactive AI Coaching** ✅
+   - ✅ Contextual AI responses based on user input
+   - ✅ Intelligent parameter extraction from natural language
+   - ✅ Previous workout data integration for smart defaults
+   - ✅ Goal-based workout recommendations
+   - ✅ Experience-level appropriate suggestions
+
+3. **Contextual Conversations** ✅
+   - ✅ Reference exercise database in conversations
+   - ✅ Remember user workout history for recommendations
+   - ✅ Provide exercise alternatives based on available equipment
+   - ✅ Adapt workout suggestions to user experience level
+
+4. **AI Coach Personality** ✅
+   - ✅ Consistent coaching persona with helpful responses
+   - ✅ Motivational messaging for workout creation
+   - ✅ Celebration of workout completion
+   - ✅ Supportive guidance for fitness goals
+
+**🚧 REMAINING FEATURES:**
+- Voice message support
+- Image analysis for form checking
+- Workout photo analysis
+- Progress photo comparisons
+- Exercise demonstration videos
+
+### Step 25.5: AI Welcome & Daily Motivation System ✅ **COMPLETED**
+**Goal:** Provide personalized AI-generated welcome messages and daily motivation on the home page
+**Priority:** High
+**Estimated Time:** 3-4 days
+
+**Tasks:**
+1. **Dynamic Welcome Messages** ✅
+   - AI-generated personalized greetings based on time of day
+   - Context-aware messages based on user's recent activity
+   - Motivational content aligned with user's goals and personality
+   - Adaptive messaging based on workout streaks and progress
+
+2. **Daily Guidance System** ✅
+   - Morning motivation and workout planning suggestions
+   - Pre-workout pump-up messages and preparation tips
+   - Post-workout celebration and recovery guidance
+   - Rest day motivation and alternative activity suggestions
+
+3. **Contextual AI Responses** ✅
+   - **No Recent Workouts:** Gentle encouragement to get back on track
+   - **Consistent Streak:** Celebration and momentum building
+   - **Goal Progress:** Updates on goal achievement and next steps
+   - **Plateau Detection:** Motivation and strategy suggestions
+   - **Personal Milestones:** Recognition and celebration
+
+4. **Smart Message Generation** ✅
+   - Integration with user's AI personality profile
+   - Reference to personal goals, values, and motivation factors
+   - Consideration of current challenges and support system
+   - Seasonal and contextual relevance (weather, holidays, etc.)
+
+5. **Message Delivery System** ✅
+   - Prominent placement below the muscle heatmap SVG
+   - Smooth animations and engaging visual presentation
+   - Message refresh on app open and periodic updates
+   - Fallback messages for API failures
+
+**Database Schema:**
+```typescript
+interface DailyMotivation {
+  id: string;
+  userId: string;
+  message: string;
+  messageType: 'welcome' | 'motivation' | 'celebration' | 'guidance' | 'tip';
+  context: {
+    timeOfDay: 'morning' | 'afternoon' | 'evening';
+    lastWorkout?: Timestamp;
+    currentStreak: number;
+    goalProgress: number;
+    recentAchievements: string[];
+  };
+  personalizedFactors: string[];
+  createdAt: Timestamp;
+  expiresAt: Timestamp;
+}
+```
+
+**AI Prompt Engineering:**
+- **User Context Integration:** Include personality profile, goals, and recent activity
+- **Tone Adaptation:** Match user's preferred communication style
+- **Actionable Content:** Provide specific, achievable next steps
+- **Emotional Intelligence:** Recognize and respond to user's likely emotional state
+- **Variety and Freshness:** Ensure messages don't become repetitive
+
+### Step 25.6: Advanced AI Assistant with App Control (MCP-Style Integration)
+**Goal:** Create a comprehensive AI assistant that can control all app functions through natural language
+**Priority:** High
+**Estimated Time:** 5-7 days
+
+**Tasks:**
+1. **AI Function Registry System**
+   - Create a registry of all available app functions
+   - Define function schemas with parameters and descriptions
+   - Implement function calling interface for AI
+   - Add permission and validation layers
+
+2. **Workout Management Functions**
+   - **Add Workout:** "Add a push workout with bench press and push-ups"
+   - **Modify Workout:** "Change my last set to 15 reps"
+   - **Delete Workout:** "Remove yesterday's workout"
+   - **Schedule Workout:** "Schedule a leg workout for tomorrow"
+   - **Copy Workout:** "Repeat my Monday workout"
+
+3. **Social & Discovery Functions**
+   - **Search Users:** "Find users who do powerlifting"
+   - **Follow/Unfollow:** "Follow John Smith"
+   - **Share Workout:** "Share my today's workout with caption 'Great session!'"
+   - **Like/Comment:** "Like Sarah's latest workout post"
+   - **View Profile:** "Show me Alex's profile"
+
+4. **Settings & Preferences Functions**
+   - **Update Goals:** "Change my goal to muscle building"
+   - **Modify Preferences:** "Update my workout types to include yoga"
+   - **Change Communication Style:** "Make responses more motivational"
+   - **Update Equipment:** "Add resistance bands to my equipment"
+   - **Adjust Schedule:** "I can only workout in evenings now"
+
+5. **Analytics & Insights Functions**
+   - **View Stats:** "Show my progress this month"
+   - **Compare Performance:** "How does this week compare to last week?"
+   - **Generate Reports:** "Create a summary of my chest workouts"
+   - **Set Reminders:** "Remind me to workout at 6 PM"
+   - **Track Goals:** "How close am I to my strength goal?"
+
+6. **Navigation & UI Functions**
+   - **Navigate:** "Go to my workout history"
+   - **Search:** "Find my deadlift workouts"
+   - **Filter:** "Show only cardio workouts"
+   - **Sort:** "Sort workouts by date"
+   - **Export:** "Export my data as PDF"
+
+**Technical Implementation:**
+```typescript
+interface AIFunction {
+  name: string;
+  description: string;
+  parameters: {
+    type: 'object';
+    properties: Record<string, any>;
+    required: string[];
+  };
+  handler: (params: any, userId: string) => Promise<any>;
+  permissions: string[];
+}
+
+interface AIFunctionCall {
+  function: string;
+  parameters: Record<string, any>;
+  reasoning: string;
+}
+
+interface AIResponse {
+  message: string;
+  functionCalls?: AIFunctionCall[];
+  success: boolean;
+  data?: any;
+}
+```
+
+**Function Categories:**
+1. **Workout Functions** (15+ functions)
+2. **Social Functions** (10+ functions)
+3. **Settings Functions** (12+ functions)
+4. **Analytics Functions** (8+ functions)
+5. **Navigation Functions** (6+ functions)
+6. **Data Functions** (5+ functions)
+
+**AI Prompt Engineering:**
+- **Function Detection:** Identify when user wants to perform actions vs. get information
+- **Parameter Extraction:** Extract relevant parameters from natural language
+- **Confirmation Flow:** Ask for confirmation on destructive actions
+- **Error Handling:** Gracefully handle invalid requests or missing permissions
+- **Multi-step Actions:** Handle complex requests requiring multiple function calls
+
+**User Experience:**
+- **Natural Language:** "Add 3 sets of bench press with 135 lbs"
+- **Contextual Understanding:** "Add another set" (understands current context)
+- **Confirmation Dialogs:** "Are you sure you want to delete this workout?"
+- **Progress Feedback:** "Adding workout... Done! Your workout has been saved."
+- **Error Messages:** "I couldn't find a user named 'John'. Did you mean 'John Smith'?"
+
+### Step 25.7: Loading Skeletons & Enhanced UX ✅ **COMPLETED**
+**Goal:** Add skeleton loading states throughout the app for better perceived performance
+**Priority:** Medium
+**Estimated Time:** 2-3 days
+
+**✅ COMPLETED TASKS:**
+1. **Page Loading Skeletons** ✅
+   - ✅ Home page skeleton with heatmap placeholder
+   - ✅ Stats page skeleton with chart placeholders
+   - ✅ Feed page skeleton with post placeholders
+   - ✅ Profile page skeleton with user info placeholders
+   - ✅ Chat page skeleton with message placeholders
+
+2. **Component Loading States** ✅
+   - ✅ Workout cards skeleton
+   - ✅ User profile cards skeleton
+   - ✅ Exercise list skeleton
+   - ✅ Chart loading animations
+   - ✅ Button loading states
+
+3. **Data Loading Indicators** ✅
+   - ✅ Shimmer animations for content loading
+   - ✅ Progressive loading for images
+   - ✅ Smooth transitions between loading and loaded states
+   - ✅ Error state designs
+
+4. **Performance Optimizations** 🚧
+   - 🚧 Lazy loading for images
+   - 🚧 Virtual scrolling for long lists
+   - 🚧 Debounced search inputs
+   - 🚧 Optimistic UI updates
+
+**✅ IMPLEMENTATION FEATURES:**
+- ✅ Comprehensive skeleton component library with specialized skeletons
+- ✅ WorkoutCardSkeleton, UserProfileSkeleton, ExerciseListSkeleton
+- ✅ ChatMessageSkeleton, FeedPostSkeleton, StatCardSkeleton
+- ✅ MuscleMapSkeleton, ChartSkeleton for complex visualizations
+- ✅ Dashboard loading states with proper skeleton integration
+- ✅ HeatmapCard, StatsCardsRow, RecentWorkoutsCarousel loading states
+- ✅ CommunityFeed with FeedPostSkeleton implementation
+- ✅ Consistent skeleton animations and styling
+- ✅ Proper aspect ratios and realistic loading placeholders
+- ✅ Smooth transitions and reduced layout shift
+- ✅ Modular and reusable skeleton architecture
+
+### Step 25.8: Enhanced Onboarding with Physical Stats
+**Goal:** Collect comprehensive user physical data for better AI coaching and calorie calculations
+**Priority:** High
+**Estimated Time:** 3-4 days
+
+**Tasks:**
+1. **Physical Stats Collection**
+   - Age input with validation (13-100 years)
+   - Height input with metric/imperial units
+   - Weight input with metric/imperial units
+   - Gender selection (Male, Female, Other, Prefer not to say)
+   - Activity level assessment
+
+2. **Calorie Calculation Integration**
+   - BMR (Basal Metabolic Rate) calculation using Mifflin-St Jeor equation
+   - TDEE (Total Daily Energy Expenditure) calculation
+   - Exercise-specific calorie burn estimation
+   - Integration with workout tracking
+
+3. **AI Context Enhancement**
+   - Physical stats integration in AI personality profiles
+   - Gender-specific fitness recommendations
+   - Age-appropriate exercise modifications
+   - Weight-based progression suggestions
+
+4. **Health & Safety Features**
+   - Age-appropriate workout recommendations
+   - Weight progression safety checks
+   - Recovery time suggestions based on age
+   - Injury prevention based on physical profile
+
+**Database Schema Updates:**
+```typescript
+interface UserPhysicalStats {
+  age: number;
+  height: {
+    value: number;
+    unit: 'cm' | 'ft_in';
+    feet?: number; // for imperial
+    inches?: number; // for imperial
+  };
+  weight: {
+    value: number;
+    unit: 'kg' | 'lbs';
+  };
+  gender: 'male' | 'female' | 'other' | 'prefer_not_to_say';
+  activityLevel: 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active' | 'extremely_active';
+  bmr: number; // calculated
+  tdee: number; // calculated
+}
+
+interface CalorieBurn {
+  workoutId: string;
+  userId: string;
+  estimatedCalories: number;
+  duration: number;
+  intensity: 'low' | 'moderate' | 'high';
+  calculationMethod: 'met_based' | 'heart_rate' | 'estimated';
+  createdAt: Timestamp;
+}
+```
+
+**Calorie Calculation Formulas:**
+- **BMR (Men):** 10 × weight(kg) + 6.25 × height(cm) - 5 × age + 5
+- **BMR (Women):** 10 × weight(kg) + 6.25 × height(cm) - 5 × age - 161
+- **Exercise Calories:** METs × weight(kg) × duration(hours)
+- **Strength Training:** ~6-8 METs depending on intensity
+- **Cardio:** Variable METs based on activity type and intensity
+
+### Step 25.9: User Settings & Profile Management ✅ PARTIALLY COMPLETED
+**Goal:** Comprehensive user settings, profile management, and logout functionality
+**Priority:** High
+**Estimated Time:** 4-5 days
+
+**✅ COMPLETED FEATURES:**
+- Profile dropdown menu with user info and logout
+- Basic logout functionality with secure session cleanup
+- User settings outline with comprehensive specifications
+- Profile picture upload and editing system with Cloudinary integration
+- Profile picture cropping, rotation, and progress tracking
+- Onboarding context service with complete CRUD operations
+- Settings page with tabbed interface and navigation
+- Firebase security rules for new collections
+- Build optimization with Suspense boundary for useSearchParams
+- Fitness Goals Editor with interactive goal selection and targets
+- Equipment Manager with location, space, budget, and equipment tracking
+- Cloudinary integration for profile pictures with upload presets
+- Schedule Builder with workout days, times, duration, and flexibility
+- Health Information Manager with medical conditions, medications, allergies
+- Physical Stats Manager with BMR/TDEE calculations and unit conversion
+- Sleep pattern, stress level, and energy tracking
+- Activity level assessment with metabolic calculations
+- Privacy notices and comprehensive health data management
+- AI Coach Settings with communication styles and personality testing
+- Privacy & Security Dashboard with session management and security scoring
+- Data export functionality and account deletion options
+- Active session monitoring with device tracking and remote logout
+- Comprehensive privacy controls for profile visibility and data sharing
+- Security recommendations and privacy score calculation
+
+**🚧 REMAINING FEATURES:**
+- Notification settings management
+- Profile picture history management interface
+- Two-factor authentication setup
+- Advanced data backup and restore functionality
+- Workout sharing permissions granular controls
+- Social media integration settings
+
+**Tasks:**
+1. **Profile Icon Menu**
+   - Dropdown menu from profile icon in header
+   - User avatar display with fallback initials
+   - Quick access to key settings
+   - Visual hierarchy for menu items
+
+2. **User Settings Page**
+   - **Personal Information**
+     - Edit display name and bio
+     - Update profile picture with advanced features
+     - Change email (with verification)
+     - Phone number (optional)
+     - Location and timezone settings
+     - Social media links (optional)
+
+   - **Profile Picture Management**
+     - Upload from device gallery
+     - Take photo with camera
+     - Crop and resize with preview
+     - Apply filters and adjustments
+     - Remove/reset to default avatar
+     - Profile picture history (last 5 uploads)
+     - Privacy settings for profile visibility
+
+   - **Onboarding Context Editing**
+     - **Fitness Goals Modification**
+       - Primary goals (weight loss, muscle gain, endurance, etc.)
+       - Target timeline adjustments
+       - Priority level changes
+       - Add/remove secondary goals
+
+     - **Experience Level Updates**
+       - Beginner/Intermediate/Advanced status
+       - Years of training experience
+       - Specific exercise experience levels
+       - Previous injuries or limitations
+
+     - **Equipment & Environment**
+       - Available equipment list editing
+       - Gym vs. home workout preferences
+       - Equipment acquisition plans
+       - Space constraints updates
+
+     - **Schedule & Availability**
+       - Workout days and times
+       - Session duration preferences
+       - Flexibility in scheduling
+       - Busy periods and availability changes
+
+     - **Personal Preferences**
+       - Workout intensity preferences
+       - Music and motivation preferences
+       - Social vs. solo workout preferences
+       - Coaching style preferences
+
+     - **Health & Medical Information**
+       - Medical conditions updates
+       - Medication changes
+       - Dietary restrictions modifications
+       - Sleep pattern changes
+       - Stress level assessments
+
+   - **Physical Stats Management**
+     - Update age, height, weight, gender
+     - Activity level adjustment
+     - Unit preferences (metric/imperial)
+     - BMR/TDEE recalculation on changes
+     - Body composition tracking
+     - Measurement history and trends
+
+   - **Fitness Preferences**
+     - Modify fitness goals
+     - Update preferred workout types
+     - Equipment availability changes
+     - Workout schedule preferences
+     - Training split preferences
+     - Recovery preferences
+
+   - **AI Coach Settings**
+     - Communication style preferences
+     - Feedback type (detailed/concise/visual)
+     - Learning style adjustment
+     - Motivation level settings
+     - Personal challenges and support system updates
+     - AI personality customization
+     - Context retention preferences
+
+3. **Privacy & Security**
+   - **Account Security**
+     - Change password
+     - Two-factor authentication setup
+     - Active sessions management
+     - Account deletion option
+
+   - **Privacy Controls**
+     - Profile visibility settings
+     - Workout sharing preferences
+     - Data export options
+     - Analytics opt-out
+
+4. **Notification Settings**
+   - **Workout Reminders**
+     - Daily workout notifications
+     - Rest day reminders
+     - Streak maintenance alerts
+     - Goal progress updates
+
+   - **Social Notifications**
+     - New followers
+     - Workout likes and comments
+     - Friend achievements
+     - Community updates
+
+   - **AI Coach Notifications**
+     - Daily motivation messages
+     - Personalized tips
+     - Progress insights
+     - Challenge suggestions
+
+5. **App Preferences**
+   - **Display Settings**
+     - Theme selection (light/dark/auto)
+     - Font size preferences
+     - Color scheme options
+     - Animation preferences
+
+   - **Data & Storage**
+     - Offline data sync
+     - Cache management
+     - Backup preferences
+     - Data usage settings
+
+6. **Logout & Session Management**
+   - **Secure Logout**
+     - Clear local data
+     - Revoke authentication tokens
+     - Redirect to login screen
+     - Session timeout settings
+
+   - **Multi-device Management**
+     - View active sessions
+     - Remote logout capability
+     - Device trust settings
+     - Sync preferences across devices
+
+**Database Schema Updates:**
+```typescript
+interface UserSettings {
+  userId: string;
+
+  // Display preferences
+  theme: 'light' | 'dark' | 'auto';
+  fontSize: 'small' | 'medium' | 'large';
+  animations: boolean;
+
+  // Privacy settings
+  profileVisibility: 'public' | 'friends' | 'private';
+  workoutSharing: 'public' | 'friends' | 'private';
+  showInSearch: boolean;
+
+  // Notification preferences
+  workoutReminders: boolean;
+  socialNotifications: boolean;
+  aiCoachNotifications: boolean;
+  emailNotifications: boolean;
+
+  // Units and preferences
+  unitSystem: 'metric' | 'imperial';
+  timeFormat: '12h' | '24h';
+  firstDayOfWeek: 'sunday' | 'monday';
+
+  // Security settings
+  twoFactorEnabled: boolean;
+  sessionTimeout: number; // minutes
+
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}
+
+interface ProfilePicture {
+  id: string;
+  userId: string;
+  url: string;
+  thumbnailUrl: string;
+  originalFilename: string;
+  fileSize: number;
+  dimensions: {
+    width: number;
+    height: number;
+  };
+  isActive: boolean;
+  uploadedAt: Timestamp;
+  metadata?: {
+    camera?: string;
+    location?: string;
+    filters?: string[];
+  };
+}
+
+interface OnboardingContext {
+  userId: string;
+
+  // Fitness Goals
+  fitnessGoals: {
+    primary: 'weight_loss' | 'muscle_gain' | 'endurance' | 'strength' | 'general_fitness' | 'sport_specific';
+    secondary: string[];
+    targetTimeline: '1_month' | '3_months' | '6_months' | '1_year' | 'ongoing';
+    priorityLevel: 'low' | 'medium' | 'high';
+    specificTargets?: {
+      weightTarget?: number;
+      bodyFatTarget?: number;
+      strengthTargets?: Record<string, number>;
+    };
+  };
+
+  // Experience Level
+  experienceLevel: {
+    overall: 'beginner' | 'intermediate' | 'advanced';
+    yearsTraining: number;
+    specificExperience: {
+      weightlifting: 'none' | 'beginner' | 'intermediate' | 'advanced';
+      cardio: 'none' | 'beginner' | 'intermediate' | 'advanced';
+      flexibility: 'none' | 'beginner' | 'intermediate' | 'advanced';
+      sports: 'none' | 'beginner' | 'intermediate' | 'advanced';
+    };
+    previousInjuries: string[];
+    limitations: string[];
+  };
+
+  // Equipment & Environment
+  equipment: {
+    available: string[];
+    location: 'home' | 'gym' | 'both' | 'outdoor';
+    spaceConstraints: 'minimal' | 'moderate' | 'spacious';
+    acquisitionPlans: string[];
+    budget: 'low' | 'medium' | 'high' | 'unlimited';
+  };
+
+  // Schedule & Availability
+  schedule: {
+    workoutDays: string[]; // ['monday', 'wednesday', 'friday']
+    preferredTimes: string[]; // ['morning', 'afternoon', 'evening']
+    sessionDuration: '15_30' | '30_45' | '45_60' | '60_90' | '90_plus';
+    flexibility: 'rigid' | 'somewhat_flexible' | 'very_flexible';
+    busyPeriods: string[];
+    restDayPreferences: string[];
+  };
+
+  // Personal Preferences
+  preferences: {
+    workoutIntensity: 'low' | 'moderate' | 'high' | 'variable';
+    musicPreferences: string[];
+    motivationStyle: 'encouraging' | 'challenging' | 'analytical' | 'casual';
+    socialPreference: 'solo' | 'partner' | 'group' | 'mixed';
+    coachingStyle: 'detailed' | 'concise' | 'visual' | 'conversational';
+    feedbackFrequency: 'minimal' | 'moderate' | 'frequent';
+  };
+
+  // Health & Medical
+  healthInfo: {
+    medicalConditions: string[];
+    medications: string[];
+    dietaryRestrictions: string[];
+    allergies: string[];
+    sleepPattern: {
+      averageHours: number;
+      quality: 'poor' | 'fair' | 'good' | 'excellent';
+      schedule: 'regular' | 'irregular';
+    };
+    stressLevel: 'low' | 'moderate' | 'high';
+    energyLevels: 'low' | 'moderate' | 'high' | 'variable';
+  };
+
+  // Tracking Preferences
+  tracking: {
+    progressPhotos: boolean;
+    bodyMeasurements: boolean;
+    performanceMetrics: boolean;
+    moodTracking: boolean;
+    nutritionTracking: boolean;
+    sleepTracking: boolean;
+  };
+
+  lastUpdated: Timestamp;
+  version: number; // for tracking context evolution
+}
+
+interface UserSession {
+  id: string;
+  userId: string;
+  deviceInfo: {
+    type: 'mobile' | 'desktop' | 'tablet';
+    browser: string;
+    os: string;
+    location?: string;
+  };
+  lastActive: Timestamp;
+  createdAt: Timestamp;
+  isActive: boolean;
+}
+```
+
+**UI Components:**
+1. **Settings Navigation**
+   - Categorized settings sections with icons
+   - Search functionality within settings
+   - Quick access toggles for common settings
+   - Save/cancel confirmation with change detection
+   - Progress indicators for multi-step processes
+   - Breadcrumb navigation for deep settings
+
+2. **Profile Picture Management**
+   - **Upload Interface**
+     - Drag-and-drop upload area
+     - Gallery selection with preview
+     - Camera capture with real-time preview
+     - Multiple file format support (JPEG, PNG, WebP)
+
+   - **Editing Tools**
+     - Crop tool with aspect ratio options
+     - Zoom and pan controls
+     - Rotation and flip options
+     - Basic filters (brightness, contrast, saturation)
+     - Preview before/after comparison
+
+   - **Management Features**
+     - Profile picture history carousel
+     - Delete/restore previous pictures
+     - Set privacy levels for profile visibility
+     - Automatic thumbnail generation
+     - File size optimization
+
+3. **Onboarding Context Editor**
+   - **Fitness Goals Section**
+     - Interactive goal selection with icons
+     - Timeline slider with visual milestones
+     - Priority ranking with drag-and-drop
+     - Target setting with unit conversion
+     - Progress tracking integration
+
+   - **Experience Level Assessment**
+     - Skill level sliders for different areas
+     - Experience timeline with milestones
+     - Injury/limitation input with suggestions
+     - Previous workout history import
+
+   - **Equipment & Environment Setup**
+     - Equipment checklist with images
+     - Location preference toggle
+     - Space assessment with visual guides
+     - Budget range selector
+     - Equipment recommendation engine
+
+   - **Schedule Builder**
+     - Weekly calendar interface
+     - Time slot selection with conflicts detection
+     - Duration preference sliders
+     - Flexibility assessment questionnaire
+     - Busy period calendar integration
+
+   - **Preference Customization**
+     - Intensity preference scale
+     - Music genre selection with samples
+     - Motivation style quiz with examples
+     - Social preference assessment
+     - Coaching style preview with examples
+
+   - **Health Information Form**
+     - Medical condition autocomplete
+     - Medication interaction warnings
+     - Dietary restriction tags
+     - Sleep pattern tracking integration
+     - Stress level assessment tools
+
+4. **Profile Management Dashboard**
+   - Real-time preview of profile changes
+   - Validation and error handling with helpful messages
+   - Progress indicators for updates
+   - Change history with rollback options
+   - Data export functionality
+   - Privacy impact assessment
+
+5. **Security Dashboard**
+   - Active sessions list with device details
+   - Security score indicator with recommendations
+   - Recent activity log with location data
+   - Security recommendations with one-click fixes
+   - Two-factor authentication setup wizard
+   - Password strength meter and suggestions
+
+**User Experience Flow:**
+1. **Profile Icon Click** → Dropdown menu with quick actions
+2. **Settings Access** → Categorized settings page with search
+3. **Edit Profile** → Comprehensive profile management dashboard
+4. **Profile Picture Update** → Upload → Crop → Preview → Save
+5. **Onboarding Context Edit** → Section selection → Form editing → Preview changes → Save
+6. **Physical Stats Update** → Form with unit conversion → BMR/TDEE recalculation → Save
+7. **AI Coach Customization** → Personality selection → Communication style → Test conversation → Apply
+8. **Security Settings** → Dashboard with active sessions → Security recommendations → Apply fixes
+9. **Privacy Controls** → Visibility settings → Data sharing preferences → Apply changes
+10. **Logout** → Confirmation dialog with session cleanup options
+
+**Detailed User Flows:**
+
+**Profile Picture Management Flow:**
+1. Click profile picture → Edit option
+2. Choose upload method (gallery/camera/URL)
+3. Select image → Automatic face detection and centering
+4. Crop and adjust → Real-time preview
+5. Apply filters (optional) → Preview changes
+6. Save → Automatic thumbnail generation → Update across app
+7. View history → Option to revert to previous pictures
+
+**Onboarding Context Editing Flow:**
+1. Settings → Onboarding Context → Section overview
+2. Select section to edit (Goals/Experience/Equipment/Schedule/Preferences/Health)
+3. Form with current values pre-filled → Make changes
+4. Real-time validation and suggestions → Preview impact on AI coaching
+5. Save changes → Update AI personality profile → Confirmation
+6. Option to test new settings with AI coach → Apply or revert
+
+**AI Coach Customization Flow:**
+1. Settings → AI Coach → Current personality overview
+2. Communication style selection → Preview examples
+3. Feedback preferences → Test with sample scenarios
+4. Motivation level adjustment → Preview motivational messages
+5. Context retention settings → Privacy implications explanation
+6. Test conversation with new settings → Satisfaction check
+7. Apply changes → AI personality update → Welcome message with new style
+
+**Implementation Priorities for Step 25.9:**
+
+**Phase 1 (Week 1): Core Profile Management**
+- Profile picture upload and basic editing
+- Personal information editing (name, bio, email)
+- Basic onboarding context viewing
+- Profile dropdown menu implementation
+
+**Phase 2 (Week 2): Advanced Profile Features**
+- Profile picture cropping and filters
+- Profile picture history management
+- Comprehensive onboarding context editing
+- Physical stats management with calculations
+
+**Phase 3 (Week 3): AI Integration**
+- AI coach settings customization
+- Context impact preview
+- AI personality testing interface
+- Real-time AI coaching updates
+
+**Phase 4 (Week 4): Security & Privacy**
+- Security dashboard implementation
+- Session management
+- Privacy controls
+- Two-factor authentication setup
+
+**Phase 5 (Week 5): Polish & Testing**
+- User experience optimization
+- Performance testing
+- Security testing
+- User acceptance testing
+
+**Technical Implementation Notes:**
+- Use Firebase Storage for profile pictures with automatic resizing
+- Implement client-side image cropping with Canvas API
+- Use Firestore transactions for atomic onboarding context updates
+- Implement real-time preview of AI coaching changes
+- Add comprehensive form validation with helpful error messages
+- Implement progressive image loading for profile picture history
+- Use optimistic updates for better user experience
+- Add comprehensive analytics for settings usage patterns
+
+### Step 26: Smart Notifications & Daily Engagement ✅ **COMPLETED**
+**Goal:** Keep users engaged with intelligent, personalized notifications
+**Priority:** Medium
+**Estimated Time:** 4-5 days
+
+**✅ COMPLETED TASKS:**
+1. **Workout Reminders** ✅
+   - ✅ Intelligent scheduling based on user patterns and preferences
+   - ✅ Energy level-based workout intensity recommendations
+   - ✅ Recovery-based rest day recommendations with RPE analysis
+   - ✅ Workout frequency analysis and smart reminders
+
+2. **Social Notifications** ✅
+   - ✅ Framework for friend workout completions
+   - ✅ New followers and interactions tracking
+   - ✅ Social engagement notification system
+   - ✅ Community activity updates
+
+3. **AI Insights Delivery** ✅
+   - ✅ Daily fitness tips generation and delivery
+   - ✅ Weekly progress summaries with contextual analysis
+   - ✅ Personalized coaching insights
+   - ✅ Smart tip recommendations based on user behavior
+
+4. **Habit Formation Support** ✅
+   - ✅ Streak maintenance reminders with motivation
+   - ✅ Habit tracking and celebration system
+   - ✅ Motivational message delivery based on patterns
+   - ✅ Consistency rewards and encouragement
+
+**✅ IMPLEMENTATION FEATURES:**
+- ✅ Comprehensive Smart Notification Service with intelligent analysis
+- ✅ Priority-based notification system (urgent, high, medium, low)
+- ✅ Multiple notification types (workout, social, AI insights, habit support, recovery)
+- ✅ User preference management with quiet hours and customization
+- ✅ Smart Notifications Panel component with real-time updates
+- ✅ Dedicated notifications page with filtering and categorization
+- ✅ Contextual notification generation based on user behavior
+- ✅ Energy level and RPE pattern analysis for smart recommendations
+- ✅ Streak tracking and motivation system
+- ✅ Home page integration with high-priority notifications
+- ✅ Notification status tracking (pending, sent, read, dismissed)
+- ✅ Automatic notification generation and refresh system
+
+## Phase 4: Advanced Features & Gamification
+
+### Step 27: Achievements & Gamification System
+**Goal:** Increase engagement through achievements and challenges
+**Priority:** Medium
+**Estimated Time:** 5-6 days
+
+**Tasks:**
+1. **Achievement System**
+   - Workout milestones (volume, frequency, consistency)
+   - Exercise-specific achievements (PR, form improvement)
+   - Social achievements (helping others, community engagement)
+   - AI coaching achievements (following recommendations)
+
+2. **Challenge System**
+   - Personal challenges (30-day consistency, volume goals)
+   - Friend challenges (workout competitions)
+   - Community challenges (monthly themes)
+   - AI-generated challenges based on user data
+
+3. **Progress Visualization**
+   - Achievement badges and trophies
+   - Progress bars and streaks
+   - Leaderboards and rankings
+   - Visual progress timelines
+
+**Database Schema:**
+```typescript
+interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  category: 'workout' | 'social' | 'consistency' | 'strength' | 'ai_coaching';
+  criteria: {
+    type: string;
+    target: number;
+    timeframe?: string;
+  };
+  reward: {
+    points: number;
+    badge: string;
+    title?: string;
+  };
+  rarity: 'common' | 'rare' | 'epic' | 'legendary';
+}
+
+interface UserAchievement {
+  userId: string;
+  achievementId: string;
+  progress: number;
+  completed: boolean;
+  completedAt?: Timestamp;
+  createdAt: Timestamp;
+}
+```
+
+### Step 28: Advanced Analytics & Insights
+**Goal:** Provide comprehensive fitness analytics powered by AI
+**Priority:** Medium
+**Estimated Time:** 6-7 days
+
+**Tasks:**
+1. **Performance Analytics**
+   - Strength progression tracking
+   - Volume trend analysis
+   - Recovery pattern insights
+   - Injury risk assessment
+
+2. **AI-Powered Insights**
+   - Workout effectiveness analysis
+   - Optimal training frequency recommendations
+   - Plateau detection and solutions
+   - Goal timeline predictions
+
+3. **Comparative Analytics**
+   - Progress vs. similar users
+   - Goal achievement rates
+   - Exercise effectiveness comparisons
+   - Social engagement impact on results
+
+4. **Predictive Features**
+   - Injury risk predictions
+   - Performance plateau forecasting
+   - Goal achievement probability
+   - Optimal workout timing
+
+## Phase 5: Implementation Strategy & Technical Details
+
+### Step 29: Database Architecture & API Design
+**Goal:** Design scalable backend architecture for all features
+**Priority:** High
+**Estimated Time:** 4-5 days
+
+**Tasks:**
+1. **Firebase Collections Structure**
+   ```
+   /users/{userId}
+   /user_profiles/{userId}
+   /ai_personality_profiles/{userId}
+   /user_context/{userId}
+   /workouts/{workoutId}
+   /workout_posts/{postId}
+   /feed_posts/{postId}
+   /user_following/{followId}
+   /workout_interactions/{interactionId}
+   /achievements/{achievementId}
+   /user_achievements/{userAchievementId}
+   /ai_recommendations/{recommendationId}
+   /challenges/{challengeId}
+   /user_challenges/{userChallengeId}
+   /notifications/{notificationId}
+   ```
+
+2. **API Endpoints Design**
+   - RESTful API structure
+   - Real-time subscriptions for social features
+   - Batch operations for analytics
+   - Caching strategies for performance
+
+3. **Security Rules**
+   - User data privacy protection
+   - Social interaction permissions
+   - AI data access controls
+   - Media upload security
+
+### Step 30: Frontend Architecture & State Management
+**Goal:** Organize frontend for scalable social and AI features
+**Priority:** High
+**Estimated Time:** 3-4 days
+
+**Tasks:**
+1. **State Management Strategy**
+   - User authentication state
+   - Social feed state management
+   - AI conversation state
+   - Offline data synchronization
+
+2. **Component Architecture**
+   - Reusable social components
+   - AI chat interface components
+   - Analytics visualization components
+   - Notification system components
+
+3. **Navigation & Routing**
+   - Tab-based navigation enhancement
+   - Deep linking for social features
+   - Modal management for AI interactions
+   - Progressive loading strategies
+
+## Phase 6: Testing, Performance & Deployment
+
+### Step 31: Comprehensive Testing Strategy
+**Goal:** Ensure reliability across all features
+**Priority:** High
+**Estimated Time:** 5-6 days
+
+**Tasks:**
+1. **Unit Testing**
+   - AI recommendation algorithms
+   - Social interaction logic
+   - Authentication flows
+   - Data validation functions
+
+2. **Integration Testing**
+   - Social feed functionality
+   - AI chat conversations
+   - Workout sharing workflows
+   - Notification delivery
+
+3. **E2E Testing**
+   - Complete user onboarding flow
+   - Social interaction scenarios
+   - AI coaching conversations
+   - Cross-platform compatibility
+
+4. **Performance Testing**
+   - Feed loading performance
+   - AI response times
+   - Image upload optimization
+   - Database query efficiency
+
+### Step 32: AI Model Integration & Optimization
+**Goal:** Integrate and optimize AI models for production
+**Priority:** High
+**Estimated Time:** 6-8 days
+
+**Tasks:**
+1. **AI Model Selection**
+   - Choose appropriate LLM for coaching conversations
+   - Implement image analysis for form checking
+   - Set up recommendation algorithms
+   - Configure personality adaptation models
+
+2. **Context Management**
+   - Implement efficient context storage
+   - Design context retrieval strategies
+   - Optimize for conversation continuity
+   - Handle context size limitations
+
+3. **Performance Optimization**
+   - Implement response caching
+   - Optimize prompt engineering
+   - Reduce API call costs
+   - Implement fallback strategies
+
+4. **Privacy & Safety**
+   - Implement content filtering
+   - Ensure data privacy compliance
+   - Add safety guardrails for AI responses
+   - Monitor for inappropriate content
+
+### Step 33: Production Deployment & Monitoring
+**Goal:** Deploy to production with comprehensive monitoring
+**Priority:** High
+**Estimated Time:** 3-4 days
+
+**Tasks:**
+1. **Deployment Pipeline**
+   - Set up CI/CD for frontend and backend
+   - Configure environment variables
+   - Implement database migrations
+   - Set up monitoring and logging
+
+2. **Performance Monitoring**
+   - Track AI response times
+   - Monitor social feed performance
+   - Track user engagement metrics
+   - Monitor error rates and crashes
+
+3. **Analytics Implementation**
+   - User behavior tracking
+   - Feature usage analytics
+   - AI interaction analytics
+   - Social engagement metrics
+
+4. **Scaling Preparation**
+   - Database indexing optimization
+   - CDN setup for media files
+   - Load balancing configuration
+   - Backup and disaster recovery
+
+## Implementation Priority Matrix
+
+### Phase 1 (Immediate - Weeks 1-3)
+1. **Step 18:** User Authentication System
+2. **Step 19:** AI Onboarding & Personality Profiling
+3. **Step 20:** User Discovery & Following System
+
+### Phase 2 (Short-term - Weeks 4-6)
+4. **Step 21:** Enhanced Social Workout Features
+5. **Step 22:** Advanced Social Feed
+6. **Step 23:** Contextual AI Data Collection
+
+### Phase 3 (Medium-term - Weeks 7-10)
+7. **Step 24:** AI-Powered Personalized Recommendations
+8. **Step 25:** Enhanced AI Chat & Coaching Interface
+9. **Step 26:** Smart Notifications & Daily Engagement
+
+### Phase 4 (Long-term - Weeks 11-14)
+10. **Step 27:** Achievements & Gamification System
+11. **Step 28:** Advanced Analytics & Insights
+12. **Step 29:** Database Architecture & API Design
+
+### Phase 5 (Final - Weeks 15-16)
+13. **Step 30:** Frontend Architecture & State Management
+14. **Step 31:** Comprehensive Testing Strategy
+15. **Step 32:** AI Model Integration & Optimization
+16. **Step 33:** Production Deployment & Monitoring
+
+## Success Metrics
+
+### User Engagement
+- Daily active users (target: 70% of registered users)
+- Session duration (target: 15+ minutes average)
+- Workout completion rate (target: 85%+)
+- Social interaction rate (target: 60% of users engage socially)
+
+### AI Coaching Effectiveness
+- AI conversation engagement (target: 80% of users chat weekly)
+- Recommendation acceptance rate (target: 70%+)
+- Goal achievement improvement (target: 40% increase vs. non-AI users)
+- User satisfaction with AI coaching (target: 4.5/5 rating)
+
+### Social Features Adoption
+- Following/follower growth rate
+- Workout sharing frequency
+- Community challenge participation
+- User-generated content volume
+
+### Technical Performance
+- App load time (target: <3 seconds)
+- AI response time (target: <2 seconds)
+- Feed refresh time (target: <1 second)
+- Crash rate (target: <0.1%)
+
+## Risk Mitigation
+
+### Technical Risks
+- **AI Model Costs:** Implement caching and optimize prompts
+- **Database Scaling:** Design with horizontal scaling in mind
+- **Real-time Features:** Use efficient WebSocket connections
+- **Media Storage:** Implement CDN and compression
+
+### User Experience Risks
+- **AI Overwhelm:** Provide AI interaction controls
+- **Privacy Concerns:** Clear privacy settings and explanations
+- **Social Pressure:** Implement mental health safeguards
+- **Feature Complexity:** Gradual feature introduction with tutorials
+
+### Business Risks
+- **User Retention:** Focus on habit formation and value delivery
+- **Competition:** Unique AI coaching differentiation
+- **Monetization:** Freemium model with premium AI features
+- **Compliance:** GDPR, HIPAA considerations for health data
+
+---
+
+## Next Steps
+
+1. **Review and approve** this comprehensive outline
+2. **Prioritize features** based on business goals and user needs
+3. **Set up development environment** for new features
+4. **Begin with Phase 1** implementation starting with user authentication
+5. **Establish testing protocols** early in development
+6. **Plan user feedback collection** throughout development phases
+
+This outline provides a complete roadmap for transforming Gymzy into a comprehensive social fitness app with AI-powered personal coaching capabilities.
+```
+```

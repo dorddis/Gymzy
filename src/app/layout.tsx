@@ -1,31 +1,33 @@
+import type { Metadata } from 'next/types';
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { Providers } from "@/app/providers";
 
-import type {Metadata} from 'next';
-import './globals.css';
-import { Toaster } from "@/components/ui/toaster";
-import { WorkoutProvider } from '@/contexts/WorkoutContext';
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Gymzy - Your Smart Fitness Partner',
-  description: 'Interactive anatomy, smart workout logging, and progress analytics.',
+  title: 'Gymzy',
+  description: 'Gymzy - Your ultimate fitness companion',
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en" className="dark">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
-      </head>
-      <body className="font-body antialiased">
-        <WorkoutProvider>
-          {children}
-        </WorkoutProvider>
-        <Toaster />
+    <html lang="en">
+      <body className={inter.className} suppressHydrationWarning={true}>
+        <Providers>
+        {children}
+        </Providers>
       </body>
     </html>
   );

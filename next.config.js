@@ -1,10 +1,10 @@
 // next.config.js
 const nextConfig = {
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false, // ✅ Enable TypeScript strict checking
   },
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false, // ✅ Enable ESLint checking
   },
   images: {
     remotePatterns: [

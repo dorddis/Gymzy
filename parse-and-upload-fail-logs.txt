@@ -1,0 +1,215 @@
+🧠 AIRouter: Complexity: complex, Selected API: groq
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai\groq-service.ts:224 🌊 Groq Streaming: Starting stream for prompt length: 1627
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:235 🔍 Attempting to extract JSON from text: {
+  "workout_name": "Mixed Bodyweight Workout",
+  "exercises": [
+    {
+      "name": "Push-ups",
+      "sets": 3,
+      "reps": 10,
+      "rest_seconds": 60,
+      "instructions": "Lower until chest almost touches ground"
+    },
+    {
+      "name": "Lat Pulldowns (using resistance band or bodyweight)",
+      "sets": 3,
+      "reps": 12,
+      "rest_seconds": 60,
+      "instructions": "Pull down towards chest, squeezing lats"
+    },
+    {
+      "name": "Squats",
+      "sets": 3,
+      "reps": 12,...
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:255 🔧 Attempting to parse cleaned JSON: {
+  "workout_name": "Mixed Bodyweight Workout",
+  "exercises": [
+    {
+      "name": "Push-ups",
+      "sets": 3,
+      "reps": 10,
+      "rest_seconds": 60,
+      "instructions": "Lower until chest a...
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:260 ⚠️ Failed to parse this match: SyntaxError: Expected ',' or ']' after array element in JSON at position 227 (line 10 column 6)
+    at JSON.parse (<anonymous>)
+    at extractJSON (C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:256:33)
+    at sendStreamingChatMessageIntelligent (C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:78:35)
+    at async sendStreamingChatMessage (C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:710:14)
+    at async handleSendMessage (C:\Users\sidro\Projects\Gymzy\Gymzy\src\app\chat\page.tsx:253:26)
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:398 ⚠️ Could not fix truncated JSON: SyntaxError: Unterminated string in JSON at position 222 (line 9 column 65)
+    at JSON.parse (<anonymous>)
+    at fixTruncatedJSON (C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:394:10)
+    at extractJSON (C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:264:33)
+    at sendStreamingChatMessageIntelligent (C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:78:35)
+    at async sendStreamingChatMessage (C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:710:14)
+    at async handleSendMessage (C:\Users\sidro\Projects\Gymzy\Gymzy\src\app\chat\page.tsx:253:26)
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:255 🔧 Attempting to parse cleaned JSON: {
+      "name": "Lat Pulldowns (using resistance band or bodyweight)",
+      "sets": 3,
+      "reps": 12,
+      "rest_seconds": 60,
+      "instructions": "Pull down towards chest, squeezing lats"
+    ...
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:257 ✅ Successfully parsed JSON: {name: 'Lat Pulldowns (using resistance band or bodyweight)', sets: 3, reps: 12, rest_seconds: 60, instructions: 'Pull down towards chest, squeezing lats'}
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:79 🔍 ChatService: Extracted workout JSON: {name: 'Lat Pulldowns (using resistance band or bodyweight)', sets: 3, reps: 12, rest_seconds: 60, instructions: 'Pull down towards chest, squeezing lats'}
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:137 ⚠️ ChatService: JSON parsing failed, attempting text extraction fallback
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:406 🔧 ChatService: Attempting text-based workout extraction
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:407 📝 Text to extract from: {
+  "workout_name": "Mixed Bodyweight Workout",
+  "exercises": [
+    {
+      "name": "Push-ups",
+      "sets": 3,
+      "reps": 10,
+      "rest_seconds": 60,
+      "instructions": "Lower until chest almost touches ground"
+    },
+    {
+      "name": "Lat Pulldowns (using resistance band or bodyweight)",
+      "sets": 3,
+      "reps": 12,
+      "rest_seconds": 60,
+      "instructions": "Pull down towards chest, squeezing lats"
+    },
+    {
+      "name": "Squats",
+      "sets": 3,
+      "reps": 12,...
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:495 ⚠️ ChatService: No exercises found in text, attempting intelligent fallback
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:513 🎯 ChatService: Inferred workout type, using exercises: Push-ups, Bench Press, Incline Dumbbell Press, Dips
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:873 ✅ Mapped AI exercise "Push-ups" to existing exercise "Push-ups" (push-ups)
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:873 ✅ Mapped AI exercise "Bench Press" to existing exercise "Bench Press" (bench-press)
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:883 ✅ Partially mapped AI exercise "Incline Dumbbell Press" to existing exercise "Incline Dumbbell Press" (incline-dumbbell-press)
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:873 ✅ Mapped AI exercise "Dips" to existing exercise "Dips" (dips)
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:560 ✅ ChatService: Extracted exercises from text: 4
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\app\chat\page.tsx:284 💬 ChatPage: AI streaming response completed.
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\app\chat\page.tsx:245 💬 ChatPage: Sending message to AI service with streaming. History length: 4
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:702 💬 ChatService: ===== SENDING STREAMING CHAT MESSAGE (INTELLIGENT_REASONING) =====
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:703 💬 ChatService: User ID: hHuIokDYEoM3MkAVqELo2SGRbx13
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:704 💬 ChatService: Message: Give me a full body workout with 10 exercises
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:705 💬 ChatService: History length: 4
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:706 💬 ChatService: Streaming enabled: true
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:48 🧠 ChatService: Using intelligent multi-step reasoning
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:58 🏋️ ChatService: Detected workout request
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:65 🧠 ChatService: Using multi-step reasoning with Groq
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai\multi-step-reasoning.ts:64 🧠 Multi-Step Reasoning: Starting workout reasoning chain
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai\multi-step-reasoning.ts:65 📝 User Input: Give me a full body workout with 10 exercises
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai\intelligent-ai-router.ts:31 🧠 AIRouter: Routing request...
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai\intelligent-ai-router.ts:37 🧠 AIRouter: Complexity: complex, Selected API: groq
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai\groq-service.ts:120 🔄 Groq Client: Sending request to /api/ai/generate with prompt length: 4016
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai\groq-service.ts:137 ✅ Groq Client: Received response with length: 800
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai\intelligent-ai-router.ts:31 🧠 AIRouter: Routing request...
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai\intelligent-ai-router.ts:37 🧠 AIRouter: Complexity: complex, Selected API: groq
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai\groq-service.ts:120 🔄 Groq Client: Sending request to /api/ai/generate with prompt length: 3270
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai\groq-service.ts:137 ✅ Groq Client: Received response with length: 273
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai\intelligent-ai-router.ts:31 🧠 AIRouter: Routing request...
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai\intelligent-ai-router.ts:37 🧠 AIRouter: Complexity: complex, Selected API: groq
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai\groq-service.ts:120 🔄 Groq Client: Sending request to /api/ai/generate with prompt length: 732
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai\groq-service.ts:137 ✅ Groq Client: Received response with length: 1510
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai\intelligent-ai-router.ts:31 🧠 AIRouter: Routing request...
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai\intelligent-ai-router.ts:37 🧠 AIRouter: Complexity: complex, Selected API: groq
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai\groq-service.ts:120 🔄 Groq Client: Sending request to /api/ai/generate with prompt length: 2469
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai\groq-service.ts:137 ✅ Groq Client: Received response with length: 1180
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai\intelligent-ai-router.ts:31 🧠 AIRouter: Routing request...
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai\intelligent-ai-router.ts:37 🧠 AIRouter: Complexity: complex, Selected API: groq
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai\groq-service.ts:224 🌊 Groq Streaming: Starting stream for prompt length: 1674
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:235 🔍 Attempting to extract JSON from text: {
+  "workout_name": "Full Body Workout",
+  "exercises": [
+    {
+      "name": "Dumbbell Chest Press",
+      "sets": 3,
+      "reps": 8,
+      "rest_seconds": 60,
+      "instructions": "Keep core engaged"
+    },
+    {
+      "name": "Lat Pulldowns",
+      "sets": 3,
+      "reps": 10,
+      "rest_seconds": 60,
+      "instructions": "Keep back straight"
+    },
+    {
+      "name": "Dumbbell Shoulder Press",
+      "sets": 3,
+      "reps": 10,
+      "rest_seconds": 60,
+      "instructions": "Keep core ...
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:255 🔧 Attempting to parse cleaned JSON: {
+  "workout_name": "Full Body Workout",
+  "exercises": [
+    {
+      "name": "Dumbbell Chest Press",
+      "sets": 3,
+      "reps": 8,
+      "rest_seconds": 60,
+      "instructions": "Keep core engag...
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:260 ⚠️ Failed to parse this match: SyntaxError: Expected ',' or ']' after array element in JSON at position 209 (line 10 column 6)
+    at JSON.parse (<anonymous>)
+    at extractJSON (C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:256:33)
+    at sendStreamingChatMessageIntelligent (C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:78:35)
+    at async sendStreamingChatMessage (C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:710:14)
+    at async handleSendMessage (C:\Users\sidro\Projects\Gymzy\Gymzy\src\app\chat\page.tsx:253:26)
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:398 ⚠️ Could not fix truncated JSON: SyntaxError: Unterminated string in JSON at position 204 (line 9 column 43)
+    at JSON.parse (<anonymous>)
+    at fixTruncatedJSON (C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:394:10)
+    at extractJSON (C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:264:33)
+    at sendStreamingChatMessageIntelligent (C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:78:35)
+    at async sendStreamingChatMessage (C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:710:14)
+    at async handleSendMessage (C:\Users\sidro\Projects\Gymzy\Gymzy\src\app\chat\page.tsx:253:26)
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:255 🔧 Attempting to parse cleaned JSON: {
+      "name": "Lat Pulldowns",
+      "sets": 3,
+      "reps": 10,
+      "rest_seconds": 60,
+      "instructions": "Keep back straight"
+    }...
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:257 ✅ Successfully parsed JSON: {name: 'Lat Pulldowns', sets: 3, reps: 10, rest_seconds: 60, instructions: 'Keep back straight'}
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:79 🔍 ChatService: Extracted workout JSON: {name: 'Lat Pulldowns', sets: 3, reps: 10, rest_seconds: 60, instructions: 'Keep back straight'}
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:137 ⚠️ ChatService: JSON parsing failed, attempting text extraction fallback
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:406 🔧 ChatService: Attempting text-based workout extraction
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:407 📝 Text to extract from: {
+  "workout_name": "Full Body Workout",
+  "exercises": [
+    {
+      "name": "Dumbbell Chest Press",
+      "sets": 3,
+      "reps": 8,
+      "rest_seconds": 60,
+      "instructions": "Keep core engaged"
+    },
+    {
+      "name": "Lat Pulldowns",
+      "sets": 3,
+      "reps": 10,
+      "rest_seconds": 60,
+      "instructions": "Keep back straight"
+    },
+    {
+      "name": "Dumbbell Shoulder Press",
+      "sets": 3,
+      "reps": 10,
+      "rest_seconds": 60,
+      "instructions": "Keep core ...
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:495 ⚠️ ChatService: No exercises found in text, attempting intelligent fallback
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:513 🎯 ChatService: Inferred workout type, using exercises: Push-ups, Bench Press, Incline Dumbbell Press, Dips
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:873 ✅ Mapped AI exercise "Push-ups" to existing exercise "Push-ups" (push-ups)
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:873 ✅ Mapped AI exercise "Bench Press" to existing exercise "Bench Press" (bench-press)
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:883 ✅ Partially mapped AI exercise "Incline Dumbbell Press" to existing exercise "Incline Dumbbell Press" (incline-dumbbell-press)
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:873 ✅ Mapped AI exercise "Dips" to existing exercise "Dips" (dips)
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:560 ✅ ChatService: Extracted exercises from text: 4
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\app\chat\page.tsx:284 💬 ChatPage: AI streaming response completed.
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\app\chat\page.tsx:245 💬 ChatPage: Sending message to AI service with streaming. History length: 6
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:702 💬 ChatService: ===== SENDING STREAMING CHAT MESSAGE (INTELLIGENT_REASONING) =====
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:703 💬 ChatService: User ID: hHuIokDYEoM3MkAVqELo2SGRbx13
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:704 💬 ChatService: Message: you only gave 6
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:705 💬 ChatService: History length: 6
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:706 💬 ChatService: Streaming enabled: true
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:48 🧠 ChatService: Using intelligent multi-step reasoning
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\core\ai-chat-service.ts:192 💬 ChatService: Using simple intelligent routing for general conversation
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai\intelligent-ai-router.ts:31 🧠 AIRouter: Routing request...
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai\intelligent-ai-router.ts:37 🧠 AIRouter: Complexity: simple, Selected API: gemini
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai\groq-service.ts:224 🌊 Groq Streaming: Starting stream for prompt length: 3166
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\app\chat\page.tsx:284 💬 ChatPage: AI streaming response completed.
+

@@ -21,7 +21,7 @@ import { Muscle, MUSCLE_VOLUME_THRESHOLDS } from '../../../home/user/studio/src/
 /* ───────────────────────────────────────────────────────────────────────────
    1) Import the two full‐body SVGs (front & back) as React components.
       These single SVGs each already contain all of the muscle‐group <g> IDs
-      that we’ll dynamically show/hide via opacity.
+      that we'll dynamically show/hide via opacity.
 ──────────────────────────────────────────────────────────────────────────── */
 import FrontFullBody from '@/assets/images/front-full-body-with-all-muscles-showing.svg';
 import BackFullBody from '@/assets/images/back-full-body-with-all-muscles-showing.svg';
@@ -50,11 +50,11 @@ const getMuscleActivationLevel = (
  *    then, via a ref + useEffect, toggles the opacity of each <g id="...">
  *    inside that SVG according to its activation level.
  *
- * Implementation detail for “Option B”:
+ * Implementation detail for "Option B":
  *   • We build two maps (front & back), each keyed by `Muscle` and pointing to
  *     either a single `string` (one `<g>` ID) or an array of `string[]` (multiple sub‐IDs).
  *   • In the effect, we first force‐hide every single ID in the current map (by setting
- *     `opacity=0`). Then, for each “relevantMuscle” that has volume>0, we re‐set
+ *     `opacity=0`). Then, for each "relevantMuscle" that has volume>0, we re‐set
  *     its opacity to 0.3 / 0.6 / 1.0.
  */
 const AnatomyFigureSvg = (props: {
@@ -72,7 +72,7 @@ const AnatomyFigureSvg = (props: {
      2) Build a map from Muscle enum → one or more `<g id="...">` strings
         for the *back*‐view SVG.  Each key is a Muscle enum, and each RHS is
         either a single string (one `<g>`) or an array of strings (if the
-        “muscle” is actually split into multiple sub‐<g> groups in the SVG).
+        "muscle" is actually split into multiple sub‐<g> groups in the SVG).
   ─────────────────────────────────────────────────────────────── */
   const backMuscleIdMap: Partial<Record<Muscle, string | string[]>> = {
     [Muscle.Rhomboids]:
@@ -95,9 +95,9 @@ const AnatomyFigureSvg = (props: {
       'Lats_00000133492815442984477070000001790843316009520005_',
 
     /*
-      DELTOIDS (all three heads share the same “Delts_…” ID on the back)
+      DELTOIDS (all three heads share the same "Delts_…" ID on the back)
       => merged into a single entry here (these are kept for future implementation):
-      [Muscle.AnteriorDeltoid]: // we’ll use this one key for all three heads on the back
+      [Muscle.AnteriorDeltoid]: // we'll use this one key for all three heads on the back
       [Muscle.LateralDeltoid]:
       [Muscle.PosteriorDeltoid]:
     */
@@ -115,7 +115,7 @@ const AnatomyFigureSvg = (props: {
       'Infraspinatus_00000055693351133629568060000011005395473393824395_',
 
     /*
-      On the back, the SVG only has one <g> for “TricepsBrachii.”
+      On the back, the SVG only has one <g> for "TricepsBrachii."
       The separate heads do NOT exist here. We therefore map the umbrella term.
     */
     [Muscle.TricepsBrachii]:
@@ -156,9 +156,9 @@ const AnatomyFigureSvg = (props: {
   /* ───────────────────────────────────────────────────────────────
      3) Front‐view map—using the `<g id="…">` strings from your *front* SVG.
      Each key is the same `Muscle` enum value, but the RHS is either a single
-     string or an array of strings (if that muscle’s shape is split into multiple
-     <g> sub‐groups in the SVG).  Here we explicitly separate “upper vs. lower abs,”
-     “gluteus medius vs. maximus,” etc.
+     string or an array of strings (if that muscle's shape is split into multiple
+     <g> sub‐groups in the SVG).  Here we explicitly separate "upper vs. lower abs,"
+     "gluteus medius vs. maximus," etc.
   ─────────────────────────────────────────────────────────────── */
   const frontMuscleIdMap: Partial<Record<Muscle, string | string[]>> = {
     // ───────────────────────────────────────────────────────────
@@ -240,9 +240,9 @@ const AnatomyFigureSvg = (props: {
 
     /*
       On the front, the triceps heads do exist separately:
-      If you want to highlight “TricepsBrachii” as both heads, you can add:
+      If you want to highlight "TricepsBrachii" as both heads, you can add:
       [Muscle.TricepsBrachii]: [<both IDs>] 
-      but we’ll keep them split:
+      but we'll keep them split:
     */
     [Muscle.TricepsBrachii]: [
       'Triceps_long_head_00000083776378062729911360000007780280132728440204_',
@@ -267,7 +267,7 @@ const AnatomyFigureSvg = (props: {
   // ───────────────────────────────────────────────────────────────
   // 5) Whenever `view`, `muscleVolumes`, or `relevantMuscles` changes,
   //    we:
-  //    • First “hide” every single <g> in `currentMuscleIdMap` by forcing
+  //    • First "hide" every single <g> in `currentMuscleIdMap` by forcing
   //      opacity=0
   //    • Then loop over each `relevantMuscle` (from the enum) and set its
   //      correct opacity based on volume.
@@ -275,7 +275,7 @@ const AnatomyFigureSvg = (props: {
   useEffect(() => {
     if (!svgRef.current) return;
 
-    // --- STEP 1: Force-hide all mapped <g> IDs (so nothing is “pre‐lit”)
+    // --- STEP 1: Force-hide all mapped <g> IDs (so nothing is "pre‐lit")
     const allGroupIds: string[] = Object.values(currentMuscleIdMap).reduce<
       string[]
     >((acc, maybeId) => {
@@ -291,10 +291,10 @@ const AnatomyFigureSvg = (props: {
       }
     });
 
-    // --- STEP 2: Now “light up” each muscle that actually has a volume > 0
+    // --- STEP 2: Now "light up" each muscle that actually has a volume > 0
     relevantMuscles.forEach((muscle) => {
       const maybeId = currentMuscleIdMap[muscle];
-      if (!maybeId) return; // This muscle isn’t in the map → skip.
+      if (!maybeId) return; // This muscle isn't in the map → skip.
 
       // Normalize to array-of-strings so we can set opacity on each sub-group:
       const groupIds: string[] = Array.isArray(maybeId)
@@ -340,22 +340,35 @@ const AnatomyFigureSvg = (props: {
   );
 };
 
+import { HeatmapCard } from './heatmap-card';
+
 /**
  * AnatomyVisualization
  *  - Parent card containing:
  *      • Front/Back toggle buttons
  *      • AnatomyFigureSvg (full‐body + overlays)
- *      • Scrollable “Muscle Activation” list
+ *      • Scrollable "Muscle Activation" list
  */
 export function AnatomyVisualization() {
-  const [currentView, setCurrentView] = useState<'front' | 'back'>('front');
   const { muscleVolumes } = useWorkout();
 
-  // Safely collect all enum values (e.g. ["Pectoralis Major", "Upper Rectus Abdominis", …])
-  const relevantMuscles =
-    typeof Muscle === 'object' && Muscle !== null
-      ? (Object.values(Muscle) as Muscle[])
-      : [];
+  // Initialize all muscles with 0 if undefined
+  const safeMuscleVolumes = React.useMemo(() => {
+    const volumes: Record<Muscle, number> = {} as Record<Muscle, number>;
+    Object.values(Muscle).forEach((muscle) => {
+      if (typeof muscle === 'string') {
+        volumes[muscle as Muscle] = muscleVolumes[muscle as Muscle] ?? 0;
+      }
+    });
+    return volumes;
+  }, [muscleVolumes]);
+
+  // Get relevant muscles (those with volume > 0)
+  const relevantMuscles = React.useMemo(() => {
+    return Object.entries(safeMuscleVolumes)
+      .filter(([_, volume]) => volume > 0)
+      .map(([muscle]) => muscle as Muscle);
+  }, [safeMuscleVolumes]);
 
   return (
     <Card className="flex flex-col h-full shadow-xl bg-card hover:shadow-2xl transition-shadow duration-300">
@@ -372,90 +385,37 @@ export function AnatomyVisualization() {
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="flex-grow flex flex-col p-4">
+      <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-          {/* — Left column: full‐body SVG + toggle buttons — */}
+          {/* Left column: full‐body SVG + toggle buttons */}
           <div className="flex flex-col items-center">
-            <div className="relative w-full aspect-[3/5] max-w-xs sm:max-w-sm mb-4 rounded-lg overflow-hidden bg-muted/10 border border-border">
-              <AnatomyFigureSvg
-                view={currentView}
-                muscleVolumes={muscleVolumes}
-                relevantMuscles={relevantMuscles}
-              />
-            </div>
-
-            <div className="flex space-x-2">
-              <Button
-                variant={currentView === 'front' ? 'default' : 'outline'}
-                size="default"
-                aria-label="Show Front View"
-                className="transition-transform hover:scale-110 active:scale-95"
-                onClick={() => setCurrentView('front')}
-              >
-                <UserRound className="w-5 h-5 mr-2" /> Front
-              </Button>
-              <Button
-                variant={currentView === 'back' ? 'default' : 'outline'}
-                size="default"
-                aria-label="Show Back View"
-                className="transition-transform hover:scale-110 active:scale-95"
-                onClick={() => setCurrentView('back')}
-              >
-                <RotateCcwSquare className="w-5 h-5 mr-2" /> Back
-              </Button>
-            </div>
+            <HeatmapCard 
+              muscleVolumes={safeMuscleVolumes}
+              title="Weekly Muscle Activation"
+              className="w-full"
+              height="400px"
+            />
           </div>
 
-          {/* — Right column: scrollable “Muscle Activation” list — */}
-          <div className="flex flex-col">
+          {/* Right column: scrollable "Muscle Activation" list */}
+          <div>
             <h3 className="text-lg font-semibold mb-2 flex items-center">
               <Zap className="w-5 h-5 mr-2 text-primary" />
               Muscle Activation
             </h3>
             <ScrollArea className="h-[300px] md:h-[400px] pr-3 border rounded-md bg-background/30 p-3">
-              {relevantMuscles.length > 0 ? (
-                <ul className="space-y-2">
-                  {relevantMuscles.map((muscleName) => {
-                    const volume = muscleVolumes[muscleName];
-                    const activation = getMuscleActivationLevel(volume);
-
-                    // Only show a row if activation > 0
-                    if (activation.level === 'None' && !volume) return null;
-
-                    return (
-                      <li
-                        key={muscleName}
-                        className={`flex justify-between items-center p-2 rounded-md text-sm ${activation.color}`}
-                      >
-                        <span>{muscleName}</span>
-                        <Badge
-                          variant={
-                            activation.level === 'High'
-                              ? 'destructive'
-                              : activation.level === 'Medium'
-                              ? 'default'
-                              : 'secondary'
-                          }
-                          className="capitalize"
-                        >
-                          {activation.level}{' '}
-                          {volume !== undefined ? `(${Math.round(volume)})` : ''}
-                        </Badge>
-                      </li>
-                    );
-                  })}
-
-                  {Object.values(muscleVolumes).every((v) => v === 0 || v === undefined) && (
-                    <p className="text-muted-foreground text-center py-4">
-                      Log a workout to see muscle activation.
-                    </p>
-                  )}
-                </ul>
-              ) : (
-                <p className="text-muted-foreground text-center py-4">
-                  Log a workout to see muscle activation.
-                </p>
-              )}
+              {relevantMuscles.map((muscle) => {
+                const volume = safeMuscleVolumes[muscle];
+                const { level, color } = getMuscleActivationLevel(volume);
+                return (
+                  <div key={muscle} className="flex justify-between items-center py-1">
+                    <span className="text-sm font-medium">{muscle}</span>
+                    <span className={`text-xs font-semibold ${color}`}>
+                      {level} ({volume.toFixed(0)} kg)
+                    </span>
+                  </div>
+                );
+              })}
             </ScrollArea>
           </div>
         </div>

@@ -1,0 +1,638 @@
+# Ultimate UI Redesign Implementation Guide
+
+This document is the single source of truth for the AI agent. It contains:
+
+1. **Step-by-step implementation outline**  
+2. **General and extension instructions**  
+3. **Complete HTML/CSS/JS code snippets** saved as `.txt` design files  
+4. **Context-extension guidelines** so the agent can update this file as needed
+
+---
+
+## 1. Progress Tracker  
+Mark each step complete by changing `[ ]` to `[x]`.
+
+[x] 0. Integrate AI Agent Chat Interface
+- [x] Implement robust agentic AI system with tool decision making
+- [x] Add streaming response capability with typing indicators
+- [x] Integrate ReactMarkdown for proper message formatting
+- [x] Replace simple pattern matching with intelligent tool selection
+- [x] Add proper error handling and fallback responses
+[x] 1. Analyze Codebase  
+[x] 2. Configure Design System  
+[x] 3. Build Header (Status Bar)  
+[x] 4. Weekly Muscle Heatmap Card  
+[x] 5. Stats Cards Row  
+[x] 6. Add Workout CTA  
+[x] 6.1. See saved home-dashboard HTML → `design/home-dashboard.html.txt`  
+[x] 6.2. See saved add-workout HTML → `design/add-workout.html.txt`  
+[x] 6.3. Hook button click to open modal  
+[x] 7. Recent Workouts Carousel  
+[x] 8. Replace Main Dashboard Layout  
+[x] 9. Community Feed Section  
+[x] 9.1. Implement CommunityFeed component (frontend)  
+[x] 9.2. Design and implement backend data structure/API for community posts  
+[x] 9.3. Integrate frontend with backend  
+[x] 10. Bottom Navigation Bar  
+[x] 11. Add Workout Modal  
+[x] 11.1. Exercise Selection Screen
+- Implement search functionality with debounce
+- Add "Most Used" exercises section with actual usage data
+- Implement exercise selection with proper state management
+[x] 11.2. Exercise Details Screen
+- Create exercise details view with sets/reps/weight/RPE inputs
+- Add "Add Set" and "Add Warmup Set" functionality
+- Implement plate calculator widget
+- Add exercise notes and tips section
+[x] 11.3. Workout Summary Screen
+- Show total volume calculation
+- Do not display targeted muscle groups separately as they are shown in the svg
+- Add ability to reorder exercises
+[x] 11.4. Finish Workout Modal
+- [x] Add date/time picker
+- [x] Implement notes textarea
+- [x] Add media upload functionality
+- [x] Add public/private toggle
+- [x] Fix UI styling issues (date selector outline, notes outline, optional labels)
+- [x] Improve public workout toggle visibility
+[x] 11.5. State Management & Data Flow
+- Implement proper state management for multi-step flow
+- [x] Add validation for all inputs
+- [x] Handle "Copy last session" functionality
+- [x] Implement proper error handling
+[x] 11.6. Integration with Backend
+- [x] Connect with workout service
+- [x] Implement proper data saving
+- [x] Add loading states and error handling
+[x] 12. Log Workout Screen  
+[x] 13. Finish Workout Modal  
+[x] 14. Stats & Trends Screen  
+
+### Step 15: Implement Robust Media Upload System
+- **Goal:** Create a reliable, user-friendly media upload system with proper data management and error handling.
+- **Inputs:** 
+  - Cloudinary configuration
+  - Workout data structure
+  - UI components for media upload
+
+- **Tasks:**
+  1. **Media Upload Implementation**
+     - [x] Set up Cloudinary configuration with unsigned upload preset
+     - [x] Implement direct upload using Cloudinary's upload API
+     - [x] Add proper progress tracking and UI feedback
+     - [x] Implement file type and size validation
+     - [x] Add retry mechanism for failed uploads
+     - [x] Handle upload cancellation
+
+  2. **Database Schema Updates**
+     - [x] Verify current Cloudinary implementation (using Cloudinary directly, no Firestore needed)
+
+  3. **UI/UX Improvements**
+     - [x] Design and implement custom upload UI:
+       - [x] Drag and drop support
+       - [x] File preview before upload
+       - [x] Progress bar with percentage
+       - [x] Upload status indicators
+       - [x] Error messages and retry options
+     - [x] Add loading animations and transitions
+     - [x] Implement proper modal layout and scrolling
+     - [x] Add proper margins and corner rounding
+     - [x] Fix date picker styling and validation
+
+  4. **Error Handling & Validation**
+     - [x] Implement comprehensive error handling:
+       - [x] Network errors
+       - [x] File size limits
+       - [x] Invalid file types
+       - [x] Upload timeouts
+     - [x] Add client-side validation:
+       - [x] File size checks
+       - [x] File type validation
+       - [x] Multiple file handling
+     - [x] Add retry mechanism for failed uploads
+
+  5. **Performance Optimization**
+     - [x] Implement file compression before upload
+     - [ ] Add lazy loading for media previews
+     - [ ] Implement proper caching strategies
+     - [x] Add upload queue management
+
+  6. **Security & Privacy**
+     - [ ] Implement proper access control for media
+     - [ ] Add media deletion when workout is deleted
+     - [ ] Implement proper cleanup of unused media
+     - [ ] Add privacy controls for media visibility
+
+  7. **Testing & Documentation**
+     - [ ] Write unit tests for media upload functionality
+     - [ ] Add integration tests for media workflow
+     - [ ] Test on various devices and browsers
+     - [ ] Document media upload process and limitations
+     - [ ] Add error handling documentation
+
+- **Output:** 
+  - Fully functional media upload system
+  - User-friendly upload interface
+  - Comprehensive error handling
+  - Performance optimized implementation
+  - Security measures in place
+  - Complete documentation
+
+- **Success Criteria:**
+  1. Media uploads work reliably across all supported devices
+  2. Upload progress is clearly visible to users
+  3. Error handling provides clear feedback
+  4. Media is properly stored and retrievable
+  5. Performance meets or exceeds requirements
+  6. Security measures are properly implemented
+  7. Documentation is complete and accurate
+
+### Step 17: Implement Consistent Header/Footer Styling & Back Navigation
+- **Goal:** Establish a consistent header/footer design across the app (referencing Instagram) and implement back navigation on the Stats page.
+- **Inputs:** `src/app/stats/page.tsx`, `StatusBar` component, routing configuration.
+- **Tasks:**
+  - Define clear guidelines for when a page should have a full header (like a home/feed screen), a minimalist header (like a detail/form screen with a back button), or no header (if content is full-screen and self-contained).
+  - Define guidelines for footer presence (e.g., persistent on main navigation screens).
+  - On `src/app/stats/page.tsx`, remove the existing `StatusBar` component.
+  - Add a back arrow icon (e.g., from `lucide-react`) to the top-left of the Stats page, configured to navigate back to the home page (e.g., `/`).
+  - Ensure the back arrow is styled consistently with the new header/footer guidelines.
+- **Output:** Updated `ui-redesign-outline.txt` with consistent header/footer strategy, and the Stats page header is replaced with a back arrow.
+
+
+### Step 16: Implement Advanced Workout Features
+- **Goal:** Add special sets functionality and improve workout experience
+- **Inputs:** Special sets outline, workout context, exercise components
+- **Tasks:**
+  - [x] Implement basic superset functionality
+    - [x] Create SupersetCreator component for exercise grouping
+    - [x] Implement SupersetDisplay component for workout execution
+    - [x] Add superset data structure to ExerciseWithSets type
+    - [x] Integrate superset creation UI in WorkoutSummaryScreen
+    - [x] Add round tracking and progress indicators
+    - [x] Implement superset-specific rest timer integration
+  - [ ] Add circuit training support
+  - [ ] Create drop set implementation
+  - [ ] Add rest-pause sets
+  - [ ] Implement cluster sets
+  - [ ] Add tempo control for exercises
+- **Output:** Enhanced workout creation with advanced set types
+
+### Step 17: Implement Payment Plans & Subscription System
+- **Goal:** Add monetization with Free, Plus, and Pro tiers
+- **Inputs:** Payment plans outline, Stripe integration
+- **Tasks:**
+  - [ ] Set up Stripe payment processing
+  - [ ] Implement subscription management
+  - [ ] Create pricing page UI
+  - [ ] Add feature gating system
+  - [ ] Implement usage tracking
+  - [ ] Add account management interface
+- **Output:** Complete subscription system with payment processing
+
+### Step 18: Enhanced AI Features
+- **Goal:** Improve AI capabilities and user experience
+- **Tasks:**
+  - [x] Implement agentic AI system with tool decision making
+  - [x] Add streaming responses with proper formatting
+  - [ ] Add workout analysis and recommendations
+  - [ ] Implement AI-powered form checking
+  - [ ] Add nutrition guidance integration
+  - [ ] Create personalized workout suggestions
+- **Output:** Advanced AI coaching capabilities
+
+[ ] 19. Review & Polish
+  - **Goal:** Final quality pass, visual consistency, and new UI enhancements.
+  - **Tasks:**
+    - Test responsiveness on mobile (390×844).
+    - Verify color, typography, spacing per design.
+    - Performance optimization
+    - Security audit
+    - User testing and feedback integration
+
+---
+
+## 2. Step-by-Step Outline
+
+### Step 0: [REMOVED - Replaced by Dedicated AI Chat Screen]
+
+### Step 1: Analyze Codebase
+- **Goal:** Map existing files and identify reusable components  
+- **Inputs:** `src/app/`, `src/components/`, `src/contexts/`  
+- **Tasks:**  
+  - List all UI components, hooks, SVGs, and utility functions.  
+  - Categorize each as "Reuse" or "Refactor/Build New."  
+- **Output:** Bullet list under **"## Reuse vs Refactor"** section in this file.
+
+### Step 2: Configure Design System
+- **Goal:** Set global colors and typography  
+- **Inputs:** `tailwind.config.ts`, global CSS  
+- **Tasks:**  
+  - Add to `theme.extend.colors` in Tailwind config:  
+    - `primary: #34113F`  
+    - `secondary: #73AB84`  
+    - `background: #FDFFFC`  
+  - Set default font family to `Inter` in global CSS and Tailwind.  
+  - Remove unused color entries.  
+- **Output:** Updated `tailwind.config.ts` and CSS.
+
+### Step 3: Build Header (Status Bar)
+- **Goal:** Top bar with title, bell icon, user avatar  
+- **Inputs:** Design tokens, existing icon components  
+- **Tasks:**  
+  - Create `<StatusBar />` component.  
+  - Include text "Gymzy", notification button, avatar.  
+  - Verify responsive padding and background color.  
+- **Output:** `StatusBar` ready for integration.
+
+### Step 4: Weekly Muscle Heatmap Card
+- **Goal:** Toggleable front/back muscle SVG heatmap  
+- **Inputs:** SVG files, activation data hook/context  
+- **Tasks:**  
+  - Create `<HeatmapCard />` with header, toggle button, SVG placeholder, legend.  
+  - Implement toggle logic to swap SVG and update button label.  
+- **Output:** Fully functional heatmap card.
+
+### Step 5: Stats Cards Row
+- **Goal:** Display Total Volume, Average RPE, Consistency  
+- **Inputs:** Stats API or context data  
+- **Tasks:**  
+  - Build three `<StatCard />` components with appropriate icons and data.  
+- **Output:** Responsive stats row.
+
+### Step 6: Add Workout CTA
+- **Goal:** Prominent "+" Add Workout" button that opens the workout flow  
+- **Inputs:**  
+  - **Design specs** saved as text files  
+  - Existing workout logic/context  
+- **Tasks:**  
+  1. **Save the Home Dashboard design HTML**  
+     - Copy the `<iframe srcdoc="…">` block from the main dashboard prototype and save it verbatim as `design/home-dashboard.html.txt`.  
+  2. **Save the Add Workout design HTML**  
+     - Copy the `<iframe srcdoc="…">` block from the Add Workout prototype and save it verbatim as `design/add-workout.html.txt`.  
+  3. **Render the CTA**  
+     - In `HomeDashboard.tsx`, add the secondary-colored full-width button.  
+     - Hook its `onClick` to toggle `isWorkoutModalOpen` state.  
+- **Output:**  
+  - Two `.txt` files under `design/` folder containing raw HTML prototypes  
+  - Clickable Add Workout CTA in the dashboard
+
+### Step 7: Recent Workouts Carousel
+- **Goal:** Horizontal scroll list of recent workouts  
+- **Inputs:** Recent workouts data  
+- **Tasks:**  
+  - Create scrollable `<WorkoutCard />` list.  
+  - Include "See All" link.  
+- **Output:** Functional carousel.
+
+### Step 8: Replace Main Dashboard Layout
+- **Goal:** The main dashboard page (src/app/page.tsx) should use only the new components and match the design reference layout.
+- **Inputs:** All new dashboard components, design/home-dashboard.html.txt
+- **Tasks:**
+  - Remove old grid/components from page.tsx
+  - Render: StatusBar, HeatmapCard, StatsCardsRow, Add Workout CTA, RecentWorkoutsCarousel, Community Feed Section, Bottom Navigation Bar (in correct order)
+  - Ensure stacking, spacing, and mobile layout match the design reference
+- **Output:** Dashboard matches the new design
+
+### Step 9: Community Feed Section
+- **Goal:** Vertical list of social posts
+- **Inputs:** Community posts API
+- **Tasks:**
+  1. Implement CommunityFeed component (frontend)
+  2. Design and implement backend data structure/API for community posts
+  3. Integrate frontend with backend
+- **Output:** Styled feed with real data
+
+### Step 10: Bottom Navigation Bar
+- **Goal:** Persistent footer with Home, Stats, Social, Chat (replaces <Something else not profile>)
+- **Inputs:** Routing config, lucide-react icons
+- **Tasks:**
+  1. Create `<BottomNav />` component.
+  2. Include four navigation items (Home, Stats, Social, Chat) with appropriate icons and labels.
+  3. Highlight the active tab (placeholder logic for now, actual routing later).
+  4. Ensure fixed positioning at the bottom and responsive behavior.
+- **Output:** Fixed navigation component visible on dashboard
+
+### Step 11: Add Workout Modal
+- **Goal:** Create a comprehensive workout logging system with multi-step flow
+- **Inputs:** 
+  - Exercise database
+  - User's workout history
+  - Design specs from `design/add-workout.html.txt`
+  - Firebase configuration
+
+#### Frontend Implementation
+
+1. **Exercise Selection Screen**
+   - **Components:**
+     - `ExerciseSearch.tsx`: Search input with debounced filtering
+     - `MostUsedExercises.tsx`: Horizontal scrollable list of frequently used exercises
+     - `ExerciseList.tsx`: Scrollable list of filtered exercises
+   - **Features:**
+     - Real-time search with debounce (300ms)
+     - Exercise categorization (Chest, Back, Legs, etc.)
+     - Exercise details preview on hover
+     - Muscle group indicators
+     - "Copy last session" toggle with last workout data
+
+2. **Exercise Details Screen**
+   - **Components:**
+     - `SetInput.tsx`: Individual set input with weight/reps/RPE
+     - `PlateCalculator.tsx`: Visual plate calculator widget
+     - `ExerciseNotes.tsx`: Tips and form guidance
+   - **Features:**
+     - Dynamic set addition/removal
+     - Warmup set differentiation
+     - RPE input (1-10 scale)
+     - Plate calculator with common weight configurations
+     - Exercise-specific tips and form guidance
+     - Volume calculation per set and total
+
+4. **Muscle Activation Visualization Redesign**
+   - **Components:**
+     - `MuscleActivationSVG.tsx`: Dedicated component for displaying the muscle activation SVG.
+   - **Features:**
+     - Implement a scroll-blur effect for the SVG, where it blurs and allows content to scroll over it.
+     - Make the blurred SVG tappable to automatically scroll down the current exercises to reveal the complete svg with smooth bezier animations.
+
+4. **Finish Workout Modal**
+   - **Components:**
+     - `DateTimePicker.tsx`: Date and time selection
+     - `MediaUpload.tsx`: Photo/video upload interface
+     - `PrivacyToggle.tsx`: Public/private workout toggle
+   - **Features:**
+     - Date/time selection with timezone support
+     - Media upload with preview
+     - Workout notes with markdown support
+     - Privacy settings
+     - Share options
+
+#### Backend Implementation
+
+1. **Firebase Data Structure**
+   ```typescript
+   // workouts collection
+   interface Workout {
+     id: string;
+     userId: string;
+     title: string;
+     date: Timestamp;
+     exercises: {
+       id: string;
+       name: string;
+       sets: {
+         weight: number;
+         reps: number;
+         rpe: number;
+         isWarmup: boolean;
+       }[];
+       notes: string;
+       order: number;
+     }[];
+     totalVolume: number;
+     duration: number;
+     notes: string;
+     mediaUrls: string[];
+     isPublic: boolean;
+     createdAt: Timestamp;
+     updatedAt: Timestamp;
+   }
+
+   // user_workout_stats collection
+   interface UserWorkoutStats {
+     userId: string;
+     totalWorkouts: number;
+     totalVolume: number;
+     exerciseFrequency: {
+       [exerciseId: string]: number;
+     };
+     lastWorkout: Timestamp;
+     streak: number;
+   }
+   ```
+
+2. **Firebase Security Rules**
+   ```javascript
+   rules_version = '2';
+   service cloud.firestore {
+     match /databases/{database}/documents {
+       match /workouts/{workoutId} {
+         allow read: if request.auth != null && 
+           (resource.data.userId == request.auth.uid || resource.data.isPublic);
+         allow create: if request.auth != null && 
+           request.resource.data.userId == request.auth.uid;
+         allow update, delete: if request.auth != null && 
+           resource.data.userId == request.auth.uid;
+       }
+       
+       match /user_workout_stats/{userId} {
+         allow read: if request.auth != null;
+         allow write: if request.auth != null && 
+           request.auth.uid == userId;
+       }
+     }
+   }
+   ```
+
+3. **API Endpoints**
+   ```typescript
+   // src/services/workout-service.ts
+   export const workoutService = {
+     // Create new workout
+     createWorkout: async (workoutData: Omit<Workout, 'id'>) => {
+       // Implementation
+     },
+     
+     // Get user's recent workouts
+     getRecentWorkouts: async (userId: string, limit: number = 10) => {
+       // Implementation
+     },
+     
+     // Update workout
+     updateWorkout: async (workoutId: string, data: Partial<Workout>) => {
+       // Implementation
+     },
+     
+     // Delete workout
+     deleteWorkout: async (workoutId: string) => {
+       // Implementation
+     },
+     
+     // Get workout statistics
+     getWorkoutStats: async (userId: string) => {
+       // Implementation
+     }
+   };
+   ```
+
+4. **State Management**
+   ```typescript
+   // src/contexts/WorkoutContext.tsx
+   interface WorkoutContextType {
+     currentWorkout: Workout | null;
+     recentWorkouts: Workout[];
+     workoutStats: UserWorkoutStats | null;
+     loading: boolean;
+     error: Error | null;
+     addExercise: (exercise: Exercise) => void;
+     updateExercise: (exerciseId: string, data: Partial<Exercise>) => void;
+     removeExercise: (exerciseId: string) => void;
+     reorderExercises: (newOrder: string[]) => void;
+     saveWorkout: () => Promise<void>;
+     loadRecentWorkouts: () => Promise<void>;
+   }
+   ```
+
+#### Integration Points
+
+1. **Dashboard Integration**
+   - Update `RecentWorkoutsCarousel` to use real data
+   - Implement workout deletion
+   - Add workout details view
+   - Show workout statistics
+
+2. **Analytics Integration**
+   - Track workout completion
+   - Monitor exercise frequency
+   - Calculate volume trends
+   - Update muscle heatmap
+
+3. **Social Features**
+   - Share public workouts
+   - Like/comment functionality
+   - Workout templates
+
+#### Testing Strategy
+
+1. **Unit Tests**
+   - Component rendering
+   - State management
+   - Form validation
+   - API calls
+
+2. **Integration Tests**
+   - Workflow completion
+   - Data persistence
+   - Error handling
+
+3. **E2E Tests**
+   - Complete workout flow
+   - Social interactions
+   - Data synchronization
+
+- **Output:** Fully functional workout logging system with proper data persistence and social features
+
+### Step 13: Finish Workout Modal
+- **Goal:** Finalize and save workout  
+- **Inputs:** Workout summary  
+- **Tasks:**  
+  - Modal with date/time picker, notes textarea, media upload, public/private toggle, "Save Workout" button.  
+- **Output:** Ready finish modal.
+
+### Step 14: Stats & Trends Screen
+- **Goal:** Show volume trend and training frequency charts  
+- **Inputs:** Weekly volume & frequency data  
+- **Tasks:**  
+  - Line chart for volume, bar chart for frequency using Chart.js or Recharts.  
+  - Display summary metrics (total week, average, streak, top muscle).  
+- **Output:** Fully rendered stats screen.
+
+### Step 15: Review & Polish
+- **Goal:** Final quality pass  
+- **Tasks:**  
+  - Test responsiveness on mobile (390×844).  
+  - Verify color, typography, spacing per design.  
+  - Remove unused code, update docs/screenshots.  
+- **Output:** Merge-ready codebase.
+
+### Step 16: Address Photo Upload Error During Workout Save
+- **Goal:** Investigate and fix the error encountered during photo upload when saving a workout.
+- **Inputs:** Error logs, workout saving process, media upload service.
+- **Tasks:**
+  - Replicate the photo upload error during workout saving.
+  - Review relevant code in the workout saving and media upload logic (e.g., in `src/contexts/WorkoutContext.tsx`, `src/services/workout-service.ts`, and `MediaUpload.tsx`).
+  - Implement robust error handling and retry mechanisms for photo uploads.
+  - Provide clear user feedback on upload status or failures.
+  - Test the photo upload functionality thoroughly.
+- **Output:** Photo upload during workout save is stable and error-free.
+
+### Step 17: Implement Consistent Header/Footer Styling & Back Navigation
+- **Goal:** Establish a consistent header/footer design across the app (referencing Instagram) and implement back navigation on the Stats page.
+- **Inputs:** `src/app/stats/page.tsx`, `StatusBar` component, routing configuration.
+- **Tasks:**
+  - Define clear guidelines for when a page should have a full header (like a home/feed screen), a minimalist header (like a detail/form screen with a back button), or no header (if content is full-screen and self-contained).
+  - Define guidelines for footer presence (e.g., persistent on main navigation screens).
+  - On `src/app/stats/page.tsx`, remove the existing `StatusBar` component.
+  - Add a back arrow icon (e.g., from `lucide-react`) to the top-left of the Stats page, configured to navigate back to the home page (e.g., `/`).
+  - Ensure the back arrow is styled consistently with the new header/footer guidelines.
+- **Output:** Updated `ui-redesign-outline.txt` with consistent header/footer strategy, and the Stats page header is replaced with a back arrow.
+
+---
+
+## 3. Context-Extension Instructions
+
+If you need to add new implementation details or reminders, it should:
+
+1. Append under a new heading `## Context Extensions`  
+2. Use the same structure: **Goal**, **Inputs**, **Tasks**, **Output**  
+3. Update the **Progress Tracker** with any new steps
+
+---
+
+## 4. Design Files Saved as TXT
+
+- **`design/home-dashboard.html.txt`**  
+  Contains the full `<html>…</html>` from the main dashboard iframe `srcdoc`.
+
+- **`design/add-workout.html.txt`**  
+  Contains the full `<html>…</html>` from the Add Workout modal iframe `srcdoc`.
+
+Make sure your repo structure includes:
+/design/home-dashboard.html.txt
+/design/add-workout.html.txt
+
+## Reuse vs Refactor
+
+UI Components (src/components/)
+Reusable:
+ui/button.tsx, ui/card.tsx, ui/badge.tsx, ui/avatar.tsx, ui/scroll-area.tsx, ui/sheet.tsx, ui/dialog.tsx, ui/tooltip.tsx, ui/tabs.tsx, ui/accordion.tsx, ui/progress.tsx, ui/slider.tsx, ui/switch.tsx, ui/input.tsx, ui/label.tsx, ui/menubar.tsx, ui/popover.tsx, ui/checkbox.tsx, ui/separator.tsx, ui/toast.tsx, ui/toaster.tsx, ui/skeleton.tsx, ui/alert.tsx, ui/alert-dialog.tsx, ui/calendar.tsx, ui/form.tsx, ui/dropdown-menu.tsx
+dashboard/anatomy-visualization.tsx (SVG heatmap logic, to be refactored for the new design)
+dashboard/progress-analytics.tsx (progress/stats logic, to be refactored)
+dashboard/workout-logger.tsx (workout logging logic, to be refactored)
+layout/header.tsx (header, will need redesign)
+Refactor/Build New:
+Status bar/header (needs new layout and icons)
+Bottom navigation bar (not present, needs to be built)
+Social/community feed (not present, needs to be built)
+Recent workouts carousel (not present, needs to be built)
+Stats cards row (not present, needs to be built)
+Add workout modal (may need to be built or heavily refactored)
+Log workout screen/modal (refactor from workout-logger.tsx)
+Finish workout modal (may need to be built or refactored)
+Hooks (src/hooks/)
+Reusable:
+use-mobile.tsx (mobile detection)
+use-toast.ts (toast notifications)
+Refactor/Build New:
+Any new hooks for navigation, modal state, etc.
+Contexts (src/contexts/)
+Reusable:
+WorkoutContext.tsx (workout state and logic)
+Refactor/Build New:
+Any new context for UI state (e.g., modal open/close, navigation)
+Utilities (src/lib/)
+Reusable:
+constants.ts (muscle and threshold constants)
+utils.ts (utility functions)
+Refactor/Build New:
+Extend as needed for new features
+Assets (src/assets/images/)
+Refactor/Build New:
+None, unless new SVGs are required for the design
+App Structure (src/app/)
+Reusable:
+layout.tsx (global layout, can be updated)
+globals.css (global styles, to be updated)
+Refactor/Build New:
+page.tsx (main dashboard, will need to be rebuilt for new layout)
+
+_End of Guide_ 

@@ -1,0 +1,108 @@
+Subscription Tiers (Revised)
+1. Free Tier
+Goal: Let everyone experience AI-powered guidance at no cost, while still encouraging upgrades for deeper insights and convenience.
+Features:
+
+Basic workout logging (up to 3 workouts/week)
+
+Limited exercise library (50 exercises)
+
+Basic muscle-activation visualization
+
+Simple workout templates (5 templates)
+
+Core AI chat assistant (unlimited, but capped to basic QA & tips only)
+
+Basic progress tracking (last 30 days)
+
+Community feed (view only)
+
+Manual media uploads disabled
+
+Ease-of-use level: Manual entry, simple screens, no “smart” recommendations
+
+Limitations:
+
+No advanced analytics or AI-generated workouts
+
+No custom workout creation
+
+No social posting/sharing or media uploads
+
+Basic customer support
+
+2. Plus Tier ($9.99/mo or $99/yr)
+Goal: For enthusiasts who want more seamless AI support, richer data, and more social features.
+Includes everything in Free, plus:
+
+Unlimited workout logging
+
+Full exercise library (500+ exercises)
+
+Advanced muscle-activation analytics
+
+Unlimited custom workout templates
+
+6-month progress history
+
+Enhanced AI coach (up to 50 messages/day; can generate and adjust full workouts, suggest form cues)
+
+Guided workout creator (step-by-step “smart” builder w/ recommended supersets & circuits)
+
+Media uploads (photos only, 10 per workout)
+
+Social features (post workouts, follow users, comment)
+
+Priority customer support
+
+Additional perks:
+
+Workout analytics & insights dashboard
+
+Progress-photo comparison tool
+
+Basic nutrition tracking integration
+
+“One-click” template suggestions based on your goals
+
+3. Pro Tier ($19.99/mo or $199/yr)
+Goal: The ultimate, frictionless AI-first experience for coaches and dedicated athletes.
+Includes everything in Plus, plus:
+
+Unlimited AI coach & programming (true conversational coach, auto-generate periodized plans, live adjustments)
+
+Full automation: “Generate next week’s plan” and “Auto-log from form/video”
+
+Video uploads (unlimited)
+
+Complete analytics dashboard & exportable reports
+
+Unlimited progress history
+
+Advanced social (private groups, challenges, leaderboards)
+
+Client management portal (assign workouts, track clients)
+
+API access for integrations & white-label options
+
+Premium customer support (24/7)
+
+Pro-only tools:
+
+Advanced special sets (drop sets, rest-pause, clusters, tempo control)
+
+Periodization & auto-progression tools
+
+Biomechanics analysis & injury-prevention insights
+
+Integrated nutrition coaching w/ meal plans
+
+Supplement & recovery-optimization recommendations
+
+Ease-of-Use Continuum
+Free: Manual workflows, limited prompts, basic UI.
+
+Plus: Guided builders, contextual tooltips, one-click suggestions.
+
+Pro: Fully automated pipelines, “AI as your co-trainer,” deep personalization, dashboard shortcuts everywhere.
+

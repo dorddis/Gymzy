@@ -1,0 +1,232 @@
+name: 🚀 Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+env:
+  NODE_VERSION: '18'
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  # Pre-deployment checks
+  pre-deploy:
+    name: 🔍 Pre-deployment Checks
+    runs-on: ubuntu-latest
+    
+    outputs:
+      should-deploy: ${{ steps.check.outputs.should-deploy }}
+      environment: ${{ steps.check.outputs.environment }}
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔍 Check deployment conditions
+        id: check
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "should-deploy=true" >> $GITHUB_OUTPUT
+            echo "environment=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "should-deploy=true" >> $GITHUB_OUTPUT
+            echo "environment=production" >> $GITHUB_OUTPUT
+          else
+            echo "should-deploy=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 📊 Check commit messages
+        run: |
+          # Check if the latest commit is a deployment commit
+          if git log -1 --pretty=%B | grep -q "^deploy:"; then
+            echo "✅ Deployment commit detected"
+          else
+            echo "ℹ️ Regular commit, proceeding with deployment"
+          fi
+
+  # Run full CI pipeline
+  ci:
+    name: 🔄 Run CI Pipeline
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
+
+  # Deploy to Vercel
+  deploy:
+    name: 🚀 Deploy to ${{ needs.pre-deploy.outputs.environment }}
+    runs-on: ubuntu-latest
+    needs: [pre-deploy, ci]
+    if: needs.pre-deploy.outputs.should-deploy == 'true'
+    
+    environment:
+      name: ${{ needs.pre-deploy.outputs.environment }}
+      url: ${{ steps.deploy.outputs.url }}
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📥 Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: 🔗 Link Vercel project
+        run: vercel link --yes --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: 🏗️ Build project artifacts
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }} ${{ needs.pre-deploy.outputs.environment == 'production' && '--prod' || '' }}
+
+      - name: 🚀 Deploy to Vercel
+        id: deploy
+        run: |
+          url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} ${{ needs.pre-deploy.outputs.environment == 'production' && '--prod' || '' }})
+          echo "url=$url" >> $GITHUB_OUTPUT
+          echo "🚀 Deployed to: $url"
+
+      - name: 📊 Update deployment status
+        run: |
+          echo "✅ Deployment successful!"
+          echo "🌐 URL: ${{ steps.deploy.outputs.url }}"
+          echo "🏷️ Environment: ${{ needs.pre-deploy.outputs.environment }}"
+
+  # Post-deployment tests
+  post-deploy:
+    name: 🧪 Post-deployment Tests
+    runs-on: ubuntu-latest
+    needs: [deploy]
+    if: needs.deploy.result == 'success'
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📥 Install dependencies
+        run: npm ci
+
+      - name: 🧪 Run smoke tests
+        run: |
+          # Basic health check
+          curl -f ${{ needs.deploy.outputs.url }}/api/health || exit 1
+          echo "✅ Health check passed"
+
+      - name: ⚡ Run Lighthouse audit
+        run: |
+          npm install -g lighthouse
+          lighthouse ${{ needs.deploy.outputs.url }} --output=json --output-path=./lighthouse-report.json --chrome-flags="--headless --no-sandbox"
+          
+          # Check performance score
+          PERFORMANCE=$(cat lighthouse-report.json | jq '.categories.performance.score * 100')
+          echo "⚡ Performance score: $PERFORMANCE"
+          
+          if (( $(echo "$PERFORMANCE < 80" | bc -l) )); then
+            echo "⚠️ Performance score below 80"
+          else
+            echo "✅ Performance score acceptable"
+          fi
+
+      - name: 🔒 Security headers check
+        run: |
+          # Check for security headers
+          curl -I ${{ needs.deploy.outputs.url }} | grep -i "x-frame-options\|x-content-type-options\|x-xss-protection" || echo "⚠️ Some security headers missing"
+
+  # Rollback on failure
+  rollback:
+    name: 🔄 Rollback on Failure
+    runs-on: ubuntu-latest
+    needs: [deploy, post-deploy]
+    if: failure() && needs.deploy.result == 'success'
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📥 Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: 🔄 Rollback deployment
+        run: |
+          echo "🔄 Rolling back deployment due to post-deployment test failures"
+          # Get previous deployment
+          PREV_DEPLOYMENT=$(vercel ls --token=${{ secrets.VERCEL_TOKEN }} | grep -v ${{ needs.deploy.outputs.url }} | head -1 | awk '{print $2}')
+          
+          if [ ! -z "$PREV_DEPLOYMENT" ]; then
+            vercel alias $PREV_DEPLOYMENT ${{ needs.deploy.outputs.url }} --token=${{ secrets.VERCEL_TOKEN }}
+            echo "✅ Rolled back to previous deployment: $PREV_DEPLOYMENT"
+          else
+            echo "❌ No previous deployment found for rollback"
+          fi
+
+  # Notify deployment status
+  notify:
+    name: 📢 Notify Deployment Status
+    runs-on: ubuntu-latest
+    needs: [deploy, post-deploy]
+    if: always() && needs.deploy.result != 'skipped'
+    
+    steps:
+      - name: 📢 Notify success
+        if: needs.deploy.result == 'success' && needs.post-deploy.result == 'success'
+        run: |
+          echo "🎉 Deployment successful!"
+          echo "🌐 URL: ${{ needs.deploy.outputs.url }}"
+          echo "✅ All post-deployment tests passed"
+
+      - name: 📢 Notify failure
+        if: needs.deploy.result == 'failure' || needs.post-deploy.result == 'failure'
+        run: |
+          echo "❌ Deployment failed!"
+          if [ "${{ needs.deploy.result }}" == "failure" ]; then
+            echo "💥 Deployment step failed"
+          fi
+          if [ "${{ needs.post-deploy.result }}" == "failure" ]; then
+            echo "🧪 Post-deployment tests failed"
+          fi
+
+  # Update production status
+  update-status:
+    name: 📊 Update Production Status
+    runs-on: ubuntu-latest
+    needs: [deploy, post-deploy]
+    if: needs.deploy.result == 'success' && needs.post-deploy.result == 'success' && needs.pre-deploy.outputs.environment == 'production'
+    
+    steps:
+      - name: 📊 Update deployment status
+        run: |
+          echo "📊 Updating production deployment status"
+          echo "🚀 Version: ${{ github.sha }}"
+          echo "🌐 URL: ${{ needs.deploy.outputs.url }}"
+          echo "📅 Deployed at: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+
+      - name: 🏷️ Create release tag
+        if: needs.pre-deploy.outputs.environment == 'production'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          # Create tag with current date
+          TAG="v$(date +%Y.%m.%d)-$(echo ${{ github.sha }} | cut -c1-7)"
+          git tag $TAG
+          git push origin $TAG
+          
+          echo "🏷️ Created release tag: $TAG"
