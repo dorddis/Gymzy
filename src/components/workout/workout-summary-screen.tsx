@@ -36,6 +36,7 @@ import { SupersetCreator } from './superset-creator';
 import { SupersetDisplay } from './superset-display';
 import { CircuitDisplay } from './circuit-display';
 import { DropSetDisplay } from './dropset-display';
+import { RestPauseDisplay } from './restpause-display';
 import { SpecialSetsModal } from './special-sets-modal';
 
 interface WorkoutSummaryScreenProps {
@@ -267,6 +268,24 @@ export function WorkoutSummaryScreen({
     });
   };
 
+  const handleCreateRestPause = (exerciseId: string, parameters: any) => {
+    const restPauseGroupId = `restpause_${Date.now()}`;
+
+    setCurrentWorkoutExercises((prevExercises: ExerciseWithSets[]) => {
+      return prevExercises.map(exercise => {
+        if (exercise.id === exerciseId) {
+          return {
+            ...exercise,
+            specialSetType: 'restpause' as const,
+            specialSetGroup: restPauseGroupId,
+            specialSetParameters: parameters
+          };
+        }
+        return exercise;
+      });
+    });
+  };
+
   // Group exercises by superset
   const groupedExercises = React.useMemo(() => {
     const groups: { [key: string]: ExerciseWithSets[] } = {};
@@ -400,6 +419,22 @@ export function WorkoutSummaryScreen({
               const exercise = exercises[0];
               return (
                 <DropSetDisplay
+                  key={groupId}
+                  exercise={exercise}
+                  onSetExecuted={(setIndex, actualReps, actualWeight) => {
+                    const globalExerciseIndex = currentWorkoutExercises.findIndex(ex => ex.id === exercise.id);
+                    if (globalExerciseIndex !== -1) {
+                      handleSetExecuted(globalExerciseIndex, setIndex);
+                    }
+                  }}
+                  className="mb-4"
+                />
+              );
+            } else if (specialSetType === 'restpause') {
+              // Rest-pause sets are single exercises, so we take the first one
+              const exercise = exercises[0];
+              return (
+                <RestPauseDisplay
                   key={groupId}
                   exercise={exercise}
                   onSetExecuted={(setIndex, actualReps, actualWeight) => {
@@ -566,6 +601,7 @@ export function WorkoutSummaryScreen({
           onCreateSuperset={handleCreateSuperset}
           onCreateCircuit={handleCreateCircuit}
           onCreateDropSet={handleCreateDropSet}
+          onCreateRestPause={handleCreateRestPause}
           onClose={() => setShowSpecialSetsModal(false)}
         />
       )}

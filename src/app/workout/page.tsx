@@ -281,6 +281,25 @@ export default function WorkoutPage() {
     setShowSpecialSetsModal(false);
   };
 
+  const handleCreateRestPause = (exerciseId: string, parameters: any) => {
+    const restPauseGroupId = `restpause_${Date.now()}`;
+
+    setCurrentWorkoutExercises((prevExercises) => {
+      return prevExercises.map(exercise => {
+        if (exercise.id === exerciseId) {
+          return {
+            ...exercise,
+            specialSetType: 'restpause' as const,
+            specialSetGroup: restPauseGroupId,
+            specialSetParameters: parameters
+          };
+        }
+        return exercise;
+      });
+    });
+    setShowSpecialSetsModal(false);
+  };
+
   return (
     <div className="flex flex-col h-full">
       <WorkoutHeader
@@ -385,6 +404,7 @@ export default function WorkoutPage() {
           onCreateSuperset={handleCreateSuperset}
           onCreateCircuit={handleCreateCircuit}
           onCreateDropSet={handleCreateDropSet}
+          onCreateRestPause={handleCreateRestPause}
           onClose={() => setShowSpecialSetsModal(false)}
         />
       )}

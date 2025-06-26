@@ -10,12 +10,14 @@ import { cn } from '@/lib/utils';
 import { SupersetCreator } from './superset-creator';
 import { CircuitCreator } from './circuit-creator';
 import { DropSetCreator } from './dropset-creator';
+import { RestPauseCreator } from './restpause-creator';
 
 interface SpecialSetsModalProps {
   exercises: ExerciseWithSets[];
   onCreateSuperset: (exerciseIds: string[], parameters: any) => void;
   onCreateCircuit: (exerciseIds: string[], parameters: any) => void;
   onCreateDropSet: (exerciseId: string, parameters: any) => void;
+  onCreateRestPause: (exerciseId: string, parameters: any) => void;
   onClose: () => void;
 }
 
@@ -55,8 +57,7 @@ const SPECIAL_SET_TYPES: SpecialSetType[] = [
     name: 'Rest-Pause',
     description: 'Short rest periods within a set to extend total reps',
     icon: Clock,
-    available: false,
-    comingSoon: true
+    available: true
   },
   {
     id: 'cluster',
@@ -76,11 +77,12 @@ const SPECIAL_SET_TYPES: SpecialSetType[] = [
   }
 ];
 
-export function SpecialSetsModal({ exercises, onCreateSuperset, onCreateCircuit, onCreateDropSet, onClose }: SpecialSetsModalProps) {
+export function SpecialSetsModal({ exercises, onCreateSuperset, onCreateCircuit, onCreateDropSet, onCreateRestPause, onClose }: SpecialSetsModalProps) {
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [showSupersetCreator, setShowSupersetCreator] = useState(false);
   const [showCircuitCreator, setShowCircuitCreator] = useState(false);
   const [showDropSetCreator, setShowDropSetCreator] = useState(false);
+  const [showRestPauseCreator, setShowRestPauseCreator] = useState(false);
 
   const handleSpecialSetSelect = (typeId: string) => {
     if (typeId === 'superset') {
@@ -89,6 +91,8 @@ export function SpecialSetsModal({ exercises, onCreateSuperset, onCreateCircuit,
       setShowCircuitCreator(true);
     } else if (typeId === 'dropset') {
       setShowDropSetCreator(true);
+    } else if (typeId === 'restpause') {
+      setShowRestPauseCreator(true);
     } else {
       // For future implementation
       console.log(`${typeId} coming soon!`);
@@ -110,6 +114,12 @@ export function SpecialSetsModal({ exercises, onCreateSuperset, onCreateCircuit,
   const handleDropSetCreate = (exerciseId: string, parameters: any) => {
     onCreateDropSet(exerciseId, parameters);
     setShowDropSetCreator(false);
+    onClose();
+  };
+
+  const handleRestPauseCreate = (exerciseId: string, parameters: any) => {
+    onCreateRestPause(exerciseId, parameters);
+    setShowRestPauseCreator(false);
     onClose();
   };
 
@@ -139,6 +149,16 @@ export function SpecialSetsModal({ exercises, onCreateSuperset, onCreateCircuit,
         exercises={exercises}
         onCreateDropSet={handleDropSetCreate}
         onClose={() => setShowDropSetCreator(false)}
+      />
+    );
+  }
+
+  if (showRestPauseCreator) {
+    return (
+      <RestPauseCreator
+        exercises={exercises}
+        onCreateRestPause={handleRestPauseCreate}
+        onClose={() => setShowRestPauseCreator(false)}
       />
     );
   }
@@ -225,7 +245,7 @@ export function SpecialSetsModal({ exercises, onCreateSuperset, onCreateCircuit,
             <ul className="text-sm text-blue-800 space-y-1">
               <li>• You need at least 2 exercises to create a superset</li>
               <li>• You need at least 3 exercises to create a circuit</li>
-              <li>• Drop sets require exercises with weight data</li>
+              <li>• Drop sets and rest-pause require exercises with weight data</li>
               <li>• Other special sets will be available in future updates</li>
               <li>• Special sets can be mixed with regular exercises in the same workout</li>
             </ul>
