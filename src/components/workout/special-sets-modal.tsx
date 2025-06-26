@@ -8,10 +8,12 @@ import { ExerciseWithSets } from '@/types/exercise';
 import { X, Link, Zap, TrendingDown, Clock, Repeat, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SupersetCreator } from './superset-creator';
+import { CircuitCreator } from './circuit-creator';
 
 interface SpecialSetsModalProps {
   exercises: ExerciseWithSets[];
   onCreateSuperset: (exerciseIds: string[], parameters: any) => void;
+  onCreateCircuit: (exerciseIds: string[], parameters: any) => void;
   onClose: () => void;
 }
 
@@ -37,8 +39,7 @@ const SPECIAL_SET_TYPES: SpecialSetType[] = [
     name: 'Circuit',
     description: 'Timed rounds of multiple exercises with work/rest intervals',
     icon: Repeat,
-    available: false,
-    comingSoon: true
+    available: true
   },
   {
     id: 'dropset',
@@ -74,13 +75,16 @@ const SPECIAL_SET_TYPES: SpecialSetType[] = [
   }
 ];
 
-export function SpecialSetsModal({ exercises, onCreateSuperset, onClose }: SpecialSetsModalProps) {
+export function SpecialSetsModal({ exercises, onCreateSuperset, onCreateCircuit, onClose }: SpecialSetsModalProps) {
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [showSupersetCreator, setShowSupersetCreator] = useState(false);
+  const [showCircuitCreator, setShowCircuitCreator] = useState(false);
 
   const handleSpecialSetSelect = (typeId: string) => {
     if (typeId === 'superset') {
       setShowSupersetCreator(true);
+    } else if (typeId === 'circuit') {
+      setShowCircuitCreator(true);
     } else {
       // For future implementation
       console.log(`${typeId} coming soon!`);
@@ -93,12 +97,28 @@ export function SpecialSetsModal({ exercises, onCreateSuperset, onClose }: Speci
     onClose();
   };
 
+  const handleCircuitCreate = (exerciseIds: string[], parameters: any) => {
+    onCreateCircuit(exerciseIds, parameters);
+    setShowCircuitCreator(false);
+    onClose();
+  };
+
   if (showSupersetCreator) {
     return (
       <SupersetCreator
         exercises={exercises}
         onCreateSuperset={handleSupersetCreate}
         onClose={() => setShowSupersetCreator(false)}
+      />
+    );
+  }
+
+  if (showCircuitCreator) {
+    return (
+      <CircuitCreator
+        exercises={exercises}
+        onCreateCircuit={handleCircuitCreate}
+        onClose={() => setShowCircuitCreator(false)}
       />
     );
   }
@@ -184,6 +204,7 @@ export function SpecialSetsModal({ exercises, onCreateSuperset, onClose }: Speci
             <h4 className="font-semibold text-blue-900 mb-2">Requirements</h4>
             <ul className="text-sm text-blue-800 space-y-1">
               <li>• You need at least 2 exercises to create a superset</li>
+              <li>• You need at least 3 exercises to create a circuit</li>
               <li>• Other special sets will be available in future updates</li>
               <li>• Special sets can be mixed with regular exercises in the same workout</li>
             </ul>

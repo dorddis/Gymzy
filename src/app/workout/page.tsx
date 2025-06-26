@@ -243,6 +243,25 @@ export default function WorkoutPage() {
     setShowSpecialSetsModal(false);
   };
 
+  const handleCreateCircuit = (exerciseIds: string[], parameters: any) => {
+    const circuitGroupId = `circuit_${Date.now()}`;
+
+    setCurrentWorkoutExercises((prevExercises) => {
+      return prevExercises.map(exercise => {
+        if (exerciseIds.includes(exercise.id)) {
+          return {
+            ...exercise,
+            specialSetType: 'circuit' as const,
+            specialSetGroup: circuitGroupId,
+            specialSetParameters: parameters
+          };
+        }
+        return exercise;
+      });
+    });
+    setShowSpecialSetsModal(false);
+  };
+
   return (
     <div className="flex flex-col h-full">
       <WorkoutHeader
@@ -345,6 +364,7 @@ export default function WorkoutPage() {
         <SpecialSetsModal
           exercises={currentWorkoutExercises.filter(ex => !ex.specialSetGroup)}
           onCreateSuperset={handleCreateSuperset}
+          onCreateCircuit={handleCreateCircuit}
           onClose={() => setShowSpecialSetsModal(false)}
         />
       )}

@@ -34,6 +34,7 @@ import { AlertTriangle, ArrowDown, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SupersetCreator } from './superset-creator';
 import { SupersetDisplay } from './superset-display';
+import { CircuitDisplay } from './circuit-display';
 import { SpecialSetsModal } from './special-sets-modal';
 
 interface WorkoutSummaryScreenProps {
@@ -229,6 +230,24 @@ export function WorkoutSummaryScreen({
     });
   };
 
+  const handleCreateCircuit = (exerciseIds: string[], parameters: any) => {
+    const circuitGroupId = `circuit_${Date.now()}`;
+
+    setCurrentWorkoutExercises((prevExercises: ExerciseWithSets[]) => {
+      return prevExercises.map(exercise => {
+        if (exerciseIds.includes(exercise.id)) {
+          return {
+            ...exercise,
+            specialSetType: 'circuit' as const,
+            specialSetGroup: circuitGroupId,
+            specialSetParameters: parameters
+          };
+        }
+        return exercise;
+      });
+    });
+  };
+
   // Group exercises by superset
   const groupedExercises = React.useMemo(() => {
     const groups: { [key: string]: ExerciseWithSets[] } = {};
@@ -323,21 +342,44 @@ export function WorkoutSummaryScreen({
 
       {currentWorkoutExercises.length > 0 && (
         <div className="space-y-4"> {/* Reduced vertical spacing between exercises */}
-          {/* Render Supersets */}
-          {Object.entries(groupedExercises.groups).map(([groupId, exercises]) => (
-            <SupersetDisplay
-              key={groupId}
-              exercises={exercises}
-              groupId={groupId}
-              onSetExecuted={(exerciseIndex, setIndex) => {
-                const globalExerciseIndex = currentWorkoutExercises.findIndex(ex => ex.id === exercises[exerciseIndex].id);
-                if (globalExerciseIndex !== -1) {
-                  handleSetExecuted(globalExerciseIndex, setIndex);
-                }
-              }}
-              className="mb-4"
-            />
-          ))}
+          {/* Render Special Sets (Supersets and Circuits) */}
+          {Object.entries(groupedExercises.groups).map(([groupId, exercises]) => {
+            const specialSetType = exercises[0]?.specialSetType;
+
+            if (specialSetType === 'superset') {
+              return (
+                <SupersetDisplay
+                  key={groupId}
+                  exercises={exercises}
+                  groupId={groupId}
+                  onSetExecuted={(exerciseIndex, setIndex) => {
+                    const globalExerciseIndex = currentWorkoutExercises.findIndex(ex => ex.id === exercises[exerciseIndex].id);
+                    if (globalExerciseIndex !== -1) {
+                      handleSetExecuted(globalExerciseIndex, setIndex);
+                    }
+                  }}
+                  className="mb-4"
+                />
+              );
+            } else if (specialSetType === 'circuit') {
+              return (
+                <CircuitDisplay
+                  key={groupId}
+                  exercises={exercises}
+                  groupId={groupId}
+                  onSetExecuted={(exerciseIndex, setIndex) => {
+                    const globalExerciseIndex = currentWorkoutExercises.findIndex(ex => ex.id === exercises[exerciseIndex].id);
+                    if (globalExerciseIndex !== -1) {
+                      handleSetExecuted(globalExerciseIndex, setIndex);
+                    }
+                  }}
+                  className="mb-4"
+                />
+              );
+            }
+
+            return null;
+          })}
 
           {/* Render Standalone Exercises */}
           {groupedExercises.standalone.map((exercise) => {
@@ -487,6 +529,7 @@ export function WorkoutSummaryScreen({
         <SpecialSetsModal
           exercises={currentWorkoutExercises.filter(ex => !ex.specialSetGroup)}
           onCreateSuperset={handleCreateSuperset}
+          onCreateCircuit={handleCreateCircuit}
           onClose={() => setShowSpecialSetsModal(false)}
         />
       )}
