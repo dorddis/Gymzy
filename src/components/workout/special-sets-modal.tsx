@@ -9,11 +9,13 @@ import { X, Link, Zap, TrendingDown, Clock, Repeat, Target } from 'lucide-react'
 import { cn } from '@/lib/utils';
 import { SupersetCreator } from './superset-creator';
 import { CircuitCreator } from './circuit-creator';
+import { DropSetCreator } from './dropset-creator';
 
 interface SpecialSetsModalProps {
   exercises: ExerciseWithSets[];
   onCreateSuperset: (exerciseIds: string[], parameters: any) => void;
   onCreateCircuit: (exerciseIds: string[], parameters: any) => void;
+  onCreateDropSet: (exerciseId: string, parameters: any) => void;
   onClose: () => void;
 }
 
@@ -46,8 +48,7 @@ const SPECIAL_SET_TYPES: SpecialSetType[] = [
     name: 'Drop Set',
     description: 'Reduce weight after reaching failure to continue the set',
     icon: TrendingDown,
-    available: false,
-    comingSoon: true
+    available: true
   },
   {
     id: 'restpause',
@@ -75,16 +76,19 @@ const SPECIAL_SET_TYPES: SpecialSetType[] = [
   }
 ];
 
-export function SpecialSetsModal({ exercises, onCreateSuperset, onCreateCircuit, onClose }: SpecialSetsModalProps) {
+export function SpecialSetsModal({ exercises, onCreateSuperset, onCreateCircuit, onCreateDropSet, onClose }: SpecialSetsModalProps) {
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [showSupersetCreator, setShowSupersetCreator] = useState(false);
   const [showCircuitCreator, setShowCircuitCreator] = useState(false);
+  const [showDropSetCreator, setShowDropSetCreator] = useState(false);
 
   const handleSpecialSetSelect = (typeId: string) => {
     if (typeId === 'superset') {
       setShowSupersetCreator(true);
     } else if (typeId === 'circuit') {
       setShowCircuitCreator(true);
+    } else if (typeId === 'dropset') {
+      setShowDropSetCreator(true);
     } else {
       // For future implementation
       console.log(`${typeId} coming soon!`);
@@ -100,6 +104,12 @@ export function SpecialSetsModal({ exercises, onCreateSuperset, onCreateCircuit,
   const handleCircuitCreate = (exerciseIds: string[], parameters: any) => {
     onCreateCircuit(exerciseIds, parameters);
     setShowCircuitCreator(false);
+    onClose();
+  };
+
+  const handleDropSetCreate = (exerciseId: string, parameters: any) => {
+    onCreateDropSet(exerciseId, parameters);
+    setShowDropSetCreator(false);
     onClose();
   };
 
@@ -119,6 +129,16 @@ export function SpecialSetsModal({ exercises, onCreateSuperset, onCreateCircuit,
         exercises={exercises}
         onCreateCircuit={handleCircuitCreate}
         onClose={() => setShowCircuitCreator(false)}
+      />
+    );
+  }
+
+  if (showDropSetCreator) {
+    return (
+      <DropSetCreator
+        exercises={exercises}
+        onCreateDropSet={handleDropSetCreate}
+        onClose={() => setShowDropSetCreator(false)}
       />
     );
   }
@@ -205,6 +225,7 @@ export function SpecialSetsModal({ exercises, onCreateSuperset, onCreateCircuit,
             <ul className="text-sm text-blue-800 space-y-1">
               <li>• You need at least 2 exercises to create a superset</li>
               <li>• You need at least 3 exercises to create a circuit</li>
+              <li>• Drop sets require exercises with weight data</li>
               <li>• Other special sets will be available in future updates</li>
               <li>• Special sets can be mixed with regular exercises in the same workout</li>
             </ul>

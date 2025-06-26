@@ -262,6 +262,25 @@ export default function WorkoutPage() {
     setShowSpecialSetsModal(false);
   };
 
+  const handleCreateDropSet = (exerciseId: string, parameters: any) => {
+    const dropSetGroupId = `dropset_${Date.now()}`;
+
+    setCurrentWorkoutExercises((prevExercises) => {
+      return prevExercises.map(exercise => {
+        if (exercise.id === exerciseId) {
+          return {
+            ...exercise,
+            specialSetType: 'dropset' as const,
+            specialSetGroup: dropSetGroupId,
+            specialSetParameters: parameters
+          };
+        }
+        return exercise;
+      });
+    });
+    setShowSpecialSetsModal(false);
+  };
+
   return (
     <div className="flex flex-col h-full">
       <WorkoutHeader
@@ -365,6 +384,7 @@ export default function WorkoutPage() {
           exercises={currentWorkoutExercises.filter(ex => !ex.specialSetGroup)}
           onCreateSuperset={handleCreateSuperset}
           onCreateCircuit={handleCreateCircuit}
+          onCreateDropSet={handleCreateDropSet}
           onClose={() => setShowSpecialSetsModal(false)}
         />
       )}
