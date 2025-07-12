@@ -97,7 +97,7 @@ export async function compressVideo(
     return file;
   }
 
-  // For now, we'll just return the original file
+  // For now, we&apos;ll just return the original file
   // Video compression would require a more complex solution
   // like using WebCodecs API or a server-side solution
   return file;

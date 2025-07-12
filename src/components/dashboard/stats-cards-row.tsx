@@ -29,7 +29,7 @@ export function StatsCardsRow() {
   const averageRPE = recentWorkouts.length > 0 ? (totalRPE / recentWorkouts.length) : 0;
 
   // Calculate Consistency (placeholder for now, needs actual logic)
-  // For demonstration, let's say 3 workouts in the last 7 days is 'Good'
+  // For demonstration, let&apos;s say 3 workouts in the last 7 days is 'Good'
   const consistency = recentWorkouts.length >= 3 ? 'Good' : 'Needs Work';
 
   const stats = [

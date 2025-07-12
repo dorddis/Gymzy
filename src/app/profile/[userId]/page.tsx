@@ -153,7 +153,7 @@ export default function UserProfilePage() {
           <CardContent className="p-6 text-center">
             <h2 className="text-xl font-semibold mb-2">User Not Found</h2>
             <p className="text-muted-foreground">
-              This user profile doesn't exist or is private.
+              This user profile doesn&apos;t exist or is private.
             </p>
           </CardContent>
         </Card>

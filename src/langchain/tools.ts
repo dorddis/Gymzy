@@ -1,6 +1,6 @@
 import { DynamicTool } from 'langchain/tools';
 // Attempting to use Zod for schema definition as is common in LangChain.js
-// If 'zod' is not available, these schemas will guide the DynamicTool's description.
+// If 'zod' is not available, these schemas will guide the DynamicTool&apos;s description.
 import { z } from 'zod';
 import { EnhancedWorkoutTools, ToolExecutionContext } from '../services/enhanced-workout-tools'; // Assuming ToolExecutionContext is exported
 
@@ -11,7 +11,7 @@ const enhancedWorkoutTools = new EnhancedWorkoutTools();
 const mockContext: ToolExecutionContext = {
   userId: "langchain-user-simulated",
   // userProfile might be needed by some tools, initialize if necessary based on EnhancedWorkoutTools
-  // For now, assuming it's optional or handled gracefully by the tools if not present
+  // For now, assuming it&apos;s optional or handled gracefully by the tools if not present
   userProfile: {
     // Example properties - actual properties depend on UserProfile definition
     // preferences: { workoutComplexity: 'intermediate' },
@@ -48,9 +48,9 @@ export const createWorkoutLangchainTool = new DynamicTool({
   description: `Creates a personalized workout plan.
 Use this when a user explicitly asks to generate, build, or design a workout or routine.
 You can specify parameters like workout name, type (e.g., strength, cardio), target muscle groups, a list of specific exercises (which will be intelligently matched or substituted if necessary), total duration, and difficulty.
-If specific exercises are NOT provided, the tool will generate suitable exercises based on the workout type, muscle groups, duration, and difficulty. The tool returns a summary of the created workout, including its name, the exercises included, and details about any exercises that couldn't be matched or were substituted.`,
+If specific exercises are NOT provided, the tool will generate suitable exercises based on the workout type, muscle groups, duration, and difficulty. The tool returns a summary of the created workout, including its name, the exercises included, and details about any exercises that couldn&apos;t be matched or were substituted.`,
   func: async (args) => {
-    // Type assertion for args if not using Zod directly in DynamicTool's args typing
+    // Type assertion for args if not using Zod directly in DynamicTool&apos;s args typing
     const validatedArgs = CreateWorkoutArgsSchema.parse(args);
     const originalTool = enhancedWorkoutTools.getToolDefinitions().find(t => t.name === 'create_workout');
     if (!originalTool || !originalTool.execute) {

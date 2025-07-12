@@ -1,7 +1,7 @@
 // Groq AI Service - Now using server-side API routes for security
 // This service now makes requests to our own API routes instead of directly to Groq
 
-// Check if we're running on the server side
+// Check if we&apos;re running on the server side
 const isServerSide = typeof window === 'undefined';
 
 // Server-side Groq client (only used in API routes)
@@ -107,7 +107,7 @@ export const generateAIResponseServer = async (prompt: string): Promise<string> 
 // Client-side function that calls our API route
 export const generateAIResponse = async (prompt: string): Promise<string> => {
   if (isServerSide) {
-    // If we're on the server, use the direct function
+    // If we&apos;re on the server, use the direct function
     return generateAIResponseServer(prompt);
   }
 
@@ -211,7 +211,7 @@ export const generateCharacterStreamingResponse = async (
   onError?: (error: string) => void
 ): Promise<string> => {
   if (isServerSide) {
-    // If we're on the server, use the direct function
+    // If we&apos;re on the server, use the direct function
     return generateCharacterStreamingResponseServer(prompt, onChunk, onComplete, onError);
   }
 
@@ -354,11 +354,11 @@ export const generateTokenStreamingResponse = async (
   onError?: (error: string) => void
 ): Promise<string> => {
   if (isServerSide) {
-    // If we're on the server, use the direct function
+    // If we&apos;re on the server, use the direct function
     return generateTokenStreamingResponseServer(prompt, onChunk, onComplete, onError);
   }
 
-  // Use the same streaming implementation as character streaming (they're now the same)
+  // Use the same streaming implementation as character streaming (they&apos;re now the same)
   return generateCharacterStreamingResponse(prompt, onChunk, onComplete, onError);
 };
 
@@ -411,7 +411,7 @@ export const generateConversationResponse = async (
   temperature: number = 0.7
 ): Promise<string> => {
   if (isServerSide) {
-    // If we're on the server, use the direct function
+    // If we&apos;re on the server, use the direct function
     return generateConversationResponseServer(messages, temperature);
   }
 

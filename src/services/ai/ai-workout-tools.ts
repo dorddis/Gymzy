@@ -132,7 +132,7 @@ export const AI_WORKOUT_TOOLS: AITool[] = [
         experience: {
           type: "string",
           enum: ["beginner", "intermediate", "advanced"],
-          description: "User's experience level"
+          description: "User&apos;s experience level"
         },
         duration: {
           type: "number",
@@ -422,7 +422,7 @@ export class AIWorkoutToolExecutor {
         name: exercise.name,
         sets: experience === 'beginner' ? 2 : experience === 'intermediate' ? 3 : 4,
         reps: goal === 'strength' ? 6 : goal === 'endurance' ? 15 : 10,
-        weight: 0 // Will be filled based on user's previous data
+        weight: 0 // Will be filled based on user&apos;s previous data
       } : null;
     }).filter(Boolean);
 
@@ -496,7 +496,7 @@ export class AIWorkoutToolExecutor {
 
     return {
       ...result,
-      message: `I've ${this.getModificationDescription(modificationType)} your workout! Here's your updated routine:`
+      message: `I've ${this.getModificationDescription(modificationType)} your workout! Here&apos;s your updated routine:`
     };
   }
 

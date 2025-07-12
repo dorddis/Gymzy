@@ -117,7 +117,7 @@ export class ProfilePictureService {
     pictureId: string
   ): Promise<void> {
     try {
-      // Get all user's profile pictures
+      // Get all user&apos;s profile pictures
       const userPicturesQuery = query(
         collection(db, this.COLLECTION_NAME),
         where('userId', '==', userId)
@@ -313,17 +313,17 @@ export class ProfilePictureService {
   private static async deleteFromCloudinary(publicId: string): Promise<void> {
     try {
       // Note: Deleting from Cloudinary requires server-side implementation
-      // For now, we'll just mark as deleted in our database
+      // For now, we&apos;ll just mark as deleted in our database
       // In production, you'd want to implement a server endpoint for deletion
       console.log(`Would delete Cloudinary image: ${publicId}`);
     } catch (error) {
       console.error('Error deleting from Cloudinary:', error);
-      // Don't throw error as this is not critical
+      // Don&apos;t throw error as this is not critical
     }
   }
 
   private static generateThumbnailUrl(originalUrl: string): string {
-    // Use Cloudinary's transformation API to generate thumbnail
+    // Use Cloudinary&apos;s transformation API to generate thumbnail
     // Replace /upload/ with /upload/w_150,h_150,c_fill/
     return originalUrl.replace('/upload/', '/upload/w_150,h_150,c_fill/');
   }

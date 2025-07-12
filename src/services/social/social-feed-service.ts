@@ -64,7 +64,7 @@ const calculateRecencyScore = (post: WorkoutPost): number => {
 // Calculate similarity score based on user preferences
 const calculateSimilarityScore = async (post: WorkoutPost, userId: string): Promise<number> => {
   try {
-    // Get user's profile to compare interests
+    // Get user&apos;s profile to compare interests
     const userProfileRef = doc(db, 'user_profiles', userId);
     const userProfileSnap = await getDoc(userProfileRef);
     
@@ -74,7 +74,7 @@ const calculateSimilarityScore = async (post: WorkoutPost, userId: string): Prom
     const userGoals = userProfile.fitnessGoals || [];
     const userWorkoutTypes = userProfile.preferredWorkoutTypes || [];
     
-    // Get post author's profile
+    // Get post author&apos;s profile
     const postAuthorRef = doc(db, 'user_profiles', post.userId);
     const postAuthorSnap = await getDoc(postAuthorRef);
     

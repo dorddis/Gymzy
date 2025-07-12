@@ -197,7 +197,7 @@ export class IntelligentWorkoutGenerator {
       name: exercise.name,
       sets,
       reps,
-      weight: 0, // Will be filled based on user's previous data
+      weight: 0, // Will be filled based on user&apos;s previous data
       restTime: 60,
       instructions: exercise.instructions
     }));

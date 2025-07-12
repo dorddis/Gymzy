@@ -261,7 +261,7 @@ export default function DiscoverPage() {
             ) : searchTerm && !isSearching ? (
               <Card>
                 <CardContent className="p-6 text-center text-muted-foreground">
-                  No users found for "{searchTerm}"
+                  No users found for &quot;{searchTerm}&quot;
                 </CardContent>
               </Card>
             ) : null}

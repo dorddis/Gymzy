@@ -31,34 +31,34 @@ C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:258 🔍 
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:272 🔍 AgenticAI: Tool decision prompt length: 2301
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:275 🔍 AgenticAI: Raw tool decision response: ```json
 {
-  "reasoning": "The user's request is unrelated to fitness.  Providing workout plans or exercise information would be irrelevant and inappropriate.  No fitness tools are needed.",
+  "reasoning": "The user&apos;s request is unrelated to fitness.  Providing workout plans or exercise information would be irrelevant and inappropriate.  No fitness tools are needed.",
   "toolCalls": []
 }
 ```
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:280 🔍 AgenticAI: Found JSON in response: {
-  "reasoning": "The user's request is unrelated to fitness.  Providing workout plans or exercise information would be irrelevant and inappropriate.  No fitness tools are needed.",
+  "reasoning": "The user&apos;s request is unrelated to fitness.  Providing workout plans or exercise information would be irrelevant and inappropriate.  No fitness tools are needed.",
   "toolCalls": []
 }
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:282 🔍 AgenticAI: Parsed tool decision: {
-  "reasoning": "The user's request is unrelated to fitness.  Providing workout plans or exercise information would be irrelevant and inappropriate.  No fitness tools are needed.",
+  "reasoning": "The user&apos;s request is unrelated to fitness.  Providing workout plans or exercise information would be irrelevant and inappropriate.  No fitness tools are needed.",
   "toolCalls": []
 }
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:111 🔍 AgenticAI: Tool decision received: {
-  "reasoning": "The user's request is unrelated to fitness.  Providing workout plans or exercise information would be irrelevant and inappropriate.  No fitness tools are needed.",
+  "reasoning": "The user&apos;s request is unrelated to fitness.  Providing workout plans or exercise information would be irrelevant and inappropriate.  No fitness tools are needed.",
   "toolCalls": []
 }
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:159 🛠️ AgenticAI: No tools needed for this request
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:163 📝 AgenticAI: Building final response prompt...
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:165 📝 AgenticAI: Final prompt length: 647
-C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:166 📝 AgenticAI: Final prompt preview: Based on the user's request: "whats the weather today?"
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:166 📝 AgenticAI: Final prompt preview: Based on the user&apos;s request: "whats the weather today?"
 
-Reasoning: The user's request is unrelated to fitness.  Providing workout plans or exercise information would be irrelevant and inappropriate. ...
+Reasoning: The user&apos;s request is unrelated to fitness.  Providing workout plans or exercise information would be irrelevant and inappropriate. ...
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:169 🌊 AgenticAI: Using streaming response for final prompt
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:348 🌊 AgenticAI: Starting character streaming...
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:349 🌊 AgenticAI: Prompt length for streaming: 647
-C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai-service.ts:121 Starting character streaming for prompt: Based on the user's request: "whats the weather today?"
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai-service.ts:121 Starting character streaming for prompt: Based on the user&apos;s request: "whats the weather today?"
 
-Reasoning: The user's request is unrelated ...
+Reasoning: The user&apos;s request is unrelated ...
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai-service.ts:123 Full response received, length: 172
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai-chat-service.ts:111 🌊 ChatService: Received streaming chunk: T
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai-chat-service.ts:111 🌊 ChatService: Received streaming chunk: h
@@ -281,13 +281,13 @@ C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:111 🔍 
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:159 🛠️ AgenticAI: No tools needed for this request
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:163 📝 AgenticAI: Building final response prompt...
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:165 📝 AgenticAI: Final prompt length: 766
-C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:166 📝 AgenticAI: Final prompt preview: Based on the user's request: "okay now create me a workout"
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:166 📝 AgenticAI: Final prompt preview: Based on the user&apos;s request: "okay now create me a workout"
 
 Reasoning: The user has requested a workout without specifying any preferences (muscle group, goals, experience level, equipment available)...
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:169 🌊 AgenticAI: Using streaming response for final prompt
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:348 🌊 AgenticAI: Starting character streaming...
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:349 🌊 AgenticAI: Prompt length for streaming: 766
-C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai-service.ts:121 Starting character streaming for prompt: Based on the user's request: "okay now create me a workout"
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai-service.ts:121 Starting character streaming for prompt: Based on the user&apos;s request: "okay now create me a workout"
 
 Reasoning: The user has requested a wor...
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai-service.ts:123 Full response received, length: 467
@@ -750,7 +750,7 @@ C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:354 🌊 
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:176 ✅ AgenticAI: Final response generated, length: 467
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:177 ✅ AgenticAI: Response preview: Before I create your workout, I need some information!
 
-* **What's your fitness level?** (Beginner, ...
+* **What&apos;s your fitness level?** (Beginner, ...
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:186 🎯 AgenticAI: Final result summary:
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:187 🎯 AgenticAI: - Content length: 467
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:188 🎯 AgenticAI: - Tool calls count: 0
@@ -1604,7 +1604,7 @@ C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:143 💪 
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:157 🛠️ AgenticAI: All tools executed. Total successful tool calls: 1
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:163 📝 AgenticAI: Building final response prompt...
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:165 📝 AgenticAI: Final prompt length: 3381
-C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:166 📝 AgenticAI: Final prompt preview: Based on the user's request: "advanced, i have access to a gym, i want to build muscle, 1 hour"
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:166 📝 AgenticAI: Final prompt preview: Based on the user&apos;s request: "advanced, i have access to a gym, i want to build muscle, 1 hour"
 
 I've executed the following tools:
 - create_workout: {
@@ -1613,7 +1613,7 @@ I've executed the following tools:
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:169 🌊 AgenticAI: Using streaming response for final prompt
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:348 🌊 AgenticAI: Starting character streaming...
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\agentic-ai-service.ts:349 🌊 AgenticAI: Prompt length for streaming: 3381
-C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai-service.ts:121 Starting character streaming for prompt: Based on the user's request: "advanced, i have access to a gym, i want to build muscle, 1 hour"
+C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai-service.ts:121 Starting character streaming for prompt: Based on the user&apos;s request: "advanced, i have access to a gym, i want to build muscle, 1 hour"
 
 I'v...
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\services\ai-service.ts:123 Full response received, length: 369
@@ -2131,7 +2131,7 @@ C:\Users\sidro\Projects\Gymzy\Gymzy\src\components\workout\muscle-activation-svg
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\components\workout\muscle-activation-svg.tsx:179 MuscleActivationSVG - safeMuscleVolumes: {Pectoralis Major: 0, Anterior Deltoid: 0, Lateral Deltoid: 0, Posterior Deltoid: 0, Deltoid: 0, …}
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\components\workout\muscle-activation-svg.tsx:180 MuscleActivationSVG - relevantMuscles: []
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\components\workout\muscle-activation-svg.tsx:215 MuscleActivationSVG - scrollElement: Window {window: Window, self: Window, document: document, name: '', location: Location, …}
-6The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.Understand this warning
+6The resource <URL> was preloaded using link preload but not used within a few seconds from the window&apos;s load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.Understand this warning
 C:\Users\sidro\Projects\Gymzy\Gymzy\src\components\ui\dialog.tsx:38 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
 overrideMethod @ hook.js:608
 DescriptionWarning.useEffect @ index.mjs:475

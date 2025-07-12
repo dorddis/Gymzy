@@ -73,7 +73,7 @@ export function PreferencesStep({ data, updateData, onNext, onPrev }: Preference
             What types of workouts do you enjoy or want to try? (Select all that apply)
           </Label>
           <p className="text-sm text-muted-foreground">
-            Don't worry if you're new to some of these - your AI coach will help you get started safely.
+            Don&apos;t worry if you&apos;re new to some of these - your AI coach will help you get started safely.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {WORKOUT_TYPES.map((type) => {
@@ -150,9 +150,9 @@ export function PreferencesStep({ data, updateData, onNext, onPrev }: Preference
             </div>
           </div>
           <p className="text-sm text-muted-foreground">
-            {data.workoutFrequency <= 2 && "A great start! We'll make each session count."}
+            {data.workoutFrequency <= 2 && "A great start! We&apos;ll make each session count."}
             {data.workoutFrequency > 2 && data.workoutFrequency <= 4 && "Excellent frequency for steady progress."}
-            {data.workoutFrequency > 4 && "High commitment! We'll ensure proper recovery."}
+            {data.workoutFrequency > 4 && "High commitment! We&apos;ll ensure proper recovery."}
           </p>
         </div>
 

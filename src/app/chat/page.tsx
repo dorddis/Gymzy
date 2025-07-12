@@ -112,7 +112,7 @@ function ChatContent() {
       await loadChatSessions();
     } catch (error) {
       console.error('Error creating new chat:', error);
-      setMessages([{ role: 'assistant', content: 'Sorry, I couldn\'t start a new chat. Please try again.', timestamp: new Date() }]);
+      setMessages([{ role: 'assistant', content: 'Sorry, I couldn\&apos;t start a new chat. Please try again.', timestamp: new Date() }]);
     } finally {
       setIsLoading(false);
     }
@@ -213,7 +213,7 @@ function ChatContent() {
       let conversationHistoryForAI: Array<{id: string, role: 'user' | 'assistant' | 'system', content: string, timestamp: Date, userId?: string}>;
 
       if (isInitialAutomatedCall) {
-          // For the initial automated call, history should only contain the user's first message
+          // For the initial automated call, history should only contain the user&apos;s first message
           conversationHistoryForAI = [{
               id: new Date().toISOString() + Math.random().toString(),
               role: 'user',
@@ -249,7 +249,7 @@ function ChatContent() {
 
       let fullStreamedContent = '';
       // Assuming sendStreamingChatMessage and saveChatMessage can handle workoutData.
-      // These service functions might need updates if they don't already.
+      // These service functions might need updates if they don&apos;t already.
       const aiResponse = await sendStreamingChatMessage(
         user.uid,
         messageToSend,

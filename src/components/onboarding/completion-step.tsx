@@ -30,7 +30,7 @@ export function CompletionStep({ data, onComplete, onPrev, isSubmitting }: Compl
         <div className="mx-auto mb-4 p-3 bg-green-100 rounded-full w-fit">
           <CheckCircle className="h-8 w-8 text-green-600" />
         </div>
-        <CardTitle className="text-2xl">You're all set! 🎉</CardTitle>
+        <CardTitle className="text-2xl">You&apos;re all set! 🎉</CardTitle>
         <CardDescription className="text-lg">
           Your AI coach is ready to help you achieve your fitness goals
         </CardDescription>
@@ -89,7 +89,7 @@ export function CompletionStep({ data, onComplete, onPrev, isSubmitting }: Compl
           </div>
         </div>
 
-        {/* What's Next */}
+        {/* What&apos;s Next */}
         <div className="bg-blue-50 p-4 rounded-lg">
           <h4 className="font-semibold text-blue-800 mb-2">What happens next?</h4>
           <ul className="space-y-2 text-sm text-blue-700">
@@ -99,7 +99,7 @@ export function CompletionStep({ data, onComplete, onPrev, isSubmitting }: Compl
             </li>
             <li className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4" />
-              You'll get daily motivation and guidance tailored to your preferences
+              You&apos;ll get daily motivation and guidance tailored to your preferences
             </li>
             <li className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4" />

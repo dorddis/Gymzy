@@ -212,7 +212,7 @@ export default function NotificationsPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
                     <Clock className="h-4 w-4 text-green-600" />
-                    Today's Notifications
+                    Today&apos;s Notifications
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -220,7 +220,7 @@ export default function NotificationsPage() {
                     <div className="text-center py-8">
                       <CheckCircle className="h-12 w-12 text-gray-400 mx-auto mb-3" />
                       <p className="text-sm text-gray-600">No notifications today</p>
-                      <p className="text-xs text-gray-500 mt-1">You're all caught up!</p>
+                      <p className="text-xs text-gray-500 mt-1">You&apos;re all caught up!</p>
                     </div>
                   ) : (
                     <div className="space-y-3">
@@ -261,7 +261,7 @@ export default function NotificationsPage() {
                     <div className="text-center py-8">
                       <Dumbbell className="h-12 w-12 text-gray-400 mx-auto mb-3" />
                       <p className="text-sm text-gray-600">No workout notifications</p>
-                      <p className="text-xs text-gray-500 mt-1">You're staying consistent!</p>
+                      <p className="text-xs text-gray-500 mt-1">You&apos;re staying consistent!</p>
                     </div>
                   ) : (
                     <div className="space-y-3">
@@ -360,7 +360,7 @@ export default function NotificationsPage() {
                     <div className="text-center py-8">
                       <Heart className="h-12 w-12 text-gray-400 mx-auto mb-3" />
                       <p className="text-sm text-gray-600">No habit notifications</p>
-                      <p className="text-xs text-gray-500 mt-1">You're building great habits!</p>
+                      <p className="text-xs text-gray-500 mt-1">You&apos;re building great habits!</p>
                     </div>
                   ) : (
                     <div className="space-y-3">

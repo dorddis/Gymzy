@@ -74,9 +74,9 @@ export function FitnessBackgroundStep({ data, updateData, onNext, onPrev }: Fitn
             </div>
           </div>
           <p className="text-sm text-muted-foreground">
-            {data.experienceLevel <= 3 && "Perfect! We'll start with the basics and build from there."}
+            {data.experienceLevel <= 3 && "Perfect! We&apos;ll start with the basics and build from there."}
             {data.experienceLevel > 3 && data.experienceLevel <= 7 && "Great! You have some experience to build upon."}
-            {data.experienceLevel > 7 && "Excellent! We'll help you optimize your advanced training."}
+            {data.experienceLevel > 7 && "Excellent! We&apos;ll help you optimize your advanced training."}
           </p>
         </div>
 
@@ -151,7 +151,7 @@ export function FitnessBackgroundStep({ data, updateData, onNext, onPrev }: Fitn
         {data.previousInjuries.length > 0 && (
           <div className="bg-orange-50 p-3 rounded-lg">
             <p className="text-sm font-medium text-orange-800 mb-2">
-              We'll keep these in mind when creating your program:
+              We&apos;ll keep these in mind when creating your program:
             </p>
             <div className="flex flex-wrap gap-2">
               {data.previousInjuries.map((injury) => (

@@ -51,7 +51,7 @@ import { UserProfile, UserProfileUpdate } from '@/types/user-profile';
 // ✅ Uses the correct types from user-profile.ts
 
 // src/app/onboarding/page.tsx
-// ❌ Tries to use experienceLevel in UserProfileUpdate but it doesn't exist
+// ❌ Tries to use experienceLevel in UserProfileUpdate but it doesn&apos;t exist
 ```
 
 ### Services Directory Structure Issues
@@ -101,7 +101,7 @@ src/services/
 
 ### Import Dependency Analysis
 
-#### High-Usage Services (Critical - Don't Remove)
+#### High-Usage Services (Critical - Don&apos;t Remove)
 - `production-agentic-service.ts` (15+ imports)
 - `ai-chat-service.ts` (12+ imports) 
 - `workout-service.ts` (10+ imports)
@@ -366,13 +366,13 @@ npx madge --circular src/
 
 #### 1. **CRITICAL: Type Mismatch in Onboarding**
 **File**: `src/app/onboarding/page.tsx:147`
-**Issue**: Using `experienceLevel` in `UserProfileUpdate` but field doesn't exist
+**Issue**: Using `experienceLevel` in `UserProfileUpdate` but field doesn&apos;t exist
 **Current Code**:
 ```typescript
 await updateUserProfile({
   hasCompletedOnboarding: true,
   fitnessGoals: [onboardingData.primaryGoal, ...onboardingData.secondaryGoals].filter(Boolean),
-  experienceLevel: onboardingData.experienceLevel <= 3 ? 'beginner' :  // ❌ Field doesn't exist
+  experienceLevel: onboardingData.experienceLevel <= 3 ? 'beginner' :  // ❌ Field doesn&apos;t exist
                   onboardingData.experienceLevel <= 7 ? 'intermediate' : 'advanced',
   preferredWorkoutTypes: onboardingData.workoutTypes
 });

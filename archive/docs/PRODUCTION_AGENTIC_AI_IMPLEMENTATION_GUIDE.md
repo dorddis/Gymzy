@@ -12,7 +12,7 @@ This guide transforms your current student-level agentic AI into a production-gr
 3. **Poor Exercise Matching** - Hard-coded mappings fail frequently
 4. **Inconsistent AI Behavior** - Contradictory responses
 5. **No Error Recovery** - System fails without graceful degradation
-6. **Limited Conversation Memory** - AI doesn't remember user context
+6. **Limited Conversation Memory** - AI doesn&apos;t remember user context
 
 ## 🏗️ **New Architecture Components**
 
@@ -307,7 +307,7 @@ console.log('Tool Performance:', metrics);
 
 ## 🎉 **Result**
 
-After implementation, you'll have:
+After implementation, you&apos;ll have:
 
 ✅ **Production-grade reliability** with proper error handling  
 ✅ **Intelligent exercise matching** that actually works  

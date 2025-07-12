@@ -274,7 +274,7 @@ export default function SettingsPage() {
                 <div className="text-center py-8 text-gray-500">
                   <SettingsIcon className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                   <p>App settings coming soon!</p>
-                  <p className="text-sm">You'll be able to customize app preferences here.</p>
+                  <p className="text-sm">You&apos;ll be able to customize app preferences here.</p>
                 </div>
               </CardContent>
             </Card>

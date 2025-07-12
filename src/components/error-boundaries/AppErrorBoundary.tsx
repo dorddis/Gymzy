@@ -94,7 +94,7 @@ export class AppErrorBoundary extends Component<Props, State> {
                 Oops! Something went wrong
               </CardTitle>
               <CardDescription>
-                We encountered an unexpected error. Don't worry, your data is safe.
+                We encountered an unexpected error. Don&apos;t worry, your data is safe.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">

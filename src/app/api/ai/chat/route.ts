@@ -25,7 +25,7 @@ export async function POST(request: Request) {
   ).join('; ');
 
   // Construct the system message with personalized context
-  const systemMessage = `You are Gymzy's AI assistant for user ${mockUserProfile.name}. ` +
+  const systemMessage = `You are Gymzy&apos;s AI assistant for user ${mockUserProfile.name}. ` +
                         `Their profile: age ${mockUserProfile.age}, goals ${mockUserProfile.goals}. ` +
                         `Recent workouts: ${workoutSummary}. ` +
                         `Use this context to answer questions and execute tasks related to their fitness journey.`;

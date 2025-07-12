@@ -251,7 +251,7 @@ describe('Logger', () => {
 
   describe('Log Entry Structure', () => {
     it('should create properly structured log entries', () => {
-      // Access the logger's internal methods for testing
+      // Access the logger&apos;s internal methods for testing
       const { Logger } = require('@/lib/logger');
       const testLogger = new Logger();
 

@@ -142,7 +142,7 @@ export function GoalsMotivationStep({ data, updateData, onNext, onPrev }: GoalsM
 
         {/* Timeline */}
         <div className="space-y-3">
-          <Label className="text-base font-semibold">What's your timeline for achieving this goal?</Label>
+          <Label className="text-base font-semibold">What&apos;s your timeline for achieving this goal?</Label>
           <div className="space-y-2">
             {TIMELINES.map((timeline) => (
               <div key={timeline} className="flex items-center space-x-2">

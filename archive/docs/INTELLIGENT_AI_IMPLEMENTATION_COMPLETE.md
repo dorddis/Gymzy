@@ -139,7 +139,7 @@ npx tsx src/scripts/test-intelligent-ai.ts
 - Multi-step reasoning chains working
 - Proper fallback handling
 
-## 🎯 What's Fixed
+## 🎯 What&apos;s Fixed
 
 ### **Intelligence Issues Resolved**
 - ✅ **Specific Muscle Groups**: "tricep workout" → actual tricep exercises

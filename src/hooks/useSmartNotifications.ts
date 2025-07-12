@@ -135,7 +135,7 @@ export function useSmartNotifications() {
     );
   }, [notifications]);
 
-  // Get today's notifications
+  // Get today&apos;s notifications
   const getTodaysNotifications = useCallback(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);

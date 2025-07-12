@@ -38,7 +38,7 @@ describe('Validation Utilities', () => {
       const invalidData = {
         email: 'invalid-email',
         password: '123', // Too short
-        confirmPassword: '456', // Doesn't match
+        confirmPassword: '456', // Doesn&apos;t match
         agreeToTerms: false, // Required
       };
 

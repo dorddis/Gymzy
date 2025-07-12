@@ -42,7 +42,7 @@ export interface AgentInvocationResult {
 interface AgentState {
   input: string;
   chat_history: BaseMessage[];
-  agent_outcome: AIMessage | null;       // LLM's decision, potentially with tool_calls
+  agent_outcome: AIMessage | null;       // LLM&apos;s decision, potentially with tool_calls
   intermediate_steps: Array<[ToolInvocation, string]>; // Store tool calls and their string outputs for history
   userId: string | null;                 // User ID for tool context
   extractedWorkoutData?: { exercises: any[]; workoutId: string } | null; // To store structured workout data
@@ -75,12 +75,12 @@ const callModel = async (state: AgentState): Promise<Partial<AgentState>> => {
   You have access to the following tools:
   ${allLangchainTools.map(tool => `- ${tool.name}: ${tool.description}`).join('\n')}
 
-  Based on the user's input and conversation history, decide if you need to use a tool or if you can respond directly.
+  Based on the user&apos;s input and conversation history, decide if you need to use a tool or if you can respond directly.
   If you need to use a tool, provide the tool name and its arguments.
   If the user asks to save a workout but does not provide details (e.g., exercises), you should use the "save_user_workout" tool but also indicate in your thoughts (not directly to the user yet) that you will need to ask for these details if the tool cannot proceed without them. The tool itself might also prompt for this.
   Your response should be an AIMessage. If using tools, include 'tool_calls' in the AIMessage.
 
-  User ID for this interaction (use if tools require it, but don't mention it to the user): ${userId || 'not_provided'}`;
+  User ID for this interaction (use if tools require it, but don&apos;t mention it to the user): ${userId || 'not_provided'}`;
 
 
   const prompt = ChatPromptTemplate.fromMessages([
@@ -127,7 +127,7 @@ const callTools = async (state: AgentState): Promise<Partial<AgentState>> => {
   for (const toolCall of agent_outcome.tool_calls) {
     const toolName = toolCall.name;
     const toolArgs = toolCall.args;
-    const toolCallId = toolCall.id || `tool_call_${Date.now()}`; // Ensure there's an ID
+    const toolCallId = toolCall.id || `tool_call_${Date.now()}`; // Ensure there&apos;s an ID
 
     console.log(`📞 Executing tool: ${toolName} with args:`, toolArgs);
 
@@ -278,14 +278,14 @@ export async function invokeGymzyAgent(
 
     console.log("✅ Agent invocation complete. Final state:", JSON.stringify(finalState, null, 2));
 
-    let aiResponseContent = "Sorry, I couldn't generate a response.";
+    let aiResponseContent = "Sorry, I couldn&apos;t generate a response.";
     // The final AI response should be the content of the last AIMessage in the chat_history,
     // especially if the graph ended because there were no more tool calls.
-    // If agent_outcome is present and has no tool_calls, it's the final message.
+    // If agent_outcome is present and has no tool_calls, it&apos;s the final message.
     if (finalState.agent_outcome && finalState.agent_outcome.content && !finalState.agent_outcome.tool_calls?.length) {
         aiResponseContent = finalState.agent_outcome.content as string;
     } else {
-        // Look for the last AI message in the history that isn't a tool call request
+        // Look for the last AI message in the history that isn&apos;t a tool call request
         const historyMessages = finalState.chat_history;
         for (let i = historyMessages.length - 1; i >= 0; i--) {
             const msg = historyMessages[i];

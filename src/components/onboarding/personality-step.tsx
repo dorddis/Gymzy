@@ -83,7 +83,7 @@ export function PersonalityStep({ data, updateData, onNext, onPrev }: Personalit
   return (
     <div className="space-y-6">
       <CardHeader className="pb-4">
-        <CardTitle className="text-2xl">Let's personalize your AI coach</CardTitle>
+        <CardTitle className="text-2xl">Let&apos;s personalize your AI coach</CardTitle>
         <CardDescription>
           These preferences help your AI coach communicate with you in the way that works best for you
         </CardDescription>
@@ -175,9 +175,9 @@ export function PersonalityStep({ data, updateData, onNext, onPrev }: Personalit
             </div>
           </div>
           <p className="text-sm text-muted-foreground">
-            {data.challengeLevel <= 3 && "We'll keep things comfortable and gradually build up."}
+            {data.challengeLevel <= 3 && "We&apos;ll keep things comfortable and gradually build up."}
             {data.challengeLevel > 3 && data.challengeLevel <= 7 && "Perfect balance of challenge and achievability."}
-            {data.challengeLevel > 7 && "Ready for intense challenges! We'll push your limits safely."}
+            {data.challengeLevel > 7 && "Ready for intense challenges! We&apos;ll push your limits safely."}
           </p>
         </div>
 

@@ -70,7 +70,7 @@ The AI coach uses your onboarding data to provide personalized responses:
 ### Chat Not Working
 - Check browser console for error messages
 - Verify the API key is correctly set in `.env.local`
-- Ensure you haven't exceeded Google AI Studio's free tier limits
+- Ensure you haven&apos;t exceeded Google AI Studio&apos;s free tier limits
 
 ### Fallback Behavior
 - If the AI service fails, the app will show fallback messages
@@ -88,7 +88,7 @@ The AI coach uses your onboarding data to provide personalized responses:
 
 - API calls are made directly from the client to Google AI Studio
 - User data is only sent to Google AI for generating responses
-- No conversation data is stored on Google's servers beyond the API call
+- No conversation data is stored on Google&apos;s servers beyond the API call
 - All personal data remains in your Firebase database
 
 ## Next Steps

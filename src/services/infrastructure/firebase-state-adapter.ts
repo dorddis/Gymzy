@@ -83,7 +83,7 @@ export class FirebaseStateAdapter implements StateStorageAdapter {
       console.log(`🔍 FirebaseStateAdapter: Loading all states for user ${userId}`);
       
       // Note: This would require a compound query in production
-      // For now, we'll implement a simple approach
+      // For now, we&apos;ll implement a simple approach
       // In production, you'd want to add a userId field and create an index
       
       console.log(`⚠️ FirebaseStateAdapter: getUserStates not fully implemented - requires Firestore compound queries`);
@@ -130,7 +130,7 @@ export class FirebaseStateAdapter implements StateStorageAdapter {
 
   /**
    * Recursively remove undefined values from an object
-   * Firestore doesn't allow undefined values
+   * Firestore doesn&apos;t allow undefined values
    */
   private removeUndefinedValues(obj: any): any {
     if (obj === null || obj === undefined) {
@@ -196,7 +196,7 @@ export class FirebaseStateAdapter implements StateStorageAdapter {
       cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);
       
       // Note: This would require a query in production
-      // For now, we'll just log the intent
+      // For now, we&apos;ll just log the intent
       console.log(`⚠️ FirebaseStateAdapter: Cleanup not fully implemented - requires Firestore queries`);
       
       return 0;

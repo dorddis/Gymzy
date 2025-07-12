@@ -84,7 +84,7 @@ export async function validateAsync<T>(
 }
 
 /**
- * Safe parse function that doesn't throw errors
+ * Safe parse function that doesn&apos;t throw errors
  */
 export function safeValidate<T>(
   schema: z.ZodSchema<T>,

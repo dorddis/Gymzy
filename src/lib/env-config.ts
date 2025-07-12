@@ -3,7 +3,7 @@
  * Simple environment variable access without complex validation
  */
 
-// Check if we're on the server side
+// Check if we&apos;re on the server side
 const isServer = typeof window === 'undefined';
 
 // Simple environment configuration object

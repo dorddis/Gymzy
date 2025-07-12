@@ -85,7 +85,7 @@ export class EnhancedWorkoutTools {
       },
       fallback: async (params, error) => {
         console.warn(`⚠️ save_workout fallback triggered due to: ${error.message}`);
-        return { success: false, message: "Sorry, I couldn't save the workout right now due to a temporary issue." };
+        return { success: false, message: "Sorry, I couldn&apos;t save the workout right now due to a temporary issue." };
       }
     };
   }
@@ -139,7 +139,7 @@ export class EnhancedWorkoutTools {
       photoUrl: params.photoUrl,
       sourceWorkoutId: params.sourceWorkoutId,
       // Assuming your workout-service.ts expects a certain structure
-      // For now, we'll keep it flat and simulate what workout-service might store/return.
+      // For now, we&apos;ll keep it flat and simulate what workout-service might store/return.
       createdAt: new Date(),
       updatedAt: new Date(),
       isCompleted: params.isCompleted || false, // Example: track if workout is logged as completed
@@ -638,7 +638,7 @@ export class EnhancedWorkoutTools {
     };
 
     return muscleNames.map(muscle => {
-      // Return mapped value if exists, otherwise return original (assuming it's already valid)
+      // Return mapped value if exists, otherwise return original (assuming it&apos;s already valid)
       return muscleMapping[muscle] || muscle;
     });
   }
@@ -649,7 +649,7 @@ export class EnhancedWorkoutTools {
     } else if (matched > 0) {
       const message = `✅ Created your workout with ${matched} out of ${total} exercises. `;
       if (unmatched.length > 0) {
-        return message + `Couldn't find matches for: ${unmatched.join(', ')}. You can add these manually if needed.`;
+        return message + `Couldn&apos;t find matches for: ${unmatched.join(', ')}. You can add these manually if needed.`;
       }
       return message;
     } else {
@@ -743,7 +743,7 @@ export class EnhancedWorkoutTools {
 
     return {
       ...result,
-      message: `I've ${this.getModificationDescription(params.modificationType)} your workout! Here's your updated routine:`
+      message: `I've ${this.getModificationDescription(params.modificationType)} your workout! Here&apos;s your updated routine:`
     };
   }
 

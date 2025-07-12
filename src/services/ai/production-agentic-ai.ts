@@ -137,7 +137,7 @@ export class ProductionAgenticAI {
     const context = this.stateManager.getContextForAI(state.sessionId);
     
     const analysisPrompt = `
-Analyze the user's request and decompose it into executable steps.
+Analyze the user&apos;s request and decompose it into executable steps.
 
 User Request: "${userInput}"
 
@@ -327,7 +327,7 @@ Respond with a JSON object containing:
     const context = this.stateManager.getContextForAI(state.sessionId);
     
     const responsePrompt = `
-Based on the user's request and execution results, generate a helpful response.
+Based on the user&apos;s request and execution results, generate a helpful response.
 
 User Request: "${userInput}"
 Context: ${context}
@@ -339,7 +339,7 @@ Requirements:
 - Use markdown formatting
 - Keep response concise but informative
 - If workout was created, include "Start This Workout" call-to-action
-- Match the user's communication style from their profile
+- Match the user&apos;s communication style from their profile
 `;
 
     try {

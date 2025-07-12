@@ -74,7 +74,7 @@ export default function StatsTrendsScreen() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Helper function to get dates in user's local timezone
+  // Helper function to get dates in user&apos;s local timezone
   const getLocalDateString = (date: Date) => {
     return date.toLocaleDateString('en-US', { 
       month: 'numeric', 
@@ -83,7 +83,7 @@ export default function StatsTrendsScreen() {
     });
   };
 
-  // Helper function to get start of day in user's timezone
+  // Helper function to get start of day in user&apos;s timezone
   const getStartOfDay = (date: Date) => {
     const localDate = new Date(date);
     localDate.setHours(0, 0, 0, 0);
@@ -116,7 +116,7 @@ export default function StatsTrendsScreen() {
 
     if (allWorkouts) {
       allWorkouts.forEach(workout => {
-        // Convert workout date to user's local timezone
+        // Convert workout date to user&apos;s local timezone
         const workoutDate = workout.date.toDate();
         const localWorkoutDate = getStartOfDay(workoutDate);
         const workoutDateFormatted = localWorkoutDate.toISOString().split('T')[0]; // YYYY-MM-DD

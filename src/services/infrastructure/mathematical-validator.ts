@@ -8,7 +8,7 @@ export class MathematicalValidator {
   ): { modificationPlan?: ModificationPlan; clarificationDetails?: ClarificationDetails; error?: string } {
     if (intent.name === 'DOUBLE_WORKOUT') {
       if (!currentWorkout || !currentWorkout.exercises || currentWorkout.exercises.length === 0) {
-        return { error: "There's no current workout to double or it's empty." };
+        return { error: "There&apos;s no current workout to double or it&apos;s empty." };
       }
 
       // For now, always ask for clarification for "DOUBLE_WORKOUT"

@@ -229,7 +229,7 @@ workout_special_sets: {
 
 ### API Endpoints
 - `POST /api/special-sets` - Create special set
-- `GET /api/special-sets` - Get user's special sets
+- `GET /api/special-sets` - Get user&apos;s special sets
 - `PUT /api/special-sets/:id` - Update special set
 - `DELETE /api/special-sets/:id` - Delete special set
 - `POST /api/workouts/:id/special-sets` - Add special set to workout

@@ -231,7 +231,7 @@ export class IntelligentGymzyAgent {
       if (identifiedIntent) {
         // A new primary intent was identified. This new intent takes precedence.
       } else {
-        // No new primary intent, and it wasn't a USER_PROVIDED_CLARIFICATION (that would have returned in Stage 1).
+        // No new primary intent, and it wasn&apos;t a USER_PROVIDED_CLARIFICATION (that would have returned in Stage 1).
         identifiedIntent = {
             name: 'CLARIFICATION_MISMATCH',
             confidence: 0.7,
@@ -316,11 +316,11 @@ export class IntelligentGymzyAgent {
       return responseText;
     }
     if (toolResult) {
-      return toolResult.success ? (toolResult.message || "Action completed successfully.") : (toolResult.error || "Sorry, I couldn't complete that action.");
+      return toolResult.success ? (toolResult.message || "Action completed successfully.") : (toolResult.error || "Sorry, I couldn&apos;t complete that action.");
     }
     if (intent) {
       switch (intent.name) {
-        case 'CANNOT_DOUBLE_NO_WORKOUT': return "It looks like there's no active workout to double. Please start or select a workout first.";
+        case 'CANNOT_DOUBLE_NO_WORKOUT': return "It looks like there&apos;s no active workout to double. Please start or select a workout first.";
         case 'DOUBLE_WORKOUT': return "I need a bit more information to double the workout.";
         case 'GREETING':
           const greetings = ["Hello! How can I assist with your fitness goals today?", "Hi there! What are we working on?", "Hey! Ready to get started?"];
@@ -329,12 +329,12 @@ export class IntelligentGymzyAgent {
           const farewells = ["Goodbye! Keep up the great work!", "See you next time. Stay consistent!", "Alright, take care!"];
           return farewells[Math.floor(Math.random() * farewells.length)];
         case 'THANKS':
-          const thanksResponses = ["You're welcome!", "Happy to help!", "Anytime! Let me know if there's anything else."];
+          const thanksResponses = ["You&apos;re welcome!", "Happy to help!", "Anytime! Let me know if there&apos;s anything else."];
           return thanksResponses[Math.floor(Math.random() * thanksResponses.length)];
         case 'HELP':
           return "I can help you with things like creating workout plans, modifying your current workout (like doubling sets or reps), and providing information about exercises. What would you like to do?";
         case 'GET_EXERCISE_INFO':
-          return intent.slots?.exercise_name ? `Okay, I'll look up information for "${intent.slots.exercise_name}". (Tool for this will be in Phase 3)` : "Which exercise are you interested in? (Tool for this will be in Phase 3)";
+          return intent.slots?.exercise_name ? `Okay, I&apos;ll look up information for "${intent.slots.exercise_name}". (Tool for this will be in Phase 3)` : "Which exercise are you interested in? (Tool for this will be in Phase 3)";
         case 'CREATE_WORKOUT':
           let createMsg = "Okay, I can help you create a workout";
           if (intent.slots?.muscle_group) createMsg += ` for ${intent.slots.muscle_group}`;
@@ -386,13 +386,13 @@ export class IntelligentGymzyAgent {
               this.updateWorkingMemory({ pendingClarificationContext: null });
             }
           } else {
-            errorMessage = "I couldn't understand your choice for the clarification. Please try again.";
+            errorMessage = "I couldn&apos;t understand your choice for the clarification. Please try again.";
             this.updateWorkingMemory({ pendingClarificationContext: null });
           }
           break;
 
         case 'DOUBLE_WORKOUT':
-          // This logic for clearing context was from Phase 8, Turn 21 - ensuring it's here
+          // This logic for clearing context was from Phase 8, Turn 21 - ensuring it&apos;s here
           if (this.memory.workingMemory.pendingClarificationContext &&
               (this.memory.workingMemory.pendingClarificationContext.originalIntentName !== detectedIntent.name ||
                this.memory.workingMemory.pendingClarificationContext.relatedData?.workoutId !== this.memory.workingMemory.currentWorkout?.id)) {
@@ -435,7 +435,7 @@ export class IntelligentGymzyAgent {
         case 'CLARIFICATION_MISMATCH':
           if (this.memory.workingMemory.pendingClarificationContext) {
              clarificationDetails = {
-               question: "Sorry, I didn't catch that. " + this.memory.workingMemory.pendingClarificationContext.clarificationQuestionText,
+               question: "Sorry, I didn&apos;t catch that. " + this.memory.workingMemory.pendingClarificationContext.clarificationQuestionText,
                options: this.memory.workingMemory.pendingClarificationContext.optionsProvided
              };
           } else {
@@ -488,7 +488,7 @@ export class IntelligentGymzyAgent {
           break;
       }
     } else {
-      errorMessage = "Sorry, I couldn't understand your input at all.";
+      errorMessage = "Sorry, I couldn&apos;t understand your input at all.";
       this.updateWorkingMemory({ pendingClarificationContext: null });
     }
 
@@ -534,7 +534,7 @@ export interface CognitiveTool {
   execute(params: ToolParams, currentMemory: Readonly<IntelligentAgentMemory>): Promise<ToolResult>;
 }
 
-// Interface for the agent's working memory
+// Interface for the agent&apos;s working memory
 export interface WorkingMemory {
   currentWorkout: WorkoutState | null;
   lastAction: AgentAction | null;
@@ -543,7 +543,7 @@ export interface WorkingMemory {
   pendingClarificationContext?: PendingClarificationContext | null;
 }
 
-// Structure to hold context when the agent is waiting for user's response to a clarification question
+// Structure to hold context when the agent is waiting for user&apos;s response to a clarification question
 export interface PendingClarificationContext {
   originalIntentName: string;
   clarificationQuestionText: string;
@@ -555,7 +555,7 @@ export interface PendingClarificationContext {
   relatedData?: any;
 }
 
-// Interface for the agent's episodic memory
+// Interface for the agent&apos;s episodic memory
 export interface EpisodicMemory {
   recentTurns: ConversationTurn[];
 }

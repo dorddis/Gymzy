@@ -150,7 +150,7 @@ export default function OnboardingPage() {
       });
       console.log('Onboarding: User profile updated');
 
-      // Force refresh the user profile to ensure it's updated
+      // Force refresh the user profile to ensure it&apos;s updated
       console.log('Onboarding: Refreshing user profile');
       await refreshUserProfile();
 

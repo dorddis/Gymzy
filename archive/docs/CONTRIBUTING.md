@@ -84,7 +84,7 @@ git push origin feature/your-feature-name
 ### 5. Pull Request Process
 
 1. Update the README.md with details of changes if needed
-2. Update the documentation if you're changing functionality
+2. Update the documentation if you&apos;re changing functionality
 3. The PR will be merged once you have the sign-off of at least one other developer
 
 ### 6. Feature Requests
@@ -135,4 +135,4 @@ Types:
 
 ## License
 
-By contributing to Gymzy, you agree that your contributions will be licensed under the project's MIT License. 
+By contributing to Gymzy, you agree that your contributions will be licensed under the project&apos;s MIT License. 

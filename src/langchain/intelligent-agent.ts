@@ -142,7 +142,7 @@ Respond with only the muscle group names, separated by commas. If no specific mu
     name: "classify_muscle_groups",
     description: "Classify specific muscle groups mentioned in user input",
     schema: z.object({
-      user_input: z.string().describe("The user's workout request")
+      user_input: z.string().describe("The user&apos;s workout request")
     })
   }
 );
@@ -174,7 +174,7 @@ const selectExercises = tool(
       selectedExercises.push(...selected);
     }
     
-    // If we don't have enough exercises, fill with general exercises
+    // If we don&apos;t have enough exercises, fill with general exercises
     while (selectedExercises.length < exercise_count && selectedExercises.length < 8) {
       const generalExercises = [
         { name: 'Push-ups', equipment: 'bodyweight', difficulty: 'beginner' },
@@ -483,7 +483,7 @@ Requirements:
 2. Mention the specific muscle groups being targeted
 3. Briefly explain why these exercises were chosen
 4. Keep it conversational and human-like
-5. Don't be overly long - 2-3 sentences max
+5. Don&apos;t be overly long - 2-3 sentences max
 
 Original user request: "${state.user_input}"`;
 
@@ -497,7 +497,7 @@ Original user request: "${state.user_input}"`;
   } catch (error) {
     console.error("❌ Response generation failed:", error);
     return {
-      response_content: `I've created a ${state.workout_data.name} for you! This workout targets your ${state.workout_data.target_muscles.join(' and ')} with ${state.workout_data.exercises.length} exercises. Let's get started!`,
+      response_content: `I've created a ${state.workout_data.name} for you! This workout targets your ${state.workout_data.target_muscles.join(' and ')} with ${state.workout_data.exercises.length} exercises. Let&apos;s get started!`,
       error_state: "response_generation_failed"
     };
   }

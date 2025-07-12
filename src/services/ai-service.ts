@@ -66,7 +66,7 @@ export const generateAIResponse = async (prompt: string): Promise<string> => {
   }
 };
 
-// Streaming AI response (Google AI doesn't support true streaming, so we simulate it)
+// Streaming AI response (Google AI doesn&apos;t support true streaming, so we simulate it)
 export const generateStreamingAIResponse = async (
   prompt: string,
   onChunk: (chunk: string) => void

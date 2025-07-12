@@ -126,7 +126,7 @@ export class AIRecommendationsService {
         priority: daysSinceLastWorkout >= 5 ? 'high' : 'medium',
         content: {
           title: 'Time for Your Next Workout!',
-          description: `It's been ${daysSinceLastWorkout} days since your last workout. Let's get back on track!`,
+          description: `It&apos;s been ${daysSinceLastWorkout} days since your last workout. Let&apos;s get back on track!`,
           actionItems: [
             'Start with a light warm-up',
             'Choose exercises you enjoy',
@@ -310,7 +310,7 @@ export class AIRecommendationsService {
         priority: 'medium',
         content: {
           title: 'Boost Your Motivation',
-          description: 'Your motivation levels have been lower recently. Let\'s reignite that fitness fire!',
+          description: 'Your motivation levels have been lower recently. Let\&apos;s reignite that fitness fire!',
           actionItems: [
             'Set a small, achievable goal for this week',
             'Try a new type of workout',

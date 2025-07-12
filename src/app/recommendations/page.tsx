@@ -210,7 +210,7 @@ export default function RecommendationsPage() {
                     <div className="text-center py-8">
                       <Target className="h-12 w-12 text-gray-400 mx-auto mb-3" />
                       <p className="text-sm text-gray-600">No high priority recommendations</p>
-                      <p className="text-xs text-gray-500 mt-1">You're doing great! Keep up the good work.</p>
+                      <p className="text-xs text-gray-500 mt-1">You&apos;re doing great! Keep up the good work.</p>
                     </div>
                   ) : (
                     <div className="space-y-3">
@@ -312,7 +312,7 @@ export default function RecommendationsPage() {
                     <div className="text-center py-8">
                       <Zap className="h-12 w-12 text-gray-400 mx-auto mb-3" />
                       <p className="text-sm text-gray-600">No motivation recommendations</p>
-                      <p className="text-xs text-gray-500 mt-1">You're staying motivated!</p>
+                      <p className="text-xs text-gray-500 mt-1">You&apos;re staying motivated!</p>
                     </div>
                   ) : (
                     <div className="space-y-3">

@@ -134,8 +134,8 @@ export function LifestyleStep({ data, updateData, onNext, onPrev }: LifestyleSte
           </div>
           <p className="text-sm text-muted-foreground">
             {data.stressLevel <= 3 && "Great! We can focus on maintaining your zen while building fitness."}
-            {data.stressLevel > 3 && data.stressLevel <= 7 && "We'll include stress-relieving workouts in your routine."}
-            {data.stressLevel > 7 && "Exercise can be a great stress reliever! We'll prioritize calming activities."}
+            {data.stressLevel > 3 && data.stressLevel <= 7 && "We&apos;ll include stress-relieving workouts in your routine."}
+            {data.stressLevel > 7 && "Exercise can be a great stress reliever! We&apos;ll prioritize calming activities."}
           </p>
         </div>
 
@@ -161,7 +161,7 @@ export function LifestyleStep({ data, updateData, onNext, onPrev }: LifestyleSte
             </div>
           </div>
           <p className="text-sm text-muted-foreground">
-            {data.sleepQuality <= 4 && "We'll recommend gentle workouts and recovery-focused activities."}
+            {data.sleepQuality <= 4 && "We&apos;ll recommend gentle workouts and recovery-focused activities."}
             {data.sleepQuality > 4 && data.sleepQuality <= 7 && "Good sleep supports your fitness goals!"}
             {data.sleepQuality > 7 && "Excellent! Your good sleep will help maximize workout recovery."}
           </p>

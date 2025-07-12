@@ -38,7 +38,7 @@ export default function HomePage() {
         router.replace('/auth');
       } else if (user.profile === undefined) {
         console.log('HomePage: Profile is undefined, waiting for profile to load');
-        // Don't redirect yet, wait for profile to load
+        // Don&apos;t redirect yet, wait for profile to load
       } else if (user.profile && !user.profile.hasCompletedOnboarding) {
         console.log('HomePage: User has not completed onboarding, redirecting');
         router.replace('/onboarding');
@@ -57,7 +57,7 @@ export default function HomePage() {
     );
   }
 
-  // Don't render if user is not authenticated or hasn't completed onboarding
+  // Don&apos;t render if user is not authenticated or hasn&apos;t completed onboarding
   if (!user || !user.profile?.hasCompletedOnboarding) {
     return null;
   }

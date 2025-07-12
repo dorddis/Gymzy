@@ -33,7 +33,7 @@ import { runAllTests } from './src/services/test-production-agentic';
 await runAllTests();
 ```
 
-### **Key Improvements You'll See**
+### **Key Improvements You&apos;ll See**
 
 #### **1. Intelligent Exercise Matching**
 - ✅ "dumbbell row" → "Dumbbell Row" (exact match)

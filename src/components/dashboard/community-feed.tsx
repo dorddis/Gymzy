@@ -53,7 +53,7 @@ export function CommunityFeed() {
           id: post.id,
           userId: post.userId,
           userName: post.userName || 'Anonymous User',
-          userAvatar: undefined, // We'll add avatar support later
+          userAvatar: undefined, // We&apos;ll add avatar support later
           workoutTitle: post.workoutTitle,
           workoutSummary: post.workoutSummary,
           duration: post.duration,
@@ -88,7 +88,7 @@ export function CommunityFeed() {
         [postId]: !prev[postId]
       }));
 
-      // Update the post's like count
+      // Update the post&apos;s like count
       setWorkoutPosts(prev => prev.map(post =>
         post.id === postId
           ? { ...post, likesCount: post.likesCount + (likedPosts[postId] ? -1 : 1) }
@@ -300,7 +300,7 @@ export function CommunityFeed() {
                 onClick={() => {
                   if (navigator.share) {
                     navigator.share({
-                      title: `${isWorkoutPost ? post.userName : (post as any).user?.name}'s workout`,
+                      title: `${isWorkoutPost ? post.userName : (post as any).user?.name}&apos;s workout`,
                       text: `Check out this workout: ${isWorkoutPost ? post.workoutTitle : (post as any).workout?.title}`,
                       url: window.location.href
                     });

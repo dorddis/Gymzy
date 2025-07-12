@@ -13,7 +13,7 @@ The current AI implementation exhibits significant deficiencies in conversationa
 **Evidence from Chat**:
 - AI creates a workout with "Push-ups: 3 sets of 10 reps, Squats: 3 sets of 12 reps, Plank: 3 sets of 30 seconds"
 - User says "double it"
-- AI responds: "Since I don't know what 'it' refers to, could you tell me which workout you'd like me to double?"
+- AI responds: "Since I don&apos;t know what 'it' refers to, could you tell me which workout you'd like me to double?"
 - **This is a complete failure** - the AI literally just provided a workout 1 message ago
 
 **Deeper Analysis**: The AI not only forgets the workout exists, but also fails to understand what "doubling" means in fitness context:
@@ -30,7 +30,7 @@ The current AI implementation exhibits significant deficiencies in conversationa
 
 **Evidence**:
 - First "double me the workout" → AI attempts to double (though incorrectly)
-- Later "double it" → AI claims it doesn't know what "it" refers to
+- Later "double it" → AI claims it doesn&apos;t know what "it" refers to
 - This inconsistency suggests multiple AI pathways with different context handling
 
 **Critical Fitness Logic Failures**:
@@ -57,12 +57,12 @@ The current AI implementation exhibits significant deficiencies in conversationa
 **Problem**: Tools are not properly integrated with conversation state.
 
 **Evidence**:
-- AI creates workouts but doesn't store them in accessible conversation memory
+- AI creates workouts but doesn&apos;t store them in accessible conversation memory
 - No persistent workout state between messages
 - Tools execute in isolation without feeding back into conversation context
-- **Workout modification tools exist but aren't triggered**: The codebase has `modify_workout` tools that should handle "double it" requests
+- **Workout modification tools exist but aren&apos;t triggered**: The codebase has `modify_workout` tools that should handle "double it" requests
 - **Tool routing failures**: Intent detection fails to route modification requests to appropriate tools
-- **Parameter extraction broken**: Even when tools execute, they don't properly extract/modify sets and reps
+- **Parameter extraction broken**: Even when tools execute, they don&apos;t properly extract/modify sets and reps
 
 ## Technical Analysis
 
@@ -89,7 +89,7 @@ User Input → Intent Analysis → Tool Execution → Response Generation
   - Missing domain-specific intent patterns for fitness commands
 
 #### 3. **Memory Architecture Issues**
-- Conversation history exists but isn't effectively utilized
+- Conversation history exists but isn&apos;t effectively utilized
 - No working memory for recent actions/outputs
 - Missing semantic memory for workout state
 - No episodic memory for conversation context
@@ -146,12 +146,12 @@ User Input → Intent Analysis → Tool Execution → Response Generation
 
 #### A. **Intent Analysis Service Issues** (`production-agentic-service.ts`)
 - `getFallbackIntentAnalysis()` uses primitive keyword matching
-- "double it" doesn't match modification keywords because it lacks workout context
+- "double it" doesn&apos;t match modification keywords because it lacks workout context
 - Intent analysis happens in isolation without conversation history
 - No semantic understanding of fitness terminology
 
 #### B. **Tool Execution Problems** (`ai-workout-tools.ts` & `enhanced-workout-tools.ts`)
-- `executeModifyWorkout()` exists but isn't being called
+- `executeModifyWorkout()` exists but isn&apos;t being called
 - `extractExercisesFromMessage()` uses regex parsing instead of structured data
 - Tool parameter extraction fails for contextual references
 - No validation of mathematical operations on fitness parameters
@@ -160,13 +160,13 @@ User Input → Intent Analysis → Tool Execution → Response Generation
 - Conversation history stored but not effectively queried
 - No structured workout state in conversation context
 - Missing workout-specific context extraction
-- State updates don't include tool execution results
+- State updates don&apos;t include tool execution results
 
 #### D. **Response Generation Issues**
 - AI generates responses without checking tool execution results
 - No verification that claimed modifications actually occurred
 - Missing fitness domain validation of generated content
-- Response templates don't include parameter verification
+- Response templates don&apos;t include parameter verification
 
 ## Recommendations for Investigation
 
@@ -286,7 +286,7 @@ The current AI implementation suffers from fundamental architectural issues that
 2. **Mathematical incompetence** - Claims to modify numbers while keeping them identical
 3. **Domain ignorance** - No understanding of fitness concepts, sets, reps, or workout progression
 4. **Intent detection failures** - Cannot route contextual requests to appropriate tools
-5. **Tool integration problems** - Tools exist but aren't properly triggered or validated
+5. **Tool integration problems** - Tools exist but aren&apos;t properly triggered or validated
 6. **Response generation without verification** - Claims success without checking results
 
 These issues make the AI appear "jailbreakable" and unreliable because it lacks:
@@ -304,4 +304,4 @@ The fix requires a comprehensive overhaul of:
 4. Response generation with result verification
 5. Domain-specific knowledge integration for fitness concepts
 
-This is not a prompt engineering problem - it's a fundamental architecture and domain modeling problem.
+This is not a prompt engineering problem - it&apos;s a fundamental architecture and domain modeling problem.

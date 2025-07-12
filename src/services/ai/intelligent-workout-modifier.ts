@@ -32,7 +32,7 @@ export class IntelligentWorkoutModifier implements CognitiveTool {
     let modificationError: string | null = null;
 
     modifiedWorkout.exercises = modifiedWorkout.exercises.map(exercise => {
-      // Create a new object for each exercise to ensure we're not modifying the original array's items by reference
+      // Create a new object for each exercise to ensure we&apos;re not modifying the original array&apos;s items by reference
       const newExercise = { ...exercise };
       switch (plan.type) {
         case 'DOUBLE_SETS':

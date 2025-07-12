@@ -356,7 +356,7 @@ const fixTruncatedJSON = (jsonStr: string): string | null => {
     // Apply common fixes
     fixed = fixCommonJSONIssues(fixed);
 
-    // Count braces and brackets to see what's missing
+    // Count braces and brackets to see what&apos;s missing
     let braceCount = 0;
     let bracketCount = 0;
     let inString = false;
@@ -379,7 +379,7 @@ const fixTruncatedJSON = (jsonStr: string): string | null => {
       lastChar = char;
     }
 
-    // If we're in the middle of a string, close it
+    // If we&apos;re in the middle of a string, close it
     if (inString) {
       fixed += '"';
     }
@@ -662,7 +662,7 @@ const generateSystemPrompt = async (userId: string): Promise<string> => {
 
     const userContext = generateAIContext(personalityProfile);
     
-    return `You are Gymzy AI, a personalized fitness coach and companion. You have deep knowledge about this specific user based on their onboarding profile. Here's what you know about them:
+    return `You are Gymzy AI, a personalized fitness coach and companion. You have deep knowledge about this specific user based on their onboarding profile. Here&apos;s what you know about them:
 
 ${userContext}
 
@@ -685,7 +685,7 @@ Communication Guidelines:
 - Be encouraging about their fitness goals while respecting their experience level
 - Suggest modifications based on their equipment access and schedule
 
-Remember: You're not just a fitness bot - you're their personal coach who understands their unique situation, challenges, and aspirations.`;
+Remember: You&apos;re not just a fitness bot - you&apos;re their personal coach who understands their unique situation, challenges, and aspirations.`;
 
   } catch (error) {
     console.error('Error generating system prompt:', error);
@@ -1083,7 +1083,7 @@ export const generateDailyMotivation = async (
         motivationPrompt = `Generate a brief, personalized motivational message for the home page. Focus on motivation and encouragement.`;
         break;
       case 'tip':
-        motivationPrompt = `Generate a brief, actionable fitness tip based on the user's activity. Make it practical and relevant.`;
+        motivationPrompt = `Generate a brief, actionable fitness tip based on the user&apos;s activity. Make it practical and relevant.`;
         break;
       case 'joke':
         motivationPrompt = `Tell a lighthearted, fitness-related joke. Keep it short and fun.`;
@@ -1130,7 +1130,7 @@ Keep the message to 1-2 sentences maximum. Make it personal and encouraging.`;
     let fallbackMessage = "Welcome back to Gymzy! ";
     
     if (context.hasWorkoutToday) {
-      fallbackMessage += "Great job on today's workout! 💪";
+      fallbackMessage += "Great job on today&apos;s workout! 💪";
     } else if (context.currentStreak > 5) {
       fallbackMessage += `Amazing ${context.currentStreak}-day streak! Keep it going! 🔥`;
     } else {

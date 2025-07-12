@@ -48,7 +48,7 @@ Generate AI responses using the optimal model.
 ```json
 {
   "success": true,
-  "content": "Here's a muscle-building workout...",
+  "content": "Here&apos;s a muscle-building workout...",
   "model": "groq",
   "timestamp": "2024-01-01T00:00:00.000Z",
   "metadata": {
@@ -123,7 +123,7 @@ Send a chat message and get AI response.
   "message": {
     "id": "message-id",
     "role": "assistant",
-    "content": "I'll create a workout for you...",
+    "content": "I&apos;ll create a workout for you...",
     "timestamp": "2024-01-01T00:00:00.000Z"
   },
   "sessionId": "session-id"
@@ -147,7 +147,7 @@ Get chat history for a session.
     {
       "id": "message-2",
       "role": "assistant",
-      "content": "Here's your workout...",
+      "content": "Here&apos;s your workout...",
       "timestamp": "2024-01-01T00:01:00.000Z"
     }
   ],
@@ -231,7 +231,7 @@ Create a new workout.
 ```
 
 ##### `GET /api/workouts?page=<number>&limit=<number>&filter=<type>`
-Get user's workouts with pagination.
+Get user&apos;s workouts with pagination.
 
 **Response:**
 ```json
@@ -307,7 +307,7 @@ Delete a workout.
 #### User APIs
 
 ##### `GET /api/user/profile`
-Get current user's profile.
+Get current user&apos;s profile.
 
 **Response:**
 ```json

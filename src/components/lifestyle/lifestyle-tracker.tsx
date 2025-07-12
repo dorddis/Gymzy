@@ -124,7 +124,7 @@ export function LifestyleTracker({ onClose }: LifestyleTrackerProps) {
           </Button>
         </div>
         <p className="text-sm text-muted-foreground">
-          Help your AI coach understand how you're feeling today
+          Help your AI coach understand how you&apos;re feeling today
         </p>
       </CardHeader>
       <CardContent className="space-y-6">

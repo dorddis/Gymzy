@@ -29,7 +29,7 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
           Welcome to Your AI Fitness Journey! 🚀
         </CardTitle>
         <CardDescription className="text-lg">
-          Let's create your personalized AI coach that understands you better than anyone else
+          Let&apos;s create your personalized AI coach that understands you better than anyone else
         </CardDescription>
       </CardHeader>
 
@@ -120,7 +120,7 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
           className="w-full"
           disabled={isLoggingOut}
         >
-          Let's Get Started! 🎯
+          Let&apos;s Get Started! 🎯
         </Button>
       </div>
     </div>

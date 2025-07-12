@@ -142,7 +142,7 @@ export function AIWelcomeMessage() {
   const shouldGenerateNewMessage = (): boolean => {
     if (!lastGenerated) return true;
     
-    // Generate new message if it's been more than 4 hours
+    // Generate new message if it&apos;s been more than 4 hours
     const fourHoursAgo = new Date();
     fourHoursAgo.setHours(fourHoursAgo.getHours() - 4);
     
@@ -164,7 +164,7 @@ export function AIWelcomeMessage() {
         if (Math.random() < 0.2) { // 20% chance for a joke
           selectedMessageType = 'joke';
         } else if (shouldGenerateNewMessage()) {
-          // Prioritize motivational or general if it's a "new" message session
+          // Prioritize motivational or general if it&apos;s a "new" message session
           selectedMessageType = Math.random() < 0.5 ? 'motivational' : 'general';
         } else {
           // If message is being refreshed but not "stale", default to general or motivational
@@ -195,11 +195,11 @@ export function AIWelcomeMessage() {
     const { timeOfDay, hasWorkoutToday, currentStreak } = motivationContext;
 
     if (hasWorkoutToday) {
-      return `Great job on today's workout! 🎉 ${currentStreak > 1 ? `You're on a ${currentStreak}-day streak!` : 'Keep the momentum going!'} 💪`;
+      return `Great job on today&apos;s workout! 🎉 ${currentStreak > 1 ? `You&apos;re on a ${currentStreak}-day streak!` : 'Keep the momentum going!'} 💪`;
     }
 
     if (timeOfDay === 'morning') {
-      return `Good morning! ${currentStreak > 0 ? `Don't break your ${currentStreak}-day streak!` : 'Today is a perfect day to start your fitness journey!'} 🌅`;
+      return `Good morning! ${currentStreak > 0 ? `Don&apos;t break your ${currentStreak}-day streak!` : 'Today is a perfect day to start your fitness journey!'} 🌅`;
     } else if (timeOfDay === 'afternoon') {
       return `Afternoon energy boost time! ${currentStreak > 0 ? `Keep your ${currentStreak}-day streak alive!` : 'A quick workout can energize your day!'} ⚡`;
     } else {

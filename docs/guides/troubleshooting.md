@@ -28,7 +28,7 @@
 
 4. **Check Next.js environment variable rules**:
    - Client-side variables must start with `NEXT_PUBLIC_`
-   - Server-side variables don't need prefix
+   - Server-side variables don&apos;t need prefix
    - Variables are loaded at build time
 
 #### Firebase Connection Issues

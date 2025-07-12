@@ -140,7 +140,7 @@ export class MultiStepReasoningService {
     const startTime = Date.now();
 
     try {
-      const prompt = `Analyze this fitness request and extract the user's intent:
+      const prompt = `Analyze this fitness request and extract the user&apos;s intent:
 
 User Request: "${userInput}"
 
@@ -419,7 +419,7 @@ Workout Data: ${workoutData}
 Original Request: "${userInput}"
 
 Create a natural, encouraging response that:
-1. Acknowledges the user's specific request
+1. Acknowledges the user&apos;s specific request
 2. Presents the workout in an easy-to-read format
 3. Explains why these exercises were chosen
 4. Includes motivational language

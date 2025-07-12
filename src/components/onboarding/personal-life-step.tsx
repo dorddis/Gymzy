@@ -205,7 +205,7 @@ export function PersonalLifeStep({ data, updateData, onNext, onPrev }: PersonalL
         {/* Personal Motivation Story */}
         <div className="space-y-3">
           <Label className="text-base font-semibold">
-            What's your personal "why" for wanting to get fit?
+            What&apos;s your personal &quot;why&quot; for wanting to get fit?
           </Label>
           <p className="text-sm text-muted-foreground">
             Share your story - what drives you? What would achieving your fitness goals mean to you personally?
@@ -224,7 +224,7 @@ export function PersonalLifeStep({ data, updateData, onNext, onPrev }: PersonalL
             Tell us about your current life situation
           </Label>
           <p className="text-sm text-muted-foreground">
-            What's going on in your life right now? This helps your AI coach understand your context and provide appropriate support.
+            What&apos;s going on in your life right now? This helps your AI coach understand your context and provide appropriate support.
           </p>
           <Textarea
             placeholder="e.g., I'm a busy parent with two young kids, I just started a new job, I'm going through a difficult time, I'm preparing for a wedding, I'm recovering from an injury..."

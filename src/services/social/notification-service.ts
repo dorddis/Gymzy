@@ -312,7 +312,7 @@ export class SmartNotificationService {
             type: 'habit_support',
             priority: 'medium',
             title: `${currentStreak}-Day Streak! 🔥`,
-            message: `You're on fire! Don't break your ${currentStreak}-day workout streak. Keep the momentum going!`,
+            message: `You&apos;re on fire! Don&apos;t break your ${currentStreak}-day workout streak. Keep the momentum going!`,
             actionText: 'Continue Streak',
             actionUrl: '/workout',
             metadata: {
@@ -482,11 +482,11 @@ export class SmartNotificationService {
 
   private static generateWorkoutReminderMessage(daysSinceLastWorkout: number, userContext: any): string {
     if (daysSinceLastWorkout >= 4) {
-      return `It's been ${daysSinceLastWorkout} days since your last workout. Your body is ready to get back into action!`;
+      return `It&apos;s been ${daysSinceLastWorkout} days since your last workout. Your body is ready to get back into action!`;
     } else if (daysSinceLastWorkout === 3) {
       return "Time to get moving! A quick workout will boost your energy and mood.";
     } else {
-      return "Ready to continue your fitness journey? Let's make today count!";
+      return "Ready to continue your fitness journey? Let&apos;s make today count!";
     }
   }
 

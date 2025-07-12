@@ -226,7 +226,7 @@ export function PhysicalStatsManager({ onUpdate }: PhysicalStatsManagerProps) {
           </div>
           <div className="mt-4 text-xs text-gray-600 flex items-start gap-2">
             <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
-            <p>BMR is your body's energy needs at rest. TDEE includes your activity level and represents your total daily calorie needs.</p>
+            <p>BMR is your body&apos;s energy needs at rest. TDEE includes your activity level and represents your total daily calorie needs.</p>
           </div>
         </CardContent>
       </Card>

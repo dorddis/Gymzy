@@ -158,7 +158,7 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
       // First try to find the exercise details from EXERCISES constant
       let exerciseDetails = EXERCISES.find(e => e.id === exercise.id);
 
-      // If not found in EXERCISES (e.g., AI-generated exercise), use the exercise's own muscle data
+      // If not found in EXERCISES (e.g., AI-generated exercise), use the exercise&apos;s own muscle data
       if (!exerciseDetails) {
         // Check if this is an AI-generated exercise with embedded muscle data
         if (exercise.primaryMuscles || exercise.secondaryMuscles) {
@@ -213,7 +213,7 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
     
     // Add current workout volumes
     Object.entries(currentWorkoutMuscleVolumes).forEach(([muscle, volume]) => {
-      if (volume > 0) { // Only add if there's actual volume
+      if (volume > 0) { // Only add if there&apos;s actual volume
         volumes[muscle as Muscle] = (volumes[muscle as Muscle] || 0) + volume;
       }
     });

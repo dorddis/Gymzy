@@ -78,7 +78,7 @@ Mark each step complete by changing `[ ]` to `[x]`.
 - **Tasks:**
   1. **Media Upload Implementation**
      - [x] Set up Cloudinary configuration with unsigned upload preset
-     - [x] Implement direct upload using Cloudinary's upload API
+     - [x] Implement direct upload using Cloudinary&apos;s upload API
      - [x] Add proper progress tracking and UI feedback
      - [x] Implement file type and size validation
      - [x] Add retry mechanism for failed uploads
@@ -316,7 +316,7 @@ Mark each step complete by changing `[ ]` to `[x]`.
 - **Goal:** Create a comprehensive workout logging system with multi-step flow
 - **Inputs:** 
   - Exercise database
-  - User's workout history
+  - User&apos;s workout history
   - Design specs from `design/add-workout.html.txt`
   - Firebase configuration
 
@@ -442,7 +442,7 @@ Mark each step complete by changing `[ ]` to `[x]`.
        // Implementation
      },
      
-     // Get user's recent workouts
+     // Get user&apos;s recent workouts
      getRecentWorkouts: async (userId: string, limit: number = 10) => {
        // Implementation
      },

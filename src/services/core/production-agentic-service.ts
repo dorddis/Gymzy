@@ -225,7 +225,7 @@ export class ProductionAgenticService {
     const conversationContext = recentHistory.map((msg: any) => `${msg.role}: ${msg.content}`).join('\n');
 
     const analysisPrompt = `
-Analyze the user's request and determine what tools are needed.
+Analyze the user&apos;s request and determine what tools are needed.
 
 User Request: "${userInput}"
 Context: ${context}
@@ -262,9 +262,9 @@ WORKOUT SAVING TRIGGERS (use "save_workout"):
 - "Can you save this workout for me?"
 
 GENERAL CONVERSATION (use "general_response"):
-- Greetings: "Hi", "Hello", "Hey", "What's up"
+- Greetings: "Hi", "Hello", "Hey", "What&apos;s up"
 - Questions: "How are you?", "What can you do?"
-- Statements: "There's no button", "I'm tired"
+- Statements: "There&apos;s no button", "I'm tired"
 - Emotional expressions: "I'm demotivated", "I'm sad", "I'm stressed"
 - Complaints or feedback
 - Any statement about feelings or mood
@@ -272,7 +272,7 @@ GENERAL CONVERSATION (use "general_response"):
 - CONVERSATION CONTEXT: Always consider the previous conversation context and any pending instructions
 
 // Rule for Ambiguity:
-// If a workout creation request is ambiguous (e.g., "make me a workout"), and you are confident it's a workout request,
+// If a workout creation request is ambiguous (e.g., "make me a workout"), and you are confident it&apos;s a workout request,
 // set intent to "workout_creation" and use the "create_workout" tool.
 // The tool will attempt to create a sensible default. Do not ask clarifying questions at this stage unless the request is extremely vague.
 
@@ -309,8 +309,8 @@ Examples:
 - "I want to save the workout I just did." →
   {"intent": "save_workout", "requiresTools": true, "tools": ["save_workout"], "reasoning": "User wants to save a workout, details need to be collected.", "confidence": 0.9, "parameters": {}}
 - "Hey there" → {"intent": "general_chat", "requiresTools": false, "tools": [], "reasoning": "Greeting - general conversation", "confidence": 0.9, "parameters": {}}
-- "What's up?" → {"intent": "general_chat", "requiresTools": false, "tools": [], "reasoning": "Casual greeting", "confidence": 0.9, "parameters": {}}
-- "There's no button" → {"intent": "general_chat", "requiresTools": false, "tools": [], "reasoning": "User feedback/complaint", "confidence": 0.9, "parameters": {}}
+- "What&apos;s up?" → {"intent": "general_chat", "requiresTools": false, "tools": [], "reasoning": "Casual greeting", "confidence": 0.9, "parameters": {}}
+- "There&apos;s no button" → {"intent": "general_chat", "requiresTools": false, "tools": [], "reasoning": "User feedback/complaint", "confidence": 0.9, "parameters": {}}
 - "I'm demotivated" → {"intent": "general_chat", "requiresTools": false, "tools": [], "reasoning": "Emotional statement - provide support", "confidence": 0.9, "parameters": {}}
 - "I'm feeling tired" → {"intent": "general_chat", "requiresTools": false, "tools": [], "reasoning": "Emotional/physical state - general conversation", "confidence": 0.9, "parameters": {}}`;
 
@@ -470,13 +470,13 @@ Examples:
 CRITICAL: Return ONLY the welcome message text itself. Do not include any explanations, descriptions, commentary, or additional text. Just the exact message that should be displayed to the user.
 
 Example of what to return: "Good morning! Ready to crush your fitness goals today?"
-Example of what NOT to return: "Here's a personalized welcome message: 'Good morning! Ready to crush your fitness goals today?' This message is..."
+Example of what NOT to return: "Here&apos;s a personalized welcome message: 'Good morning! Ready to crush your fitness goals today?' This message is..."
 
 Return only the message content.`;
     } else {
       // Full conversational prompt for regular chat
       responsePrompt = `
-Based on the user's request and any tool execution results, generate a helpful, conversational response.
+Based on the user&apos;s request and any tool execution results, generate a helpful, conversational response.
 
 User Request: "${userInput}"
 Intent: ${intentAnalysis.intent}
@@ -490,24 +490,24 @@ Context: ${context}
       responsePrompt += `
 Requirements:
 - Be conversational and helpful
-- Use the user's name if available
+- Use the user&apos;s name if available
 - Include specific details from tool results
 - Use clean, readable formatting (avoid excessive markdown)
 - If a workout was created or modified (e.g., from the "create_workout" or "modify_workout" tool):
   - Clearly list the exercises in the workout (name, sets, reps).
   - If this was a modification (modify_workout tool), acknowledge what was changed (e.g., "I've doubled your workout" or "I've made it harder").
-  - Check the tool results for details on exercise matching (e.g., a field named "matchingResults" or "unmatchedExercises" within the tool's results).
-  - If any user-requested exercises couldn't be matched or were substituted, clearly state this. For example: "I included [Exercise A] and [Exercise B]. I couldn't find an exact match for '[User's Requested Exercise C]', so I've added [Fallback Exercise D] as an alternative." or "I've included exercises based on your request for a [muscle group] workout. If you had specific exercises in mind that aren't listed, let me know!"
+  - Check the tool results for details on exercise matching (e.g., a field named "matchingResults" or "unmatchedExercises" within the tool&apos;s results).
+  - If any user-requested exercises couldn&apos;t be matched or were substituted, clearly state this. For example: "I included [Exercise A] and [Exercise B]. I couldn&apos;t find an exact match for '[User&apos;s Requested Exercise C]', so I've added [Fallback Exercise D] as an alternative." or "I've included exercises based on your request for a [muscle group] workout. If you had specific exercises in mind that aren&apos;t listed, let me know!"
   - This transparency helps the user understand how their request was processed.
-- If the user's intent was save_workout:
-  - And the save_workout tool was called and succeeded (check toolResults for a successful save_workout entry): Respond with a confirmation, like 'Okay, I've saved your workout "[Workout Name]"!' (extract workout name from tool result if possible, or use the one from parameters if tool doesn't return it).
-  - And the save_workout tool was intended (intentAnalysis.tools included save_workout) BUT crucial parameters like exercises were missing from the user's initial request (meaning the tool might not have been called or might have failed due to missing info from the intentAnalysis.parameters): **Ask clarifying questions to gather the necessary details.** For example: 'Sure, I can help you save that! What exercises did you do in your workout?' or 'Sounds good! To save your workout, could you tell me the exercises, sets, and reps?' or 'What would you like to name this workout and what exercises should I include?'.
+- If the user&apos;s intent was save_workout:
+  - And the save_workout tool was called and succeeded (check toolResults for a successful save_workout entry): Respond with a confirmation, like 'Okay, I've saved your workout "[Workout Name]"!' (extract workout name from tool result if possible, or use the one from parameters if tool doesn&apos;t return it).
+  - And the save_workout tool was intended (intentAnalysis.tools included save_workout) BUT crucial parameters like exercises were missing from the user&apos;s initial request (meaning the tool might not have been called or might have failed due to missing info from the intentAnalysis.parameters): **Ask clarifying questions to gather the necessary details.** For example: 'Sure, I can help you save that! What exercises did you do in your workout?' or 'Sounds good! To save your workout, could you tell me the exercises, sets, and reps?' or 'What would you like to name this workout and what exercises should I include?'.
   - If the save_workout tool was called but failed for another reason (check toolResults for errors for the save_workout tool): Inform the user, e.g., 'I tried to save your workout, but something went wrong. [Optional: brief, non-technical error if available from tool result]'
 - DO NOT include any "Start This Workout" text or buttons in your response - the UI will automatically add a workout button if needed.
-- Match the user's communication style from their profile
+- Match the user&apos;s communication style from their profile
 - Keep response concise but informative (max 250 words)
 - Format workout details in a simple, easy-to-read list
-- Don't include technical metadata or confidence scores in the user response
+- Don&apos;t include technical metadata or confidence scores in the user response
 `;
     }
 
@@ -552,8 +552,8 @@ Requirements:
     }
 
     // Remove common explanatory prefixes that might appear in welcome messages
-    cleaned = cleaned.replace(/^Here's a personalized welcome message[^:]*:\s*/i, '');
-    cleaned = cleaned.replace(/^Here's a[^:]*welcome message[^:]*:\s*/i, '');
+    cleaned = cleaned.replace(/^Here&apos;s a personalized welcome message[^:]*:\s*/i, '');
+    cleaned = cleaned.replace(/^Here&apos;s a[^:]*welcome message[^:]*:\s*/i, '');
     cleaned = cleaned.replace(/^I've created a[^:]*message[^:]*:\s*/i, '');
     cleaned = cleaned.replace(/^This message is[^.]*\.\s*/i, '');
     cleaned = cleaned.replace(/\s*This message[^.]*\.$/i, '');
@@ -596,9 +596,9 @@ Requirements:
     console.log('🔄 ProductionAgenticService: Using fallback intent analysis for:', userInput);
 
     // Greetings and casual conversation - prioritize these
-    const greetingKeywords = ['hi', 'hello', 'hey', 'sup', 'what\'s up', 'how are you', 'good morning', 'good afternoon', 'good evening'];
+    const greetingKeywords = ['hi', 'hello', 'hey', 'sup', 'what\&apos;s up', 'how are you', 'good morning', 'good afternoon', 'good evening'];
     const casualKeywords = ['thanks', 'thank you', 'ok', 'okay', 'cool', 'nice', 'great', 'awesome'];
-    const feedbackKeywords = ['no button', 'doesn\'t work', 'error', 'problem', 'issue', 'bug'];
+    const feedbackKeywords = ['no button', 'doesn\&apos;t work', 'error', 'problem', 'issue', 'bug'];
     const emotionalKeywords = ['demotivated', 'sad', 'tired', 'stressed', 'frustrated', 'angry', 'upset', 'down', 'depressed', 'anxious', 'worried', 'feeling', 'mood'];
 
     if (greetingKeywords.some(keyword => lowerInput.includes(keyword)) ||

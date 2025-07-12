@@ -76,7 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (!profile) {
         console.log('AuthContext: No profile found, creating new profile');
-        // Create profile if it doesn't exist (for legacy users)
+        // Create profile if it doesn&apos;t exist (for legacy users)
         profile = await createUserProfile(firebaseUser);
         console.log('AuthContext: New profile created', { hasCompletedOnboarding: profile.hasCompletedOnboarding });
       } else {
@@ -192,7 +192,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (!profileExists) {
         console.log('AuthContext: Profile does not exist, creating new profile...');
-        // Create profile if it doesn't exist
+        // Create profile if it doesn&apos;t exist
         await createUserProfile(user, updates);
       } else {
         console.log('AuthContext: Updating existing profile');

@@ -61,7 +61,7 @@ export const searchUsers = async (searchTerm: string, currentUserId: string, lim
     const usersRef = collection(db, 'user_profiles');
     const searchTermLower = searchTerm.toLowerCase();
 
-    // Get all public users first (since Firestore doesn't support full-text search)
+    // Get all public users first (since Firestore doesn&apos;t support full-text search)
     const allUsersQuery = query(
       usersRef,
       where('isPublic', '==', true),
@@ -132,7 +132,7 @@ export const searchUsers = async (searchTerm: string, currentUserId: string, lim
 // Get suggested users based on similar goals/interests
 export const getSuggestedUsers = async (currentUserId: string, limitCount: number = 10): Promise<PublicUserProfile[]> => {
   try {
-    // Get current user's profile to find similar users
+    // Get current user&apos;s profile to find similar users
     const currentUserRef = doc(db, 'user_profiles', currentUserId);
     const currentUserSnap = await getDoc(currentUserRef);
     
@@ -333,7 +333,7 @@ export const isFollowing = async (followerId: string, followingId: string): Prom
   }
 };
 
-// Get user's followers
+// Get user&apos;s followers
 export const getUserFollowers = async (userId: string): Promise<PublicUserProfile[]> => {
   try {
     const followersQuery = query(

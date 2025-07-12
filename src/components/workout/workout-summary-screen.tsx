@@ -93,8 +93,8 @@ export function WorkoutSummaryScreen({
       const newExercises = [...prevExercises];
       const currentSets = [...newExercises[exerciseIndex].sets];
       
-      // Get the last non-warmup set's values if adding a regular set
-      // or the last warmup set's values if adding a warmup set
+      // Get the last non-warmup set&apos;s values if adding a regular set
+      // or the last warmup set&apos;s values if adding a warmup set
       let lastSetValues: { weight: number; reps: number; rpe: number | undefined } = { weight: 0, reps: 0, rpe: 8 };
       if (currentSets.length > 0) {
         if (isWarmup) {
@@ -318,7 +318,7 @@ export function WorkoutSummaryScreen({
       </AnimatePresence>
 
       {currentWorkoutExercises.length === 0 ? (
-        <p className="text-center text-gray-500">No exercises added yet. Click "Add Exercise" to start!</p>
+        <p className="text-center text-gray-500">No exercises added yet. Click &quot;Add Exercise&quot; to start!</p>
       ) : null}
 
       {currentWorkoutExercises.length > 0 && (

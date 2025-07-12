@@ -63,7 +63,7 @@ export const createChatSession = async (
 
     // Do NOT save the initialMessage here.
     // The calling context (e.g., chat/page.tsx) is responsible for saving the first message with the correct role.
-    // For example, if it's a welcome message from AI, it should be saved as 'assistant'.
+    // For example, if it&apos;s a welcome message from AI, it should be saved as 'assistant'.
 
     return sessionId;
   } catch (error) {

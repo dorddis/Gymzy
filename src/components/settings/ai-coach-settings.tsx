@@ -36,7 +36,7 @@ const COMMUNICATION_STYLES = [
     description: 'Positive, supportive, and motivational',
     icon: Heart,
     color: 'bg-green-100 text-green-700',
-    example: "Great job! You're making amazing progress. Keep pushing forward!"
+    example: "Great job! You&apos;re making amazing progress. Keep pushing forward!"
   },
   { 
     id: 'challenging', 
@@ -60,7 +60,7 @@ const COMMUNICATION_STYLES = [
     description: 'Friendly, relaxed, and conversational',
     icon: MessageCircle,
     color: 'bg-purple-100 text-purple-700',
-    example: "Hey! Ready for today's workout? Let's have some fun with it!"
+    example: "Hey! Ready for today&apos;s workout? Let&apos;s have some fun with it!"
   }
 ];
 
@@ -81,7 +81,7 @@ const COACHING_STYLES = [
     id: 'visual', 
     label: 'Visual', 
     description: 'Emphasis on demonstrations and imagery',
-    example: "Imagine you're sitting back into a chair. Keep your chest proud and core tight."
+    example: "Imagine you&apos;re sitting back into a chair. Keep your chest proud and core tight."
   },
   { 
     id: 'conversational', 
@@ -281,7 +281,7 @@ export function AICoachSettings({ context, onUpdate }: AICoachSettingsProps) {
                     </div>
                   </div>
                   <div className="text-xs text-gray-500 italic">
-                    "{style.example}"
+                    &quot;{style.example}&quot;
                   </div>
                 </button>
               );
@@ -316,7 +316,7 @@ export function AICoachSettings({ context, onUpdate }: AICoachSettingsProps) {
                   <div className="font-medium mb-1">{style.label}</div>
                   <div className="text-sm text-gray-600 mb-2">{style.description}</div>
                   <div className="text-xs text-gray-500 italic">
-                    Example: "{style.example}"
+                    Example: &quot;{style.example}&quot;
                   </div>
                 </button>
               );

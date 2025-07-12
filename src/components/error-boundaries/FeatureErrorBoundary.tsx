@@ -153,7 +153,7 @@ export class FeatureErrorBoundary extends Component<Props, State> {
             </AlertTitle>
             <AlertDescription className="mt-2">
               <p className="mb-2">
-                This feature encountered an error and couldn't load properly. 
+                This feature encountered an error and couldn&apos;t load properly. 
                 You can try again or continue using other parts of the app.
               </p>
               

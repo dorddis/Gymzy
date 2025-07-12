@@ -9,7 +9,7 @@ This document outlines the subsequent phases for enhancing the Gymzy Intelligent
 *   **User-Centricity:** All enhancements should prioritize improving the user experience, making interactions more natural, helpful, and intuitive.
 *   **Modularity & Scalability:** Continue building components in a modular fashion to ensure the system is maintainable, testable, and scalable.
 *   **Robustness & Reliability:** Emphasize thorough error handling, validation, and testing at every stage.
-*   **Clarity & Transparency:** The agent's reasoning and actions should be understandable (where appropriate for the user) and debuggable for developers.
+*   **Clarity & Transparency:** The agent&apos;s reasoning and actions should be understandable (where appropriate for the user) and debuggable for developers.
 *   **Incremental Progress:** Implement features in logical, manageable phases, allowing for iterative improvements and validation.
 
 ### 1.3. Scope
@@ -26,36 +26,36 @@ This document will serve as the primary plan for these ongoing enhancements.
 ## 2. Phase 1: Full Conversational State Management for Clarifications
 
 ### 2.1. Objective
-To enable the agent to robustly handle multi-turn clarification dialogues. When the agent asks a clarifying question (e.g., "Do you want to double sets or reps?"), it must understand the user's subsequent response in the context of that question and proceed accordingly.
+To enable the agent to robustly handle multi-turn clarification dialogues. When the agent asks a clarifying question (e.g., "Do you want to double sets or reps?"), it must understand the user&apos;s subsequent response in the context of that question and proceed accordingly.
 
 ### 2.2. Current State
-The agent can ask clarification questions (as seen in the "double it" scenario). However, processing the user's answer to that clarification relies on a simulation within the `processMessage` loop. This phase will implement the actual logic.
+The agent can ask clarification questions (as seen in the "double it" scenario). However, processing the user&apos;s answer to that clarification relies on a simulation within the `processMessage` loop. This phase will implement the actual logic.
 
 ### 2.3. Key Tasks
 
 #### 2.3.1. Define Contextual Intent for Clarification Responses
 *   **Task:** Introduce a new intent type, e.g., `USER_PROVIDED_CLARIFICATION`.
 *   **Details:** When the agent asks a question and stores it in `WorkingMemory` (e.g., `pendingClarificationContext`), the intent detector for the *next* user input should be biased or specifically look for answers related to this pending context.
-*   **Example:** If `pendingClarificationContext` is about "doubling options," the user's "double the sets" should be recognized as `USER_PROVIDED_CLARIFICATION` with slots indicating their choice (e.g., `{ "clarification_choice": "DOUBLE_SETS" }`).
+*   **Example:** If `pendingClarificationContext` is about "doubling options," the user&apos;s "double the sets" should be recognized as `USER_PROVIDED_CLARIFICATION` with slots indicating their choice (e.g., `{ "clarification_choice": "DOUBLE_SETS" }`).
 
 #### 2.3.2. Enhance Intent Detection for Follow-up Inputs
 *   **Task:** Modify `IntelligentGymzyAgent.detectIntent()` to consider `workingMemory.pendingClarificationContext`.
 *   **Details:**
     *   If `pendingClarificationContext` is active, the primary goal of intent detection for the next input is to resolve the clarification.
     *   This might involve checking user input against the options provided in `clarificationDetails.options`.
-    *   If the user's input doesn't directly answer the clarification (e.g., they ask a different question), the agent needs to decide whether to re-ask, answer the new question, or abandon the clarification flow. (For this phase, focus on direct answers first).
+    *   If the user&apos;s input doesn&apos;t directly answer the clarification (e.g., they ask a different question), the agent needs to decide whether to re-ask, answer the new question, or abandon the clarification flow. (For this phase, focus on direct answers first).
 *   **Acceptance Criteria:** The `detectIntent` method correctly identifies user responses to clarification questions and extracts the chosen option.
 
 #### 2.3.3. Update `processMessage` Loop for Clarification Handling
 *   **Task:** Refine `IntelligentGymzyAgent.processMessage()` to use the new contextual intent.
 *   **Details:**
     *   If `USER_PROVIDED_CLARIFICATION` intent is detected:
-        1.  Extract the user's choice (e.g., "DOUBLE_SETS") from the intent slots.
+        1.  Extract the user&apos;s choice (e.g., "DOUBLE_SETS") from the intent slots.
         2.  Construct the appropriate `ModificationPlan` based on this choice and the original context (e.g., the `currentWorkout` that was to be doubled).
         3.  Clear the `pendingClarificationContext` from `WorkingMemory`.
         4.  Call `executeTool()` with the `IntelligentWorkoutModifier` and the new `ModificationPlan`.
-        5.  Generate a response based on the tool's success or failure.
-    *   If the user's input is not a valid response to the clarification, the agent should (for now) perhaps re-state the clarification question or provide an error.
+        5.  Generate a response based on the tool&apos;s success or failure.
+    *   If the user&apos;s input is not a valid response to the clarification, the agent should (for now) perhaps re-state the clarification question or provide an error.
 *   **Acceptance Criteria:** The `processMessage` loop correctly orchestrates the flow from receiving a clarification response to executing the intended action.
 
 #### 2.3.4. Manage `pendingClarificationContext` in Working Memory
@@ -82,11 +82,11 @@ The agent can ask clarification questions (as seen in the "double it" scenario).
     *   Test end-to-end flow:
         1. User: "double it" -> Agent: Asks clarification.
         2. User: "double the sets" -> Agent: Executes modification and confirms.
-    *   Test cases where user input doesn't match clarification options.
+    *   Test cases where user input doesn&apos;t match clarification options.
 *   **Acceptance Criteria:** All tests pass, demonstrating robust clarification handling.
 
 ### 2.4. Expected Outcome
-At the end of this phase, the agent will be able to engage in a simple but complete multi-turn dialogue to resolve ambiguity. For example, if the user says "double it," the agent will ask for specifics, understand the user's reply, and then execute the correctly specified action. This removes the simulation currently in place.
+At the end of this phase, the agent will be able to engage in a simple but complete multi-turn dialogue to resolve ambiguity. For example, if the user says "double it," the agent will ask for specifics, understand the user&apos;s reply, and then execute the correctly specified action. This removes the simulation currently in place.
 
 ---
 *Guide to be continued in subsequent steps.*
@@ -139,7 +139,7 @@ To significantly broaden the range of user intents the agent can understand and 
 *   **Acceptance Criteria:** All new intents are covered by tests, and tests pass.
 
 ### 3.3. Expected Outcome
-The agent will understand a broader variety of user requests, making it significantly more useful. While full natural language understanding isn't achieved yet, the agent will be more flexible than simple command matching for the implemented intents.
+The agent will understand a broader variety of user requests, making it significantly more useful. While full natural language understanding isn&apos;t achieved yet, the agent will be more flexible than simple command matching for the implemented intents.
 
 ## 4. Phase 3: Broader Tool Development & Integration
 
@@ -188,7 +188,7 @@ The agent will be able to perform a variety of useful fitness-related actions, s
 ## 5. Phase 4: Memory Persistence & Scalability Foundations
 
 ### 5.1. Objective
-To enable the agent's memory (WorkingMemory and EpisodicMemory) to persist across sessions and to lay basic groundwork for scalability.
+To enable the agent&apos;s memory (WorkingMemory and EpisodicMemory) to persist across sessions and to lay basic groundwork for scalability.
 
 ### 5.2. Key Tasks
 
@@ -227,7 +227,7 @@ The agent will be able to maintain context and history across different user ses
 ## 6. Phase 5: Refining Response Generation
 
 ### 6.1. Objective
-To make the agent's responses more natural, varied, and contextually appropriate, moving away from purely template-based replies.
+To make the agent&apos;s responses more natural, varied, and contextually appropriate, moving away from purely template-based replies.
 
 ### 6.2. Key Tasks
 
@@ -248,15 +248,15 @@ To make the agent's responses more natural, varied, and contextually appropriate
 #### 6.2.3. Basic Personality Infusion (Tone and Style)
 *   **Task:** Define a basic personality for Gymzy (e.g., encouraging, straightforward, knowledgeable) and ensure response variations align with it.
 *   **Details:** This is not about complex personality modeling yet, but about ensuring the language used is consistent with a defined character. Avoid overly robotic or generic phrasing.
-*   **Acceptance Criteria:** A style guide for Gymzy's responses is created, and response templates are reviewed against it.
+*   **Acceptance Criteria:** A style guide for Gymzy&apos;s responses is created, and response templates are reviewed against it.
 
 #### 6.2.4. Handling Acknowledgment and Follow-up
 *   **Task:** Improve how the agent acknowledges user input before proceeding with actions, especially for complex requests.
-*   **Details:** For some actions, it might be good to say "Okay, I'll create a chest workout for you." before actually presenting the workout. This manages expectations.
+*   **Details:** For some actions, it might be good to say "Okay, I&apos;ll create a chest workout for you." before actually presenting the workout. This manages expectations.
 *   **Acceptance Criteria:** Agent uses acknowledgments where appropriate for better conversational flow.
 
 ### 6.3. Expected Outcome
-The agent's communication will feel more polished, engaging, and less repetitive. Users will perceive the agent as more interactive and intelligent due to more varied and contextually relevant responses.
+The agent&apos;s communication will feel more polished, engaging, and less repetitive. Users will perceive the agent as more interactive and intelligent due to more varied and contextually relevant responses.
 
 ---
 *This concludes the main enhancement phases for this guide. Future work would focus on more advanced NLP, deeper knowledge integration, and the advanced cognitive patterns from the v2.0 plan.*

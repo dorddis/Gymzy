@@ -21,7 +21,7 @@ import { Muscle, MUSCLE_VOLUME_THRESHOLDS } from '../../../home/user/studio/src/
 /* ───────────────────────────────────────────────────────────────────────────
    1) Import the two full‐body SVGs (front & back) as React components.
       These single SVGs each already contain all of the muscle‐group <g> IDs
-      that we'll dynamically show/hide via opacity.
+      that we&apos;ll dynamically show/hide via opacity.
 ──────────────────────────────────────────────────────────────────────────── */
 import FrontFullBody from '@/assets/images/front-full-body-with-all-muscles-showing.svg';
 import BackFullBody from '@/assets/images/back-full-body-with-all-muscles-showing.svg';
@@ -97,7 +97,7 @@ const AnatomyFigureSvg = (props: {
     /*
       DELTOIDS (all three heads share the same "Delts_…" ID on the back)
       => merged into a single entry here (these are kept for future implementation):
-      [Muscle.AnteriorDeltoid]: // we'll use this one key for all three heads on the back
+      [Muscle.AnteriorDeltoid]: // we&apos;ll use this one key for all three heads on the back
       [Muscle.LateralDeltoid]:
       [Muscle.PosteriorDeltoid]:
     */
@@ -156,7 +156,7 @@ const AnatomyFigureSvg = (props: {
   /* ───────────────────────────────────────────────────────────────
      3) Front‐view map—using the `<g id="…">` strings from your *front* SVG.
      Each key is the same `Muscle` enum value, but the RHS is either a single
-     string or an array of strings (if that muscle's shape is split into multiple
+     string or an array of strings (if that muscle&apos;s shape is split into multiple
      <g> sub‐groups in the SVG).  Here we explicitly separate "upper vs. lower abs,"
      "gluteus medius vs. maximus," etc.
   ─────────────────────────────────────────────────────────────── */
@@ -242,7 +242,7 @@ const AnatomyFigureSvg = (props: {
       On the front, the triceps heads do exist separately:
       If you want to highlight "TricepsBrachii" as both heads, you can add:
       [Muscle.TricepsBrachii]: [<both IDs>] 
-      but we'll keep them split:
+      but we&apos;ll keep them split:
     */
     [Muscle.TricepsBrachii]: [
       'Triceps_long_head_00000083776378062729911360000007780280132728440204_',
@@ -280,7 +280,7 @@ const AnatomyFigureSvg = (props: {
       string[]
     >((acc, maybeId) => {
       if (!maybeId) return acc;
-      // If it's an array of IDs, flatten; if string, wrap in array:
+      // If it&apos;s an array of IDs, flatten; if string, wrap in array:
       return acc.concat(Array.isArray(maybeId) ? maybeId : [maybeId]);
     }, []);
 
@@ -294,7 +294,7 @@ const AnatomyFigureSvg = (props: {
     // --- STEP 2: Now "light up" each muscle that actually has a volume > 0
     relevantMuscles.forEach((muscle) => {
       const maybeId = currentMuscleIdMap[muscle];
-      if (!maybeId) return; // This muscle isn't in the map → skip.
+      if (!maybeId) return; // This muscle isn&apos;t in the map → skip.
 
       // Normalize to array-of-strings so we can set opacity on each sub-group:
       const groupIds: string[] = Array.isArray(maybeId)

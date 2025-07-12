@@ -56,7 +56,7 @@ export function MediaUpload({ onFilesChange, onUploadProgress, isUploading, disa
         };
         reader.readAsDataURL(file);
       } else {
-        // For videos, we'll use a placeholder
+        // For videos, we&apos;ll use a placeholder
         resolve('/video-placeholder.png');
       }
     });

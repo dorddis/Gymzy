@@ -101,7 +101,7 @@ NEXT_PUBLIC_GROQ_MODEL_NAME=llama3-70b-8192
 
 1. **Test the app** - Start your development server and test the chat functionality
 2. **Monitor usage** - Check your Groq Console for usage statistics
-3. **Optimize prompts** - Fine-tune prompts for Llama 3's capabilities
+3. **Optimize prompts** - Fine-tune prompts for Llama 3&apos;s capabilities
 4. **Explore models** - Try different Groq models if needed
 
 ## 🔧 Available Models

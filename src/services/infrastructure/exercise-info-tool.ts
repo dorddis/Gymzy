@@ -23,13 +23,13 @@ export class ExerciseInfoTool implements CognitiveTool {
     if (!exerciseDetails) {
       return {
         success: false,
-        error: `Sorry, I don't have information on an exercise called "${exerciseName}".`,
+        error: `Sorry, I don&apos;t have information on an exercise called "${exerciseName}".`,
         // We could suggest alternatives or similar exercises in a more advanced version
       };
     }
 
     // Format the response message
-    let message = `Here's information on ${exerciseDetails.name}:\n`;
+    let message = `Here&apos;s information on ${exerciseDetails.name}:\n`;
     message += `Description: ${exerciseDetails.description}\n`;
     message += `Target Muscles: ${exerciseDetails.targetMuscles.join(', ')}\n`;
     if (exerciseDetails.instructions && exerciseDetails.instructions.length > 0) {

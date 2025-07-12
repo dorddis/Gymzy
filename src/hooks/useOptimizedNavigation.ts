@@ -2,7 +2,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
 
 /**
- * Hook for optimized navigation that doesn't block on current page loading states
+ * Hook for optimized navigation that doesn&apos;t block on current page loading states
  */
 export const useOptimizedNavigation = () => {
   const router = useRouter();

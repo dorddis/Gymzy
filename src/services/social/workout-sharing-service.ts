@@ -108,7 +108,7 @@ export const getWorkoutFeed = async (
   limitCount: number = 20
 ): Promise<WorkoutPost[]> => {
   try {
-    // For now, get all public posts. Later we'll filter by following
+    // For now, get all public posts. Later we&apos;ll filter by following
     const postsQuery = query(
       collection(db, 'workout_posts'),
       where('visibility', '==', 'public'),
@@ -298,7 +298,7 @@ export const getWorkoutComments = async (postId: string): Promise<WorkoutComment
   }
 };
 
-// Get user's shared workouts
+// Get user&apos;s shared workouts
 export const getUserWorkoutPosts = async (userId: string): Promise<WorkoutPost[]> => {
   try {
     const postsQuery = query(
