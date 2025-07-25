@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Desktop Layout Styles */
+@import '../styles/desktop-layout.css';
+
 @layer base {
   :root {
     --background: 0 0% 99%; /* #FDFFFC - Light background */
@@ -15,6 +18,14 @@
     --secondary: 146 25% 56%; /* #73AB84 */
     --secondary-foreground: 0 0% 98%; /* White text on secondary */
     --muted: 0 0% 96%; /* Light muted background */
+    
+    /* Desktop Layout Custom Properties */
+    --app-panel-width: 65%;
+    --chat-panel-width: 35%;
+    --split-divider-width: 4px;
+    --layout-transition-duration: 300ms;
+    --desktop-padding: 1.5rem;
+    --chat-compact-padding: 0.75rem;
     --muted-foreground: 0 0% 45%; /* Dark muted text */
     --accent: 354 47% 43%; /* Deep Red #A23B44 */
     --accent-foreground: 0 0% 98%; /* White text on accent */

@@ -74,6 +74,7 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@axe-core/react": "^4.10.2",
     "@svgr/webpack": "^8.1.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
@@ -84,8 +85,10 @@
     "@types/react-dom": "^18",
     "@types/three": "^0.167.1",
     "@types/webpack": "^5.28.5",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
     "genkit-cli": "^1.8.0",
     "jest": "^30.0.2",
+    "jest-axe": "^10.0.0",
     "jest-environment-jsdom": "^30.0.2",
     "postcss": "^8",
     "raw-loader": "^4.0.2",
