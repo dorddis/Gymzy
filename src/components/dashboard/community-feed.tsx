@@ -8,7 +8,7 @@ import { communityPosts } from '@/data/community-posts';
 import { Dumbbell, Heart, MessageSquare, Share2, Clock, MapPin, Flame, Trophy } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { getWorkoutFeed } from '@/services/workout-sharing-service';
+import { getWorkoutFeed } from '@/services/social/workout-sharing-service';
 
 interface WorkoutPost {
   id: string;
@@ -192,7 +192,7 @@ export function CommunityFeed() {
           <Button
             onClick={() => router.push('/workout')}
             size="sm"
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-blue-600 hover:bg-blue-700 text-white"
           >
             Start a Workout
           </Button>
@@ -280,16 +280,16 @@ export function CommunityFeed() {
                 variant="ghost"
                 size="sm"
                 onClick={() => handleLike(post.id)}
-                className="flex items-center p-1 h-auto text-gray-600 hover:text-red-500 transition-colors"
+                className="flex items-center p-1 h-auto text-green-600 hover:text-green-600"
               >
-                <Heart className={`mr-1 w-4 h-4 ${likedPosts[post.id] ? 'fill-current text-red-500' : ''}`} />
+                <Heart className={`mr-1 w-4 h-4 ${likedPosts[post.id] ? 'fill-current text-green-600' : ''}`} />
                 {(isWorkoutPost ? post.likesCount : (post as any).likes) + (likedPosts[post.id] ? 1 : 0)}
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => router.push(`/feed?post=${post.id}`)}
-                className="flex items-center p-1 h-auto text-gray-600 hover:text-blue-500 transition-colors"
+                className="flex items-center p-1 h-auto text-green-600 hover:text-green-600"
               >
                 <MessageSquare className="mr-1 w-4 h-4" />
                 {isWorkoutPost ? post.commentsCount : (post as any).comments}
@@ -309,7 +309,7 @@ export function CommunityFeed() {
                     navigator.clipboard.writeText(window.location.href);
                   }
                 }}
-                className="flex items-center p-1 h-auto text-gray-600 hover:text-green-500 transition-colors"
+                className="flex items-center p-1 h-auto text-green-600 hover:text-green-600"
               >
                 <Share2 className="w-4 h-4" />
               </Button>

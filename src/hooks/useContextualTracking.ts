@@ -1,6 +1,6 @@
 import { useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { ContextualDataService } from '@/services/contextual-data-service';
+import { ContextualDataService } from '@/services/data/contextual-data-service';
 
 // Hook for tracking contextual data throughout the app
 export function useContextualTracking() {

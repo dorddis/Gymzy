@@ -83,7 +83,12 @@ export function WorkoutHeader({ onTerminateWorkout, onCompleteWorkout, className
         </Button>
 
         <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="icon" onClick={() => setIsRunning(!isRunning)}>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setIsRunning(!isRunning)}
+            className="border-primary/40 text-primary hover:bg-primary/10 hover:border-primary/60"
+          >
             {isRunning ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
           </Button>
           <span className="text-xl font-semibold">{formatTime(time)}</span>

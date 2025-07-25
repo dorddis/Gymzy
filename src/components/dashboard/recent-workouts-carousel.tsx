@@ -23,7 +23,7 @@ export function RecentWorkoutsCarousel() {
             variant="ghost"
             size="sm"
             onClick={handleViewAll}
-            className="text-blue-600 hover:text-blue-800 text-sm p-0 h-auto font-medium"
+            className="text-secondary hover:text-secondary/80 text-sm p-0 h-auto font-medium"
           >
             View All
           </Button>
@@ -48,7 +48,7 @@ export function RecentWorkoutsCarousel() {
             variant="ghost"
             size="sm"
             onClick={handleViewAll}
-            className="text-blue-600 hover:text-blue-800 text-sm p-0 h-auto font-medium"
+            className="text-secondary hover:text-secondary/80 text-sm p-0 h-auto font-medium"
           >
             View All
           </Button>
@@ -67,7 +67,7 @@ export function RecentWorkoutsCarousel() {
             variant="ghost"
             size="sm"
             onClick={handleViewAll}
-            className="text-blue-600 hover:text-blue-800 text-sm p-0 h-auto font-medium"
+            className="text-secondary hover:text-secondary/80 text-sm p-0 h-auto font-medium"
           >
             View All
           </Button>
@@ -85,7 +85,7 @@ export function RecentWorkoutsCarousel() {
           variant="ghost"
           size="sm"
           onClick={handleViewAll}
-          className="text-blue-600 hover:text-blue-800 text-sm p-0 h-auto font-medium"
+          className="text-secondary hover:text-secondary/80 text-sm p-0 h-auto font-medium"
         >
           View All
         </Button>

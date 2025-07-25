@@ -2,12 +2,12 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Workout } from '@/services/workout-service';
+import { Workout } from '@/services/core/workout-service';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
-import { workoutService } from '@/services/workout-service';
+import { workoutService } from '@/services/core/workout-service';
 
 export default function LogWorkoutPage() {
   const { id } = useParams();

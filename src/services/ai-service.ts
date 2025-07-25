@@ -114,10 +114,7 @@ const simulateStreamingResponse = async (
 
 // Token-based streaming with abort support for better performance
 export const generateCharacterStreamingResponse = async (
-  prompt: string,
-  onChunk: (chunk: string) => void,
-  abortSignal?: AbortSignal
-): Promise<string> => {
+prompt: string, onChunk: (chunk: string) => void, p0: () => void, p1: (error: any) => void, abortSignal?: AbortSignal): Promise<string> => {
   try {
     console.log('Starting token streaming for prompt:', prompt.substring(0, 100) + '...');
     const fullResponse = await generateAIResponse(prompt);

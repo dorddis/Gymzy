@@ -12,9 +12,10 @@ interface ChatBubbleProps {
     workoutId: string;
   };
   onStartWorkout?: (workoutData: any) => void;
+  compact?: boolean;
 }
 
-export function ChatBubble({ role, content, workoutData, onStartWorkout }: ChatBubbleProps) {
+export function ChatBubble({ role, content, workoutData, onStartWorkout, compact = false }: ChatBubbleProps) {
   const isUser = role === 'user';
 
   // Format content with basic markdown-like formatting
@@ -77,7 +78,8 @@ export function ChatBubble({ role, content, workoutData, onStartWorkout }: ChatB
 
   return (
     <div
-      className={`p-3 rounded-xl max-w-[75%] leading-relaxed
+      className={`rounded-xl max-w-[75%] leading-relaxed
+        ${compact ? 'p-2 text-sm' : 'p-3'}
         ${
           isUser
             ? 'bg-primary text-white self-end ml-auto rounded-br-none'
@@ -88,14 +90,14 @@ export function ChatBubble({ role, content, workoutData, onStartWorkout }: ChatB
 
       {/* Workout Start Button */}
       {!isUser && workoutData && onStartWorkout && (
-        <div className="mt-3 pt-3 border-t border-gray-200">
+        <div className={compact ? "mt-2 pt-2 border-t border-gray-200" : "mt-3 pt-3 border-t border-gray-200"}>
           <Button
             onClick={() => onStartWorkout(workoutData)}
-            size="sm"
+            size={compact ? "sm" : "sm"}
             className="bg-green-600 hover:bg-green-700 text-white"
           >
-            <Play className="h-4 w-4 mr-2" />
-            Start This Workout
+            <Play className={compact ? "h-3 w-3 mr-1" : "h-4 w-4 mr-2"} />
+            {compact ? "Start" : "Start This Workout"}
           </Button>
         </div>
       )}

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { SmartNotificationService, SmartNotification, NotificationPreferences } from '@/services/notification-service';
+import { SmartNotificationService, SmartNotification, NotificationPreferences } from '@/services/social/notification-service';
 
 export function useSmartNotifications() {
   const { user } = useAuth();

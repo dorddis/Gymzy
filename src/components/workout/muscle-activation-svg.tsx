@@ -134,22 +134,27 @@ const frontMuscleIdMap: Partial<Record<Muscle, string | string[]>> = {
  *  - Displays the full-body SVG with muscle activation.
  *  - Implements scroll-blur effect and tappable functionality.
  */
-export function MuscleActivationSVG({ 
-  muscleVolumes = {}, 
-  className, 
+export function MuscleActivationSVG({
+  muscleVolumes = {},
+  className,
   scrollElementRef,
   scale = 2 // Updated default scale to 2
 }: MuscleActivationSVGProps) {
   const [view, setView] = useState<'front' | 'back'>('front');
   const [isRotating, setIsRotating] = useState(false);
   const svgRef = useRef<SVGSVGElement>(null);
+  const modalSvgRef = useRef<SVGSVGElement>(null); // Separate ref for modal
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalView, setModalView] = useState<'front' | 'back'>('front'); // Separate state for modal
   const [scrollPosition, setScrollPosition] = useState(0);
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
+  const [isModalRotating, setIsModalRotating] = useState(false); // Separate rotating state for modal
 
   const BodySvg = view === 'front' ? FrontFullBody : BackFullBody;
+  const ModalBodySvg = modalView === 'front' ? FrontFullBody : BackFullBody;
   const currentMuscleIdMap = view === 'front' ? frontMuscleIdMap : backMuscleIdMap;
+  const modalMuscleIdMap = modalView === 'front' ? frontMuscleIdMap : backMuscleIdMap;
 
   // Initialize all muscles with 0 if undefined, and ensure all muscles are present
   const safeMuscleVolumes = useMemo(() => {
@@ -172,27 +177,27 @@ export function MuscleActivationSVG({
       .map(([muscle]) => muscle as Muscle);
   }, [safeMuscleVolumes]);
 
-  const applyMuscleActivation = useCallback(() => {
-    if (!svgRef.current) return;
+  const applyMuscleActivation = useCallback((targetRef: React.RefObject<SVGSVGElement>, muscleIdMap: Partial<Record<Muscle, string | string[]>>) => {
+    if (!targetRef.current) return;
 
     console.log("MuscleActivationSVG - muscleVolumes prop:", muscleVolumes);
     console.log("MuscleActivationSVG - safeMuscleVolumes:", safeMuscleVolumes);
     console.log("MuscleActivationSVG - relevantMuscles:", relevantMuscles);
 
-    const allGroupIds: string[] = Object.values(currentMuscleIdMap).reduce<string[]>((acc, maybeId) => {
+    const allGroupIds: string[] = Object.values(muscleIdMap).reduce<string[]>((acc, maybeId) => {
       if (!maybeId) return acc;
       return acc.concat(Array.isArray(maybeId) ? maybeId : [maybeId]);
     }, []);
 
     // First, hide all muscles to reset opacities
     allGroupIds.forEach((groupId) => {
-      const g = svgRef.current!.querySelector<SVGGElement>(`#${groupId}`);
+      const g = targetRef.current!.querySelector<SVGGElement>(`#${groupId}`);
       if (g) g.style.opacity = '0';
     });
 
     // Then, apply activation opacities to relevant muscles
     relevantMuscles.forEach((muscle) => {
-      const maybeId = currentMuscleIdMap[muscle];
+      const maybeId = muscleIdMap[muscle];
       if (!maybeId) return;
 
       const groupIds: string[] = Array.isArray(maybeId) ? maybeId : [maybeId];
@@ -200,15 +205,24 @@ export function MuscleActivationSVG({
       const activation = getMuscleActivationLevel(volume);
 
       groupIds.forEach((groupId) => {
-        const g = svgRef.current!.querySelector<SVGGElement>(`#${groupId}`);
+        const g = targetRef.current!.querySelector<SVGGElement>(`#${groupId}`);
         if (g) g.style.opacity = `${activation.opacity}`;
       });
     });
-  }, [view, safeMuscleVolumes, relevantMuscles, currentMuscleIdMap]);
+  }, [safeMuscleVolumes, relevantMuscles, muscleVolumes]);
 
   useEffect(() => {
-    applyMuscleActivation();
-  }, [applyMuscleActivation]);
+    applyMuscleActivation(svgRef, currentMuscleIdMap);
+  }, [applyMuscleActivation, currentMuscleIdMap]);
+
+  useEffect(() => {
+    if (isModalOpen) {
+      // Reset modal state when opening
+      setModalView('front');
+      setIsModalRotating(false);
+      applyMuscleActivation(modalSvgRef, modalMuscleIdMap);
+    }
+  }, [applyMuscleActivation, modalMuscleIdMap, isModalOpen]);
 
   useEffect(() => {
     const scrollElement = scrollElementRef?.current || window;
@@ -224,27 +238,42 @@ export function MuscleActivationSVG({
   }, [scrollElementRef]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
+    // Only handle touch events on the SVG itself, not on buttons
+    const target = e.target as Element;
+    if (target.closest('button')) return;
+
     touchStartX.current = e.touches[0].clientX;
+    touchEndX.current = e.touches[0].clientX; // Initialize end position
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
+    // Only handle touch events on the SVG itself, not on buttons
+    const target = e.target as Element;
+    if (target.closest('button')) return;
+
     touchEndX.current = e.touches[0].clientX;
   };
 
-  const handleTouchEnd = () => {
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    // Only handle touch events on the SVG itself, not on buttons
+    const target = e.target as Element;
+    if (target.closest('button')) return;
+
     const distance = touchEndX.current - touchStartX.current;
     const minSwipeDistance = 50; // Minimum distance for a swipe
 
-    if (distance > minSwipeDistance) {
-      // Swiped right - show front
-      handleViewChange('front');
-    } else if (distance < -minSwipeDistance) {
-      // Swiped left - show back
-      handleViewChange('back');
+    if (Math.abs(distance) >= minSwipeDistance) {
+      if (distance > 0) {
+        // Swiped right - show front
+        handleViewChange('front');
+      } else {
+        // Swiped left - show back
+        handleViewChange('back');
+      }
     }
   };
 
-  const handleViewChange = (newView: 'front' | 'back') => {
+  const handleViewChange = useCallback((newView: 'front' | 'back') => {
     if (newView === view || isRotating) return;
 
     setIsRotating(true);
@@ -255,19 +284,54 @@ export function MuscleActivationSVG({
       svgRef.current.style.transform = `scale(${scale}) rotateY(90deg)`;
     }
 
-    setTimeout(() => {
+    const flipTimeout = setTimeout(() => {
       setView(newView);
       if (svgRef.current) {
         svgRef.current.style.transform = `scale(${scale}) rotateY(0deg)`;
       }
-      setTimeout(() => {
+
+      const resetTimeout = setTimeout(() => {
         setIsRotating(false);
         if (svgRef.current) {
           svgRef.current.style.transition = '';
         }
       }, 150);
+
+      return () => clearTimeout(resetTimeout);
     }, 150);
-  };
+
+    return () => clearTimeout(flipTimeout);
+  }, [view, isRotating, scale]);
+
+  const handleModalViewChange = useCallback((newView: 'front' | 'back') => {
+    if (newView === modalView || isModalRotating) return;
+
+    setIsModalRotating(true);
+
+    // Add a smooth 3D flip transition effect for modal
+    if (modalSvgRef.current) {
+      modalSvgRef.current.style.transition = 'transform 0.3s ease-in-out';
+      modalSvgRef.current.style.transform = 'rotateY(90deg)';
+    }
+
+    const flipTimeout = setTimeout(() => {
+      setModalView(newView);
+      if (modalSvgRef.current) {
+        modalSvgRef.current.style.transform = 'rotateY(0deg)';
+      }
+
+      const resetTimeout = setTimeout(() => {
+        setIsModalRotating(false);
+        if (modalSvgRef.current) {
+          modalSvgRef.current.style.transition = '';
+        }
+      }, 150);
+
+      return () => clearTimeout(resetTimeout);
+    }, 150);
+
+    return () => clearTimeout(flipTimeout);
+  }, [modalView, isModalRotating]);
 
   return (
     <div
@@ -275,46 +339,67 @@ export function MuscleActivationSVG({
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      style={{ perspective: '1000px' }}
+      style={{
+        perspective: '1000px',
+        paddingTop: '5px',
+        touchAction: 'pan-y pinch-zoom' // Allow vertical scrolling but handle horizontal swipes
+      }}
     >
       <BodySvg
         ref={svgRef}
-        className="w-full h-full transition-transform duration-300 ease-in-out"
+        className="w-full h-full transition-transform duration-300 ease-in-out cursor-pointer"
         style={{
           transform: `scale(${scale})`,
           transformStyle: 'preserve-3d',
           backfaceVisibility: 'hidden'
         }}
+        onClick={() => setIsModalOpen(true)}
       />
 
       {/* Left Arrow Button - Show Back */}
       <Button
         variant="ghost"
         size="icon"
-        className={`absolute left-1 top-1/2 -translate-y-1/2 z-20 text-gray-600 hover:text-blue-600 transition-all duration-300 rounded-full border border-gray-200 hover:border-blue-300 hover:bg-blue-50 hover:shadow-lg transform hover:scale-110 ${isRotating ? 'animate-pulse scale-95' : ''} ${view === 'back' ? 'bg-blue-100 text-blue-600 border-blue-300' : ''}`}
+        className={`absolute left-1 top-1/2 -translate-y-1/2 z-50 transition-all duration-200 rounded-full bg-black/20 hover:bg-black/40 backdrop-blur-sm border border-white/20 ${isRotating ? 'opacity-50 scale-95' : 'opacity-100 scale-100'} ${view === 'back' ? 'text-primary border-primary/50' : 'text-white hover:text-primary'}`}
         onClick={(e) => {
           e.stopPropagation();
-          handleViewChange('back');
+          e.preventDefault();
+          if (!isRotating) {
+            handleViewChange('back');
+          }
         }}
         aria-label="Show Back View"
         disabled={isRotating}
+        style={{
+          pointerEvents: isRotating ? 'none' : 'auto',
+          minWidth: '40px',
+          minHeight: '40px'
+        }}
       >
-        <RotateCcw className={`h-5 w-5 transform rotate-180 transition-transform duration-300 ${isRotating ? 'rotate-360' : ''}`} />
+        <RotateCcw className={`h-5 w-5 transform rotate-180 transition-transform duration-200 ${isRotating ? 'rotate-360' : ''}`} />
       </Button>
 
       {/* Right Arrow Button - Show Front */}
       <Button
         variant="ghost"
         size="icon"
-        className={`absolute right-1 top-1/2 -translate-y-1/2 z-20 text-gray-600 hover:text-blue-600 transition-all duration-300 rounded-full border border-gray-200 hover:border-blue-300 hover:bg-blue-50 hover:shadow-lg transform hover:scale-110 ${isRotating ? 'animate-pulse scale-95' : ''} ${view === 'front' ? 'bg-blue-100 text-blue-600 border-blue-300' : ''}`}
+        className={`absolute right-1 top-1/2 -translate-y-1/2 z-50 transition-all duration-200 rounded-full bg-black/20 hover:bg-black/40 backdrop-blur-sm border border-white/20 ${isRotating ? 'opacity-50 scale-95' : 'opacity-100 scale-100'} ${view === 'front' ? 'text-primary border-primary/50' : 'text-white hover:text-primary'}`}
         onClick={(e) => {
           e.stopPropagation();
-          handleViewChange('front');
+          e.preventDefault();
+          if (!isRotating) {
+            handleViewChange('front');
+          }
         }}
         aria-label="Show Front View"
         disabled={isRotating}
+        style={{
+          pointerEvents: isRotating ? 'none' : 'auto',
+          minWidth: '40px',
+          minHeight: '40px'
+        }}
       >
-        <RotateCcw className={`h-5 w-5 transition-transform duration-300 ${isRotating ? 'rotate-360' : ''}`} />
+        <RotateCcw className={`h-5 w-5 transition-transform duration-200 ${isRotating ? 'rotate-360' : ''}`} />
       </Button>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
@@ -324,7 +409,63 @@ export function MuscleActivationSVG({
             <DialogDescription>Detailed view of activated muscles.</DialogDescription>
           </DialogHeader>
           <div className="flex flex-col items-center">
-            <BodySvg ref={svgRef} className="w-full h-full" />
+            <div className="relative w-full" style={{ perspective: '1000px', paddingTop: '5px' }}>
+              <ModalBodySvg
+                ref={modalSvgRef}
+                className="w-full h-full transition-transform duration-300 ease-in-out"
+                style={{
+                  transformStyle: 'preserve-3d',
+                  backfaceVisibility: 'hidden'
+                }}
+              />
+
+              {/* Modal Left Arrow Button - Show Back */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className={`absolute left-1 top-1/2 -translate-y-1/2 z-50 transition-all duration-200 rounded-full bg-gray-100/80 hover:bg-gray-200/80 backdrop-blur-sm border border-gray-300/50 ${isModalRotating ? 'opacity-50 scale-95' : 'opacity-100 scale-100'} ${modalView === 'back' ? 'text-primary border-primary/50' : 'text-gray-600 hover:text-primary'}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  if (!isModalRotating) {
+                    handleModalViewChange('back');
+                  }
+                }}
+                aria-label="Show Back View"
+                disabled={isModalRotating}
+                style={{
+                  pointerEvents: isModalRotating ? 'none' : 'auto',
+                  minWidth: '36px',
+                  minHeight: '36px'
+                }}
+              >
+                <RotateCcw className={`h-4 w-4 transform rotate-180 transition-transform duration-200 ${isModalRotating ? 'rotate-360' : ''}`} />
+              </Button>
+
+              {/* Modal Right Arrow Button - Show Front */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className={`absolute right-1 top-1/2 -translate-y-1/2 z-50 transition-all duration-200 rounded-full bg-gray-100/80 hover:bg-gray-200/80 backdrop-blur-sm border border-gray-300/50 ${isModalRotating ? 'opacity-50 scale-95' : 'opacity-100 scale-100'} ${modalView === 'front' ? 'text-primary border-primary/50' : 'text-gray-600 hover:text-primary'}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  if (!isModalRotating) {
+                    handleModalViewChange('front');
+                  }
+                }}
+                aria-label="Show Front View"
+                disabled={isModalRotating}
+                style={{
+                  pointerEvents: isModalRotating ? 'none' : 'auto',
+                  minWidth: '36px',
+                  minHeight: '36px'
+                }}
+              >
+                <RotateCcw className={`h-4 w-4 transition-transform duration-200 ${isModalRotating ? 'rotate-360' : ''}`} />
+              </Button>
+            </div>
+
             <div className="mt-4 w-full">
               {relevantMuscles.map((muscle) => {
                 const volume = safeMuscleVolumes[muscle];

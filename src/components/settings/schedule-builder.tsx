@@ -18,7 +18,7 @@ import {
   Loader2,
   CheckCircle
 } from 'lucide-react';
-import { OnboardingContext, OnboardingContextService } from '@/services/onboarding-context-service';
+import { OnboardingContext, OnboardingContextService } from '@/services/data/onboarding-context-service';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface ScheduleBuilderProps {

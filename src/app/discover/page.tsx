@@ -16,7 +16,7 @@ import {
   unfollowUser,
   isFollowing,
   PublicUserProfile
-} from '@/services/user-discovery-service';
+} from '@/services/core/user-discovery-service';
 import { useRouter } from 'next/navigation';
 import { useContextualTracking } from '@/hooks/useContextualTracking';
 

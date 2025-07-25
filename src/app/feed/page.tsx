@@ -22,17 +22,17 @@ import {
 } from 'lucide-react';
 import { FeedPostSkeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
-import { 
-  getPersonalizedFeed, 
-  getTrendingPosts, 
+import {
+  getPersonalizedFeed,
+  getTrendingPosts,
   getFollowingFeed,
-  FeedPost 
-} from '@/services/social-feed-service';
+  FeedPost
+} from '@/services/social/social-feed-service';
 import {
   likeWorkoutPost,
   unlikeWorkoutPost,
   hasUserLikedPost
-} from '@/services/workout-sharing-service';
+} from '@/services/social/workout-sharing-service';
 import { useContextualTracking } from '@/hooks/useContextualTracking';
 
 export default function FeedPage() {

@@ -123,7 +123,8 @@ export function ExerciseDetailsScreen({ exercise, onBack, onSave }: ExerciseDeta
             Add Set
           </Button>
           <Button
-            className="flex-1 bg-secondary text-white"
+            variant="secondary"
+            className="flex-1"
             onClick={handleSave}
           >
             Save Exercise

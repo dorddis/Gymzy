@@ -4,23 +4,24 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Dumbbell, 
-  Clock, 
-  Zap, 
-  Target, 
+import {
+  Dumbbell,
+  Clock,
+  Zap,
+  Target,
   Play,
   Heart,
   Flame,
   Activity,
-  ChevronRight
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useWorkout } from '@/contexts/WorkoutContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { EXERCISES } from '@/lib/constants';
 import { Exercise } from '@/types/exercise';
-import { getRecentWorkouts } from '@/services/workout-service';
+import { getRecentWorkouts } from '@/services/core/workout-service';
 
 interface WorkoutTemplate {
   id: string;
@@ -262,10 +263,9 @@ export function QuickWorkoutTemplates() {
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold">Quick Start Workouts</h2>
         <Button
-          variant="ghost"
           size="sm"
           onClick={() => router.push('/templates')}
-          className="text-secondary hover:text-secondary/80 text-sm p-0 h-auto font-medium"
+          className="bg-secondary text-white hover:bg-secondary/90 text-sm px-2 py-1 h-auto font-medium rounded-md"
         >
           View All
         </Button>
@@ -293,9 +293,9 @@ export function QuickWorkoutTemplates() {
                     variant="ghost"
                     size="sm"
                     onClick={() => viewTemplate(template)}
-                    className="p-1 h-auto"
+                    className="p-1 h-auto text-secondary hover:text-secondary/80 hover:bg-transparent"
                   >
-                    <ChevronRight className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                    {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                   </Button>
                 </div>
 
@@ -371,11 +371,11 @@ export function QuickWorkoutTemplates() {
         })}
       </div>
 
-      <div className="mt-4 text-center">
-        <Button 
-          variant="outline" 
+      <div className="mt-6 text-center">
+        <Button
+          variant="outline"
           onClick={() => router.push('/templates')}
-          className="w-full"
+          className="w-full py-3 text-green-600 border-green-400 hover:border-green-600 hover:bg-green-50 font-medium"
         >
           Browse All Templates
         </Button>

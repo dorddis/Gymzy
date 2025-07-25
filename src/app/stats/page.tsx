@@ -104,7 +104,18 @@ export default function StatsTrendsScreen() {
     maxDailyVolume,
     totalCaloriesBurnt,
     personalBestLift
-  } = React.useMemo(() => {
+  } = React.useMemo((): {
+    weeklyVolumeData: WeeklyData[];
+    weeklyFrequencyData: WeeklyData[];
+    totalVolumeLast7Days: number;
+    averageRPE: number;
+    consistencyStreak: number;
+    topMuscleGroup: string;
+    dailyVolumesForTracker: DailyVolume[];
+    maxDailyVolume: number;
+    totalCaloriesBurnt: number;
+    personalBestLift: { weight: number; exercise: string } | null;
+  } => {
     const volumeMap7Days = new Map<string, number>(last7Days.map(date => [date, 0]));
     const frequencyMap7Days = new Map<string, number>(last7Days.map(date => [date, 0]));
     const dailyVolumeMap6Months = new Map<string, number>(last6MonthsDates.map(date => [date, 0])); // Changed to 6 months
@@ -159,8 +170,16 @@ export default function StatsTrendsScreen() {
       });
     }
 
-    const weeklyVolumeData = Array.from(volumeMap7Days.entries()).map(([date, volume]) => ({ date, volume }));
-    const weeklyFrequencyData = Array.from(frequencyMap7Days.entries()).map(([date, workouts]) => ({ date, workouts }));
+    const weeklyVolumeData = Array.from(volumeMap7Days.entries()).map(([date, volume]) => ({ 
+      date, 
+      volume, 
+      workouts: frequencyMap7Days.get(date) || 0 
+    }));
+    const weeklyFrequencyData = Array.from(frequencyMap7Days.entries()).map(([date, workouts]) => ({ 
+      date, 
+      workouts, 
+      volume: volumeMap7Days.get(date) || 0 
+    }));
 
     const dailyVolumesForTracker: DailyVolume[] = Array.from(dailyVolumeMap6Months.entries()).map(([date, volume]) => ({ date, volume }));
     const maxDailyVolume = dailyVolumesForTracker.reduce((max, day) => Math.max(max, day.volume), 0);
@@ -175,15 +194,19 @@ export default function StatsTrendsScreen() {
 
     // Calculate personal best lift
     let personalBestLift: { weight: number; exercise: string } | null = null;
-    if (allWorkouts) {
+    if (allWorkouts && allWorkouts.length > 0) {
       allWorkouts.forEach(workout => {
-        workout.exercises.forEach(exercise => {
-          exercise.sets.forEach(set => {
-            if (set.weight > (personalBestLift?.weight || 0)) {
-              personalBestLift = { weight: set.weight, exercise: exercise.name };
+        if (workout.exercises && workout.exercises.length > 0) {
+          workout.exercises.forEach(exercise => {
+            if (exercise.sets && exercise.sets.length > 0) {
+              exercise.sets.forEach(set => {
+                if (set.weight && set.weight > (personalBestLift?.weight || 0)) {
+                  personalBestLift = { weight: set.weight, exercise: exercise.name };
+                }
+              });
             }
           });
-        });
+        }
       });
     }
 
@@ -347,7 +370,7 @@ export default function StatsTrendsScreen() {
             </CardHeader>
             <CardContent className="p-0">
               <CardDescription className="text-2xl font-bold text-primary">
-                {personalBestLift ? `${personalBestLift.weight.toLocaleString()} lbs (${personalBestLift.exercise})` : 'N/A'}
+                {personalBestLift && personalBestLift.weight ? `${personalBestLift.weight.toLocaleString()} lbs (${personalBestLift.exercise})` : 'N/A'}
               </CardDescription>
             </CardContent>
           </Card>

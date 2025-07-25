@@ -6,8 +6,8 @@ import { MessagesPlaceholder, ChatPromptTemplate, PromptTemplate } from '@langch
 import { AIMessage, HumanMessage, BaseMessage, ToolMessage, SystemMessage } from '@langchain/core/messages';
 import { ConversationBufferWindowMemory } from 'langchain/memory'; // For managing chat history
 
-// Vertex AI specific imports
-import { ChatVertexAI } from '@langchain/google-vertexai';
+// Groq AI specific imports
+import { ChatGroq } from '@langchain/groq';
 
 // Tool related imports
 import { allLangchainTools } from './tools'; // Our LangChain tool wrappers
@@ -19,10 +19,10 @@ import { ToolInvocation } from '@langchain/core/messages'; // Represents a tool 
 
 // --- 1. Initialize LLM and Tools ---
 
-const llm = new ChatVertexAI({
-  modelName: "gemini-1.5-pro-preview-0409", // Using a recommended capable model
+const llm = new ChatGroq({
+  model: process.env.NEXT_PUBLIC_GROQ_MODEL_NAME || "llama3-8b-8192",
   temperature: 0.7,
-  // convertSystemMessageToHuman: true, // Keep an eye on this; Gemini generally supports SystemMessages
+  apiKey: process.env.NEXT_PUBLIC_GROQ_API_KEY,
 });
 
 const enhancedWorkoutToolsExecutor = new EnhancedWorkoutTools(); // To access original tool definitions

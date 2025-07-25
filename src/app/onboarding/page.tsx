@@ -15,7 +15,7 @@ import { PersonalityStep } from '@/components/onboarding/personality-step';
 import { PersonalLifeStep } from '@/components/onboarding/personal-life-step';
 import { LifestyleStep } from '@/components/onboarding/lifestyle-step';
 import { CompletionStep } from '@/components/onboarding/completion-step';
-import { createAIPersonalityProfile } from '@/services/ai-personality-service';
+import { createAIPersonalityProfile } from '@/services/ai/ai-personality-service';
 
 export interface OnboardingData {
   // Fitness Background

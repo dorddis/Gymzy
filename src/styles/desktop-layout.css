@@ -1,0 +1,365 @@
+/* Desktop Layout Styles */
+
+/* Split Screen Layout Utilities */
+.split-screen-container {
+  @apply relative min-h-screen bg-split-screen-app-panel;
+  display: grid;
+  grid-template-columns: var(--app-panel-width, 1fr) var(--split-divider, 4px) var(--chat-panel-width, 400px);
+  grid-template-areas: "app divider chat";
+}
+
+.split-screen-app-panel {
+  @apply bg-split-screen-app-panel overflow-hidden;
+  grid-area: app;
+  animation: split-panel-enter 0.4s ease-out forwards;
+}
+
+.split-screen-chat-panel {
+  @apply bg-split-screen-chat-panel border-l border-split-screen-divider overflow-hidden;
+  grid-area: chat;
+  animation: chat-panel-enter 0.4s ease-out forwards;
+}
+
+.split-screen-divider {
+  @apply bg-split-screen-divider hover:bg-split-screen-divider-hover active:bg-split-screen-divider-active cursor-col-resize;
+  grid-area: divider;
+  transition: background-color 0.2s ease;
+  position: relative;
+}
+
+.split-screen-divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 2px;
+  height: 40px;
+  background: currentColor;
+  opacity: 0.3;
+  border-radius: 1px;
+}
+
+.split-screen-divider:hover::before {
+  opacity: 0.6;
+}
+
+/* Responsive Split Screen */
+@media (max-width: 1199px) {
+  .split-screen-container {
+    grid-template-columns: 1fr;
+    grid-template-areas: "app";
+  }
+  
+  .split-screen-chat-panel,
+  .split-screen-divider {
+    display: none;
+  }
+}
+
+/* Desktop-specific component styles */
+.desktop-card {
+  @apply bg-white rounded-lg shadow-sm border border-gray-200 p-desktop-padding;
+  transition: all 0.2s ease;
+}
+
+.desktop-card:hover {
+  @apply shadow-md border-gray-300;
+}
+
+.desktop-button {
+  @apply px-4 py-2 rounded-md font-medium transition-all duration-200;
+}
+
+.desktop-button-primary {
+  @apply desktop-button bg-desktop-primary text-white hover:bg-opacity-90 focus:ring-2 focus:ring-desktop-primary focus:ring-offset-2;
+}
+
+.desktop-button-secondary {
+  @apply desktop-button bg-desktop-secondary text-white hover:bg-opacity-90 focus:ring-2 focus:ring-desktop-secondary focus:ring-offset-2;
+}
+
+.desktop-input {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-desktop-primary focus:border-transparent;
+  transition: all 0.2s ease;
+}
+
+/* Chat-specific styles */
+.chat-message {
+  @apply mb-4 animate-fadeInUp;
+}
+
+.chat-message-user {
+  @apply ml-auto max-w-xs lg:max-w-sm;
+}
+
+.chat-message-assistant {
+  @apply mr-auto max-w-xs lg:max-w-sm;
+}
+
+.chat-input-container {
+  @apply border-t border-gray-200 bg-white p-panel-padding;
+}
+
+.chat-input {
+  @apply w-full resize-none rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-desktop-primary focus:border-transparent;
+  transition: all 0.2s ease;
+}
+
+.chat-compact .chat-input {
+  @apply text-sm p-chat-compact;
+}
+
+/* Workout component adaptations */
+.workout-card-desktop {
+  @apply desktop-card mb-4;
+}
+
+.workout-exercise-item {
+  @apply border border-gray-200 rounded-lg p-4 mb-3 bg-white hover:shadow-sm transition-all duration-200;
+}
+
+.workout-set-grid {
+  @apply grid gap-2;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+}
+
+@media (min-width: 1024px) {
+  .workout-set-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Stats component adaptations */
+.stats-card-desktop {
+  @apply desktop-card text-center;
+}
+
+.stats-grid {
+  @apply grid gap-4;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+@media (min-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Dashboard adaptations */
+.dashboard-grid {
+  @apply grid gap-6;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Responsive utilities for reduced width containers */
+.container-narrow {
+  @apply max-w-none;
+}
+
+.container-narrow .dashboard-grid {
+  grid-template-columns: 1fr;
+}
+
+.container-narrow .stats-grid {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.container-narrow .workout-set-grid {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* Animation utilities */
+.animate-highlight {
+  animation: glow 1s ease-in-out;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.2s ease-out forwards;
+}
+
+/* Focus and accessibility styles */
+.focus-visible-ring {
+  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-desktop-primary focus-visible:ring-offset-2;
+}
+
+.sr-only-focusable {
+  @apply sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:p-4 focus:bg-white focus:text-desktop-primary focus:outline-none focus:ring-2 focus:ring-desktop-primary;
+}
+
+/* Loading states */
+.skeleton {
+  @apply animate-pulse bg-gray-200 rounded;
+}
+
+.skeleton-text {
+  @apply skeleton h-4 mb-2;
+}
+
+.skeleton-title {
+  @apply skeleton h-6 mb-4;
+}
+
+.skeleton-card {
+  @apply skeleton h-32 mb-4;
+}
+
+/* Error states */
+.error-container {
+  @apply border border-red-200 bg-red-50 rounded-lg p-4;
+}
+
+.error-title {
+  @apply text-red-800 font-semibold mb-2;
+}
+
+.error-message {
+  @apply text-red-700 text-sm;
+}
+
+/* Success states */
+.success-container {
+  @apply border border-green-200 bg-green-50 rounded-lg p-4;
+}
+
+.success-title {
+  @apply text-green-800 font-semibold mb-2;
+}
+
+.success-message {
+  @apply text-green-700 text-sm;
+}
+
+/* Tablet toggle styles */
+.tablet-toggle-container {
+  @apply relative min-h-screen overflow-hidden;
+}
+
+.tablet-view-app,
+.tablet-view-chat {
+  @apply absolute inset-0 transition-transform duration-300 ease-in-out;
+}
+
+.tablet-view-app.active {
+  transform: translateX(0);
+}
+
+.tablet-view-app.inactive {
+  transform: translateX(-100%);
+}
+
+.tablet-view-chat.active {
+  transform: translateX(0);
+}
+
+.tablet-view-chat.inactive {
+  transform: translateX(100%);
+}
+
+.tablet-toggle-header {
+  @apply flex items-center justify-between p-4 border-b border-gray-200 bg-white;
+}
+
+.tablet-toggle-button {
+  @apply desktop-button-primary text-sm;
+}
+
+/* Visual feedback styles */
+.highlight-info {
+  @apply ring-2 ring-desktop-info ring-offset-2;
+  animation: glow 2s ease-in-out;
+}
+
+.highlight-success {
+  @apply ring-2 ring-desktop-success ring-offset-2;
+  animation: glow 2s ease-in-out;
+}
+
+.highlight-warning {
+  @apply ring-2 ring-desktop-warning ring-offset-2;
+  animation: glow 2s ease-in-out;
+}
+
+.highlight-error {
+  @apply ring-2 ring-desktop-error ring-offset-2;
+  animation: glow 2s ease-in-out;
+}
+
+/* Notification styles */
+.notification-container {
+  @apply fixed top-4 right-4 z-50 space-y-2;
+}
+
+.notification {
+  @apply bg-white border border-gray-200 rounded-lg shadow-lg p-4 min-w-80 animate-slideInRight;
+}
+
+.notification-info {
+  @apply notification border-l-4 border-l-desktop-info;
+}
+
+.notification-success {
+  @apply notification border-l-4 border-l-desktop-success;
+}
+
+.notification-warning {
+  @apply notification border-l-4 border-l-desktop-warning;
+}
+
+.notification-error {
+  @apply notification border-l-4 border-l-desktop-error;
+}
+
+/* Performance optimizations */
+.will-change-transform {
+  will-change: transform;
+}
+
+.will-change-opacity {
+  will-change: opacity;
+}
+
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Print styles */
+@media print {
+  .split-screen-container {
+    grid-template-columns: 1fr;
+    grid-template-areas: "app";
+  }
+  
+  .split-screen-chat-panel,
+  .split-screen-divider {
+    display: none !important;
+  }
+  
+  .desktop-card {
+    @apply shadow-none border border-gray-300;
+  }
+}

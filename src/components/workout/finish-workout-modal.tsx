@@ -9,7 +9,7 @@ import { Progress } from '@/components/ui/progress';
 import { MediaUpload } from './media-upload';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { uploadMultipleMedia } from '@/services/media-service';
+import { uploadMultipleMedia } from '@/services/media/media-service';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { CalendarIcon, Loader2 } from 'lucide-react';
