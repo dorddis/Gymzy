@@ -124,7 +124,7 @@ export const saveChatMessage = async (
     const sessionRef = doc(db, 'chat_sessions', sessionId);
     const sessionUpdate = {
       lastMessage: content,
-      messageCount: await getChatMessageCount(sessionId) + 1,
+      messageCount: await getChatMessageCount(sessionId, userId) + 1,
       updatedAt: now
     };
     
@@ -138,11 +138,12 @@ export const saveChatMessage = async (
 };
 
 // Get messages for a chat session
-export const getChatMessages = async (sessionId: string): Promise<ChatMessage[]> => {
+export const getChatMessages = async (sessionId: string, userId: string): Promise<ChatMessage[]> => {
   try {
     const messagesQuery = query(
       collection(db, 'chat_messages'),
       where('sessionId', '==', sessionId),
+      where('userId', '==', userId),
       orderBy('timestamp', 'asc')
     );
 
@@ -161,11 +162,12 @@ export const getChatMessages = async (sessionId: string): Promise<ChatMessage[]>
 };
 
 // Get message count for a session
-const getChatMessageCount = async (sessionId: string): Promise<number> => {
+const getChatMessageCount = async (sessionId: string, userId: string): Promise<number> => {
   try {
     const messagesQuery = query(
       collection(db, 'chat_messages'),
-      where('sessionId', '==', sessionId)
+      where('sessionId', '==', sessionId),
+      where('userId', '==', userId)
     );
 
     const querySnapshot = await getDocs(messagesQuery);
@@ -177,12 +179,13 @@ const getChatMessageCount = async (sessionId: string): Promise<number> => {
 };
 
 // Delete a chat session and all its messages
-export const deleteChatSession = async (sessionId: string): Promise<void> => {
+export const deleteChatSession = async (sessionId: string, userId: string): Promise<void> => {
   try {
     // Delete all messages in the session
     const messagesQuery = query(
       collection(db, 'chat_messages'),
-      where('sessionId', '==', sessionId)
+      where('sessionId', '==', sessionId),
+      where('userId', '==', userId)
     );
 
     const messagesSnapshot = await getDocs(messagesQuery);

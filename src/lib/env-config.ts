@@ -8,9 +8,8 @@ const isServer = typeof window === 'undefined';
 
 // Simple environment configuration object
 export const env = {
-  // AI Service Configuration
+  // AI Service Configuration (Gemini only)
   NEXT_PUBLIC_GOOGLE_AI_API_KEY: process.env.NEXT_PUBLIC_GOOGLE_AI_API_KEY || '',
-  NEXT_PUBLIC_GROQ_MODEL_NAME: process.env.NEXT_PUBLIC_GROQ_MODEL_NAME || 'llama3-8b-8192',
 
   // Firebase Configuration
   NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || '',
@@ -30,7 +29,6 @@ export const env = {
 
   // Server-only variables (only available on server)
   NODE_ENV: (isServer ? process.env.NODE_ENV : 'development') as 'development' | 'staging' | 'production',
-  GROQ_API_KEY: isServer ? process.env.GROQ_API_KEY : undefined,
   NEXTAUTH_SECRET: isServer ? process.env.NEXTAUTH_SECRET : undefined,
   NEXTAUTH_URL: isServer ? process.env.NEXTAUTH_URL : undefined,
   API_RATE_LIMIT: isServer ? parseInt(process.env.API_RATE_LIMIT || '100', 10) : 100,
@@ -46,14 +44,9 @@ export const isStaging = env.NODE_ENV === 'staging';
 
 // API configuration helpers
 export const getAPIConfig = () => ({
-  googleAI: {
+  gemini: {
     apiKey: env.NEXT_PUBLIC_GOOGLE_AI_API_KEY,
-    endpoint: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent',
-    streamingEndpoint: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:streamGenerateContent',
-  },
-  groq: {
-    apiKey: env.GROQ_API_KEY,
-    modelName: env.NEXT_PUBLIC_GROQ_MODEL_NAME,
+    model: 'gemini-2.5-flash',
   },
   rateLimit: env.API_RATE_LIMIT,
 });
@@ -87,8 +80,7 @@ export const logEnvironmentStatus = () => {
     console.log(`  - Environment: ${env.NODE_ENV}`);
     console.log(`  - App URL: ${env.NEXT_PUBLIC_APP_URL}`);
     console.log(`  - API URL: ${env.NEXT_PUBLIC_API_URL}`);
-    console.log(`  - Google AI: ${env.NEXT_PUBLIC_GOOGLE_AI_API_KEY ? '✅ Configured' : '❌ Missing'}`);
-    console.log(`  - Groq API: ${env.GROQ_API_KEY ? '✅ Configured' : '⚠️ Optional - Missing'}`);
+    console.log(`  - Gemini AI: ${env.NEXT_PUBLIC_GOOGLE_AI_API_KEY ? '✅ Configured' : '❌ Missing'}`);
     console.log(`  - Firebase: ${env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ? '✅ Configured' : '❌ Missing'}`);
     console.log(`  - Dev Mode: ${env.NEXT_PUBLIC_DEV_MODE ? '✅ Enabled' : '❌ Disabled'}`);
   }

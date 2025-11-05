@@ -151,14 +151,15 @@ function ChatContent() {
   };
 
   const loadChatSession = async (sessionId: string) => {
+    if (!user?.uid) return;
     try {
-      const chatMessages = await getChatMessages(sessionId);
+      const chatMessages = await getChatMessages(sessionId, user.uid);
       const formattedMessages: ChatMessage[] = chatMessages.map(msg => ({
         role: msg.role,
         content: msg.content,
         timestamp: msg.timestamp.toDate()
       }));
-      
+
       setMessages(formattedMessages);
       setCurrentSessionId(sessionId);
       setShowSidebar(false);
@@ -168,10 +169,11 @@ function ChatContent() {
   };
 
   const deleteChatSessionHandler = async (sessionId: string) => {
+    if (!user?.uid) return;
     try {
-      await deleteChatSession(sessionId);
+      await deleteChatSession(sessionId, user.uid);
       await loadChatSessions();
-      
+
       if (sessionId === currentSessionId) {
         await createNewChat();
       }
