@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
       const stream = new ReadableStream({
         async start(controller) {
           try {
-            await geminiChatService.sendMessageStreaming(
+            const response = await geminiChatService.sendMessageStreaming(
               sessionId,
               userId,
               message,
@@ -41,6 +41,27 @@ export async function POST(request: NextRequest) {
               },
               userContext
             );
+
+            // Extract workout data from function calls if present
+            let workoutData = null;
+            if (response.functionCalls && response.functionCalls.length > 0) {
+              const workoutCall = response.functionCalls.find((call: any) => call.name === 'generateWorkout');
+              if (workoutCall && workoutCall.result?.success && workoutCall.result?.workout) {
+                workoutData = {
+                  exercises: workoutCall.result.workout.exercises,
+                  workoutId: `workout-${Date.now()}`,
+                  title: workoutCall.result.workout.title,
+                  notes: workoutCall.result.workout.notes
+                };
+              }
+            }
+
+            // Send workout data if available
+            if (workoutData) {
+              controller.enqueue(
+                encoder.encode(`data: ${JSON.stringify({ workoutData })}\n\n`)
+              );
+            }
 
             // Send completion event
             controller.enqueue(
@@ -72,10 +93,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Extract workout data from function calls if present
+    let workoutData = null;
+    if (response.functionCalls && response.functionCalls.length > 0) {
+      const workoutCall = response.functionCalls.find((call: any) => call.name === 'generateWorkout');
+      if (workoutCall && workoutCall.result?.success && workoutCall.result?.workout) {
+        workoutData = {
+          exercises: workoutCall.result.workout.exercises,
+          workoutId: `workout-${Date.now()}`,
+          title: workoutCall.result.workout.title,
+          notes: workoutCall.result.workout.notes
+        };
+      }
+    }
+
     return NextResponse.json({
       success: true,
       message: response.message,
       functionCalls: response.functionCalls,
+      workoutData,
       sessionId
     });
 

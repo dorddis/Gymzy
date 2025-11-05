@@ -311,6 +311,12 @@ function ChatContent() {
                   }));
                 }
 
+                // Handle workout data
+                if (data.workoutData) {
+                  console.log('💪 Received workout data:', data.workoutData);
+                  aiResponse.workoutData = data.workoutData;
+                }
+
                 if (data.done) {
                   aiResponse.success = true;
                   break;
