@@ -1,9 +1,11 @@
     rules_version = '2';
     service cloud.firestore {
       match /databases/{database}/documents {
-        // WARNING: These rules are HIGHLY permissive and are ONLY for development/testing.
-        // They allow any authenticated user to read/write to ANY document in 'chats' and 'workouts' collections.
-        // DO NOT use these in a production environment without significant modification!
+        // PRODUCTION-READY SECURITY RULES
+        // These rules enforce proper access control:
+        // - Users can only access their own private data (chats, AI profiles, etc.)
+        // - Social features (posts, feed) allow read access but restrict writes to owners
+        // - All rules validate userId matches authenticated user
 
         match /workouts/{workoutId} {
           allow read: if request.auth != null &&
@@ -40,9 +42,9 @@
           allow delete: if request.auth != null && request.auth.uid == userId;
         }
 
-        // AI personality profiles - private to user (DEVELOPMENT - PERMISSIVE)
+        // AI personality profiles - private to user (PRODUCTION - SECURE)
         match /ai_personality_profiles/{userId} {
-          allow read, write: if request.auth != null;
+          allow read, write: if request.auth != null && request.auth.uid == userId;
         }
 
         // User context for AI - private to user
@@ -67,9 +69,13 @@
             request.auth.uid == resource.data.followerId;
         }
 
-        // Workout posts for social feed (DEVELOPMENT - PERMISSIVE)
+        // Workout posts for social feed (PRODUCTION - SECURE)
         match /workout_posts/{postId} {
-          allow read, write: if request.auth != null;
+          allow read: if request.auth != null;
+          allow create: if request.auth != null &&
+            request.resource.data.userId == request.auth.uid;
+          allow update, delete: if request.auth != null &&
+            resource.data.userId == request.auth.uid;
         }
 
         // Feed posts
@@ -81,9 +87,13 @@
             resource.data.userId == request.auth.uid;
         }
 
-        // Workout interactions (likes, comments, etc.) (DEVELOPMENT - PERMISSIVE)
+        // Workout interactions (likes, comments, etc.) (PRODUCTION - SECURE)
         match /workout_interactions/{interactionId} {
-          allow read, write: if request.auth != null;
+          allow read: if request.auth != null;
+          allow create: if request.auth != null &&
+            request.resource.data.userId == request.auth.uid;
+          allow update, delete: if request.auth != null &&
+            resource.data.userId == request.auth.uid;
         }
 
         // AI recommendations - private to user
@@ -92,19 +102,28 @@
             resource.data.userId == request.auth.uid;
         }
 
-        // Allow authenticated users to read and write to any document in 'chats' collection. (For development/testing)
-        match /chats/{document=**} {
-          allow read, write: if request.auth != null;
+        // Chats collection - restricted to owner (PRODUCTION - SECURE)
+        match /chats/{chatId} {
+          allow read, write: if request.auth != null &&
+            resource.data.userId == request.auth.uid;
+          allow create: if request.auth != null &&
+            request.resource.data.userId == request.auth.uid;
         }
 
-        // Chat sessions (DEVELOPMENT - PERMISSIVE)
+        // Chat sessions (PRODUCTION - SECURE)
         match /chat_sessions/{sessionId} {
-          allow read, write: if request.auth != null;
+          allow read, write: if request.auth != null &&
+            resource.data.userId == request.auth.uid;
+          allow create: if request.auth != null &&
+            request.resource.data.userId == request.auth.uid;
         }
 
-        // Chat messages (DEVELOPMENT - PERMISSIVE)
+        // Chat messages (PRODUCTION - SECURE)
         match /chat_messages/{messageId} {
-          allow read, write: if request.auth != null;
+          allow read, write: if request.auth != null &&
+            resource.data.userId == request.auth.uid;
+          allow create: if request.auth != null &&
+            request.resource.data.userId == request.auth.uid;
         }
 
         // Onboarding contexts - private to user
