@@ -15,14 +15,14 @@ import { User, Settings, LogOut, HelpCircle, Bell } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export function StatusBar() {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
-      await logout();
+      await signOut();
       router.push('/auth');
     } catch (error) {
       console.error('Error logging out:', error);

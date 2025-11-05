@@ -27,8 +27,10 @@ import {
   getUserFollowing,
   PublicUserProfile
 } from '@/services/core/user-discovery-service';
-import { doc, getDoc } from 'firebase/firestore';
+import { getAllWorkouts, Workout } from '@/services/core/workout-service';
+import { doc, getDoc, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { format } from 'date-fns';
 
 export default function UserProfilePage() {
   const params = useParams();
@@ -39,8 +41,10 @@ export default function UserProfilePage() {
   const [userProfile, setUserProfile] = useState<PublicUserProfile | null>(null);
   const [followers, setFollowers] = useState<PublicUserProfile[]>([]);
   const [following, setFollowing] = useState<PublicUserProfile[]>([]);
+  const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [isFollowingUser, setIsFollowingUser] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isWorkoutsLoading, setIsWorkoutsLoading] = useState(false);
   const [isFollowLoading, setIsFollowLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -59,21 +63,21 @@ export default function UserProfilePage() {
   const loadUserProfile = async () => {
     try {
       setIsLoading(true);
-      
+
       // Load user profile
       const userRef = doc(db, 'user_profiles', userId);
       const userSnap = await getDoc(userRef);
-      
+
       if (userSnap.exists()) {
         const userData = userSnap.data() as PublicUserProfile;
         setUserProfile(userData);
-        
+
         // Load followers and following
         const [followersData, followingData] = await Promise.all([
           getUserFollowers(userId),
           getUserFollowing(userId)
         ]);
-        
+
         setFollowers(followersData);
         setFollowing(followingData);
       }
@@ -83,6 +87,25 @@ export default function UserProfilePage() {
       setIsLoading(false);
     }
   };
+
+  const loadWorkouts = async () => {
+    try {
+      setIsWorkoutsLoading(true);
+      const userWorkouts = await getAllWorkouts(userId);
+      setWorkouts(userWorkouts);
+    } catch (error) {
+      console.error('Error loading workouts:', error);
+    } finally {
+      setIsWorkoutsLoading(false);
+    }
+  };
+
+  // Load workouts when workouts tab is selected
+  useEffect(() => {
+    if (activeTab === 'workouts' && workouts.length === 0 && !isWorkoutsLoading) {
+      loadWorkouts();
+    }
+  }, [activeTab]);
 
   const checkFollowingStatus = async () => {
     if (!currentUser?.uid) return;
@@ -303,11 +326,79 @@ export default function UserProfilePage() {
         </TabsContent>
         
         <TabsContent value="workouts">
-          <Card>
-            <CardContent className="p-6 text-center text-muted-foreground">
-              Workout history will be displayed here
-            </CardContent>
-          </Card>
+          {isWorkoutsLoading ? (
+            <Card>
+              <CardContent className="p-6 flex justify-center items-center">
+                <Loader2 className="h-6 w-6 animate-spin" />
+                <span className="ml-2">Loading workouts...</span>
+              </CardContent>
+            </Card>
+          ) : workouts.length > 0 ? (
+            <div className="space-y-4">
+              {workouts.map((workout) => (
+                <Card key={workout.id} className="hover:shadow-md transition-shadow">
+                  <CardHeader>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <CardTitle className="text-lg">{workout.title}</CardTitle>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {workout.date instanceof Timestamp
+                            ? format(workout.date.toDate(), 'PPP')
+                            : format(new Date(workout.date), 'PPP')}
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        {workout.isPublic && (
+                          <Badge variant="secondary">Public</Badge>
+                        )}
+                        {workout.rpe && (
+                          <Badge variant="outline">RPE: {workout.rpe}</Badge>
+                        )}
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Exercises:</span>
+                        <span className="font-medium">{workout.exercises.length}</span>
+                      </div>
+                      {workout.totalVolume !== undefined && (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Total Volume:</span>
+                          <span className="font-medium">{workout.totalVolume.toLocaleString()} kg</span>
+                        </div>
+                      )}
+                      {workout.notes && (
+                        <div className="text-sm">
+                          <span className="text-muted-foreground">Notes: </span>
+                          <span className="text-foreground">{workout.notes}</span>
+                        </div>
+                      )}
+                      {workout.exercises.length > 0 && (
+                        <div className="mt-4 border-t pt-3">
+                          <p className="text-sm font-medium mb-2">Exercises:</p>
+                          <div className="space-y-1">
+                            {workout.exercises.map((exercise, idx) => (
+                              <div key={idx} className="text-sm text-muted-foreground pl-2">
+                                • {exercise.name} ({exercise.sets.length} sets)
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="p-6 text-center text-muted-foreground">
+                No workouts yet
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
         
         <TabsContent value="followers">

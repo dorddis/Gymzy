@@ -245,12 +245,25 @@ export class MemoryStateAdapter implements StateStorageAdapter {
 
   async saveState(state: ConversationState): Promise<void> {
     console.log(`💾 MemoryStateAdapter: Saving state for session ${state.sessionId}`);
-    
+
+    // Handle circular references
+    const seen = new WeakSet();
+
     // Deep clone to avoid reference issues
     const clonedState = JSON.parse(JSON.stringify(state, (key, value) => {
+      // Handle Date objects
       if (value instanceof Date) {
         return value.toISOString();
       }
+
+      // Handle circular references
+      if (typeof value === 'object' && value !== null) {
+        if (seen.has(value)) {
+          return '[Circular]';
+        }
+        seen.add(value);
+      }
+
       return value;
     }));
     
