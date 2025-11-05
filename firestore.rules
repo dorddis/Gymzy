@@ -70,10 +70,10 @@
 
         // Social following relationships - Fixed permissions
         match /user_following/{followId} {
-          // Allow read if user is involved in the relationship
+          // Allow read if user is checking their own follow relationships
+          // followId format is: {followerId}_{followingId}
           allow read: if request.auth != null &&
-            (request.auth.uid == resource.data.followerId ||
-             request.auth.uid == resource.data.followingId);
+            followId.split('_')[0] == request.auth.uid;
 
           // Allow create if user is the follower and data is valid
           allow create: if request.auth != null &&
@@ -82,7 +82,7 @@
 
           // Allow delete if user is the follower (unfollowing)
           allow delete: if request.auth != null &&
-            request.auth.uid == resource.data.followerId;
+            followId.split('_')[0] == request.auth.uid;
         }
 
         // Workout posts for social feed (PRODUCTION - SECURE)
