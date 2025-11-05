@@ -455,33 +455,64 @@ Guidelines:
       });
 
       // Send with streaming
-      const result = await chat.sendMessageStream(userMessage);
+      let result = await chat.sendMessageStream(userMessage);
 
       let fullText = '';
       const functionCalls: ChatResponse['functionCalls'] = [];
 
-      // Handle stream chunks
+      // First pass: collect initial response
       for await (const chunk of result.stream) {
         const chunkText = chunk.text();
         if (chunkText) {
           fullText += chunkText;
           onChunk(chunkText);
         }
+      }
 
-        // Check for function calls
-        const calls = chunk.functionCalls?.();
-        if (calls && calls.length > 0) {
-          // Note: In streaming mode, function calls come in chunks
-          // You may want to handle this differently based on your needs
-          for (const call of calls) {
-            const result = await this.executeFunction(call.name, call.args);
-            functionCalls.push({
+      // Get the aggregated response
+      let response = (await result.response).response;
+
+      // Handle function calls in a loop (like non-streaming version)
+      let calls = response.functionCalls?.();
+      while (calls && calls.length > 0) {
+        console.log('📞 Model requested function calls (streaming)');
+
+        // Execute all function calls
+        for (const call of calls) {
+          console.log(`   → ${call.name}(${JSON.stringify(call.args)})`);
+
+          // Execute function
+          const functionResult = await this.executeFunction(call.name, call.args);
+
+          // Store function call info
+          functionCalls.push({
+            name: call.name,
+            args: call.args,
+            result: functionResult
+          });
+
+          // Send function result back to continue conversation
+          result = await chat.sendMessageStream([{
+            functionResponse: {
               name: call.name,
-              args: call.args,
-              result
-            });
+              response: functionResult
+            }
+          }]);
+
+          // Stream the model's response about the function result
+          for await (const chunk of result.stream) {
+            const chunkText = chunk.text();
+            if (chunkText) {
+              fullText += chunkText;
+              onChunk(chunkText);
+            }
           }
+
+          response = (await result.response).response;
         }
+
+        // Check for more function calls
+        calls = response.functionCalls?.();
       }
 
       // Add to history
