@@ -25,6 +25,7 @@ export interface ChatSession {
 export interface ChatMessage {
   id: string;
   sessionId: string;
+  userId: string;
   role: 'user' | 'assistant';
   content: string;
   timestamp: Timestamp;
@@ -99,16 +100,18 @@ export const getChatSessions = async (userId: string): Promise<ChatSession[]> =>
 // Save a chat message
 export const saveChatMessage = async (
   sessionId: string,
+  userId: string,
   role: 'user' | 'assistant',
   content: string
 ): Promise<string> => {
   try {
     const messageId = `${sessionId}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const now = Timestamp.now();
-    
+
     const message: ChatMessage = {
       id: messageId,
       sessionId,
+      userId,
       role,
       content,
       timestamp: now

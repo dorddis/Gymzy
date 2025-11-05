@@ -136,7 +136,7 @@ function ChatContent() {
       setIsInitialMessageHandled(true);
 
       // Save the initial assistant message to the history
-      await saveChatMessage(sessionId, 'assistant', initialMessage);
+      await saveChatMessage(sessionId, user.uid, 'assistant', initialMessage);
 
       // The welcome message is now the first message in the conversation
       // When user types their first message, it will have proper context
@@ -206,8 +206,8 @@ function ChatContent() {
           timestamp: new Date()
         }]);
       }
-      
-      await saveChatMessage(targetSessionId, 'user', messageToSend);
+
+      await saveChatMessage(targetSessionId, user.uid, 'user', messageToSend);
 
       // Build conversation history for AI - include ALL messages for proper context
       let conversationHistoryForAI: Array<{id: string, role: 'user' | 'assistant' | 'system', content: string, timestamp: Date, userId?: string}>;
@@ -288,7 +288,7 @@ function ChatContent() {
       // This is important because the chunk-by-chunk update might have slight variations
       // or if any chunk processing was missed.
       if (aiResponse.success) {
-        await saveChatMessage(targetSessionId, 'assistant', fullStreamedContent);
+        await saveChatMessage(targetSessionId, user.uid, 'assistant', fullStreamedContent);
         setMessages(prevMsgs => prevMsgs.map((msg, index) =>
           index === prevMsgs.length - 1 && msg.role === 'assistant'
             ? { ...msg, content: fullStreamedContent, workoutData: aiResponse.workoutData } // Ensure final content is fullStreamedContent
@@ -330,7 +330,7 @@ function ChatContent() {
       // Save the partially streamed message
       const lastMessageIdx = messages.length - 1;
       if (messages[lastMessageIdx]?.role === 'assistant' && messages[lastMessageIdx]?.content) {
-        saveChatMessage(currentSessionId!, 'assistant', messages[lastMessageIdx].content)
+        saveChatMessage(currentSessionId!, user.uid, 'assistant', messages[lastMessageIdx].content)
           .then(() => console.log("ChatPage: Saved partially streamed message."))
           .catch(err => console.error("ChatPage: Error saving partially streamed message:", err));
       }
