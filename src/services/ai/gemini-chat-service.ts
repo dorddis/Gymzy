@@ -12,6 +12,7 @@ import { GoogleGenerativeAI, Content, FunctionDeclaration, Tool } from '@google/
 import exercisesData from '@/lib/exercises.json';
 import { getWorkouts } from '@/services/core/workout-service';
 import { OnboardingContext } from '@/services/data/onboarding-context-service';
+import { COMMUNICATION_STYLE_PROMPTS, COACHING_STYLE_PROMPTS } from '@/lib/ai-style-constants';
 
 // ============================================================================
 // Types
@@ -102,13 +103,13 @@ const workoutTools: Tool = {
     } as FunctionDeclaration,
     {
       name: 'getExerciseInfo',
-      description: 'Get detailed information about a specific exercise including form, muscles worked, and variations',
+      description: 'IMMEDIATELY call this when user asks about a specific exercise (e.g. "tell me about bench press", "how to do squats", "what muscles does deadlift work"). Get detailed information about form, muscles worked, and variations.',
       parameters: {
         type: 'OBJECT',
         properties: {
           exerciseName: {
             type: 'STRING',
-            description: 'Name of the exercise to get information about'
+            description: 'Name of the exercise (e.g. "Bench Press", "Squat", "Deadlift"). INFER from user keywords: "bench"→"Bench Press", "squat"→"Squat", "deadlift"→"Deadlift"'
           }
         },
         required: ['exerciseName']
@@ -371,7 +372,6 @@ class WorkoutFunctions {
 
 export class GeminiChatService {
   private genAI: GoogleGenerativeAI;
-  private model: any;
   private workoutFunctions: WorkoutFunctions;
   private conversations: Map<string, ConversationState>;
 
@@ -383,18 +383,35 @@ export class GeminiChatService {
     }
 
     this.genAI = new GoogleGenerativeAI(apiKey);
+    this.workoutFunctions = new WorkoutFunctions();
+    this.conversations = new Map();
 
-    // Initialize Gemini 2.5 Flash with function calling
-    this.model = this.genAI.getGenerativeModel({
-      model: 'gemini-2.5-flash',
-      tools: [workoutTools],
-      generationConfig: {
-        temperature: 0.7,
-        topP: 0.95,
-        topK: 40,
-        maxOutputTokens: 2048,
-      },
-      systemInstruction: `You are Gymzy AI, a highly efficient fitness assistant that prioritizes IMMEDIATE ACTION over conversation.
+    console.log('✅ GeminiChatService initialized with function calling');
+  }
+
+  /**
+   * Build system instruction based on user preferences
+   */
+  private buildSystemInstruction(userContext?: OnboardingContext | null): string {
+    let communicationStyle = '';
+    let coachingStyle = '';
+
+    // Apply user preferences if available
+    if (userContext?.preferences) {
+      communicationStyle = COMMUNICATION_STYLE_PROMPTS[userContext.preferences.motivationStyle] || COMMUNICATION_STYLE_PROMPTS['encouraging'];
+      coachingStyle = COACHING_STYLE_PROMPTS[userContext.preferences.coachingStyle] || COACHING_STYLE_PROMPTS['conversational'];
+    } else {
+      // Default styles
+      communicationStyle = COMMUNICATION_STYLE_PROMPTS['encouraging'];
+      coachingStyle = COACHING_STYLE_PROMPTS['conversational'];
+    }
+
+    return `You are Gymzy AI, a highly efficient fitness assistant that prioritizes IMMEDIATE ACTION over conversation.
+
+<personality>
+${communicationStyle}
+${coachingStyle}
+</personality>
 
 <role>
 You are a function-calling agent specialized in workout generation. Your PRIMARY job is to call functions immediately when you have sufficient information, not to have lengthy conversations.
@@ -431,7 +448,8 @@ Default values if not specified:
 
 <function_calling_rules>
 1. User asks for workout + you can infer muscles → CALL generateWorkout() IMMEDIATELY
-2. User mentions specific exercise name → CALL getExerciseInfo() IMMEDIATELY
+2. User asks about specific exercise → CALL getExerciseInfo() IMMEDIATELY
+   Examples: "tell me about bench press", "how do I squat", "what muscles does deadlift work"
 3. User asks about past workouts → CALL getWorkoutHistory() IMMEDIATELY
 4. ONLY ask questions if you genuinely cannot proceed (missing CRITICAL info that can't be inferred)
 </function_calling_rules>
@@ -447,6 +465,16 @@ User: "chest workout, advanced"
 Assistant: [IMMEDIATELY calls generateWorkout with targetMuscles=["chest","triceps"], experience="advanced", workoutType="strength"]
 </good_example>
 
+<good_example>
+User: "tell me about bench press"
+Assistant: [IMMEDIATELY calls getExerciseInfo with exerciseName="Bench Press"]
+</good_example>
+
+<good_example>
+User: "how to do squats properly"
+Assistant: [IMMEDIATELY calls getExerciseInfo with exerciseName="Squat"]
+</good_example>
+
 <bad_example>
 User: "I need a leg workout"
 Assistant: "What type of workout are you looking for?"
@@ -459,6 +487,12 @@ User: "strength, advanced"
 Assistant: "What target muscle groups would you like to focus on?"
 [WRONG - user already specified legs, should immediately generate]
 </bad_example>
+
+<bad_example>
+User: "tell me about deadlifts"
+Assistant: "Deadlifts are a compound exercise..."
+[WRONG - should have called getExerciseInfo to get detailed information from the database]
+</bad_example>
 </examples>
 
 <response_style>
@@ -466,13 +500,32 @@ Assistant: "What target muscle groups would you like to focus on?"
 - Minimize conversational filler
 - Present workout results clearly
 - Only elaborate if user asks for details
-</response_style>`
+</response_style>`;
+  }
+
+  /**
+   * Get or create model with user-specific system instruction
+   */
+  private getModel(userContext?: OnboardingContext | null) {
+    const systemInstruction = this.buildSystemInstruction(userContext);
+
+    if (userContext?.preferences) {
+      console.log(`🎭 Using personalized AI: ${userContext.preferences.motivationStyle} communication + ${userContext.preferences.coachingStyle} coaching`);
+    } else {
+      console.log('🤖 Using default AI personality');
+    }
+
+    return this.genAI.getGenerativeModel({
+      model: 'gemini-2.5-flash',
+      tools: [workoutTools],
+      generationConfig: {
+        temperature: 0.7,
+        topP: 0.95,
+        topK: 40,
+        maxOutputTokens: 2048,
+      },
+      systemInstruction
     });
-
-    this.workoutFunctions = new WorkoutFunctions();
-    this.conversations = new Map();
-
-    console.log('✅ GeminiChatService initialized with function calling');
   }
 
   /**
@@ -567,10 +620,11 @@ Assistant: "What target muscle groups would you like to focus on?"
       parts.push(`Session duration: ${context.schedule.sessionDuration}`);
     }
 
-    // Preferences
+    // Preferences (AI personality is already applied via system instruction)
     if (context.preferences) {
-      parts.push(`\nPreferences: Intensity=${context.preferences.workoutIntensity}, Style=${context.preferences.motivationStyle}`);
-      parts.push(`Coaching: ${context.preferences.coachingStyle}, Feedback frequency=${context.preferences.feedbackFrequency}`);
+      parts.push(`\nPreferences: Intensity=${context.preferences.workoutIntensity}, Social=${context.preferences.socialPreference}`);
+      parts.push(`Feedback frequency=${context.preferences.feedbackFrequency}`);
+      parts.push(`Note: Communication style (${context.preferences.motivationStyle}) and coaching style (${context.preferences.coachingStyle}) are already active in my personality.`);
     }
 
     // Health Info
@@ -663,8 +717,11 @@ Assistant: "What target muscle groups would you like to focus on?"
       // Convert history to Gemini format
       const history = this.toGeminiContent(conversation.messages);
 
+      // Get personalized model based on user preferences
+      const model = this.getModel(userContext);
+
       // Start chat with history
-      const chat = this.model.startChat({
+      const chat = model.startChat({
         history: history.slice(0, -1), // All messages except the last one
       });
 
@@ -782,8 +839,11 @@ Assistant: "What target muscle groups would you like to focus on?"
       // Convert history
       const history = this.toGeminiContent(conversation.messages);
 
+      // Get personalized model based on user preferences
+      const model = this.getModel(userContext);
+
       // Start chat
-      const chat = this.model.startChat({
+      const chat = model.startChat({
         history: history.slice(0, -1),
       });
 
@@ -841,11 +901,17 @@ Assistant: "What target muscle groups would you like to focus on?"
             }
           }
 
-          response = (await result.response).response;
+          // Safely get response with null checks
+          const resultResponse = await result.response;
+          if (!resultResponse || !resultResponse.response) {
+            console.warn('⚠️ No response after function call');
+            break;
+          }
+          response = resultResponse.response;
         }
 
-        // Check for more function calls
-        calls = response.functionCalls?.();
+        // Check for more function calls with null safety
+        calls = response?.functionCalls ? response.functionCalls() : undefined;
       }
 
       // Add to history
