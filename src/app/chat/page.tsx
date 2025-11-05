@@ -16,7 +16,7 @@ import {
   deleteChatSession,
   ChatSession
 } from '@/services/data/chat-history-service';
-import { sendStreamingChatMessage } from '@/services/core/ai-chat-service';
+// Using new Gemini 2.5 Flash chat API
 import { useWorkout } from '@/contexts/WorkoutContext';
 
 interface ChatMessage {
@@ -248,38 +248,86 @@ function ChatContent() {
       let hasAddedPlaceholder = false;
 
       let fullStreamedContent = '';
-      // Assuming sendStreamingChatMessage and saveChatMessage can handle workoutData.
-      // These service functions might need updates if they don&apos;t already.
-      const aiResponse = await sendStreamingChatMessage(
-        user.uid,
-        messageToSend,
-        conversationHistoryForAI,
-        (chunk: string) => {
-          if (!isAiStreamingRef.current || abortController.signal.aborted) {
-            return;
-          }
+      let aiResponse: { success: boolean; workoutData?: any; error?: string } = { success: false };
 
-          // Add placeholder on first chunk
-          if (!hasAddedPlaceholder) {
-            const streamingMessagePlaceholder: ChatMessage = {
-              role: 'assistant',
-              content: '',
-              timestamp: new Date()
-            };
-            setMessages(prevMessages => [...prevMessages, streamingMessagePlaceholder]);
-            hasAddedPlaceholder = true;
-          }
+      try {
+        // Call new Gemini 2.5 Flash chat API with streaming
+        const response = await fetch('/api/ai/gemini-chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId: targetSessionId,
+            userId: user.uid,
+            message: messageToSend,
+            streaming: true
+          }),
+          signal: abortController.signal
+        });
 
-          fullStreamedContent += chunk;
-          setMessages(prevMsgs => prevMsgs.map((msg, index) => {
-            if (index === prevMsgs.length - 1 && msg.role === 'assistant') {
-              return { ...msg, content: msg.content + chunk };
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status}`);
+        }
+
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+
+        if (!reader) {
+          throw new Error('No response body');
+        }
+
+        // Process streaming response
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done || !isAiStreamingRef.current || abortController.signal.aborted) break;
+
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n\n');
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(line.slice(6));
+
+                if (data.chunk) {
+                  // Add placeholder on first chunk
+                  if (!hasAddedPlaceholder) {
+                    const streamingMessagePlaceholder: ChatMessage = {
+                      role: 'assistant',
+                      content: '',
+                      timestamp: new Date()
+                    };
+                    setMessages(prevMessages => [...prevMessages, streamingMessagePlaceholder]);
+                    hasAddedPlaceholder = true;
+                  }
+
+                  fullStreamedContent += data.chunk;
+                  setMessages(prevMsgs => prevMsgs.map((msg, index) => {
+                    if (index === prevMsgs.length - 1 && msg.role === 'assistant') {
+                      return { ...msg, content: msg.content + data.chunk };
+                    }
+                    return msg;
+                  }));
+                }
+
+                if (data.done) {
+                  aiResponse.success = true;
+                  break;
+                }
+              } catch (e) {
+                console.error('Error parsing SSE data:', e);
+              }
             }
-            return msg;
-          }));
-        },
-        abortController.signal
-      );
+          }
+        }
+
+        // If we got content, consider it successful
+        if (fullStreamedContent) {
+          aiResponse.success = true;
+        }
+      } catch (fetchError) {
+        console.error('Streaming error:', fetchError);
+        aiResponse.error = fetchError instanceof Error ? fetchError.message : 'Unknown error';
+      }
 
       console.log('💬 ChatPage: AI streaming response completed.');
 

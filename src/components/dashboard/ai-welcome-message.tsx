@@ -14,7 +14,7 @@ import {
   Loader2,
   Brain
 } from 'lucide-react';
-import { generateDailyMotivation } from '@/services/core/ai-chat-service';
+// Using fallback messages - can integrate with Gemini API later if needed
 import { useWorkout } from '@/contexts/WorkoutContext';
 import { useRouter } from 'next/navigation';
 
@@ -155,32 +155,10 @@ export function AIWelcomeMessage() {
     try {
       setIsLoading(true);
 
-      let selectedMessageType: 'motivational' | 'tip' | 'joke' | 'general';
-
-      if (motivationContext.hasWorkoutToday) {
-        selectedMessageType = 'tip';
-      } else {
-        // No workout today
-        if (Math.random() < 0.2) { // 20% chance for a joke
-          selectedMessageType = 'joke';
-        } else if (shouldGenerateNewMessage()) {
-          // Prioritize motivational or general if it&apos;s a "new" message session
-          selectedMessageType = Math.random() < 0.5 ? 'motivational' : 'general';
-        } else {
-          // If message is being refreshed but not "stale", default to general or motivational
-          selectedMessageType = Math.random() < 0.3 ? 'motivational' : 'general'; // Slight chance for motivational on refresh
-        }
-      }
-      
-      const response = await generateDailyMotivation(user.uid, motivationContext, selectedMessageType);
-      
-      if (response.success) {
-        setMessage(response.message);
-        setLastGenerated(new Date());
-      } else {
-        // Use fallback message
-        setMessage(getFallbackMessage());
-      }
+      // For now, use fallback messages which are already well-crafted
+      // Can integrate with Gemini API later for AI-generated messages
+      setMessage(getFallbackMessage());
+      setLastGenerated(new Date());
     } catch (error) {
       console.error('Error generating motivation message:', error);
       setMessage(getFallbackMessage());
