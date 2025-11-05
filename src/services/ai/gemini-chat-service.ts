@@ -66,36 +66,36 @@ const workoutTools: Tool = {
   functionDeclarations: [
     {
       name: 'generateWorkout',
-      description: 'Generate a personalized workout plan based on user preferences and fitness goals',
+      description: 'IMMEDIATELY generate a personalized workout plan when user requests a workout. CALL THIS FUNCTION as soon as you know the target muscles. Use intelligent defaults for any unspecified parameters.',
       parameters: {
         type: 'OBJECT',
         properties: {
           targetMuscles: {
             type: 'ARRAY',
-            description: 'Target muscle groups (e.g., chest, back, legs, shoulders, arms, core)',
+            description: 'Target muscle groups. INFER from keywords: "leg/legs"=["quadriceps","hamstrings","glutes","calves"], "chest"=["chest","triceps"], "back"=["back","biceps"], "arms"=["biceps","triceps"], "shoulders"=["shoulders","traps"], "full body"=["legs","chest","back","shoulders","arms"]',
             items: { type: 'STRING' }
           },
           workoutType: {
             type: 'STRING',
-            description: 'Type of workout (strength, hypertrophy, endurance, powerlifting, bodyweight)',
+            description: 'Type of workout. DEFAULT: "strength" if not specified',
             enum: ['strength', 'hypertrophy', 'endurance', 'powerlifting', 'bodyweight']
           },
           experience: {
             type: 'STRING',
-            description: 'User fitness experience level',
+            description: 'User fitness experience level. DEFAULT: "intermediate" if not specified',
             enum: ['beginner', 'intermediate', 'advanced']
           },
           duration: {
             type: 'NUMBER',
-            description: 'Desired workout duration in minutes'
+            description: 'Desired workout duration in minutes. DEFAULT: 45 if not specified'
           },
           equipment: {
             type: 'ARRAY',
-            description: 'Available equipment',
+            description: 'Available equipment. DEFAULT: ["gym equipment"] if not specified',
             items: { type: 'STRING' }
           }
         },
-        required: ['targetMuscles', 'workoutType', 'experience']
+        required: ['targetMuscles']
       }
     } as FunctionDeclaration,
     {
