@@ -9,10 +9,21 @@
  */
 
 import { GoogleGenerativeAI, Content, FunctionDeclaration, Tool } from '@google/generative-ai';
+import exercisesData from '@/lib/exercises.json';
+import { getWorkouts } from '@/services/core/workout-service';
 
 // ============================================================================
 // Types
 // ============================================================================
+
+interface Exercise {
+  id: string;
+  name: string;
+  primaryMuscles: string[];
+  secondaryMuscles: string[];
+}
+
+const exercises = exercisesData as Exercise[];
 
 export interface ChatMessage {
   role: 'user' | 'model' | 'function';
@@ -126,59 +137,172 @@ const workoutTools: Tool = {
 // ============================================================================
 
 class WorkoutFunctions {
-  async generateWorkout(args: any): Promise<any> {
+  /**
+   * Generate a complete workout plan with real exercises from database
+   */
+  async generateWorkout(args: any, userId?: string): Promise<any> {
     console.log('🏋️ Generating workout with params:', args);
 
-    // This would integrate with your existing workout generation logic
-    // For now, returning a structured response
+    const { targetMuscles = [], workoutType = 'strength', experience = 'intermediate', duration = 45, equipment = [] } = args;
+
+    // Normalize muscle names for matching
+    const normalizeMuscle = (muscle: string) => muscle.toLowerCase().trim();
+    const targetMusclesNorm = targetMuscles.map(normalizeMuscle);
+
+    // Filter exercises by target muscles
+    const matchingExercises = exercises.filter(ex => {
+      const allMuscles = [...ex.primaryMuscles, ...ex.secondaryMuscles].map(normalizeMuscle);
+      return targetMusclesNorm.some(target =>
+        allMuscles.some(muscle => muscle.includes(target) || target.includes(muscle))
+      );
+    });
+
+    if (matchingExercises.length === 0) {
+      return {
+        success: false,
+        error: `No exercises found for: ${targetMuscles.join(', ')}. Try: chest, back, legs, shoulders, arms`
+      };
+    }
+
+    // Get workout configuration
+    const config = this.getWorkoutConfig(workoutType, experience);
+
+    // Select exercises (2-3 per muscle group, max 8 total)
+    const exercisesPerGroup = Math.max(2, Math.floor(duration / 15));
+    const selectedExercises: Exercise[] = [];
+
+    targetMusclesNorm.forEach(target => {
+      const muscleExercises = matchingExercises
+        .filter(ex => {
+          const allMuscles = [...ex.primaryMuscles, ...ex.secondaryMuscles].map(normalizeMuscle);
+          return allMuscles.some(m => m.includes(target) || target.includes(m));
+        })
+        .slice(0, exercisesPerGroup);
+      selectedExercises.push(...muscleExercises);
+    });
+
+    // Remove duplicates and limit
+    const uniqueExercises = Array.from(new Set(selectedExercises.map(e => e.id)))
+      .map(id => selectedExercises.find(e => e.id === id)!)
+      .slice(0, 8);
+
+    // Build workout
+    const workoutExercises = uniqueExercises.map((ex, index) => ({
+      exerciseId: ex.id,
+      name: ex.name,
+      sets: config.sets,
+      reps: config.reps,
+      restSeconds: config.restSeconds,
+      targetMuscles: ex.primaryMuscles,
+      order: index + 1
+    }));
+
     return {
       success: true,
       workout: {
-        exercises: [
-          {
-            name: args.targetMuscles.includes('chest') ? 'Bench Press' : 'Squat',
-            sets: args.workoutType === 'strength' ? 5 : 3,
-            reps: args.workoutType === 'strength' ? 5 : 10,
-            restSeconds: 90
-          }
-        ],
-        totalDuration: args.duration || 45,
-        notes: `${args.experience} level ${args.workoutType} workout`
+        title: `${experience} ${targetMuscles.join(' & ')} Workout`,
+        workoutType,
+        experience,
+        exercises: workoutExercises,
+        totalExercises: workoutExercises.length,
+        notes: `${config.sets} sets × ${config.reps} reps, ${config.restSeconds}s rest`
       }
     };
   }
 
-  async getExerciseInfo(args: any): Promise<any> {
+  /**
+   * Get exercise info from database
+   */
+  async getExerciseInfo(args: any, userId?: string): Promise<any> {
     console.log('📖 Getting exercise info for:', args.exerciseName);
 
-    // This would query your exercise database
+    const searchTerm = args.exerciseName.toLowerCase().trim();
+    const exercise = exercises.find(ex =>
+      ex.name.toLowerCase() === searchTerm ||
+      ex.id === searchTerm ||
+      ex.name.toLowerCase().includes(searchTerm)
+    );
+
+    if (!exercise) {
+      return {
+        success: false,
+        error: `Exercise "${args.exerciseName}" not found. Try: Bench Press, Squat, Deadlift`
+      };
+    }
+
     return {
       success: true,
       exercise: {
-        name: args.exerciseName,
-        primaryMuscles: ['chest', 'triceps'],
-        secondaryMuscles: ['shoulders'],
-        equipment: ['barbell', 'bench'],
-        difficulty: 'intermediate',
-        instructions: [
-          'Lie flat on bench',
-          'Grip bar slightly wider than shoulders',
-          'Lower bar to chest',
-          'Press up to starting position'
-        ]
+        name: exercise.name,
+        primaryMuscles: exercise.primaryMuscles,
+        secondaryMuscles: exercise.secondaryMuscles,
+        description: `Primarily targets ${exercise.primaryMuscles.join(', ')}${exercise.secondaryMuscles.length > 0 ? `, also works ${exercise.secondaryMuscles.join(', ')}` : ''}`
       }
     };
   }
 
-  async getWorkoutHistory(args: any): Promise<any> {
-    console.log('📊 Getting workout history, limit:', args.limit);
+  /**
+   * Get workout history from Firestore
+   */
+  async getWorkoutHistory(args: any, userId: string): Promise<any> {
+    console.log('📊 Getting workout history for:', userId);
 
-    // This would query Firestore for user's workout history
-    return {
-      success: true,
-      workouts: [],
-      message: 'No workout history yet'
+    try {
+      const limit = args.limit || 5;
+      const workouts = await getWorkouts(userId, limit);
+
+      const history = workouts.map(w => ({
+        title: w.title,
+        date: w.date.toDate().toISOString().split('T')[0],
+        exercises: w.exercises.map(e => e.name),
+        volume: w.totalVolume,
+        rpe: w.rpe
+      }));
+
+      return {
+        success: true,
+        workouts: history,
+        message: history.length > 0 ? `Found ${history.length} workouts` : 'No history yet'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: 'Failed to fetch history',
+        workouts: []
+      };
+    }
+  }
+
+  private getWorkoutConfig(workoutType: string, experience: string) {
+    const configs: Record<string, Record<string, any>> = {
+      strength: {
+        beginner: { sets: 3, reps: 8, restSeconds: 120 },
+        intermediate: { sets: 4, reps: 6, restSeconds: 150 },
+        advanced: { sets: 5, reps: 5, restSeconds: 180 }
+      },
+      hypertrophy: {
+        beginner: { sets: 3, reps: 12, restSeconds: 60 },
+        intermediate: { sets: 4, reps: 10, restSeconds: 75 },
+        advanced: { sets: 5, reps: 8, restSeconds: 90 }
+      },
+      endurance: {
+        beginner: { sets: 2, reps: 15, restSeconds: 45 },
+        intermediate: { sets: 3, reps: 20, restSeconds: 45 },
+        advanced: { sets: 4, reps: 25, restSeconds: 30 }
+      },
+      powerlifting: {
+        beginner: { sets: 3, reps: 5, restSeconds: 180 },
+        intermediate: { sets: 5, reps: 3, restSeconds: 240 },
+        advanced: { sets: 6, reps: 2, restSeconds: 300 }
+      },
+      bodyweight: {
+        beginner: { sets: 3, reps: 10, restSeconds: 60 },
+        intermediate: { sets: 4, reps: 15, restSeconds: 60 },
+        advanced: { sets: 5, reps: 20, restSeconds: 45 }
+      }
     };
+
+    return configs[workoutType]?.[experience] || configs.strength.intermediate;
   }
 }
 
@@ -292,18 +416,18 @@ Guidelines:
   /**
    * Execute function call
    */
-  private async executeFunction(name: string, args: Record<string, any>): Promise<any> {
+  private async executeFunction(name: string, args: Record<string, any>, userId: string): Promise<any> {
     console.log(`🔧 Executing function: ${name}`);
 
     switch (name) {
       case 'generateWorkout':
-        return await this.workoutFunctions.generateWorkout(args);
+        return await this.workoutFunctions.generateWorkout(args, userId);
 
       case 'getExerciseInfo':
-        return await this.workoutFunctions.getExerciseInfo(args);
+        return await this.workoutFunctions.getExerciseInfo(args, userId);
 
       case 'getWorkoutHistory':
-        return await this.workoutFunctions.getWorkoutHistory(args);
+        return await this.workoutFunctions.getWorkoutHistory(args, userId);
 
       default:
         return { error: `Unknown function: ${name}` };
@@ -353,7 +477,7 @@ Guidelines:
           console.log(`   → ${call.name}(${JSON.stringify(call.args)})`);
 
           // Execute function
-          const functionResult = await this.executeFunction(call.name, call.args);
+          const functionResult = await this.executeFunction(call.name, call.args, userId);
 
           // Store function call info
           functionCalls.push({
@@ -482,7 +606,7 @@ Guidelines:
           console.log(`   → ${call.name}(${JSON.stringify(call.args)})`);
 
           // Execute function
-          const functionResult = await this.executeFunction(call.name, call.args);
+          const functionResult = await this.executeFunction(call.name, call.args, userId);
 
           // Store function call info
           functionCalls.push({
