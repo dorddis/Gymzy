@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { geminiChatService } from '@/services/ai/gemini-chat-service';
+import { OnboardingContextService } from '@/services/data/onboarding-context-service';
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,6 +18,10 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Fetch user's onboarding context for personalization
+    const userContext = await OnboardingContextService.getOnboardingContext(userId);
+    console.log('📋 User context fetched:', userContext ? 'Found' : 'Not found');
 
     // Streaming response
     if (streaming) {
@@ -33,7 +38,8 @@ export async function POST(request: NextRequest) {
                 controller.enqueue(
                   encoder.encode(`data: ${JSON.stringify({ chunk })}\n\n`)
                 );
-              }
+              },
+              userContext
             );
 
             // Send completion event
@@ -57,7 +63,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Non-streaming response
-    const response = await geminiChatService.sendMessage(sessionId, userId, message);
+    const response = await geminiChatService.sendMessage(sessionId, userId, message, userContext);
 
     if (!response.success) {
       return NextResponse.json(

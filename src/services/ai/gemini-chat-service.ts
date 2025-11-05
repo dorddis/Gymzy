@@ -11,6 +11,7 @@
 import { GoogleGenerativeAI, Content, FunctionDeclaration, Tool } from '@google/generative-ai';
 import exercisesData from '@/lib/exercises.json';
 import { getWorkouts } from '@/services/core/workout-service';
+import { OnboardingContext } from '@/services/data/onboarding-context-service';
 
 // ============================================================================
 // Types
@@ -43,6 +44,7 @@ export interface ConversationState {
   sessionId: string;
   userId: string;
   messages: ChatMessage[];
+  userContext?: OnboardingContext | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -140,10 +142,38 @@ class WorkoutFunctions {
   /**
    * Generate a complete workout plan with real exercises from database
    */
-  async generateWorkout(args: any, userId?: string): Promise<any> {
+  async generateWorkout(args: any, userId?: string, userContext?: OnboardingContext | null): Promise<any> {
     console.log('🏋️ Generating workout with params:', args);
+    console.log('📋 User context available:', !!userContext);
 
-    const { targetMuscles = [], workoutType = 'strength', experience = 'intermediate', duration = 45, equipment = [] } = args;
+    // Extract context-aware defaults
+    const contextDefaults = userContext ? {
+      experience: userContext.experienceLevel.overall,
+      workoutType: this.deriveWorkoutType(userContext.fitnessGoals.primary),
+      duration: this.deriveDuration(userContext.schedule.sessionDuration),
+      equipment: userContext.equipment.available
+    } : {
+      experience: 'intermediate',
+      workoutType: 'strength',
+      duration: 45,
+      equipment: ['gym equipment']
+    };
+
+    // Use provided values or context defaults
+    const { 
+      targetMuscles = [], 
+      workoutType = contextDefaults.workoutType, 
+      experience = contextDefaults.experience, 
+      duration = contextDefaults.duration, 
+      equipment = contextDefaults.equipment 
+    } = args;
+
+    console.log(`✅ Using experience=${experience}, type=${workoutType}, duration=${duration}min`);
+
+    // Check for injuries/limitations
+    if (userContext?.experienceLevel.previousInjuries && userContext.experienceLevel.previousInjuries.length > 0) {
+      console.log(`⚠️ User has injuries: ${userContext.experienceLevel.previousInjuries.join(', ')}`);
+    }
 
     // Normalize muscle names for matching
     const normalizeMuscle = (muscle: string) => muscle.toLowerCase().trim();
@@ -208,6 +238,35 @@ class WorkoutFunctions {
         notes: `${config.sets} sets × ${config.reps} reps, ${config.restSeconds}s rest`
       }
     };
+  }
+
+  /**
+   * Derive workout type from fitness goal
+   */
+  private deriveWorkoutType(goal: string): string {
+    const goalMap: Record<string, string> = {
+      'weight_loss': 'endurance',
+      'muscle_gain': 'hypertrophy',
+      'endurance': 'endurance',
+      'strength': 'strength',
+      'general_fitness': 'strength',
+      'sport_specific': 'strength'
+    };
+    return goalMap[goal] || 'strength';
+  }
+
+  /**
+   * Derive duration from schedule preference
+   */
+  private deriveDuration(sessionDuration: string): number {
+    const durationMap: Record<string, number> = {
+      '15_30': 25,
+      '30_45': 40,
+      '45_60': 50,
+      '60_90': 75,
+      '90_plus': 90
+    };
+    return durationMap[sessionDuration] || 45;
   }
 
   /**
@@ -419,17 +478,113 @@ Assistant: "What target muscle groups would you like to focus on?"
   /**
    * Get or create conversation state
    */
-  private getConversation(sessionId: string, userId: string): ConversationState {
+  private getConversation(sessionId: string, userId: string, userContext?: OnboardingContext | null): ConversationState {
     if (!this.conversations.has(sessionId)) {
-      this.conversations.set(sessionId, {
+      // Create new conversation
+      const conversation: ConversationState = {
         sessionId,
         userId,
         messages: [],
+        userContext,
         createdAt: new Date(),
         updatedAt: new Date()
-      });
+      };
+
+      // If we have user context, inject it as a system message at the start
+      if (userContext) {
+        const contextSummary = this.buildContextSummary(userContext);
+        conversation.messages.push({
+          role: 'user',
+          content: contextSummary,
+          timestamp: new Date()
+        });
+        console.log('✅ Injected user context into new conversation');
+      }
+
+      this.conversations.set(sessionId, conversation);
     }
-    return this.conversations.get(sessionId)!;
+    
+    // Update context if provided and different
+    const conversation = this.conversations.get(sessionId)!;
+    if (userContext && !conversation.userContext) {
+      conversation.userContext = userContext;
+      
+      // If messages are empty or only have one message, inject context
+      if (conversation.messages.length <= 1) {
+        const contextSummary = this.buildContextSummary(userContext);
+        conversation.messages.unshift({
+          role: 'user',
+          content: contextSummary,
+          timestamp: new Date()
+        });
+        console.log('✅ Injected user context into existing conversation');
+      }
+    }
+    
+    return conversation;
+  }
+
+  /**
+   * Build a concise context summary from user onboarding data
+   */
+  private buildContextSummary(context: OnboardingContext): string {
+    const parts: string[] = [
+      `[USER CONTEXT - This information should guide all workout recommendations]`
+    ];
+
+    // Fitness Goals
+    if (context.fitnessGoals) {
+      parts.push(`\nGoals: Primary=${context.fitnessGoals.primary}, Timeline=${context.fitnessGoals.targetTimeline}`);
+      if (context.fitnessGoals.secondary && context.fitnessGoals.secondary.length > 0) {
+        parts.push(`Secondary goals: ${context.fitnessGoals.secondary.join(', ')}`);
+      }
+    }
+
+    // Experience Level
+    if (context.experienceLevel) {
+      parts.push(`\nExperience: ${context.experienceLevel.overall} (${context.experienceLevel.yearsTraining} years training)`);
+      const exp = context.experienceLevel.specificExperience;
+      parts.push(`Specific: Weightlifting=${exp.weightlifting}, Cardio=${exp.cardio}, Flexibility=${exp.flexibility}`);
+      
+      if (context.experienceLevel.previousInjuries && context.experienceLevel.previousInjuries.length > 0) {
+        parts.push(`⚠️ Previous Injuries: ${context.experienceLevel.previousInjuries.join(', ')}`);
+      }
+      if (context.experienceLevel.limitations && context.experienceLevel.limitations.length > 0) {
+        parts.push(`⚠️ Limitations: ${context.experienceLevel.limitations.join(', ')}`);
+      }
+    }
+
+    // Equipment & Environment
+    if (context.equipment) {
+      parts.push(`\nEquipment: ${context.equipment.location} - ${context.equipment.available.join(', ') || 'None specified'}`);
+      parts.push(`Space: ${context.equipment.spaceConstraints}`);
+    }
+
+    // Schedule
+    if (context.schedule) {
+      parts.push(`\nSchedule: ${context.schedule.workoutDays.join(', ')}`);
+      parts.push(`Preferred times: ${context.schedule.preferredTimes.join(', ')}`);
+      parts.push(`Session duration: ${context.schedule.sessionDuration}`);
+    }
+
+    // Preferences
+    if (context.preferences) {
+      parts.push(`\nPreferences: Intensity=${context.preferences.workoutIntensity}, Style=${context.preferences.motivationStyle}`);
+      parts.push(`Coaching: ${context.preferences.coachingStyle}, Feedback frequency=${context.preferences.feedbackFrequency}`);
+    }
+
+    // Health Info
+    if (context.healthInfo) {
+      if (context.healthInfo.medicalConditions && context.healthInfo.medicalConditions.length > 0) {
+        parts.push(`\n⚠️ Medical conditions: ${context.healthInfo.medicalConditions.join(', ')}`);
+      }
+      parts.push(`\nSleep: ${context.healthInfo.sleepPattern.averageHours}h (${context.healthInfo.sleepPattern.quality})`);
+      parts.push(`Stress: ${context.healthInfo.stressLevel}, Energy: ${context.healthInfo.energyLevels}`);
+    }
+
+    parts.push(`\n[END USER CONTEXT - Use this to personalize all recommendations]`);
+
+    return parts.join('\n');
   }
 
   /**
@@ -468,12 +623,12 @@ Assistant: "What target muscle groups would you like to focus on?"
   /**
    * Execute function call
    */
-  private async executeFunction(name: string, args: Record<string, any>, userId: string): Promise<any> {
+  private async executeFunction(name: string, args: Record<string, any>, userId: string, userContext?: OnboardingContext | null): Promise<any> {
     console.log(`🔧 Executing function: ${name}`);
 
     switch (name) {
       case 'generateWorkout':
-        return await this.workoutFunctions.generateWorkout(args, userId);
+        return await this.workoutFunctions.generateWorkout(args, userId, userContext);
 
       case 'getExerciseInfo':
         return await this.workoutFunctions.getExerciseInfo(args, userId);
@@ -492,10 +647,11 @@ Assistant: "What target muscle groups would you like to focus on?"
   async sendMessage(
     sessionId: string,
     userId: string,
-    userMessage: string
+    userMessage: string,
+    userContext?: OnboardingContext | null
   ): Promise<ChatResponse> {
     try {
-      const conversation = this.getConversation(sessionId, userId);
+      const conversation = this.getConversation(sessionId, userId, userContext);
 
       // Add user message to history
       conversation.messages.push({
@@ -529,7 +685,7 @@ Assistant: "What target muscle groups would you like to focus on?"
           console.log(`   → ${call.name}(${JSON.stringify(call.args)})`);
 
           // Execute function
-          const functionResult = await this.executeFunction(call.name, call.args, userId);
+          const functionResult = await this.executeFunction(call.name, call.args, userId, conversation.userContext);
 
           // Store function call info
           functionCalls.push({
@@ -610,10 +766,11 @@ Assistant: "What target muscle groups would you like to focus on?"
     sessionId: string,
     userId: string,
     userMessage: string,
-    onChunk: (chunk: string) => void
+    onChunk: (chunk: string) => void,
+    userContext?: OnboardingContext | null
   ): Promise<ChatResponse> {
     try {
-      const conversation = this.getConversation(sessionId, userId);
+      const conversation = this.getConversation(sessionId, userId, userContext);
 
       // Add user message
       conversation.messages.push({
@@ -658,7 +815,7 @@ Assistant: "What target muscle groups would you like to focus on?"
           console.log(`   → ${call.name}(${JSON.stringify(call.args)})`);
 
           // Execute function
-          const functionResult = await this.executeFunction(call.name, call.args, userId);
+          const functionResult = await this.executeFunction(call.name, call.args, userId, conversation.userContext);
 
           // Store function call info
           functionCalls.push({
