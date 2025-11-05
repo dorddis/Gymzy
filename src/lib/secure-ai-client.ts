@@ -8,7 +8,7 @@ import { env } from './env-config';
 
 export interface AIRequest {
   prompt: string;
-  model?: 'gemini' | 'groq';
+  model?: 'gemini';
   maxTokens?: number;
   temperature?: number;
   stream?: boolean;
@@ -143,7 +143,7 @@ export async function generateSecureStreamingResponse(
  */
 export async function checkAIServiceHealth(): Promise<{
   status: string;
-  services: { gemini: boolean; groq: boolean };
+  services: { gemini: boolean };
   timestamp: string;
 }> {
   try {
@@ -159,10 +159,10 @@ export async function checkAIServiceHealth(): Promise<{
 
   } catch (error) {
     console.error('❌ AI Service Health Check Error:', error);
-    
+
     return {
       status: 'unhealthy',
-      services: { gemini: false, groq: false },
+      services: { gemini: false },
       timestamp: new Date().toISOString(),
     };
   }
@@ -207,39 +207,21 @@ export async function generateCharacterStreamingResponse(
 }
 
 /**
- * Intelligent AI routing based on request complexity
- */
-export function determineOptimalModel(prompt: string): 'gemini' | 'groq' {
-  // Simple heuristics for model selection
-  const complexityIndicators = [
-    'workout', 'exercise', 'create', 'generate', 'plan', 'analyze',
-    'calculate', 'modify', 'double', 'increase', 'decrease',
-    'tricep', 'bicep', 'chest', 'back', 'legs', 'shoulders'
-  ];
-  
-  const promptLower = prompt.toLowerCase();
-  const hasComplexity = complexityIndicators.some(indicator => 
-    promptLower.includes(indicator)
-  );
-  
-  // Use Groq for complex fitness-related requests, Gemini for simple ones
-  return hasComplexity ? 'groq' : 'gemini';
-}
-
-/**
- * Smart AI request with automatic model selection
+ * Smart AI request - always uses Gemini
+ * @deprecated Use generateSecureAIResponse instead (model selection removed)
  */
 export async function generateSmartAIResponse(request: Omit<AIRequest, 'model'>): Promise<AIResponse> {
-  const optimalModel = determineOptimalModel(request.prompt);
-  
+  console.warn('⚠️ generateSmartAIResponse is deprecated. Use generateSecureAIResponse instead.');
+
   return generateSecureAIResponse({
     ...request,
-    model: optimalModel,
+    model: 'gemini',
   });
 }
 
 /**
- * Smart streaming AI request with automatic model selection
+ * Smart streaming AI request - always uses Gemini
+ * @deprecated Use generateSecureStreamingResponse instead (model selection removed)
  */
 export async function generateSmartStreamingResponse(
   request: Omit<AIRequest, 'model'>,
@@ -247,10 +229,10 @@ export async function generateSmartStreamingResponse(
   onComplete?: () => void,
   onError?: (error: string) => void
 ): Promise<void> {
-  const optimalModel = determineOptimalModel(request.prompt);
-  
+  console.warn('⚠️ generateSmartStreamingResponse is deprecated. Use generateSecureStreamingResponse instead.');
+
   return generateSecureStreamingResponse(
-    { ...request, model: optimalModel },
+    { ...request, model: 'gemini' },
     onChunk,
     onComplete,
     onError

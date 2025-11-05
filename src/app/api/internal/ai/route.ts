@@ -10,7 +10,7 @@ import { getAPIConfig } from '@/lib/env-config';
 // Request validation schema
 const aiRequestSchema = z.object({
   prompt: z.string().min(1, 'Prompt is required').max(10000, 'Prompt too long'),
-  model: z.enum(['gemini', 'groq']).default('gemini'),
+  model: z.enum(['gemini']).default('gemini'),
   maxTokens: z.number().min(1).max(4000).default(1000),
   temperature: z.number().min(0).max(2).default(0.7),
   stream: z.boolean().default(false),
@@ -41,8 +41,14 @@ function checkRateLimit(clientId: string, limit: number = 60): boolean {
 // Gemini API call
 async function callGeminiAPI(prompt: string, maxTokens: number, temperature: number): Promise<string> {
   const config = getAPIConfig();
-  
-  const response = await fetch(config.googleAI.endpoint + `?key=${config.googleAI.apiKey}`, {
+
+  if (!config.gemini.apiKey) {
+    throw new Error('Gemini API key not configured');
+  }
+
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${config.gemini.model}:generateContent?key=${config.gemini.apiKey}`;
+
+  const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -77,52 +83,12 @@ async function callGeminiAPI(prompt: string, maxTokens: number, temperature: num
   }
 
   const data = await response.json();
-  
+
   if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
     throw new Error('Invalid response format from Gemini API');
   }
 
   return data.candidates[0].content.parts[0].text;
-}
-
-// Groq API call
-async function callGroqAPI(prompt: string, maxTokens: number, temperature: number): Promise<string> {
-  const config = getAPIConfig();
-  
-  if (!config.groq.apiKey) {
-    throw new Error('Groq API key not configured');
-  }
-
-  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${config.groq.apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: config.groq.modelName,
-      messages: [
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      max_tokens: maxTokens,
-      temperature,
-    })
-  });
-
-  if (!response.ok) {
-    throw new Error(`Groq API error: ${response.status} ${response.statusText}`);
-  }
-
-  const data = await response.json();
-  
-  if (!data.choices?.[0]?.message?.content) {
-    throw new Error('Invalid response format from Groq API');
-  }
-
-  return data.choices[0].message.content;
 }
 
 export async function POST(request: NextRequest) {
@@ -142,22 +108,12 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = aiRequestSchema.parse(body);
 
-    let result: string;
-
-    // Call appropriate AI service
-    if (validatedData.model === 'groq') {
-      result = await callGroqAPI(
-        validatedData.prompt,
-        validatedData.maxTokens,
-        validatedData.temperature
-      );
-    } else {
-      result = await callGeminiAPI(
-        validatedData.prompt,
-        validatedData.maxTokens,
-        validatedData.temperature
-      );
-    }
+    // Use Gemini only
+    const result = await callGeminiAPI(
+      validatedData.prompt,
+      validatedData.maxTokens,
+      validatedData.temperature
+    );
 
     return NextResponse.json({
       success: true,
@@ -196,13 +152,12 @@ export async function POST(request: NextRequest) {
 // Health check endpoint
 export async function GET() {
   const config = getAPIConfig();
-  
+
   return NextResponse.json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
     services: {
-      gemini: !!config.googleAI.apiKey,
-      groq: !!config.groq.apiKey,
+      gemini: !!config.gemini.apiKey,
     }
   });
 }

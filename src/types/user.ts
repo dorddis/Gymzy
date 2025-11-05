@@ -588,4 +588,4 @@ export interface UserListResponse {
 export type UserStatus = 'active' | 'inactive' | 'suspended' | 'deleted';
 export type ProfileCompleteness = number; // 0-100 percentage
 export type ResponseLength = 'short' | 'medium' | 'long';
-export type AIModel = 'gemini' | 'groq';
+export type AIModel = 'gemini';

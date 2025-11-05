@@ -182,7 +182,7 @@ export const userPreferencesSchema = z.object({
   trackHeartRate: z.boolean(),
   aiPersonality: z.enum(['motivational', 'supportive', 'analytical', 'casual', 'professional']),
   aiResponseLength: z.enum(['short', 'medium', 'long']),
-  preferredAIModel: z.enum(['gemini', 'groq']),
+  preferredAIModel: z.enum(['gemini']),
   aiCoachingStyle: z.enum(['encouraging', 'challenging', 'educational', 'adaptive']),
   autoSync: z.boolean(),
   syncFrequency: z.enum(['real_time', 'hourly', 'daily', 'weekly', 'manual']),

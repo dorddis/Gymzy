@@ -27,7 +27,7 @@ export const chatRequestSchema = z.object({
   context: z.object({
     previousMessages: z.array(chatMessageSchema).max(50, 'Too many previous messages (max 50)').optional(),
     userPreferences: z.object({
-      preferredModel: z.enum(['gemini', 'groq']).optional(),
+      preferredModel: z.enum(['gemini']).optional(),
       responseLength: z.enum(['short', 'medium', 'long']).optional(),
       includeExplanations: z.boolean().optional(),
       workoutStyle: z.array(z.string()).max(10, 'Too many workout styles (max 10)').optional(),
@@ -58,7 +58,7 @@ export const chatRequestSchema = z.object({
     }).optional(),
   }).optional(),
   options: z.object({
-    model: z.enum(['gemini', 'groq']).optional(),
+    model: z.enum(['gemini']).optional(),
     maxTokens: z.number().min(1, 'Max tokens must be at least 1').max(4000, 'Max tokens must be less than 4000').optional(),
     temperature: z.number().min(0, 'Temperature must be at least 0').max(2, 'Temperature must be at most 2').optional(),
     stream: z.boolean().optional(),
@@ -195,7 +195,7 @@ export const chatSearchSchema = z.object({
 // AI model preference schema
 export const aiModelPreferenceSchema = z.object({
   userId: z.string().min(1, 'User ID is required'),
-  preferredModel: z.enum(['gemini', 'groq']),
+  preferredModel: z.enum(['gemini']),
   responseLength: z.enum(['short', 'medium', 'long']),
   temperature: z.number().min(0, 'Temperature must be at least 0').max(2, 'Temperature must be at most 2'),
   includeExplanations: z.boolean(),

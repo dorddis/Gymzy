@@ -111,7 +111,7 @@ export interface ChatSession {
 
 // User preferences for chat personalization
 export interface UserPreferences {
-  preferredModel?: 'gemini' | 'groq';
+  preferredModel?: 'gemini';
   responseLength?: 'short' | 'medium' | 'long';
   includeExplanations?: boolean;
   workoutStyle?: string[];
@@ -143,7 +143,7 @@ export interface ChatRequest {
     workoutHistory?: WorkoutSummary[];
   };
   options?: {
-    model?: 'gemini' | 'groq';
+    model?: 'gemini';
     maxTokens?: number;
     temperature?: number;
     stream?: boolean;
@@ -241,4 +241,4 @@ export type MessageStatus = 'sending' | 'sent' | 'delivered' | 'error';
 export type ChatTheme = 'light' | 'dark' | 'auto';
 export type ResponseLength = 'short' | 'medium' | 'long';
 export type FitnessLevel = 'beginner' | 'intermediate' | 'advanced';
-export type AIModel = 'gemini' | 'groq';
+export type AIModel = 'gemini';
