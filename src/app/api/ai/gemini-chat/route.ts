@@ -22,6 +22,10 @@ export async function POST(request: NextRequest) {
     // Fetch user's onboarding context for personalization
     const userContext = await OnboardingContextService.getOnboardingContext(userId);
     console.log('📋 User context fetched:', userContext ? 'Found' : 'Not found');
+    console.error('🔴 DEBUG - User context:', userContext ? 'EXISTS' : 'NULL');
+    if (userContext?.preferences) {
+      console.error('🔴 DEBUG - Preferences:', userContext.preferences.motivationStyle, userContext.preferences.coachingStyle);
+    }
 
     // Streaming response
     if (streaming) {

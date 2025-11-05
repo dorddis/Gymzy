@@ -417,6 +417,26 @@ ${coachingStyle}
 You are a function-calling agent specialized in workout generation. Your PRIMARY job is to call functions immediately when you have sufficient information, not to have lengthy conversations.
 </role>
 
+<user_context_handling>
+IMPORTANT: At the start of each conversation, you receive a [USER CONTEXT] block containing the user's:
+- Fitness goals and timeline
+- Experience level and training history
+- Previous injuries and limitations
+- Available equipment and location
+- Workout schedule and preferred times
+- Personality preferences (communication and coaching style)
+- Health information (sleep, stress, medical conditions)
+
+When the user asks "what do you know about me?", "tell me my profile", "share my data", or similar:
+→ READ the [USER CONTEXT] block you received at the start of the conversation
+→ SUMMARIZE it back to them in a friendly, organized way
+→ Group information by category: Goals, Experience, Equipment, Schedule, Preferences, Health
+→ DO NOT say "I don't have access" - you DO have access via the context block
+→ Be specific - mention their actual goals, equipment, schedule days, etc.
+
+Use this context naturally in ALL responses to personalize recommendations.
+</user_context_handling>
+
 <critical_behavior>
 ALWAYS follow this decision flow BEFORE responding:
 
@@ -581,6 +601,8 @@ Assistant: "Deadlifts are a compound exercise..."
    * Build a concise context summary from user onboarding data
    */
   private buildContextSummary(context: OnboardingContext): string {
+    console.log('🔍 Building context summary from:', JSON.stringify(context, null, 2));
+
     const parts: string[] = [
       `[USER CONTEXT - This information should guide all workout recommendations]`
     ];
@@ -862,11 +884,28 @@ Assistant: "Deadlifts are a compound exercise..."
         }
       }
 
-      // Get the aggregated response
-      let response = (await result.response).response;
+      // Get the aggregated response with null safety
+      // Note: In streaming, result.response returns the response directly (not wrapped)
+      let response = await result.response;
+
+      if (!response) {
+        console.warn('⚠️ No response after initial streaming');
+        // Return what we have so far
+        conversation.messages.push({
+          role: 'model',
+          content: fullText,
+          timestamp: new Date()
+        });
+        conversation.updatedAt = new Date();
+        return {
+          message: fullText,
+          functionCalls,
+          success: true
+        };
+      }
 
       // Handle function calls in a loop (like non-streaming version)
-      let calls = response.functionCalls?.();
+      let calls = response?.functionCalls ? response.functionCalls() : undefined;
       while (calls && calls.length > 0) {
         console.log('📞 Model requested function calls (streaming)');
 
@@ -902,12 +941,12 @@ Assistant: "Deadlifts are a compound exercise..."
           }
 
           // Safely get response with null checks
-          const resultResponse = await result.response;
-          if (!resultResponse || !resultResponse.response) {
+          // Note: In streaming, result.response returns the response directly
+          response = await result.response;
+          if (!response) {
             console.warn('⚠️ No response after function call');
             break;
           }
-          response = resultResponse.response;
         }
 
         // Check for more function calls with null safety

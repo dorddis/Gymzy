@@ -253,6 +253,8 @@ function ChatContent() {
       let aiResponse: { success: boolean; workoutData?: any; error?: string } = { success: false };
 
       try {
+        console.log('📤 Sending to API:', { sessionId: targetSessionId, userId: user.uid, message: messageToSend, streaming: true });
+
         // Call new Gemini 2.5 Flash chat API with streaming
         const response = await fetch('/api/ai/gemini-chat', {
           method: 'POST',
