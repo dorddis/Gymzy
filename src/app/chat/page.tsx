@@ -157,7 +157,8 @@ function ChatContent() {
       const formattedMessages: ChatMessage[] = chatMessages.map(msg => ({
         role: msg.role,
         content: msg.content,
-        timestamp: msg.timestamp.toDate()
+        timestamp: msg.timestamp.toDate(),
+        ...(msg.workoutData && { workoutData: msg.workoutData })
       }));
 
       setMessages(formattedMessages);
@@ -253,7 +254,7 @@ function ChatContent() {
       let aiResponse: { success: boolean; workoutData?: any; error?: string } = { success: false };
 
       try {
-        console.log('📤 Sending to API:', { sessionId: targetSessionId, userId: user.uid, message: messageToSend, streaming: true });
+        console.log('📤 Sending to API:', { sessionId: targetSessionId, userId: user.uid, message: messageToSend, streaming: true, historyLength: messages.length });
 
         // Call new Gemini 2.5 Flash chat API with streaming
         const response = await fetch('/api/ai/gemini-chat', {
@@ -263,7 +264,12 @@ function ChatContent() {
             sessionId: targetSessionId,
             userId: user.uid,
             message: messageToSend,
-            streaming: true
+            streaming: true,
+            // Send conversation history for context
+            history: messages.map(msg => ({
+              role: msg.role,
+              content: msg.content
+            }))
           }),
           signal: abortController.signal
         });
@@ -346,7 +352,7 @@ function ChatContent() {
       // This is important because the chunk-by-chunk update might have slight variations
       // or if any chunk processing was missed.
       if (aiResponse.success) {
-        await saveChatMessage(targetSessionId, user.uid, 'assistant', fullStreamedContent);
+        await saveChatMessage(targetSessionId, user.uid, 'assistant', fullStreamedContent, aiResponse.workoutData);
         setMessages(prevMsgs => prevMsgs.map((msg, index) =>
           index === prevMsgs.length - 1 && msg.role === 'assistant'
             ? { ...msg, content: fullStreamedContent, workoutData: aiResponse.workoutData } // Ensure final content is fullStreamedContent

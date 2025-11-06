@@ -29,6 +29,12 @@ export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Timestamp;
+  workoutData?: {
+    exercises: any[];
+    workoutId: string;
+    title: string;
+    notes?: string;
+  };
 }
 
 // Create a new chat session
@@ -102,7 +108,8 @@ export const saveChatMessage = async (
   sessionId: string,
   userId: string,
   role: 'user' | 'assistant',
-  content: string
+  content: string,
+  workoutData?: any
 ): Promise<string> => {
   try {
     const messageId = `${sessionId}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -114,7 +121,8 @@ export const saveChatMessage = async (
       userId,
       role,
       content,
-      timestamp: now
+      timestamp: now,
+      ...(workoutData && { workoutData })
     };
 
     const messageRef = doc(db, 'chat_messages', messageId);

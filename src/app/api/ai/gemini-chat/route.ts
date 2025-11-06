@@ -9,7 +9,7 @@ import { OnboardingContextService } from '@/services/data/onboarding-context-ser
 
 export async function POST(request: NextRequest) {
   try {
-    const { sessionId, userId, message, streaming = false } = await request.json();
+    const { sessionId, userId, message, streaming = false, history = [] } = await request.json();
 
     // Validation
     if (!sessionId || !userId || !message) {
@@ -43,7 +43,8 @@ export async function POST(request: NextRequest) {
                   encoder.encode(`data: ${JSON.stringify({ chunk })}\n\n`)
                 );
               },
-              userContext
+              userContext,
+              history
             );
 
             // Extract workout data from function calls if present
@@ -88,7 +89,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Non-streaming response
-    const response = await geminiChatService.sendMessage(sessionId, userId, message, userContext);
+    const response = await geminiChatService.sendMessage(sessionId, userId, message, userContext, history);
 
     if (!response.success) {
       return NextResponse.json(
