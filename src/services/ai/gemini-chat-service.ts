@@ -13,6 +13,7 @@ import exercisesData from '@/lib/exercises.json';
 import { getWorkouts } from '@/services/core/workout-service';
 import { OnboardingContext } from '@/services/data/onboarding-context-service';
 import { COMMUNICATION_STYLE_PROMPTS, COACHING_STYLE_PROMPTS } from '@/lib/ai-style-constants';
+import { getChatMessages } from '@/services/data/chat-history-service';
 
 // ============================================================================
 // Types
@@ -551,8 +552,13 @@ Assistant: "Deadlifts are a compound exercise..."
   /**
    * Get or create conversation state
    */
-  private getConversation(sessionId: string, userId: string, userContext?: OnboardingContext | null): ConversationState {
+  private async getConversation(sessionId: string, userId: string, userContext?: OnboardingContext | null): Promise<ConversationState> {
     if (!this.conversations.has(sessionId)) {
+      console.log(`🔄 Session ${sessionId} not in memory, checking Firestore...`);
+
+      // Try to load conversation history from Firestore
+      const firestoreMessages = await getChatMessages(sessionId, userId);
+
       // Create new conversation
       const conversation: ConversationState = {
         sessionId,
@@ -574,14 +580,27 @@ Assistant: "Deadlifts are a compound exercise..."
         console.log('✅ Injected user context into new conversation');
       }
 
+      // Load messages from Firestore if they exist
+      if (firestoreMessages.length > 0) {
+        console.log(`📚 Loaded ${firestoreMessages.length} messages from Firestore`);
+        const loadedMessages: ChatMessage[] = firestoreMessages.map(msg => ({
+          role: msg.role === 'user' ? 'user' : 'model',
+          content: msg.content,
+          timestamp: msg.timestamp.toDate()
+        }));
+
+        // Add loaded messages AFTER the context injection
+        conversation.messages.push(...loadedMessages);
+      }
+
       this.conversations.set(sessionId, conversation);
     }
-    
+
     // Update context if provided and different
     const conversation = this.conversations.get(sessionId)!;
     if (userContext && !conversation.userContext) {
       conversation.userContext = userContext;
-      
+
       // If messages are empty or only have one message, inject context
       if (conversation.messages.length <= 1) {
         const contextSummary = this.buildContextSummary(userContext);
@@ -593,7 +612,7 @@ Assistant: "Deadlifts are a compound exercise..."
         console.log('✅ Injected user context into existing conversation');
       }
     }
-    
+
     return conversation;
   }
 
@@ -727,7 +746,7 @@ Assistant: "Deadlifts are a compound exercise..."
     userContext?: OnboardingContext | null
   ): Promise<ChatResponse> {
     try {
-      const conversation = this.getConversation(sessionId, userId, userContext);
+      const conversation = await this.getConversation(sessionId, userId, userContext);
 
       // Add user message to history
       conversation.messages.push({
@@ -849,7 +868,7 @@ Assistant: "Deadlifts are a compound exercise..."
     userContext?: OnboardingContext | null
   ): Promise<ChatResponse> {
     try {
-      const conversation = this.getConversation(sessionId, userId, userContext);
+      const conversation = await this.getConversation(sessionId, userId, userContext);
 
       // Add user message
       conversation.messages.push({
