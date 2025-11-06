@@ -417,7 +417,31 @@ function ChatContent() {
 
   const handleStartWorkout = (workoutData: any) => {
     if (workoutData?.exercises) {
-      setCurrentWorkoutExercises(workoutData.exercises);
+      // Transform AI-generated exercises to WorkoutContext format
+      // AI gives: { sets: 4, reps: 6 }
+      // WorkoutContext expects: { sets: [{ weight: 0, reps: 6, isExecuted: false }, ...] }
+      const transformedExercises = workoutData.exercises.map((exercise: any) => {
+        // If sets is already an array, use it as-is
+        if (Array.isArray(exercise.sets)) {
+          return exercise;
+        }
+
+        // Otherwise, transform number of sets into array of set objects
+        const numSets = typeof exercise.sets === 'number' ? exercise.sets : 3;
+        const repsPerSet = typeof exercise.reps === 'number' ? exercise.reps : 10;
+
+        return {
+          ...exercise,
+          id: exercise.exerciseId || exercise.id,
+          sets: Array.from({ length: numSets }, () => ({
+            weight: 0,
+            reps: repsPerSet,
+            isExecuted: false
+          }))
+        };
+      });
+
+      setCurrentWorkoutExercises(transformedExercises);
       router.push('/workout');
     }
   };
