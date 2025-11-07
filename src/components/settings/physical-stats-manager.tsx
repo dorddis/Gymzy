@@ -6,19 +6,75 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Scale, 
-  Ruler, 
-  Calendar, 
-  User, 
+import {
+  Scale,
+  Ruler,
+  Calendar,
+  User,
   Activity,
   Calculator,
   TrendingUp,
   Loader2,
-  Info
+  Info,
+  AlertTriangle
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { OnboardingContextService, OnboardingContext } from '@/services/data/onboarding-context-service';
+
+// Validation constraints
+const VALIDATION = {
+  age: { min: 13, max: 120 },
+  height: {
+    cm: { min: 50, max: 250 },
+    feet: { min: 2, max: 8 },
+    inches: { min: 0, max: 11 }
+  },
+  weight: {
+    kg: { min: 20, max: 300 },
+    lbs: { min: 44, max: 660 }
+  }
+};
+
+// Validation helper functions
+const validateAge = (age: number): { isValid: boolean; message?: string } => {
+  if (age < VALIDATION.age.min) {
+    return { isValid: false, message: `Age must be at least ${VALIDATION.age.min} years` };
+  }
+  if (age > VALIDATION.age.max) {
+    return { isValid: false, message: `Age must be less than ${VALIDATION.age.max} years` };
+  }
+  return { isValid: true };
+};
+
+const validateHeight = (value: number, unit: 'cm' | 'ft_in', feet?: number, inches?: number): { isValid: boolean; message?: string } => {
+  if (unit === 'cm') {
+    if (value < VALIDATION.height.cm.min) {
+      return { isValid: false, message: `Height must be at least ${VALIDATION.height.cm.min} cm (about 1.5 feet)` };
+    }
+    if (value > VALIDATION.height.cm.max) {
+      return { isValid: false, message: `Height must be less than ${VALIDATION.height.cm.max} cm (about 8 feet)` };
+    }
+  } else {
+    if (feet && feet < VALIDATION.height.feet.min) {
+      return { isValid: false, message: `Height must be at least ${VALIDATION.height.feet.min} feet` };
+    }
+    if (feet && feet > VALIDATION.height.feet.max) {
+      return { isValid: false, message: `Height must be less than ${VALIDATION.height.feet.max} feet` };
+    }
+  }
+  return { isValid: true };
+};
+
+const validateWeight = (value: number, unit: 'kg' | 'lbs'): { isValid: boolean; message?: string } => {
+  const limits = unit === 'kg' ? VALIDATION.weight.kg : VALIDATION.weight.lbs;
+  if (value < limits.min) {
+    return { isValid: false, message: `Weight must be at least ${limits.min} ${unit}` };
+  }
+  if (value > limits.max) {
+    return { isValid: false, message: `Weight must be less than ${limits.max} ${unit}` };
+  }
+  return { isValid: true };
+};
 
 interface PhysicalStats {
   age: number;
@@ -102,6 +158,13 @@ export function PhysicalStatsManager({ context, onUpdate }: PhysicalStatsManager
     tdee: 0
   });
 
+  // Validation errors state
+  const [validationErrors, setValidationErrors] = useState<{
+    age?: string;
+    height?: string;
+    weight?: string;
+  }>({});
+
   // Calculate BMR using Mifflin-St Jeor Equation
   const calculateBMR = (statsData: PhysicalStats): number => {
     const { age, height, weight, gender } = statsData;
@@ -159,17 +222,32 @@ export function PhysicalStatsManager({ context, onUpdate }: PhysicalStatsManager
   }, [stats.age, stats.height.value, stats.height.unit, stats.height.feet, stats.height.inches, stats.weight.value, stats.weight.unit, stats.gender, stats.activityLevel]);
 
   const handleHeightChange = (value: number, unit?: 'cm' | 'ft_in') => {
+    const currentUnit = unit || stats.height.unit;
+    const validation = validateHeight(value, currentUnit);
+
+    setValidationErrors(prev => ({
+      ...prev,
+      height: validation.isValid ? undefined : validation.message
+    }));
+
     setStats(prev => ({
       ...prev,
       height: {
         ...prev.height,
         value,
-        unit: unit || prev.height.unit
+        unit: currentUnit
       }
     }));
   };
 
   const handleHeightFeetInchesChange = (feet?: number, inches?: number) => {
+    const validation = validateHeight(0, 'ft_in', feet, inches);
+
+    setValidationErrors(prev => ({
+      ...prev,
+      height: validation.isValid ? undefined : validation.message
+    }));
+
     setStats(prev => ({
       ...prev,
       height: {
@@ -182,17 +260,54 @@ export function PhysicalStatsManager({ context, onUpdate }: PhysicalStatsManager
   };
 
   const handleWeightChange = (value: number, unit?: 'kg' | 'lbs') => {
+    const currentUnit = unit || stats.weight.unit;
+    const validation = validateWeight(value, currentUnit);
+
+    setValidationErrors(prev => ({
+      ...prev,
+      weight: validation.isValid ? undefined : validation.message
+    }));
+
     setStats(prev => ({
       ...prev,
       weight: {
         value,
-        unit: unit || prev.weight.unit
+        unit: currentUnit
       }
     }));
   };
 
+  const handleAgeChange = (age: number) => {
+    const validation = validateAge(age);
+
+    setValidationErrors(prev => ({
+      ...prev,
+      age: validation.isValid ? undefined : validation.message
+    }));
+
+    setStats(prev => ({ ...prev, age }));
+  };
+
   const handleSave = async () => {
     if (!user?.uid) return;
+
+    // Validate all fields before saving
+    const ageValidation = validateAge(stats.age);
+    const heightValidation = validateHeight(stats.height.value, stats.height.unit, stats.height.feet, stats.height.inches);
+    const weightValidation = validateWeight(stats.weight.value, stats.weight.unit);
+
+    const errors: typeof validationErrors = {};
+    if (!ageValidation.isValid) errors.age = ageValidation.message;
+    if (!heightValidation.isValid) errors.height = heightValidation.message;
+    if (!weightValidation.isValid) errors.weight = weightValidation.message;
+
+    setValidationErrors(errors);
+
+    // Don't save if there are validation errors
+    if (Object.keys(errors).length > 0) {
+      console.warn('Cannot save: validation errors present', errors);
+      return;
+    }
 
     try {
       setIsLoading(true);
@@ -210,6 +325,9 @@ export function PhysicalStatsManager({ context, onUpdate }: PhysicalStatsManager
       setIsLoading(false);
     }
   };
+
+  // Check if there are any validation errors
+  const hasValidationErrors = Object.keys(validationErrors).length > 0;
 
   const selectedActivityLevel = ACTIVITY_LEVELS.find(level => level.id === stats.activityLevel);
 
@@ -259,14 +377,20 @@ export function PhysicalStatsManager({ context, onUpdate }: PhysicalStatsManager
                 <Input
                   id="age"
                   type="number"
-                  min="13"
-                  max="100"
+                  min={VALIDATION.age.min}
+                  max={VALIDATION.age.max}
                   value={stats.age}
-                  onChange={(e) => setStats(prev => ({ ...prev, age: parseInt(e.target.value) || 25 }))}
-                  className="w-20"
+                  onChange={(e) => handleAgeChange(parseInt(e.target.value) || VALIDATION.age.min)}
+                  className={`w-20 ${validationErrors.age ? 'border-red-500' : ''}`}
                 />
                 <span className="text-sm text-gray-600">years</span>
               </div>
+              {validationErrors.age && (
+                <div className="flex items-center gap-1 mt-1 text-xs text-red-600">
+                  <AlertTriangle className="h-3 w-3" />
+                  {validationErrors.age}
+                </div>
+              )}
             </div>
 
             <div>
@@ -327,37 +451,53 @@ export function PhysicalStatsManager({ context, onUpdate }: PhysicalStatsManager
           </div>
 
           {stats.height.unit === 'cm' ? (
-            <div className="flex items-center gap-2">
-              <Input
-                type="number"
-                min="100"
-                max="250"
-                value={stats.height.value}
-                onChange={(e) => handleHeightChange(parseInt(e.target.value) || 170)}
-                className="w-24"
-              />
-              <span className="text-sm text-gray-600">cm</span>
+            <div>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  min={VALIDATION.height.cm.min}
+                  max={VALIDATION.height.cm.max}
+                  value={stats.height.value}
+                  onChange={(e) => handleHeightChange(parseInt(e.target.value) || VALIDATION.height.cm.min)}
+                  className={`w-24 ${validationErrors.height ? 'border-red-500' : ''}`}
+                />
+                <span className="text-sm text-gray-600">cm</span>
+              </div>
+              {validationErrors.height && (
+                <div className="flex items-center gap-1 mt-1 text-xs text-red-600">
+                  <AlertTriangle className="h-3 w-3" />
+                  {validationErrors.height}
+                </div>
+              )}
             </div>
           ) : (
-            <div className="flex items-center gap-2">
-              <Input
-                type="number"
-                min="3"
-                max="8"
-                value={stats.height.feet || 5}
-                onChange={(e) => handleHeightFeetInchesChange(parseInt(e.target.value) || 5, stats.height.inches)}
-                className="w-20"
-              />
-              <span className="text-sm text-gray-600">ft</span>
-              <Input
-                type="number"
-                min="0"
-                max="11"
-                value={stats.height.inches || 8}
-                onChange={(e) => handleHeightFeetInchesChange(stats.height.feet, parseInt(e.target.value) || 8)}
-                className="w-20"
-              />
-              <span className="text-sm text-gray-600">in</span>
+            <div>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  min={VALIDATION.height.feet.min}
+                  max={VALIDATION.height.feet.max}
+                  value={stats.height.feet || 5}
+                  onChange={(e) => handleHeightFeetInchesChange(parseInt(e.target.value) || VALIDATION.height.feet.min, stats.height.inches)}
+                  className={`w-20 ${validationErrors.height ? 'border-red-500' : ''}`}
+                />
+                <span className="text-sm text-gray-600">ft</span>
+                <Input
+                  type="number"
+                  min={VALIDATION.height.inches.min}
+                  max={VALIDATION.height.inches.max}
+                  value={stats.height.inches || 8}
+                  onChange={(e) => handleHeightFeetInchesChange(stats.height.feet, parseInt(e.target.value) || VALIDATION.height.inches.min)}
+                  className={`w-20 ${validationErrors.height ? 'border-red-500' : ''}`}
+                />
+                <span className="text-sm text-gray-600">in</span>
+              </div>
+              {validationErrors.height && (
+                <div className="flex items-center gap-1 mt-1 text-xs text-red-600">
+                  <AlertTriangle className="h-3 w-3" />
+                  {validationErrors.height}
+                </div>
+              )}
             </div>
           )}
         </CardContent>
@@ -395,16 +535,24 @@ export function PhysicalStatsManager({ context, onUpdate }: PhysicalStatsManager
             </button>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Input
-              type="number"
-              min="30"
-              max="300"
-              value={stats.weight.value}
-              onChange={(e) => handleWeightChange(parseInt(e.target.value) || 70)}
-              className="w-24"
-            />
-            <span className="text-sm text-gray-600">{stats.weight.unit}</span>
+          <div>
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                min={stats.weight.unit === 'kg' ? VALIDATION.weight.kg.min : VALIDATION.weight.lbs.min}
+                max={stats.weight.unit === 'kg' ? VALIDATION.weight.kg.max : VALIDATION.weight.lbs.max}
+                value={stats.weight.value}
+                onChange={(e) => handleWeightChange(parseInt(e.target.value) || (stats.weight.unit === 'kg' ? VALIDATION.weight.kg.min : VALIDATION.weight.lbs.min))}
+                className={`w-24 ${validationErrors.weight ? 'border-red-500' : ''}`}
+              />
+              <span className="text-sm text-gray-600">{stats.weight.unit}</span>
+            </div>
+            {validationErrors.weight && (
+              <div className="flex items-center gap-1 mt-1 text-xs text-red-600">
+                <AlertTriangle className="h-3 w-3" />
+                {validationErrors.weight}
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -448,8 +596,14 @@ export function PhysicalStatsManager({ context, onUpdate }: PhysicalStatsManager
       </Card>
 
       {/* Save Button */}
-      <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={isLoading} className="min-w-32">
+      <div className="flex flex-col items-end gap-2">
+        {hasValidationErrors && (
+          <div className="flex items-center gap-1 text-sm text-red-600">
+            <AlertTriangle className="h-4 w-4" />
+            Please fix the errors above before saving
+          </div>
+        )}
+        <Button onClick={handleSave} disabled={isLoading || hasValidationErrors} className="min-w-32">
           {isLoading ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
