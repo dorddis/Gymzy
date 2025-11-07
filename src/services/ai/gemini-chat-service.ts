@@ -377,17 +377,17 @@ export class GeminiChatService {
   private conversations: Map<string, ConversationState>;
 
   constructor() {
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_AI_API_KEY;
+    const apiKey = process.env.GOOGLE_AI_API_KEY;
 
     if (!apiKey) {
-      throw new Error('NEXT_PUBLIC_GOOGLE_AI_API_KEY is not set');
+      throw new Error('GOOGLE_AI_API_KEY is not set. This should be a server-side only environment variable.');
     }
 
     this.genAI = new GoogleGenerativeAI(apiKey);
     this.workoutFunctions = new WorkoutFunctions();
     this.conversations = new Map();
 
-    console.log('✅ GeminiChatService initialized with function calling');
+    console.log('✅ GeminiChatService initialized with function calling (server-side only)');
   }
 
   /**

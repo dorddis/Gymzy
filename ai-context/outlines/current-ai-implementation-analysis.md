@@ -64,10 +64,11 @@ NEXT_PUBLIC_GROQ_API_KEY=
 NEXT_PUBLIC_GROQ_MODEL_NAME=
 ```
 
-#### **Present Keys**:
+#### **Present Keys**: ✅ SECURED
 ```env
-NEXT_PUBLIC_GOOGLE_AI_API_KEY="AIzaSyBusYiBolqz29l0CNAU-HP7szvAGHY6OTs"
+GOOGLE_AI_API_KEY="[REDACTED - Now server-side only]"
 ```
+**Security Update**: Migrated from `NEXT_PUBLIC_GOOGLE_AI_API_KEY` (client-exposed) to `GOOGLE_AI_API_KEY` (server-only)
 
 ### 🏗️ **Architecture Problems**
 

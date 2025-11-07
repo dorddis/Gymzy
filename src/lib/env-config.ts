@@ -8,10 +8,7 @@ const isServer = typeof window === 'undefined';
 
 // Simple environment configuration object
 export const env = {
-  // AI Service Configuration (Gemini only)
-  NEXT_PUBLIC_GOOGLE_AI_API_KEY: process.env.NEXT_PUBLIC_GOOGLE_AI_API_KEY || '',
-
-  // Firebase Configuration
+  // Firebase Configuration (OK to be public - Firebase has security rules)
   NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || '',
   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || '',
   NEXT_PUBLIC_FIREBASE_PROJECT_ID: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || '',
@@ -29,6 +26,11 @@ export const env = {
 
   // Server-only variables (only available on server)
   NODE_ENV: (isServer ? process.env.NODE_ENV : 'development') as 'development' | 'staging' | 'production',
+
+  // AI Service Configuration - SERVER-ONLY (NEVER expose to client)
+  GOOGLE_AI_API_KEY: isServer ? process.env.GOOGLE_AI_API_KEY : undefined,
+
+  // Authentication & Security
   NEXTAUTH_SECRET: isServer ? process.env.NEXTAUTH_SECRET : undefined,
   NEXTAUTH_URL: isServer ? process.env.NEXTAUTH_URL : undefined,
   API_RATE_LIMIT: isServer ? parseInt(process.env.API_RATE_LIMIT || '100', 10) : 100,
@@ -42,14 +44,19 @@ export const isDevelopment = env.NODE_ENV === 'development';
 export const isProduction = env.NODE_ENV === 'production';
 export const isStaging = env.NODE_ENV === 'staging';
 
-// API configuration helpers
-export const getAPIConfig = () => ({
-  gemini: {
-    apiKey: env.NEXT_PUBLIC_GOOGLE_AI_API_KEY,
-    model: 'gemini-2.5-flash',
-  },
-  rateLimit: env.API_RATE_LIMIT,
-});
+// API configuration helpers (SERVER-ONLY)
+export const getAPIConfig = () => {
+  if (!isServer) {
+    throw new Error('getAPIConfig() can only be called on the server side. API keys should never be exposed to the client.');
+  }
+  return {
+    gemini: {
+      apiKey: env.GOOGLE_AI_API_KEY,
+      model: 'gemini-2.5-flash',
+    },
+    rateLimit: env.API_RATE_LIMIT,
+  };
+};
 
 // Firebase configuration helper
 export const getFirebaseConfig = () => ({
@@ -75,12 +82,12 @@ export const getDevConfig = () => ({
 
 // Logging helper for environment validation
 export const logEnvironmentStatus = () => {
-  if (isDevelopment) {
+  if (isDevelopment && isServer) {
     console.log('🔧 Environment Configuration:');
     console.log(`  - Environment: ${env.NODE_ENV}`);
     console.log(`  - App URL: ${env.NEXT_PUBLIC_APP_URL}`);
     console.log(`  - API URL: ${env.NEXT_PUBLIC_API_URL}`);
-    console.log(`  - Gemini AI: ${env.NEXT_PUBLIC_GOOGLE_AI_API_KEY ? '✅ Configured' : '❌ Missing'}`);
+    console.log(`  - Gemini AI: ${env.GOOGLE_AI_API_KEY ? '✅ Configured (Server-only)' : '❌ Missing'}`);
     console.log(`  - Firebase: ${env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ? '✅ Configured' : '❌ Missing'}`);
     console.log(`  - Dev Mode: ${env.NEXT_PUBLIC_DEV_MODE ? '✅ Enabled' : '❌ Disabled'}`);
   }
