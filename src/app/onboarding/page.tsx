@@ -15,7 +15,8 @@ import { PersonalityStep } from '@/components/onboarding/personality-step';
 import { PersonalLifeStep } from '@/components/onboarding/personal-life-step';
 import { LifestyleStep } from '@/components/onboarding/lifestyle-step';
 import { CompletionStep } from '@/components/onboarding/completion-step';
-import { createAIPersonalityProfile } from '@/services/ai/ai-personality-service';
+import { OnboardingContextService, OnboardingContext } from '@/services/data/onboarding-context-service';
+import { Timestamp } from 'firebase/firestore';
 
 export interface OnboardingData {
   // Fitness Background
@@ -58,6 +59,112 @@ export interface OnboardingData {
 }
 
 const TOTAL_STEPS = 8;
+
+/**
+ * Maps OnboardingData to OnboardingContext format
+ */
+function mapOnboardingDataToContext(
+  userId: string,
+  data: OnboardingData
+): Omit<OnboardingContext, 'lastUpdated' | 'version'> {
+  // Map experience level (1-10) to beginner/intermediate/advanced
+  const overallExperience: 'beginner' | 'intermediate' | 'advanced' =
+    data.experienceLevel <= 3 ? 'beginner' :
+    data.experienceLevel <= 7 ? 'intermediate' : 'advanced';
+
+  // Map communication style to motivation style
+  const motivationStyleMap: Record<string, 'encouraging' | 'challenging' | 'analytical' | 'casual'> = {
+    'motivational': 'encouraging',
+    'challenging': 'challenging',
+    'analytical': 'analytical',
+    'supportive': 'casual'
+  };
+
+  // Map feedback preference to coaching style
+  const coachingStyleMap: Record<string, 'detailed' | 'concise' | 'visual' | 'conversational'> = {
+    'detailed': 'detailed',
+    'concise': 'concise',
+    'visual': 'visual'
+  };
+
+  // Map session duration
+  const sessionDurationMap: Record<number, '15_30' | '30_45' | '45_60' | '60_90' | '90_plus'> = {
+    30: '30_45',
+    45: '45_60',
+    60: '45_60',
+    90: '60_90'
+  };
+
+  return {
+    userId,
+    fitnessGoals: {
+      primary: (data.primaryGoal as any) || 'general_fitness',
+      secondary: data.secondaryGoals,
+      targetTimeline: (data.timeline as any) || '3_months',
+      priorityLevel: 'medium',
+      specificTargets: {}
+    },
+    experienceLevel: {
+      overall: overallExperience,
+      yearsTraining: Math.floor(data.experienceLevel / 2),
+      specificExperience: {
+        weightlifting: data.workoutTypes.includes('strength') || data.workoutTypes.includes('weightlifting') ? overallExperience : 'none',
+        cardio: data.workoutTypes.includes('cardio') ? overallExperience : 'beginner',
+        flexibility: data.workoutTypes.includes('yoga') || data.workoutTypes.includes('flexibility') ? overallExperience : 'none',
+        sports: data.workoutTypes.includes('sports') ? overallExperience : 'none'
+      },
+      previousInjuries: data.previousInjuries,
+      limitations: data.currentChallenges
+    },
+    equipment: {
+      available: data.equipmentAccess,
+      location: data.equipmentAccess.includes('gym') ? 'gym' : 'home',
+      spaceConstraints: 'moderate',
+      acquisitionPlans: [],
+      budget: 'medium'
+    },
+    schedule: {
+      workoutDays: data.availableDays,
+      preferredTimes: data.preferredTimes,
+      sessionDuration: sessionDurationMap[data.timeAvailability] || '45_60',
+      flexibility: 'somewhat_flexible',
+      busyPeriods: [],
+      restDayPreferences: []
+    },
+    preferences: {
+      workoutIntensity: data.challengeLevel <= 3 ? 'low' : data.challengeLevel <= 7 ? 'moderate' : 'high',
+      musicPreferences: [],
+      motivationStyle: motivationStyleMap[data.communicationStyle] || 'encouraging',
+      socialPreference: 'solo',
+      coachingStyle: coachingStyleMap[data.feedbackPreference] || 'conversational',
+      feedbackFrequency: data.feedbackPreference === 'detailed' ? 'frequent' :
+                         data.feedbackPreference === 'concise' ? 'minimal' : 'moderate'
+    },
+    healthInfo: {
+      medicalConditions: [],
+      medications: [],
+      dietaryRestrictions: [],
+      allergies: [],
+      sleepPattern: {
+        averageHours: data.sleepQuality >= 7 ? 8 : 6,
+        quality: data.sleepQuality >= 8 ? 'excellent' :
+                 data.sleepQuality >= 6 ? 'good' :
+                 data.sleepQuality >= 4 ? 'fair' : 'poor',
+        schedule: 'regular'
+      },
+      stressLevel: data.stressLevel <= 3 ? 'low' : data.stressLevel <= 7 ? 'moderate' : 'high',
+      energyLevels: data.sleepQuality >= 7 ? 'high' : data.sleepQuality >= 5 ? 'moderate' : 'low'
+    },
+    tracking: {
+      progressPhotos: false,
+      bodyMeasurements: true,
+      performanceMetrics: true,
+      moodTracking: false,
+      nutritionTracking: data.nutritionHabits.length > 0,
+      sleepTracking: false
+    }
+  };
+}
 
 export default function OnboardingPage() {
   const { user, loading, updateUserProfile, refreshUserProfile } = useAuth();
@@ -134,10 +241,11 @@ export default function OnboardingPage() {
     try {
       console.log('Onboarding: Starting completion process');
 
-      // Create AI personality profile
-      console.log('Onboarding: Creating AI personality profile');
-      await createAIPersonalityProfile(user.uid, onboardingData);
-      console.log('Onboarding: AI personality profile created');
+      // Create onboarding context for AI personalization
+      console.log('Onboarding: Creating onboarding context');
+      const contextData = mapOnboardingDataToContext(user.uid, onboardingData);
+      await OnboardingContextService.createOnboardingContext(user.uid, contextData);
+      console.log('Onboarding: Onboarding context created successfully');
 
       // Update user profile to mark onboarding as complete
       console.log('Onboarding: Updating user profile');

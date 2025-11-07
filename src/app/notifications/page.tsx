@@ -5,13 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Bell, 
-  ArrowLeft, 
-  Dumbbell, 
-  Users, 
-  Brain, 
-  Heart, 
+import {
+  Bell,
+  Dumbbell,
+  Users,
+  Brain,
+  Heart,
   Trophy,
   Zap,
   Settings,
@@ -20,8 +19,9 @@ import {
   CheckCircle,
   Clock
 } from 'lucide-react';
+import { BackButton } from '@/components/layout/back-button';
 import { useRouter } from 'next/navigation';
-import { StatusBar } from '@/components/layout/status-bar';
+import { StatusBar } from '@/components/layout/header';
 import { BottomNav } from '@/components/layout/bottom-nav';
 import { SmartNotificationsPanel } from '@/components/notifications/smart-notifications-panel';
 import { useSmartNotifications } from '@/hooks/useSmartNotifications';
@@ -92,14 +92,7 @@ export default function NotificationsPage() {
         {/* Header */}
         <div className="bg-white border-b border-gray-200 px-4 py-4">
           <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.back()}
-              className="p-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
+            <BackButton />
             <div className="flex items-center gap-3 flex-1">
               <div className="p-2 rounded-full bg-blue-500">
                 <Bell className="h-5 w-5 text-white" />
@@ -143,9 +136,9 @@ export default function NotificationsPage() {
         </div>
 
         {/* Content */}
-        <div className="p-4">
+        <div className="p-4 sm:p-6 lg:p-8 max-w-3xl mx-auto">
           {/* Stats Overview */}
-          <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
@@ -177,7 +170,7 @@ export default function NotificationsPage() {
 
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
               <TabsTrigger value="all" className="text-xs">
                 All ({getTabCount('all')})
               </TabsTrigger>

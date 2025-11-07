@@ -5,21 +5,21 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Brain, 
-  ArrowLeft, 
-  Dumbbell, 
-  Heart, 
-  TrendingUp, 
-  Zap, 
+import {
+  Brain,
+  Dumbbell,
+  Heart,
+  TrendingUp,
+  Zap,
   Target,
   Lightbulb,
   Filter,
   RefreshCw,
   Loader2
 } from 'lucide-react';
+import { BackButton } from '@/components/layout/back-button';
 import { useRouter } from 'next/navigation';
-import { StatusBar } from '@/components/layout/status-bar';
+import { StatusBar } from '@/components/layout/header';
 import { BottomNav } from '@/components/layout/bottom-nav';
 import { AIRecommendationsPanel } from '@/components/recommendations/ai-recommendations-panel';
 import { useAIRecommendations } from '@/hooks/useAIRecommendations';
@@ -89,14 +89,7 @@ export default function RecommendationsPage() {
         {/* Header */}
         <div className="bg-white border-b border-gray-200 px-4 py-4">
           <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.back()}
-              className="p-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
+            <BackButton />
             <div className="flex items-center gap-3 flex-1">
               <div className="p-2 rounded-full bg-purple-500">
                 <Brain className="h-5 w-5 text-white" />
@@ -107,11 +100,9 @@ export default function RecommendationsPage() {
               </div>
             </div>
             <Button
-              variant="outline"
-              size="sm"
               onClick={handleGenerateNew}
               disabled={isLoading || isGenerating}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 h-auto text-sm font-medium"
             >
               {isGenerating ? (
                 <>
@@ -129,9 +120,9 @@ export default function RecommendationsPage() {
         </div>
 
         {/* Content */}
-        <div className="p-4">
+        <div className="p-4 sm:p-6 lg:p-8 max-w-3xl mx-auto">
           {/* Stats Overview */}
-          <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
@@ -167,7 +158,7 @@ export default function RecommendationsPage() {
 
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
               <TabsTrigger value="all" className="text-xs">
                 All ({getTabCount('all')})
               </TabsTrigger>
