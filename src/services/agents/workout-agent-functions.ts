@@ -12,6 +12,7 @@
  */
 
 import { workoutService, getAllWorkouts } from '@/services/core/workout-service';
+import { getAllWorkoutsAdmin } from '@/services/core/workout-service-admin';
 import { logger } from '@/lib/logger';
 
 export interface AgentFunctionResult {
@@ -37,7 +38,18 @@ export class WorkoutAgentFunctions {
     logger.info('[WorkoutAgentFunctions] Fetching workout history', 'workout', { userId, limit, sortBy });
 
     try {
-      const workouts = await getAllWorkouts(userId);
+      const workouts = await getAllWorkoutsAdmin(userId);
+
+      // If no workouts, return friendly message
+      if (!workouts || workouts.length === 0) {
+        return {
+          success: true,
+          message: "You haven't logged any workouts yet. Start your fitness journey by logging your first workout!",
+          workouts: [],
+          total: 0,
+          navigationTarget: '/log-workout/new'
+        };
+      }
 
       // Sort workouts
       const sorted = sortBy === 'recent'
@@ -58,17 +70,34 @@ export class WorkoutAgentFunctions {
 
       return {
         success: true,
+        message: `Found ${workouts.length} workout${workouts.length === 1 ? '' : 's'}`,
         workouts: workoutSummaries,
-        total: workouts.length
+        total: workouts.length,
+        navigationTarget: '/workout'
       };
     } catch (error) {
       logger.error('[WorkoutAgentFunctions] Failed to fetch workout history', 'workout', error instanceof Error ? error : undefined, {
         userId,
         errorMessage: error instanceof Error ? error.message : String(error)
       });
+
+      // Check if it's a permission error
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('permission') || errorMessage.includes('insufficient')) {
+        return {
+          success: true,
+          message: "I can't access your workout history right now. This feature will work once you've logged some workouts!",
+          workouts: [],
+          total: 0,
+          navigationTarget: '/log-workout/new'
+        };
+      }
+
       return {
-        success: false,
-        error: 'Failed to retrieve workout history'
+        success: true,
+        message: "Unable to fetch your workout history at the moment. Please try again later!",
+        workouts: [],
+        total: 0
       };
     }
   }
@@ -81,7 +110,7 @@ export class WorkoutAgentFunctions {
     logger.info('[WorkoutAgentFunctions] Fetching workout details', 'workout', { userId, workoutId });
 
     try {
-      const workouts = await getAllWorkouts(userId);
+      const workouts = await getAllWorkoutsAdmin(userId);
       const workout = workouts.find(w => w.id === workoutId);
 
       if (!workout) {
@@ -190,7 +219,7 @@ export class WorkoutAgentFunctions {
     logger.info('[WorkoutAgentFunctions] Fetching stats', 'workout', { userId, timeframe, metric });
 
     try {
-      const workouts = await getAllWorkouts(userId);
+      const workouts = await getAllWorkoutsAdmin(userId);
 
       // Filter by timeframe
       const now = new Date();
@@ -242,9 +271,33 @@ export class WorkoutAgentFunctions {
         userId,
         errorMessage: error instanceof Error ? error.message : String(error)
       });
+
+      // Check if it's a permission error
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('permission') || errorMessage.includes('insufficient')) {
+        return {
+          success: true,
+          message: "I can't access your workout stats right now. Start logging workouts to build your stats!",
+          stats: {
+            totalWorkouts: 0,
+            totalVolume: 0,
+            averageRPE: 0,
+            workoutFrequency: '0.0 workouts/day'
+          },
+          navigationTarget: '/stats'
+        };
+      }
+
       return {
-        success: false,
-        error: 'Failed to retrieve statistics'
+        success: true,
+        message: "Unable to fetch your workout stats at the moment. Please try again later!",
+        stats: {
+          totalWorkouts: 0,
+          totalVolume: 0,
+          averageRPE: 0,
+          workoutFrequency: '0.0 workouts/day'
+        },
+        navigationTarget: '/stats'
       };
     }
   }
@@ -253,10 +306,21 @@ export class WorkoutAgentFunctions {
    * Get personal best records
    */
   async getPersonalBests(args: any, userId: string): Promise<AgentFunctionResult> {
-    logger.info('[WorkoutAgentFunctions] Fetching personal bests', 'workout', { userId });
+    const { exerciseName } = args;
+    logger.info('[WorkoutAgentFunctions] Fetching personal bests', 'workout', { userId, exerciseName });
 
     try {
-      const workouts = await getAllWorkouts(userId);
+      const workouts = await getAllWorkoutsAdmin(userId);
+
+      // If no workouts, return friendly message
+      if (!workouts || workouts.length === 0) {
+        return {
+          success: true,
+          message: "You haven't logged any workouts yet. Start tracking your exercises to see your personal bests!",
+          personalBests: []
+        };
+      }
+
       const prMap = new Map<string, { weight: number; reps: number; date: Date }>();
 
       // Find max weight for each exercise
@@ -278,15 +342,48 @@ export class WorkoutAgentFunctions {
       });
 
       // Convert to array
-      const personalBests = Array.from(prMap.entries()).map(([exercise, data]) => ({
+      let personalBests = Array.from(prMap.entries()).map(([exercise, data]) => ({
         exercise,
         weight: data.weight,
         reps: data.reps,
         date: data.date.toISOString()
       }));
 
+      // Filter by specific exercise if requested
+      if (exerciseName) {
+        personalBests = personalBests.filter(pr =>
+          pr.exercise.toLowerCase().includes(exerciseName.toLowerCase())
+        );
+
+        if (personalBests.length === 0) {
+          return {
+            success: true,
+            message: `No personal records found for "${exerciseName}". Try logging some ${exerciseName} workouts first!`,
+            personalBests: []
+          };
+        }
+
+        // Format message for specific exercise
+        const pr = personalBests[0];
+        return {
+          success: true,
+          message: `Your best ${pr.exercise}: ${pr.weight} lbs x ${pr.reps} reps`,
+          personalBests
+        };
+      }
+
+      // Return all PRs with formatted list
+      const prList = personalBests
+        .sort((a, b) => b.weight - a.weight) // Sort by weight descending
+        .slice(0, 10) // Limit to top 10
+        .map((pr, index) => `${index + 1}. ${pr.exercise}: ${pr.weight} lbs x ${pr.reps} reps`)
+        .join('\n');
+
+      const message = `Your Personal Bests:\n\n${prList}${personalBests.length > 10 ? '\n\n...and more!' : ''}`;
+
       return {
         success: true,
+        message,
         personalBests
       };
     } catch (error) {
@@ -294,9 +391,21 @@ export class WorkoutAgentFunctions {
         userId,
         errorMessage: error instanceof Error ? error.message : String(error)
       });
+
+      // Check if it's a permission error
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('permission') || errorMessage.includes('insufficient')) {
+        return {
+          success: true,
+          message: "I can't access your workout data right now. This feature will work once you've logged some workouts through the app!",
+          personalBests: []
+        };
+      }
+
       return {
-        success: false,
-        error: 'Failed to retrieve personal records'
+        success: true,
+        message: "Unable to fetch your personal records at the moment. Please try again later!",
+        personalBests: []
       };
     }
   }
