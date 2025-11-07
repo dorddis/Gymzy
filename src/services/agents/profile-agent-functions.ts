@@ -17,12 +17,6 @@ export interface AgentFunctionResult {
 }
 
 export class ProfileAgentFunctions {
-  private profileService: UnifiedUserProfileService;
-
-  constructor() {
-    this.profileService = new UnifiedUserProfileService();
-  }
-
   /**
    * View user profile
    */
@@ -30,10 +24,10 @@ export class ProfileAgentFunctions {
     const { userId: targetUserId } = args;
     const viewUserId = targetUserId || userId;
 
-    logger.info('[ProfileAgentFunctions] Fetching profile', { userId: viewUserId });
+    logger.info('[ProfileAgentFunctions] Fetching profile', 'profile', { userId: viewUserId });
 
     try {
-      const profile = await this.profileService.getProfile(viewUserId);
+      const profile = await UnifiedUserProfileService.getProfile(viewUserId);
 
       if (!profile) {
         return {
@@ -45,19 +39,19 @@ export class ProfileAgentFunctions {
       return {
         success: true,
         profile: {
-          id: profile.id,
+          id: profile.uid,
           displayName: profile.displayName,
-          username: profile.username,
           bio: profile.bio,
           fitnessGoals: profile.fitnessGoals,
-          followers: profile.followers?.length || 0,
-          following: profile.following?.length || 0,
-          workoutCount: profile.workoutCount || 0
+          workoutCount: profile.workoutsCount || 0
         },
         navigationTarget: targetUserId ? `/profile/${targetUserId}` : '/profile'
       };
     } catch (error) {
-      logger.error('[ProfileAgentFunctions] Failed to fetch profile', { error });
+      logger.error('[ProfileAgentFunctions] Failed to fetch profile', 'profile', error instanceof Error ? error : undefined, {
+        userId: viewUserId,
+        errorMessage: error instanceof Error ? error.message : String(error)
+      });
       return {
         success: false,
         error: 'Failed to retrieve profile'
@@ -69,17 +63,20 @@ export class ProfileAgentFunctions {
    * Update user profile
    */
   async updateProfile(args: any, userId: string): Promise<AgentFunctionResult> {
-    logger.info('[ProfileAgentFunctions] Updating profile', { userId, updates: Object.keys(args) });
+    logger.info('[ProfileAgentFunctions] Updating profile', 'profile', { userId, updates: Object.keys(args) });
 
     try {
-      await this.profileService.updateProfile(userId, args);
+      await UnifiedUserProfileService.updateProfile(userId, args);
 
       return {
         success: true,
         message: 'Profile updated successfully'
       };
     } catch (error) {
-      logger.error('[ProfileAgentFunctions] Failed to update profile', { error });
+      logger.error('[ProfileAgentFunctions] Failed to update profile', 'profile', error instanceof Error ? error : undefined, {
+        userId,
+        errorMessage: error instanceof Error ? error.message : String(error)
+      });
       return {
         success: false,
         error: 'Failed to update profile'
@@ -93,7 +90,7 @@ export class ProfileAgentFunctions {
   async updateFitnessGoals(args: any, userId: string): Promise<AgentFunctionResult> {
     const { goals } = args;
 
-    logger.info('[ProfileAgentFunctions] Updating fitness goals', { userId, goals });
+    logger.info('[ProfileAgentFunctions] Updating fitness goals', 'profile', { userId, goals });
 
     // Validate goals
     if (!goals || !Array.isArray(goals) || goals.length === 0) {
@@ -104,7 +101,7 @@ export class ProfileAgentFunctions {
     }
 
     try {
-      await this.profileService.updateProfile(userId, {
+      await UnifiedUserProfileService.updateProfile(userId, {
         fitnessGoals: goals
       });
 
@@ -113,7 +110,10 @@ export class ProfileAgentFunctions {
         message: 'Fitness goals updated successfully'
       };
     } catch (error) {
-      logger.error('[ProfileAgentFunctions] Failed to update fitness goals', { error });
+      logger.error('[ProfileAgentFunctions] Failed to update fitness goals', 'profile', error instanceof Error ? error : undefined, {
+        userId,
+        errorMessage: error instanceof Error ? error.message : String(error)
+      });
       return {
         success: false,
         error: 'Failed to update fitness goals'
@@ -125,10 +125,10 @@ export class ProfileAgentFunctions {
    * Get profile statistics
    */
   async getProfileStats(args: any, userId: string): Promise<AgentFunctionResult> {
-    logger.info('[ProfileAgentFunctions] Fetching profile stats', { userId });
+    logger.info('[ProfileAgentFunctions] Fetching profile stats', 'profile', { userId });
 
     try {
-      const stats = await this.profileService.getProfileStats(userId);
+      const stats = await UnifiedUserProfileService.getProfileStats();
 
       if (!stats) {
         return {
@@ -142,7 +142,10 @@ export class ProfileAgentFunctions {
         stats
       };
     } catch (error) {
-      logger.error('[ProfileAgentFunctions] Failed to fetch stats', { error });
+      logger.error('[ProfileAgentFunctions] Failed to fetch stats', 'profile', error instanceof Error ? error : undefined, {
+        userId,
+        errorMessage: error instanceof Error ? error.message : String(error)
+      });
       return {
         success: false,
         error: 'Failed to retrieve statistics'
@@ -156,14 +159,14 @@ export class ProfileAgentFunctions {
   async searchUsers(args: any, userId: string): Promise<AgentFunctionResult> {
     const { query, limit = 10 } = args;
 
-    logger.info('[ProfileAgentFunctions] Searching users', { userId, query, limit });
+    logger.info('[ProfileAgentFunctions] Searching users', 'profile', { userId, query, limit });
 
     try {
-      const results = await this.profileService.searchPublicProfiles(query, limit);
+      const results = await UnifiedUserProfileService.searchPublicProfiles(query, limit);
 
       return {
         success: true,
-        users: results.map(user => ({
+        users: results.map((user: any) => ({
           id: user.id,
           displayName: user.displayName,
           username: user.username,
@@ -172,7 +175,11 @@ export class ProfileAgentFunctions {
         query
       };
     } catch (error) {
-      logger.error('[ProfileAgentFunctions] Failed to search users', { error });
+      logger.error('[ProfileAgentFunctions] Failed to search users', 'profile', error instanceof Error ? error : undefined, {
+        userId,
+        query,
+        errorMessage: error instanceof Error ? error.message : String(error)
+      });
       return {
         success: false,
         error: 'Failed to search users'
@@ -186,10 +193,10 @@ export class ProfileAgentFunctions {
   async viewAchievements(args: any, userId: string): Promise<AgentFunctionResult> {
     const { category } = args;
 
-    logger.info('[ProfileAgentFunctions] Fetching achievements', { userId, category });
+    logger.info('[ProfileAgentFunctions] Fetching achievements', 'profile', { userId, category });
 
     try {
-      const profile = await this.profileService.getProfile(userId);
+      const profile = await UnifiedUserProfileService.getProfile(userId);
 
       if (!profile) {
         return {
@@ -211,7 +218,11 @@ export class ProfileAgentFunctions {
         achievements
       };
     } catch (error) {
-      logger.error('[ProfileAgentFunctions] Failed to fetch achievements', { error });
+      logger.error('[ProfileAgentFunctions] Failed to fetch achievements', 'profile', error instanceof Error ? error : undefined, {
+        userId,
+        category,
+        errorMessage: error instanceof Error ? error.message : String(error)
+      });
       return {
         success: false,
         error: 'Failed to retrieve achievements'

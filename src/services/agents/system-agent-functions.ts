@@ -30,7 +30,7 @@ export class SystemAgentFunctions {
    */
   async navigateTo(args: any, userId: string): Promise<AgentFunctionResult> {
     const { page, params } = args;
-    logger.info('[SystemAgentFunctions] Navigation requested', { page, params, userId });
+    logger.info('[SystemAgentFunctions] Navigation requested', 'system', { page, params, userId });
 
     const pageMap: Record<string, string> = {
       'home': '/',
@@ -70,7 +70,7 @@ export class SystemAgentFunctions {
    */
   async viewSettings(args: any, userId: string): Promise<AgentFunctionResult> {
     const { category = 'all' } = args;
-    logger.info('[SystemAgentFunctions] Fetching settings', { userId, category });
+    logger.info('[SystemAgentFunctions] Fetching settings', 'system', { userId, category });
 
     try {
       const settings: any = {};
@@ -89,7 +89,10 @@ export class SystemAgentFunctions {
         navigationTarget: '/settings'
       };
     } catch (error) {
-      logger.error('[SystemAgentFunctions] Failed to fetch settings', { error });
+      logger.error('[SystemAgentFunctions] Failed to fetch settings', 'system', error instanceof Error ? error : undefined, {
+        userId,
+        errorMessage: error instanceof Error ? error.message : String(error)
+      });
       return {
         success: false,
         error: 'Failed to retrieve settings'
@@ -101,10 +104,10 @@ export class SystemAgentFunctions {
    * Update user settings
    */
   async updateSettings(args: any, userId: string): Promise<AgentFunctionResult> {
-    logger.info('[SystemAgentFunctions] Updating settings', { userId, updates: Object.keys(args) });
+    logger.info('[SystemAgentFunctions] Updating settings', 'system', { userId, updates: Object.keys(args) });
 
     try {
-      const { theme, units, notificationsEnabled, ...otherPrefs } = args;
+      const { theme, units, ...otherPrefs } = args;
 
       // Update theme if provided
       if (theme) {
@@ -114,11 +117,6 @@ export class SystemAgentFunctions {
       // Update units if provided
       if (units) {
         await updateUnits(userId, units);
-      }
-
-      // Update notification preferences if provided
-      if (notificationsEnabled !== undefined) {
-        await updateNotificationPreferences(userId, { notificationsEnabled });
       }
 
       // Update other preferences if any
@@ -131,7 +129,10 @@ export class SystemAgentFunctions {
         message: 'Settings updated successfully'
       };
     } catch (error) {
-      logger.error('[SystemAgentFunctions] Failed to update settings', { error });
+      logger.error('[SystemAgentFunctions] Failed to update settings', 'system', error instanceof Error ? error : undefined, {
+        userId,
+        errorMessage: error instanceof Error ? error.message : String(error)
+      });
       return {
         success: false,
         error: 'Failed to update settings'
@@ -143,7 +144,7 @@ export class SystemAgentFunctions {
    * Update privacy settings
    */
   async updatePrivacy(args: any, userId: string): Promise<AgentFunctionResult> {
-    logger.info('[SystemAgentFunctions] Updating privacy settings', { userId, updates: Object.keys(args) });
+    logger.info('[SystemAgentFunctions] Updating privacy settings', 'system', { userId, updates: Object.keys(args) });
 
     try {
       await updatePrivacySettings(userId, args);
@@ -153,7 +154,10 @@ export class SystemAgentFunctions {
         message: 'Privacy settings updated successfully'
       };
     } catch (error) {
-      logger.error('[SystemAgentFunctions] Failed to update privacy', { error });
+      logger.error('[SystemAgentFunctions] Failed to update privacy', 'system', error instanceof Error ? error : undefined, {
+        userId,
+        errorMessage: error instanceof Error ? error.message : String(error)
+      });
       return {
         success: false,
         error: 'Failed to update privacy settings'
@@ -166,7 +170,7 @@ export class SystemAgentFunctions {
    */
   async getHelp(args: any): Promise<AgentFunctionResult> {
     const { topic } = args;
-    logger.info('[SystemAgentFunctions] Help requested', { topic });
+    logger.info('[SystemAgentFunctions] Help requested', 'system', { topic });
 
     const helpMessages: Record<string, string> = {
       'workouts': 'I can help you generate personalized workouts, log your exercises, view your workout history, and track your progress. Just tell me what you want to do!',

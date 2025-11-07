@@ -15,7 +15,6 @@ import { WorkoutAgentFunctions } from './workout-agent-functions';
 import { ProfileAgentFunctions } from './profile-agent-functions';
 import { SystemAgentFunctions } from './system-agent-functions';
 import { logger } from '@/lib/logger';
-import { tool } from 'ai';
 import { z } from 'zod';
 
 export interface AgentFunctionResult {
@@ -83,7 +82,7 @@ export class FunctionRegistry {
     this.register('updatePrivacy', this.systemFunctions.updatePrivacy.bind(this.systemFunctions));
     this.register('getHelp', this.systemFunctions.getHelp.bind(this.systemFunctions));
 
-    logger.info('[FunctionRegistry] Registered functions', {
+    logger.info('[FunctionRegistry] Registered functions', 'registry', {
       count: this.functionMap.size,
       functions: Array.from(this.functionMap.keys())
     });
@@ -103,7 +102,9 @@ export class FunctionRegistry {
     const fn = this.functionMap.get(functionName);
 
     if (!fn) {
-      logger.error('[FunctionRegistry] Function not found', { functionName });
+      logger.error('[FunctionRegistry] Function not found', 'execute', undefined, {
+        functionName
+      });
       return {
         success: false,
         error: `Unknown function: ${functionName}`
@@ -111,10 +112,13 @@ export class FunctionRegistry {
     }
 
     try {
-      logger.info('[FunctionRegistry] Executing function', { functionName, userId });
+      logger.info('[FunctionRegistry] Executing function', 'execute', { functionName, userId });
       return await fn(args, userId);
     } catch (error) {
-      logger.error('[FunctionRegistry] Function execution failed', { functionName, error });
+      logger.error('[FunctionRegistry] Function execution failed', 'execute', error instanceof Error ? error : undefined, {
+        functionName,
+        errorMessage: error instanceof Error ? error.message : String(error)
+      });
       return {
         success: false,
         error: `Failed to execute ${functionName}`
@@ -165,120 +169,105 @@ export class FunctionRegistry {
    * Get individual tool definition
    */
   private getToolDefinition(functionName: string): any | null {
-    // Tool definitions for Vercel AI SDK
+    // Tool definitions as plain schema objects (actual execution handled by registry)
     const toolDefinitions: Record<string, any> = {
       // ========================================
       // WORKOUT TOOLS
       // ========================================
-      viewWorkoutHistory: tool({
+      viewWorkoutHistory: {
         description: 'View workout history. Use when user asks "show my workouts", "what did I do last week"',
         parameters: z.object({
           limit: z.number().optional().describe('Number of workouts to retrieve (default: 10)'),
           sortBy: z.enum(['recent', 'oldest']).optional().describe('Sort order (default: recent)')
-        }),
-        execute: async (args) => {
-          // This will be overridden by registry execute
-          return args;
-        }
-      }),
+        })
+      },
 
-      viewWorkoutDetails: tool({
+      viewWorkoutDetails: {
         description: 'Get detailed information about a specific workout',
         parameters: z.object({
           workoutId: z.string().describe('ID of the workout to view')
-        }),
-        execute: async (args) => args
-      }),
+        })
+      },
 
-      deleteWorkout: tool({
+      deleteWorkout: {
         description: 'Delete a workout (requires confirmation). Use when user says "delete my last workout"',
         parameters: z.object({
           workoutId: z.string().describe('ID of the workout to delete')
-        }),
-        execute: async (args) => args
-      }),
+        })
+      },
 
-      logWorkout: tool({
+      logWorkout: {
         description: 'Start logging a new workout session',
         parameters: z.object({
           workoutType: z.enum(['strength', 'cardio', 'flexibility', 'sports']).optional()
-        }),
-        execute: async (args) => args
-      }),
+        })
+      },
 
-      viewStats: tool({
+      viewStats: {
         description: 'View workout statistics and progress',
         parameters: z.object({
           timeframe: z.enum(['week', 'month', 'year', 'all-time']).optional(),
           metric: z.enum(['volume', 'frequency', 'strength', 'overview']).optional()
-        }),
-        execute: async (args) => args
-      }),
+        })
+      },
 
-      getPersonalBests: tool({
+      getPersonalBests: {
         description: 'Get personal best records for exercises',
         parameters: z.object({
           exerciseName: z.string().optional().describe('Specific exercise (omit for all PRs)')
-        }),
-        execute: async (args) => args
-      }),
+        })
+      },
 
       // ========================================
       // PROFILE TOOLS
       // ========================================
-      viewProfile: tool({
+      viewProfile: {
         description: 'View user profile. Use when user says "show my profile"',
         parameters: z.object({
           userId: z.string().optional().describe('User ID (omit for current user)')
-        }),
-        execute: async (args) => args
-      }),
+        })
+      },
 
-      updateProfile: tool({
+      updateProfile: {
         description: 'Update user profile information',
         parameters: z.object({
           displayName: z.string().optional(),
           bio: z.string().optional(),
           fitnessGoals: z.array(z.string()).optional()
-        }),
-        execute: async (args) => args
-      }),
+        })
+      },
 
-      updateFitnessGoals: tool({
+      updateFitnessGoals: {
         description: 'Update fitness goals specifically',
         parameters: z.object({
           goals: z.array(z.string()).describe('Array of fitness goals')
-        }),
-        execute: async (args) => args
-      }),
+        })
+      },
 
-      getProfileStats: tool({
+      getProfileStats: {
         description: 'Get comprehensive profile statistics',
-        parameters: z.object({}),
-        execute: async (args) => args
-      }),
+        parameters: z.object({})
+      },
 
-      searchUsers: tool({
+      searchUsers: {
         description: 'Search for other users by name or username',
         parameters: z.object({
           query: z.string().describe('Search query'),
           limit: z.number().optional().describe('Number of results (default: 10)')
-        }),
-        execute: async (args) => args
-      }),
+        })
+      },
 
-      viewAchievements: tool({
+      viewAchievements: {
         description: 'View user achievements and badges',
         parameters: z.object({
           category: z.string().optional().describe('Filter by category (workouts, social, etc)')
-        }),
-        execute: async (args) => args
-      }),
+        })
+      },
 
       // ========================================
       // SYSTEM TOOLS
       // ========================================
-      navigateTo: tool({
+      navigateTo: {
         description: 'Navigate to a different page. Use when user says "go to stats", "show me settings"',
         parameters: z.object({
           page: z.enum([
@@ -289,44 +278,39 @@ export class FunctionRegistry {
             workoutId: z.string().optional(),
             userId: z.string().optional()
           }).optional()
-        }),
-        execute: async (args) => args
-      }),
+        })
+      },
 
-      viewSettings: tool({
+      viewSettings: {
         description: 'View current user settings',
         parameters: z.object({
           category: z.enum(['all', 'preferences', 'privacy', 'notifications']).optional()
-        }),
-        execute: async (args) => args
-      }),
+        })
+      },
 
-      updateSettings: tool({
+      updateSettings: {
         description: 'Update user settings',
         parameters: z.object({
           theme: z.enum(['light', 'dark', 'system']).optional(),
           units: z.enum(['metric', 'imperial']).optional(),
           notificationsEnabled: z.boolean().optional()
-        }),
-        execute: async (args) => args
-      }),
+        })
+      },
 
-      updatePrivacy: tool({
+      updatePrivacy: {
         description: 'Update privacy settings',
         parameters: z.object({
           profileVisibility: z.enum(['public', 'friends', 'private']).optional(),
           showWorkouts: z.boolean().optional()
-        }),
-        execute: async (args) => args
-      }),
+        })
+      },
 
-      getHelp: tool({
+      getHelp: {
         description: 'Get help information about app features',
         parameters: z.object({
           topic: z.enum(['workouts', 'profile', 'settings', 'navigation', 'social']).optional()
-        }),
-        execute: async (args) => args
-      })
+        })
+      }
     };
 
     return toolDefinitions[functionName] || null;

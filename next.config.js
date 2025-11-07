@@ -1,10 +1,10 @@
 // next.config.js
 const nextConfig = {
   typescript: {
-    ignoreBuildErrors: true, // ⚠️ Temporarily disabled to deploy - will fix on Day 4 of remediation plan
+    ignoreBuildErrors: true, // ⚠️ Day 4: 60+ type errors exist - need fixing before re-enabling
   },
   eslint: {
-    ignoreDuringBuilds: true, // ⚠️ Temporarily disabled due to Next.js 15 circular structure bug
+    ignoreDuringBuilds: true, // ⚠️ Will re-enable after type errors fixed
   },
 
   // Performance optimizations

@@ -3,6 +3,13 @@
  * Central export point for all application types
  */
 
+// Import types needed for type guards
+import type { User } from './user';
+import type { Workout } from './workout';
+import type { ChatMessage } from './chat';
+import type { ApiError, BaseApiResponse } from './api';
+import type { BaseEntity } from './common';
+
 // Export all chat-related types
 export * from './chat';
 
@@ -17,84 +24,6 @@ export * from './api';
 
 // Export all common utility types
 export * from './common';
-
-// Re-export commonly used types for convenience
-export type {
-  // Chat types
-  ChatMessage,
-  ChatSession,
-  ChatRequest,
-  ChatResponse,
-  StreamingChatResponse,
-  ChatContext,
-  
-  // Workout types
-  Workout,
-  WorkoutExercise,
-  Exercise,
-  WorkoutSession,
-  WorkoutTemplate,
-  ExerciseSet,
-  PerformedSet,
-  
-  // User types
-  User,
-  UserProfile,
-  UserPreferences,
-  UserSubscription,
-  PrivacySettings,
-  SocialProfile,
-  OnboardingStatus,
-  
-  // API types
-  BaseApiResponse,
-  ApiError,
-  PaginatedResponse,
-  AuthRequest,
-  AuthResponse,
-  
-  // Common types
-  BaseEntity,
-  TimestampedEntity,
-  UserOwnedEntity,
-  PaginationParams,
-  PaginationMeta,
-  SearchParams,
-  SearchResult,
-  AsyncState,
-  Notification,
-  AppError,
-} from './chat';
-
-export type {
-  // Workout enums
-  WorkoutType,
-  SetType,
-  WorkoutCategory,
-  ExerciseCategory,
-  MuscleGroup,
-  Equipment,
-  FitnessLevel,
-  
-  // User enums
-  Gender,
-  FitnessGoal,
-  ActivityLevel,
-  SubscriptionPlan,
-  SubscriptionStatus,
-  UserRole,
-  VisibilityLevel,
-  AppTheme,
-  UnitSystem,
-  
-  // Common enums
-  LoadingState,
-  SortOrder,
-  Theme,
-  Language,
-  NotificationType,
-  Environment,
-} from './workout';
 
 // Type guards for runtime type checking
 export const isUser = (obj: any): obj is User => {

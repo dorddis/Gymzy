@@ -8,7 +8,7 @@
  * - Simple, maintainable architecture
  */
 
-import { GoogleGenerativeAI, Content, FunctionDeclaration, Tool } from '@google/generative-ai';
+import { GoogleGenerativeAI, Content, FunctionDeclaration, Tool, SchemaType } from '@google/generative-ai';
 import exercisesData from '@/lib/exercises.json';
 import { getAllWorkouts } from '@/services/core/workout-service';
 import { OnboardingContext } from '@/services/data/onboarding-context-service';
@@ -72,67 +72,65 @@ const workoutTools: Tool = {
       name: 'generateWorkout',
       description: 'IMMEDIATELY generate a personalized workout plan when user requests a workout. CALL THIS FUNCTION as soon as you know the target muscles. Use intelligent defaults for any unspecified parameters.',
       parameters: {
-        type: 'OBJECT',
+        type: SchemaType.OBJECT,
         properties: {
           targetMuscles: {
-            type: 'ARRAY',
+            type: SchemaType.ARRAY,
             description: 'Target muscle groups. INFER from keywords: "leg/legs"=["quadriceps","hamstrings","glutes","calves"], "chest"=["chest","triceps"], "back"=["back","biceps"], "arms"=["biceps","triceps"], "shoulders"=["shoulders","traps"], "full body"=["legs","chest","back","shoulders","arms"]',
-            items: { type: 'STRING' }
+            items: { type: SchemaType.STRING }
           },
           workoutType: {
-            type: 'STRING',
-            description: 'Type of workout. DEFAULT: "strength" if not specified',
-            enum: ['strength', 'hypertrophy', 'endurance', 'powerlifting', 'bodyweight']
+            type: SchemaType.STRING,
+            description: 'Type of workout: strength, hypertrophy, endurance, powerlifting, or bodyweight. DEFAULT: "strength" if not specified'
           },
           experience: {
-            type: 'STRING',
-            description: 'User fitness experience level. DEFAULT: "intermediate" if not specified',
-            enum: ['beginner', 'intermediate', 'advanced']
+            type: SchemaType.STRING,
+            description: 'User fitness experience level: beginner, intermediate, or advanced. DEFAULT: "intermediate" if not specified'
           },
           duration: {
-            type: 'NUMBER',
+            type: SchemaType.NUMBER,
             description: 'Desired workout duration in minutes. DEFAULT: 45 if not specified'
           },
           equipment: {
-            type: 'ARRAY',
+            type: SchemaType.ARRAY,
             description: 'Available equipment. DEFAULT: ["gym equipment"] if not specified',
-            items: { type: 'STRING' }
+            items: { type: SchemaType.STRING }
           }
         },
         required: ['targetMuscles']
       }
-    } as FunctionDeclaration,
+    },
     {
       name: 'getExerciseInfo',
       description: 'IMMEDIATELY call this when user asks about a specific exercise (e.g. "tell me about bench press", "how to do squats", "what muscles does deadlift work"). Get detailed information about form, muscles worked, and variations.',
       parameters: {
-        type: 'OBJECT',
+        type: SchemaType.OBJECT,
         properties: {
           exerciseName: {
-            type: 'STRING',
+            type: SchemaType.STRING,
             description: 'Name of the exercise (e.g. "Bench Press", "Squat", "Deadlift"). INFER from user keywords: "bench"→"Bench Press", "squat"→"Squat", "deadlift"→"Deadlift"'
           }
         },
         required: ['exerciseName']
       }
-    } as FunctionDeclaration,
+    },
     {
       name: 'getWorkoutHistory',
       description: 'Retrieve user workout history to provide personalized recommendations',
       parameters: {
-        type: 'OBJECT',
+        type: SchemaType.OBJECT,
         properties: {
           limit: {
-            type: 'NUMBER',
+            type: SchemaType.NUMBER,
             description: 'Number of recent workouts to retrieve (default: 5)'
           },
           muscleGroup: {
-            type: 'STRING',
+            type: SchemaType.STRING,
             description: 'Filter by specific muscle group (optional)'
           }
         }
       }
-    } as FunctionDeclaration
+    }
   ]
 };
 
@@ -184,7 +182,7 @@ class WorkoutFunctions {
     // Filter exercises by target muscles
     const matchingExercises = exercises.filter(ex => {
       const allMuscles = [...ex.primaryMuscles, ...ex.secondaryMuscles].map(normalizeMuscle);
-      return targetMusclesNorm.some(target =>
+      return targetMusclesNorm.some((target: string) =>
         allMuscles.some(muscle => muscle.includes(target) || target.includes(muscle))
       );
     });
@@ -203,7 +201,7 @@ class WorkoutFunctions {
     const exercisesPerGroup = Math.max(2, Math.floor(duration / 15));
     const selectedExercises: Exercise[] = [];
 
-    targetMusclesNorm.forEach(target => {
+    targetMusclesNorm.forEach((target: string) => {
       const muscleExercises = matchingExercises
         .filter(ex => {
           const allMuscles = [...ex.primaryMuscles, ...ex.secondaryMuscles].map(normalizeMuscle);
@@ -310,7 +308,8 @@ class WorkoutFunctions {
 
     try {
       const limit = args.limit || 5;
-      const workouts = await getAllWorkouts(userId, limit);
+      const allWorkouts = await getAllWorkouts(userId);
+      const workouts = allWorkouts.slice(0, limit);
 
       const history = workouts.map(w => ({
         title: w.title,
@@ -871,10 +870,10 @@ Assistant: "Just stay motivated and keep going!"
         name: 'viewWorkoutHistory',
         description: 'View workout history. Use when user asks "show my workouts", "what did I do last week"',
         parameters: {
-          type: 'OBJECT' as const,
+          type: SchemaType.OBJECT,
           properties: {
-            limit: { type: 'NUMBER' as const, description: 'Number of workouts (default: 10)' },
-            sortBy: { type: 'STRING' as const, description: 'Sort order: recent or oldest' }
+            limit: { type: SchemaType.NUMBER, description: 'Number of workouts (default: 10)' },
+            sortBy: { type: SchemaType.STRING, description: 'Sort order: recent or oldest' }
           }
         }
       },
@@ -882,9 +881,9 @@ Assistant: "Just stay motivated and keep going!"
         name: 'viewWorkoutDetails',
         description: 'Get detailed information about a specific workout',
         parameters: {
-          type: 'OBJECT' as const,
+          type: SchemaType.OBJECT,
           properties: {
-            workoutId: { type: 'STRING' as const, description: 'ID of the workout' }
+            workoutId: { type: SchemaType.STRING, description: 'ID of the workout' }
           },
           required: ['workoutId']
         }
@@ -893,10 +892,10 @@ Assistant: "Just stay motivated and keep going!"
         name: 'viewStats',
         description: 'View workout statistics and progress',
         parameters: {
-          type: 'OBJECT' as const,
+          type: SchemaType.OBJECT,
           properties: {
-            timeframe: { type: 'STRING' as const, description: 'week, month, year, or all-time' },
-            metric: { type: 'STRING' as const, description: 'volume, frequency, strength, or overview' }
+            timeframe: { type: SchemaType.STRING, description: 'week, month, year, or all-time' },
+            metric: { type: SchemaType.STRING, description: 'volume, frequency, strength, or overview' }
           }
         }
       },
@@ -904,9 +903,9 @@ Assistant: "Just stay motivated and keep going!"
         name: 'getPersonalBests',
         description: 'Get personal best records',
         parameters: {
-          type: 'OBJECT' as const,
+          type: SchemaType.OBJECT,
           properties: {
-            exerciseName: { type: 'STRING' as const, description: 'Specific exercise (optional)' }
+            exerciseName: { type: SchemaType.STRING, description: 'Specific exercise (optional)' }
           }
         }
       },
@@ -914,9 +913,9 @@ Assistant: "Just stay motivated and keep going!"
         name: 'logWorkout',
         description: 'Start logging a new workout',
         parameters: {
-          type: 'OBJECT' as const,
+          type: SchemaType.OBJECT,
           properties: {
-            workoutType: { type: 'STRING' as const, description: 'Type: strength, cardio, flexibility, sports' }
+            workoutType: { type: SchemaType.STRING, description: 'Type: strength, cardio, flexibility, sports' }
           }
         }
       },
@@ -926,9 +925,9 @@ Assistant: "Just stay motivated and keep going!"
         name: 'viewProfile',
         description: 'View user profile. Use when user says "show my profile"',
         parameters: {
-          type: 'OBJECT' as const,
+          type: SchemaType.OBJECT,
           properties: {
-            userId: { type: 'STRING' as const, description: 'User ID (optional)' }
+            userId: { type: SchemaType.STRING, description: 'User ID (optional)' }
           }
         }
       },
@@ -936,11 +935,11 @@ Assistant: "Just stay motivated and keep going!"
         name: 'updateProfile',
         description: 'Update user profile',
         parameters: {
-          type: 'OBJECT' as const,
+          type: SchemaType.OBJECT,
           properties: {
-            displayName: { type: 'STRING' as const },
-            bio: { type: 'STRING' as const },
-            fitnessGoals: { type: 'ARRAY' as const, items: { type: 'STRING' as const } }
+            displayName: { type: SchemaType.STRING },
+            bio: { type: SchemaType.STRING },
+            fitnessGoals: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } }
           }
         }
       },
@@ -948,10 +947,10 @@ Assistant: "Just stay motivated and keep going!"
         name: 'searchUsers',
         description: 'Search for users',
         parameters: {
-          type: 'OBJECT' as const,
+          type: SchemaType.OBJECT,
           properties: {
-            query: { type: 'STRING' as const, description: 'Search query' },
-            limit: { type: 'NUMBER' as const }
+            query: { type: SchemaType.STRING, description: 'Search query' },
+            limit: { type: SchemaType.NUMBER }
           },
           required: ['query']
         }
@@ -962,9 +961,9 @@ Assistant: "Just stay motivated and keep going!"
         name: 'navigateTo',
         description: 'Navigate to a page. Use when user says "go to stats", "show settings", "take me to profile"',
         parameters: {
-          type: 'OBJECT' as const,
+          type: SchemaType.OBJECT,
           properties: {
-            page: { type: 'STRING' as const, description: 'Page: home, chat, workout, stats, feed, profile, settings, notifications, discover' }
+            page: { type: SchemaType.STRING, description: 'Page: home, chat, workout, stats, feed, profile, settings, notifications, discover' }
           },
           required: ['page']
         }
@@ -973,9 +972,9 @@ Assistant: "Just stay motivated and keep going!"
         name: 'viewSettings',
         description: 'View user settings',
         parameters: {
-          type: 'OBJECT' as const,
+          type: SchemaType.OBJECT,
           properties: {
-            category: { type: 'STRING' as const, description: 'all, preferences, privacy, or notifications' }
+            category: { type: SchemaType.STRING, description: 'all, preferences, privacy, or notifications' }
           }
         }
       },
@@ -983,10 +982,10 @@ Assistant: "Just stay motivated and keep going!"
         name: 'updateSettings',
         description: 'Update settings like theme or units',
         parameters: {
-          type: 'OBJECT' as const,
+          type: SchemaType.OBJECT,
           properties: {
-            theme: { type: 'STRING' as const, description: 'light, dark, or system' },
-            units: { type: 'STRING' as const, description: 'metric or imperial' }
+            theme: { type: SchemaType.STRING, description: 'light, dark, or system' },
+            units: { type: SchemaType.STRING, description: 'metric or imperial' }
           }
         }
       }

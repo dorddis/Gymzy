@@ -1,10 +1,10 @@
 "use client";
 
 import React from 'react';
-import dynamic from 'next/dynamic';
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { useWorkout } from '@/contexts/WorkoutContext';
 import { TrendingUp, Activity, Gauge, CalendarCheck, Flame, Award, Clock, Dumbbell, Loader2 } from 'lucide-react';
 import { BackButton } from '@/components/layout/back-button';
@@ -12,44 +12,8 @@ import { Muscle } from '@/lib/constants'; // Import Muscle enum
 import { useRouter } from 'next/navigation';
 import { StatCardSkeleton, ChartSkeleton, WorkoutCardSkeleton, Skeleton } from '@/components/ui/skeleton';
 
-// Dynamic imports for heavy Recharts components
-const LineChart = dynamic(() => import('recharts').then(mod => mod.LineChart), {
-  loading: () => <div className="h-[200px] flex items-center justify-center"><Loader2 className="animate-spin" /></div>,
-  ssr: false
-});
-
-const BarChart = dynamic(() => import('recharts').then(mod => mod.BarChart), {
-  loading: () => <div className="h-[200px] flex items-center justify-center"><Loader2 className="animate-spin" /></div>,
-  ssr: false
-});
-
-const ResponsiveContainer = dynamic(() => import('recharts').then(mod => mod.ResponsiveContainer), {
-  ssr: false
-});
-
-const XAxis = dynamic(() => import('recharts').then(mod => mod.XAxis), {
-  ssr: false
-});
-
-const YAxis = dynamic(() => import('recharts').then(mod => mod.YAxis), {
-  ssr: false
-});
-
-const CartesianGrid = dynamic(() => import('recharts').then(mod => mod.CartesianGrid), {
-  ssr: false
-});
-
-const Tooltip = dynamic(() => import('recharts').then(mod => mod.Tooltip), {
-  ssr: false
-});
-
-const Line = dynamic(() => import('recharts').then(mod => mod.Line), {
-  ssr: false
-});
-
-const Bar = dynamic(() => import('recharts').then(mod => mod.Bar), {
-  ssr: false
-});
+// Note: Recharts is already code-split by Next.js since this is a separate route (/stats)
+// No need for dynamic imports - they cause TypeScript compatibility issues
 
 // Constants for the GitHub-style progress tracker
 const DAY_SQUARE_SIZE = 20; // px
@@ -606,7 +570,7 @@ export default function StatsTrendsScreen() {
                         </h3>
                         <span className="text-sm text-gray-500 flex items-center gap-1">
                           <Clock className="h-3 w-3" />
-                          {workout.duration ? Math.floor(workout.duration / 60) : 0}m
+                          {(workout as any).duration ? Math.floor((workout as any).duration / 60) : 0}m
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-sm text-gray-600">
