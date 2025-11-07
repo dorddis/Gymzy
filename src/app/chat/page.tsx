@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useState, useEffect, useRef, Suspense } from 'react';
-import { Send, ChevronLeft, Loader2, MessageSquare, Trash2, Plus, X, AlignRight, Square } from 'lucide-react';
+import { Send, Loader2, MessageSquare, Trash2, Plus, X, AlignRight, Square } from 'lucide-react';
 import { ChatMessageSkeleton } from '@/components/ui/skeleton';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useOptimizedNavigation } from '@/hooks/useOptimizedNavigation';
+import { BackButton } from '@/components/layout/back-button';
 import { useAuth } from '@/contexts/AuthContext';
 import { ChatBubble } from '@/components/chat/chat-bubble';
+import { ChatWelcomeScreen } from '@/components/chat/chat-welcome-screen';
 import { Button } from '@/components/ui/button';
 import {
   createChatSession,
@@ -73,15 +75,13 @@ function ChatContent() {
           setMessages([]);
       }
       createNewChatWithMessage(initialUrlMessage);
-    } else if (!currentSessionId && !isInitialMessageHandled && !initialUrlMessage) {
-      console.log("ChatPage: No initial message, no current session. Loading sessions or creating new generic chat.");
-      loadChatSessions().then(_sessions => {
-        if (!currentSessionId) {
-          createNewChat();
-        }
-      });
+    } else if (!isInitialMessageHandled && !initialUrlMessage) {
+      // Just load existing chat sessions, don't auto-create a new one
+      console.log("ChatPage: Loading existing chat sessions.");
+      loadChatSessions();
+      setIsInitialMessageHandled(true);
     }
-  }, [user?.uid, searchParams, currentSessionId, isInitialMessageHandled]);
+  }, [user?.uid, searchParams, isInitialMessageHandled]);
 
   const loadChatSessions = async () => {
     if (!user?.uid) return;
@@ -101,13 +101,12 @@ function ChatContent() {
     }
     try {
       setIsLoading(true);
-      const sessionId = await createChatSession(user.uid);
-      setCurrentSessionId(sessionId);
-      setMessages([{
-        role: 'assistant',
-        content: 'Hello! I\'m Gymzy, your personalized AI fitness coach. How can I help you with your fitness journey today?',
-        timestamp: new Date()
-      }]);
+      // Clear messages to show welcome screen
+      setMessages([]);
+      // Clear input field
+      setInput('');
+      // Clear current session - will be created when user sends first message
+      setCurrentSessionId(null);
       setIsInitialMessageHandled(true);
       await loadChatSessions();
     } catch (error) {
@@ -187,8 +186,22 @@ function ChatContent() {
     if (!user?.uid) return;
 
     const messageToSend = message || input.trim();
-    const targetSessionId = sessionId || currentSessionId;
-    if (!messageToSend || !targetSessionId) return;
+    if (!messageToSend) return;
+
+    // If there's no current session, create one first
+    let targetSessionId = sessionId || currentSessionId;
+    if (!targetSessionId) {
+      console.log("ChatPage: No active session, creating new chat session for first message");
+      try {
+        targetSessionId = await createChatSession(user.uid);
+        setCurrentSessionId(targetSessionId);
+        await loadChatSessions();
+      } catch (error) {
+        console.error('Error creating chat session:', error);
+        setMessages([{ role: 'assistant', content: 'Sorry, I couldn\&apos;t start a new chat. Please try again.', timestamp: new Date() }]);
+        return;
+      }
+    }
 
     const isInitialAutomatedCall = !!(message && sessionId);
 
@@ -251,7 +264,7 @@ function ChatContent() {
       let hasAddedPlaceholder = false;
 
       let fullStreamedContent = '';
-      let aiResponse: { success: boolean; workoutData?: any; error?: string } = { success: false };
+      let aiResponse: { success: boolean; workoutData?: any; navigationTarget?: string; error?: string } = { success: false };
 
       try {
         console.log('📤 Sending to API:', { sessionId: targetSessionId, userId: user.uid, message: messageToSend, streaming: true, historyLength: messages.length });
@@ -325,6 +338,12 @@ function ChatContent() {
                   aiResponse.workoutData = data.workoutData;
                 }
 
+                // Handle navigation target
+                if (data.navigationTarget) {
+                  console.log('🧭 Received navigation target:', data.navigationTarget);
+                  aiResponse.navigationTarget = data.navigationTarget;
+                }
+
                 if (data.done) {
                   aiResponse.success = true;
                   break;
@@ -358,6 +377,15 @@ function ChatContent() {
             ? { ...msg, content: fullStreamedContent, workoutData: aiResponse.workoutData } // Ensure final content is fullStreamedContent
             : msg
         ));
+
+        // Handle navigation if AI requested it
+        if (aiResponse.navigationTarget) {
+          console.log('🧭 Navigating to:', aiResponse.navigationTarget);
+          // Small delay to let user see the AI response before navigating
+          setTimeout(() => {
+            router.push(aiResponse.navigationTarget!);
+          }, 1500);
+        }
       } else {
         // If AI response failed, remove the placeholder and add error message
         // Or update the placeholder to show the error
@@ -366,7 +394,7 @@ function ChatContent() {
           return [...updatedMessages, { role: 'assistant', content: aiResponse.error || 'Sorry, an error occurred with the AI response.', timestamp: new Date() }];
         });
       }
-      
+
       if (!isInitialAutomatedCall) {
           await loadChatSessions();
       }
@@ -393,7 +421,7 @@ function ChatContent() {
 
       // Save the partially streamed message
       const lastMessageIdx = messages.length - 1;
-      if (messages[lastMessageIdx]?.role === 'assistant' && messages[lastMessageIdx]?.content) {
+      if (messages[lastMessageIdx]?.role === 'assistant' && messages[lastMessageIdx]?.content && user) {
         saveChatMessage(currentSessionId!, user.uid, 'assistant', messages[lastMessageIdx].content)
           .then(() => console.log("ChatPage: Saved partially streamed message."))
           .catch(err => console.error("ChatPage: Error saving partially streamed message:", err));
@@ -419,6 +447,11 @@ function ChatContent() {
         handleSendMessage();
       }
     }
+  };
+
+  const handleSuggestionClick = (suggestion: string) => {
+    // When a suggestion is clicked, populate the input field
+    setInput(suggestion);
   };
 
   const handleStartWorkout = (workoutData: any) => {
@@ -466,19 +499,12 @@ function ChatContent() {
   }
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-background justify-center">
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
+      <div className="flex-1 flex flex-col max-w-3xl">
+        <div className="flex items-center justify-between p-4 md:px-6 border-b border-gray-200 bg-white">
           <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={navigateBack}
-              className="p-2 rounded-full"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </Button>
+            <BackButton onClick={navigateBack} />
             <h1 className="text-lg font-semibold text-gray-900">Chat with Gymzy</h1>
           </div>
 
@@ -503,25 +529,41 @@ function ChatContent() {
           </div>
         </div>
 
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {messages.map((message, index) => (
-            <ChatBubble
-              key={index}
-              role={message.role}
-              content={message.content}
-              workoutData={message.workoutData}
-              onStartWorkout={handleStartWorkout}
+        {/* Messages or Welcome Screen */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
+          {messages.length === 0 ? (
+            <ChatWelcomeScreen
+              userName={user.profile?.displayName || user.displayName || undefined}
+              onSuggestionClick={handleSuggestionClick}
             />
-          ))}
-          {isLoading && !isAiStreaming && (
-            <ChatMessageSkeleton />
+          ) : (
+            <>
+              {messages.map((message, index) => (
+                <ChatBubble
+                  key={index}
+                  role={message.role}
+                  content={message.content}
+                  workoutData={message.workoutData}
+                  onStartWorkout={handleStartWorkout}
+                />
+              ))}
+              {/* Show thinking indicator when AI is processing but hasn't started streaming yet */}
+              {isAiStreaming && messages.length > 0 && messages[messages.length - 1].role === 'user' && (
+                <div className="flex items-center gap-2 p-3 rounded-xl max-w-[75%] bg-gray-100 text-gray-600 self-start mr-auto rounded-bl-none">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span className="text-sm">Gymzy is thinking...</span>
+                </div>
+              )}
+              {isLoading && !isAiStreaming && (
+                <ChatMessageSkeleton />
+              )}
+            </>
           )}
           <div ref={messagesEndRef} />
         </div>
 
         {/* Input */}
-        <form onSubmit={handleSubmit} className="p-4 border-t border-gray-200 bg-white">
+        <form onSubmit={handleSubmit} className="p-4 md:p-6 border-t border-gray-200 bg-white">
           <div className="flex items-end gap-2">
             <div className="flex-1 relative">
               <textarea
@@ -552,7 +594,7 @@ function ChatContent() {
       </div>
 
       {/* Sidebar - moved to right */}
-      <div className={`${showSidebar ? 'translate-x-0' : 'translate-x-full'} fixed inset-y-0 right-0 z-50 w-80 bg-white border-l border-gray-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}>
+      <div className={`${showSidebar ? 'translate-x-0' : 'translate-x-full'} fixed inset-y-0 right-0 z-50 w-80 bg-white border-l border-gray-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:block`}>
         <div className="flex flex-col h-full">
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900">Chat History</h2>

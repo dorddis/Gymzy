@@ -10,9 +10,10 @@
 
 import { GoogleGenerativeAI, Content, FunctionDeclaration, Tool } from '@google/generative-ai';
 import exercisesData from '@/lib/exercises.json';
-import { getWorkouts } from '@/services/core/workout-service';
+import { getAllWorkouts } from '@/services/core/workout-service';
 import { OnboardingContext } from '@/services/data/onboarding-context-service';
 import { COMMUNICATION_STYLE_PROMPTS, COACHING_STYLE_PROMPTS } from '@/lib/ai-style-constants';
+import { functionRegistry } from '@/services/agents/function-registry';
 
 // ============================================================================
 // Types
@@ -309,7 +310,7 @@ class WorkoutFunctions {
 
     try {
       const limit = args.limit || 5;
-      const workouts = await getWorkouts(userId, limit);
+      const workouts = await getAllWorkouts(userId, limit);
 
       const history = workouts.map(w => ({
         title: w.title,
@@ -493,29 +494,49 @@ Follow this intelligent decision flow:
    → Provide detailed form, muscle, and variation information
 
 3. **WORKOUT HISTORY** (e.g., "show my past workouts", "what did I train last week")
-   → Immediately call getWorkoutHistory() function
+   → Immediately call viewWorkoutHistory() function
 
-4. **NUTRITION QUESTION** (macros, calories, diet, supplements)
+4. **VIEW STATS/PROGRESS** (e.g., "show my stats", "how am I doing this month")
+   → Immediately call viewStats() function
+   → After showing data, suggest: "Would you like to see your full stats page?"
+
+5. **NAVIGATION REQUEST** (e.g., "take me to settings", "go to my profile", "show me the feed")
+   → Immediately call navigateTo() function
+   → Confirm: "Taking you to [page] now!"
+
+6. **PROFILE VIEW/UPDATE** (e.g., "show my profile", "update my fitness goals")
+   → Call viewProfile() or updateProfile() as appropriate
+   → After updates, confirm success
+
+7. **SETTINGS CHANGE** (e.g., "change theme to dark", "switch to metric units")
+   → Call updateSettings() function
+   → Confirm the change was made
+
+8. **USER SEARCH** (e.g., "find users named John", "search for powerlifters")
+   → Call searchUsers() function
+   → Present results in a friendly format
+
+9. **NUTRITION QUESTION** (macros, calories, diet, supplements)
    → Provide evidence-based, personalized nutrition advice
    → Consider their goals from user context
    → Be specific with numbers and recommendations
 
-5. **RECOVERY/HEALTH QUESTION** (sleep, rest days, soreness, injury)
+10. **RECOVERY/HEALTH QUESTION** (sleep, rest days, soreness, injury)
    → Provide comprehensive guidance on recovery strategies
    → Explain the science when helpful
    → Prioritize safety and long-term health
 
-6. **MENTAL/MOTIVATION** (staying consistent, overcoming plateaus, discipline)
+11. **MENTAL/MOTIVATION** (staying consistent, overcoming plateaus, discipline)
    → Provide supportive, actionable advice
    → Draw from behavioral psychology and proven strategies
    → Acknowledge challenges while offering solutions
 
-7. **GENERAL FITNESS QUESTION** (concepts, "should I...", troubleshooting)
+12. **GENERAL FITNESS QUESTION** (concepts, "should I...", troubleshooting)
    → Explain clearly and thoroughly
    → Use examples when helpful
    → Provide evidence-based information
 
-The key: Be SMART about when to use functions vs. when to provide advice directly.
+The key: Be PROACTIVE and SMART about using functions. When user asks for action, DO IT - don't just talk about it!
 </critical_behavior>
 
 <nutrition_guidance>
@@ -786,9 +807,17 @@ Assistant: "Just stay motivated and keep going!"
       console.log('🤖 Using default AI personality');
     }
 
+    // Combine workout tools with ALL agent function tools from registry
+    const allTools: Tool[] = [
+      workoutTools, // Keep existing workout generation tools
+      ...this.getAgentTools() // Add profile, settings, navigation, etc.
+    ];
+
+    console.log(`🔧 AI has ${allTools.length} tool groups available (workout + agent functions)`);
+
     return this.genAI.getGenerativeModel({
       model: 'gemini-2.5-flash',
-      tools: [workoutTools],
+      tools: allTools,
       generationConfig: {
         temperature: 0.7,
         topP: 0.95,
@@ -797,6 +826,173 @@ Assistant: "Just stay motivated and keep going!"
       },
       systemInstruction
     });
+  }
+
+  /**
+   * Get agent function tools from registry
+   */
+  private getAgentTools(): Tool[] {
+    // Get all tool definitions except workout generation (already handled above)
+    const profileFunctions = functionRegistry.getFunctionsForDomain('profile');
+    const systemFunctions = functionRegistry.getFunctionsForDomain('system');
+    const workoutOtherFunctions = ['viewWorkoutHistory', 'viewWorkoutDetails', 'deleteWorkout',
+                                    'logWorkout', 'viewStats', 'getPersonalBests'];
+
+    const functionDeclarations: FunctionDeclaration[] = [];
+
+    // Add workout helper functions
+    workoutOtherFunctions.forEach(fnName => {
+      const decl = this.getFunctionDeclaration(fnName);
+      if (decl) functionDeclarations.push(decl);
+    });
+
+    // Add profile functions
+    profileFunctions.forEach(fnName => {
+      const decl = this.getFunctionDeclaration(fnName);
+      if (decl) functionDeclarations.push(decl);
+    });
+
+    // Add system functions
+    systemFunctions.forEach(fnName => {
+      const decl = this.getFunctionDeclaration(fnName);
+      if (decl) functionDeclarations.push(decl);
+    });
+
+    return [{ functionDeclarations }];
+  }
+
+  /**
+   * Get Gemini function declaration for a function name
+   */
+  private getFunctionDeclaration(name: string): FunctionDeclaration | null {
+    const declarations: Record<string, FunctionDeclaration> = {
+      // Workout functions
+      viewWorkoutHistory: {
+        name: 'viewWorkoutHistory',
+        description: 'View workout history. Use when user asks "show my workouts", "what did I do last week"',
+        parameters: {
+          type: 'OBJECT' as const,
+          properties: {
+            limit: { type: 'NUMBER' as const, description: 'Number of workouts (default: 10)' },
+            sortBy: { type: 'STRING' as const, description: 'Sort order: recent or oldest' }
+          }
+        }
+      },
+      viewWorkoutDetails: {
+        name: 'viewWorkoutDetails',
+        description: 'Get detailed information about a specific workout',
+        parameters: {
+          type: 'OBJECT' as const,
+          properties: {
+            workoutId: { type: 'STRING' as const, description: 'ID of the workout' }
+          },
+          required: ['workoutId']
+        }
+      },
+      viewStats: {
+        name: 'viewStats',
+        description: 'View workout statistics and progress',
+        parameters: {
+          type: 'OBJECT' as const,
+          properties: {
+            timeframe: { type: 'STRING' as const, description: 'week, month, year, or all-time' },
+            metric: { type: 'STRING' as const, description: 'volume, frequency, strength, or overview' }
+          }
+        }
+      },
+      getPersonalBests: {
+        name: 'getPersonalBests',
+        description: 'Get personal best records',
+        parameters: {
+          type: 'OBJECT' as const,
+          properties: {
+            exerciseName: { type: 'STRING' as const, description: 'Specific exercise (optional)' }
+          }
+        }
+      },
+      logWorkout: {
+        name: 'logWorkout',
+        description: 'Start logging a new workout',
+        parameters: {
+          type: 'OBJECT' as const,
+          properties: {
+            workoutType: { type: 'STRING' as const, description: 'Type: strength, cardio, flexibility, sports' }
+          }
+        }
+      },
+
+      // Profile functions
+      viewProfile: {
+        name: 'viewProfile',
+        description: 'View user profile. Use when user says "show my profile"',
+        parameters: {
+          type: 'OBJECT' as const,
+          properties: {
+            userId: { type: 'STRING' as const, description: 'User ID (optional)' }
+          }
+        }
+      },
+      updateProfile: {
+        name: 'updateProfile',
+        description: 'Update user profile',
+        parameters: {
+          type: 'OBJECT' as const,
+          properties: {
+            displayName: { type: 'STRING' as const },
+            bio: { type: 'STRING' as const },
+            fitnessGoals: { type: 'ARRAY' as const, items: { type: 'STRING' as const } }
+          }
+        }
+      },
+      searchUsers: {
+        name: 'searchUsers',
+        description: 'Search for users',
+        parameters: {
+          type: 'OBJECT' as const,
+          properties: {
+            query: { type: 'STRING' as const, description: 'Search query' },
+            limit: { type: 'NUMBER' as const }
+          },
+          required: ['query']
+        }
+      },
+
+      // System functions
+      navigateTo: {
+        name: 'navigateTo',
+        description: 'Navigate to a page. Use when user says "go to stats", "show settings", "take me to profile"',
+        parameters: {
+          type: 'OBJECT' as const,
+          properties: {
+            page: { type: 'STRING' as const, description: 'Page: home, chat, workout, stats, feed, profile, settings, notifications, discover' }
+          },
+          required: ['page']
+        }
+      },
+      viewSettings: {
+        name: 'viewSettings',
+        description: 'View user settings',
+        parameters: {
+          type: 'OBJECT' as const,
+          properties: {
+            category: { type: 'STRING' as const, description: 'all, preferences, privacy, or notifications' }
+          }
+        }
+      },
+      updateSettings: {
+        name: 'updateSettings',
+        description: 'Update settings like theme or units',
+        parameters: {
+          type: 'OBJECT' as const,
+          properties: {
+            theme: { type: 'STRING' as const, description: 'light, dark, or system' },
+            units: { type: 'STRING' as const, description: 'metric or imperial' }
+          }
+        }
+      }
+    };
+
+    return declarations[name] || null;
   }
 
   /**
@@ -971,19 +1167,18 @@ Assistant: "Just stay motivated and keep going!"
   private async executeFunction(name: string, args: Record<string, any>, userId: string, userContext?: OnboardingContext | null): Promise<any> {
     console.log(`🔧 Executing function: ${name}`);
 
-    switch (name) {
-      case 'generateWorkout':
-        return await this.workoutFunctions.generateWorkout(args, userId, userContext);
-
-      case 'getExerciseInfo':
-        return await this.workoutFunctions.getExerciseInfo(args, userId);
-
-      case 'getWorkoutHistory':
-        return await this.workoutFunctions.getWorkoutHistory(args, userId);
-
-      default:
-        return { error: `Unknown function: ${name}` };
+    // Special handling for workout generation (needs userContext)
+    if (name === 'generateWorkout') {
+      return await this.workoutFunctions.generateWorkout(args, userId, userContext);
     }
+
+    // Use function registry for all other functions
+    // This includes: workout history, profile, settings, navigation, etc.
+    const result = await functionRegistry.execute(name, args, userId);
+
+    console.log(`✅ Function ${name} executed:`, result.success ? 'SUCCESS' : 'FAILED');
+
+    return result;
   }
 
   /**

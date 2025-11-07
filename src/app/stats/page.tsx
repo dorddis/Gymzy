@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
 import { useWorkout } from '@/contexts/WorkoutContext';
-import { TrendingUp, Activity, Gauge, CalendarCheck, Flame, Award, ArrowLeft, Clock, Dumbbell, Loader2 } from 'lucide-react';
+import { TrendingUp, Activity, Gauge, CalendarCheck, Flame, Award, Clock, Dumbbell, Loader2 } from 'lucide-react';
+import { BackButton } from '@/components/layout/back-button';
 import { Muscle } from '@/lib/constants'; // Import Muscle enum
 import { useRouter } from 'next/navigation';
 import { StatCardSkeleton, ChartSkeleton, WorkoutCardSkeleton, Skeleton } from '@/components/ui/skeleton';
@@ -104,7 +105,18 @@ export default function StatsTrendsScreen() {
     maxDailyVolume,
     totalCaloriesBurnt,
     personalBestLift
-  } = React.useMemo(() => {
+  } = React.useMemo<{
+    weeklyVolumeData: { date: string; volume: number }[];
+    weeklyFrequencyData: { date: string; workouts: number }[];
+    totalVolumeLast7Days: number;
+    averageRPE: number;
+    consistencyStreak: number;
+    topMuscleGroup: string;
+    dailyVolumesForTracker: DailyVolume[];
+    maxDailyVolume: number;
+    totalCaloriesBurnt: number;
+    personalBestLift: { weight: number; exercise: string } | null;
+  }>(() => {
     const volumeMap7Days = new Map<string, number>(last7Days.map(date => [date, 0]));
     const frequencyMap7Days = new Map<string, number>(last7Days.map(date => [date, 0]));
     const dailyVolumeMap6Months = new Map<string, number>(last6MonthsDates.map(date => [date, 0])); // Changed to 6 months
@@ -255,14 +267,7 @@ export default function StatsTrendsScreen() {
         {/* Header with Back Button - Always show immediately */}
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.back()}
-              className="p-2 hover:bg-gray-100 rounded-full"
-            >
-              <ArrowLeft className="h-5 w-5 text-gray-700" />
-            </Button>
+            <BackButton />
             <h1 className="text-2xl font-headline font-bold text-primary">Stats & Trends</h1>
           </div>
         </div>
@@ -347,7 +352,7 @@ export default function StatsTrendsScreen() {
             </CardHeader>
             <CardContent className="p-0">
               <CardDescription className="text-2xl font-bold text-primary">
-                {personalBestLift ? `${personalBestLift.weight.toLocaleString()} lbs (${personalBestLift.exercise})` : 'N/A'}
+                {personalBestLift && personalBestLift.weight ? `${personalBestLift.weight.toLocaleString()} lbs (${personalBestLift.exercise || 'Unknown'})` : 'N/A'}
               </CardDescription>
             </CardContent>
           </Card>
@@ -474,8 +479,8 @@ export default function StatsTrendsScreen() {
           </CardHeader>
           <CardContent className="p-2 overflow-x-auto"> {/* Reduced padding and added overflow-x-auto */}
             <div style={{ width: '700px' }}> {/* Fixed width container for chart content */}
-              <ResponsiveContainer width="100%" height={200}> {/* Reduced height. Width will fill parent */}
-                <LineChart data={weeklyVolumeData}> {/* Removed margin prop */}
+              <ResponsiveContainer width="100%" height={200}>
+                <LineChart data={weeklyVolumeData}>
                   <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" />
                   <YAxis stroke="hsl(var(--muted-foreground))" />
                   <Tooltip
@@ -558,11 +563,11 @@ export default function StatsTrendsScreen() {
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="font-medium text-gray-800 flex items-center gap-2">
                           <Dumbbell className="h-4 w-4 text-primary" />
-                          {workout.name}
+                          {workout.title}
                         </h3>
                         <span className="text-sm text-gray-500 flex items-center gap-1">
                           <Clock className="h-3 w-3" />
-                          {Math.floor(workout.duration / 60)}m
+                          {workout.duration ? Math.floor(workout.duration / 60) : 0}m
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-sm text-gray-600">
