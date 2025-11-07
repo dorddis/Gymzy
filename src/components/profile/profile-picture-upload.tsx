@@ -26,15 +26,20 @@ interface ProfilePictureUploadProps {
   isLoading?: boolean;
 }
 
-export function ProfilePictureUpload({ 
-  currentPicture, 
-  onUpload, 
-  onRemove, 
-  isLoading = false 
+export function ProfilePictureUpload({
+  currentPicture,
+  onUpload,
+  onRemove,
+  isLoading = false
 }: ProfilePictureUploadProps) {
   const { user } = useAuth();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  // Debug: Log when currentPicture changes
+  React.useEffect(() => {
+    console.log('ProfilePictureUpload: currentPicture changed to:', currentPicture);
+  }, [currentPicture]);
   const [isEditing, setIsEditing] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [cropData, setCropData] = useState({
@@ -53,17 +58,28 @@ export function ProfilePictureUpload({
       setSelectedFile(file);
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
-      setIsEditing(true);
-      
-      // Reset crop data for new image
-      setCropData({
-        x: 0,
-        y: 0,
-        width: 200,
-        height: 200,
-        rotation: 0,
-        flipHorizontal: false
-      });
+
+      // Load image to get actual dimensions
+      const img = new Image();
+      img.onload = () => {
+        // Use the full image dimensions for crop
+        const size = Math.min(img.width, img.height);
+        setCropData({
+          x: 0,
+          y: 0,
+          width: size,
+          height: size,
+          rotation: 0,
+          flipHorizontal: false
+        });
+        console.log('Image loaded:', {
+          actualWidth: img.width,
+          actualHeight: img.height,
+          cropSize: size
+        });
+        setIsEditing(true);
+      };
+      img.src = url;
     }
   }, []);
 
@@ -90,7 +106,7 @@ export function ProfilePictureUpload({
     return new Promise((resolve, reject) => {
       const canvas = canvasRef.current;
       const image = new Image();
-      
+
       if (!canvas || !previewUrl) {
         reject(new Error('Canvas or preview not available'));
         return;
@@ -103,40 +119,63 @@ export function ProfilePictureUpload({
           return;
         }
 
-        // Set canvas size
-        canvas.width = cropData.width;
-        canvas.height = cropData.height;
+        console.log('Creating cropped image:', {
+          imageWidth: image.width,
+          imageHeight: image.height,
+          cropData
+        });
 
-        // Apply transformations
+        // Set canvas to output size (200x200 for profile pictures)
+        const outputSize = 200;
+        canvas.width = outputSize;
+        canvas.height = outputSize;
+
+        // Calculate crop area (center crop to square)
+        const sourceSize = Math.min(image.width, image.height);
+        const sourceX = (image.width - sourceSize) / 2;
+        const sourceY = (image.height - sourceSize) / 2;
+
+        console.log('Crop calculation:', {
+          sourceX,
+          sourceY,
+          sourceSize,
+          outputSize
+        });
+
+        // Clear canvas and apply transformations
         ctx.save();
-        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.translate(outputSize / 2, outputSize / 2);
         ctx.rotate((cropData.rotation * Math.PI) / 180);
         if (cropData.flipHorizontal) {
           ctx.scale(-1, 1);
         }
 
-        // Draw cropped image
+        // Draw cropped and scaled image
         ctx.drawImage(
           image,
-          cropData.x,
-          cropData.y,
-          cropData.width,
-          cropData.height,
-          -canvas.width / 2,
-          -canvas.height / 2,
-          canvas.width,
-          canvas.height
+          sourceX,
+          sourceY,
+          sourceSize,
+          sourceSize,
+          -outputSize / 2,
+          -outputSize / 2,
+          outputSize,
+          outputSize
         );
 
         ctx.restore();
 
         canvas.toBlob((blob) => {
           if (blob) {
+            console.log('Cropped blob created:', {
+              size: blob.size,
+              type: blob.type
+            });
             resolve(blob);
           } else {
             reject(new Error('Failed to create blob'));
           }
-        }, 'image/jpeg', 0.9);
+        }, 'image/jpeg', 0.95);
       };
 
       image.onerror = () => reject(new Error('Failed to load image'));
@@ -270,10 +309,15 @@ export function ProfilePictureUpload({
           <h3 className="text-lg font-semibold text-center">Profile Picture</h3>
           
           {/* Current Picture */}
-          <div className="flex justify-center">
+          <div className="flex flex-col items-center gap-2">
+            {/* Debug URL Display */}
+            <div className="w-full p-2 bg-gray-100 dark:bg-gray-800 rounded text-xs break-all max-w-md">
+              <strong>URL:</strong> {currentPicture || 'None'}
+            </div>
+
             <Avatar className="w-32 h-32">
               <AvatarImage src={currentPicture} alt="Profile" />
-              <AvatarFallback className="bg-primary text-white text-2xl">
+              <AvatarFallback className="bg-blue-600 text-white text-2xl">
                 {getInitials(user?.profile?.displayName)}
               </AvatarFallback>
             </Avatar>
@@ -306,8 +350,8 @@ export function ProfilePictureUpload({
           {/* Action Buttons */}
           <div className="flex gap-2">
             <Button
-              variant="outline"
-              className="flex-1"
+              variant="default"
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
               onClick={() => fileInputRef.current?.click()}
               disabled={isLoading}
             >
@@ -316,10 +360,10 @@ export function ProfilePictureUpload({
             </Button>
             {currentPicture && onRemove && (
               <Button
-                variant="outline"
+                variant="destructive"
                 onClick={onRemove}
                 disabled={isLoading}
-                className="text-red-600 hover:text-red-700"
+                className="bg-red-600 hover:bg-red-700 text-white"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>

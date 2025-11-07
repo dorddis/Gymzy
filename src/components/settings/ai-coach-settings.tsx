@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { OnboardingContext, OnboardingContextService } from '@/services/data/onboarding-context-service';
 import { useAuth } from '@/contexts/AuthContext';
+import { COMMUNICATION_STYLE_PROMPTS, COACHING_STYLE_PROMPTS } from '@/lib/ai-style-constants';
 
 interface AICoachSettingsProps {
   context: OnboardingContext | null;
@@ -30,64 +31,64 @@ interface AICoachSettingsProps {
 }
 
 const COMMUNICATION_STYLES = [
-  { 
-    id: 'encouraging', 
-    label: 'Encouraging', 
+  {
+    id: 'encouraging',
+    label: 'Encouraging',
     description: 'Positive, supportive, and motivational',
     icon: Heart,
     color: 'bg-green-100 text-green-700',
-    example: "Great job! You&apos;re making amazing progress. Keep pushing forward!"
+    prompt: 'Be encouraging, positive, and motivational. Use supportive language and celebrate progress.'
   },
-  { 
-    id: 'challenging', 
-    label: 'Challenging', 
+  {
+    id: 'challenging',
+    label: 'Challenging',
     description: 'Direct, demanding, and results-focused',
     icon: Zap,
     color: 'bg-red-100 text-red-700',
-    example: "Time to step it up! I know you can push harder than that."
+    prompt: 'Be direct, demanding, and results-focused. Push the user to work harder and challenge their limits.'
   },
-  { 
-    id: 'analytical', 
-    label: 'Analytical', 
+  {
+    id: 'analytical',
+    label: 'Analytical',
     description: 'Data-driven, detailed, and scientific',
     icon: Brain,
     color: 'bg-blue-100 text-blue-700',
-    example: "Based on your performance data, increasing intensity by 10% would optimize results."
+    prompt: 'Be analytical and data-driven. Use scientific language, cite performance metrics, and provide detailed explanations.'
   },
-  { 
-    id: 'casual', 
-    label: 'Casual', 
+  {
+    id: 'casual',
+    label: 'Casual',
     description: 'Friendly, relaxed, and conversational',
     icon: MessageCircle,
     color: 'bg-purple-100 text-purple-700',
-    example: "Hey! Ready for today&apos;s workout? Let&apos;s have some fun with it!"
+    prompt: 'Be casual, friendly, and conversational. Use a relaxed tone like talking to a friend.'
   }
 ];
 
 const COACHING_STYLES = [
-  { 
-    id: 'detailed', 
-    label: 'Detailed', 
+  {
+    id: 'detailed',
+    label: 'Detailed',
     description: 'Comprehensive explanations and instructions',
-    example: "For this exercise, focus on proper form: keep your core engaged, shoulders back..."
+    prompt: 'Provide detailed, comprehensive explanations with step-by-step instructions. Include form cues and technique tips.'
   },
-  { 
-    id: 'concise', 
-    label: 'Concise', 
+  {
+    id: 'concise',
+    label: 'Concise',
     description: 'Brief, to-the-point guidance',
-    example: "3 sets of 12 reps. Focus on form. Rest 60 seconds between sets."
+    prompt: 'Keep instructions brief and to-the-point. Use short sentences and bullet points. No fluff.'
   },
-  { 
-    id: 'visual', 
-    label: 'Visual', 
+  {
+    id: 'visual',
+    label: 'Visual',
     description: 'Emphasis on demonstrations and imagery',
-    example: "Imagine you&apos;re sitting back into a chair. Keep your chest proud and core tight."
+    prompt: 'Use visual imagery and metaphors. Help the user visualize movements and form cues.'
   },
-  { 
-    id: 'conversational', 
-    label: 'Conversational', 
+  {
+    id: 'conversational',
+    label: 'Conversational',
     description: 'Interactive, question-based approach',
-    example: "How are you feeling? Ready to increase the weight or stick with this for now?"
+    prompt: 'Be conversational and interactive. Ask questions to engage the user and check their progress.'
   }
 ];
 
@@ -155,16 +156,44 @@ export function AICoachSettings({ context, onUpdate }: AICoachSettingsProps) {
   });
 
   const handleTestStyle = async () => {
+    if (!user?.uid) return;
+
     setIsTestingStyle(true);
-    
-    // Simulate AI response based on selected style
-    const selectedCommStyle = COMMUNICATION_STYLES.find(s => s.id === localPreferences.motivationStyle);
-    const selectedCoachStyle = COACHING_STYLES.find(s => s.id === localPreferences.coachingStyle);
-    
-    setTimeout(() => {
-      setTestMessage(selectedCommStyle?.example || "Hello! I'm your AI coach, ready to help you achieve your fitness goals!");
+    setTestMessage('');
+
+    try {
+      // First, save the current preferences so the AI uses them
+      await OnboardingContextService.updatePreferences(user.uid, localPreferences);
+
+      // Create a test session
+      const testSessionId = `test-${Date.now()}`;
+
+      // Make real AI call - it will automatically use the saved preferences
+      const response = await fetch('/api/ai/gemini-chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sessionId: testSessionId,
+          userId: user.uid,
+          message: "Greet me and give me a quick motivational message about starting today's workout. Keep it to 2-3 sentences.",
+          streaming: false
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to test AI style');
+      }
+
+      const data = await response.json();
+      setTestMessage(data.message || 'AI response received');
+    } catch (error) {
+      console.error('Error testing AI style:', error);
+      setTestMessage('Unable to test style at this time. Please try again.');
+    } finally {
       setIsTestingStyle(false);
-    }, 1500);
+    }
   };
 
   const handleSave = async () => {
@@ -193,57 +222,53 @@ export function AICoachSettings({ context, onUpdate }: AICoachSettingsProps) {
       {/* AI Personality Preview */}
       <Card className="border-blue-200 bg-blue-50">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
             <Bot className="h-5 w-5" />
             Your AI Coach Personality
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <Badge variant="secondary" className="flex items-center gap-1">
-                {selectedCommStyle?.icon && <selectedCommStyle.icon className="h-3 w-3" />}
-                {selectedCommStyle?.label}
-              </Badge>
-              <Badge variant="outline">{selectedCoachStyle?.label}</Badge>
-              <Badge variant="outline">{selectedFeedbackFreq?.label} Feedback</Badge>
-            </div>
-            
-            <div className="flex gap-2">
-              <Button 
-                onClick={handleTestStyle} 
-                disabled={isTestingStyle}
-                variant="outline" 
-                size="sm"
-                className="flex items-center gap-2"
-              >
-                {isTestingStyle ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Testing...
-                  </>
-                ) : (
-                  <>
-                    <Play className="h-4 w-4" />
-                    Test Style
-                  </>
-                )}
-              </Button>
-            </div>
+        <CardContent className="space-y-3">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:flex-wrap">
+            <Badge variant="secondary" className="flex items-center gap-1 text-xs w-fit">
+              {selectedCommStyle?.icon && <selectedCommStyle.icon className="h-3 w-3" />}
+              {selectedCommStyle?.label}
+            </Badge>
+            <Badge variant="outline" className="text-xs w-fit">{selectedCoachStyle?.label}</Badge>
+            <Badge variant="outline" className="text-xs w-fit">{selectedFeedbackFreq?.label} Feedback</Badge>
+          </div>
 
-            {testMessage && (
-              <div className="mt-4 p-3 bg-white rounded-lg border">
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                    <Bot className="h-4 w-4 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm">{testMessage}</p>
-                  </div>
+          <Button
+            onClick={handleTestStyle}
+            disabled={isTestingStyle}
+            variant="default"
+            size="sm"
+            className="flex items-center gap-2 w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            {isTestingStyle ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Testing...
+              </>
+            ) : (
+              <>
+                <Play className="h-4 w-4" />
+                Test Style
+              </>
+            )}
+          </Button>
+
+          {testMessage && (
+            <div className="p-3 bg-white rounded-lg border">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Bot className="h-4 w-4 text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm">{testMessage}</p>
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -266,12 +291,12 @@ export function AICoachSettings({ context, onUpdate }: AICoachSettingsProps) {
                   key={style.id}
                   onClick={() => setLocalPreferences(prev => ({ ...prev, motivationStyle: style.id as any }))}
                   className={`p-4 rounded-lg border-2 transition-all text-left ${
-                    isSelected 
-                      ? 'border-blue-500 bg-blue-50' 
+                    isSelected
+                      ? 'border-blue-500 bg-blue-50'
                       : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                   }`}
                 >
-                  <div className="flex items-center gap-3 mb-2">
+                  <div className="flex items-center gap-3">
                     <div className={`p-2 rounded-lg ${style.color}`}>
                       <Icon className="h-4 w-4" />
                     </div>
@@ -279,9 +304,6 @@ export function AICoachSettings({ context, onUpdate }: AICoachSettingsProps) {
                       <div className="font-medium">{style.label}</div>
                       <div className="text-sm text-gray-600">{style.description}</div>
                     </div>
-                  </div>
-                  <div className="text-xs text-gray-500 italic">
-                    &quot;{style.example}&quot;
                   </div>
                 </button>
               );
@@ -308,16 +330,13 @@ export function AICoachSettings({ context, onUpdate }: AICoachSettingsProps) {
                   key={style.id}
                   onClick={() => setLocalPreferences(prev => ({ ...prev, coachingStyle: style.id as any }))}
                   className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
-                    isSelected 
-                      ? 'border-blue-500 bg-blue-50' 
+                    isSelected
+                      ? 'border-blue-500 bg-blue-50'
                       : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                   }`}
                 >
                   <div className="font-medium mb-1">{style.label}</div>
-                  <div className="text-sm text-gray-600 mb-2">{style.description}</div>
-                  <div className="text-xs text-gray-500 italic">
-                    Example: &quot;{style.example}&quot;
-                  </div>
+                  <div className="text-sm text-gray-600">{style.description}</div>
                 </button>
               );
             })}

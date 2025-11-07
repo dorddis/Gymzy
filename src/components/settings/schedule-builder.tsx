@@ -144,27 +144,25 @@ export function ScheduleBuilder({ context, onUpdate }: ScheduleBuilderProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-7 gap-2">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-2 sm:gap-3">
             {DAYS_OF_WEEK.map((day) => {
               const isWorkoutDay = localSchedule.workoutDays.includes(day.id);
               const isRestDay = localSchedule.restDayPreferences.includes(day.id);
-              
+
               return (
                 <div key={day.id} className="text-center">
                   <button
                     onClick={() => handleWorkoutDayToggle(day.id)}
-                    className={`w-full p-3 rounded-lg border-2 transition-all mb-2 ${
-                      isWorkoutDay 
-                        ? 'border-green-500 bg-green-50 text-green-700' 
+                    className={`w-full min-h-[60px] sm:min-h-[72px] flex flex-col items-center justify-center p-2 sm:p-3 rounded-lg border-2 transition-all mb-2 box-border ${
+                      isWorkoutDay
+                        ? 'border-green-500 bg-green-50 text-green-700'
                         : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                     }`}
                   >
-                    <div className="font-medium">{day.short}</div>
-                    <div className="text-xs">
-                      {isWorkoutDay && <CheckCircle className="h-3 w-3 mx-auto mt-1" />}
-                    </div>
+                    <div className="font-medium text-sm sm:text-base mb-1">{day.short}</div>
+                    {isWorkoutDay && <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4" />}
                   </button>
-                  <div className="text-xs text-gray-600">{day.label}</div>
+                  <div className="text-xs text-gray-600 hidden sm:block">{day.label}</div>
                 </div>
               );
             })}
@@ -280,23 +278,25 @@ export function ScheduleBuilder({ context, onUpdate }: ScheduleBuilderProps) {
           <CardTitle>Preferred Rest Days</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-7 gap-2">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-2 sm:gap-3">
             {DAYS_OF_WEEK.map((day) => {
               const isRestDay = localSchedule.restDayPreferences.includes(day.id);
-              
+
               return (
-                <button
-                  key={day.id}
-                  onClick={() => handleRestDayToggle(day.id)}
-                  className={`p-3 rounded-lg border-2 transition-all text-center ${
-                    isRestDay 
-                      ? 'border-purple-500 bg-purple-50 text-purple-700' 
-                      : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                  }`}
-                >
-                  <div className="font-medium">{day.short}</div>
-                  {isRestDay && <CheckCircle className="h-3 w-3 mx-auto mt-1" />}
-                </button>
+                <div key={day.id} className="text-center">
+                  <button
+                    onClick={() => handleRestDayToggle(day.id)}
+                    className={`w-full min-h-[60px] sm:min-h-[72px] flex flex-col items-center justify-center p-2 sm:p-3 rounded-lg border-2 transition-all box-border ${
+                      isRestDay
+                        ? 'border-purple-500 bg-purple-50 text-purple-700'
+                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="font-medium text-sm sm:text-base mb-1">{day.short}</div>
+                    {isRestDay && <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4" />}
+                  </button>
+                  <div className="text-xs text-gray-600 hidden sm:block">{day.label}</div>
+                </div>
               );
             })}
           </div>

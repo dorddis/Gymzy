@@ -23,6 +23,13 @@ export async function compressImage(
 
   const opts = { ...DEFAULT_OPTIONS, ...options };
 
+  console.log('Compressing image:', {
+    filename: file.name,
+    originalSize: file.size,
+    originalType: file.type,
+    options: opts
+  });
+
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.src = URL.createObjectURL(file);
@@ -53,9 +60,8 @@ export async function compressImage(
         return;
       }
 
-      // Draw image with white background
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(0, 0, width, height);
+      // Draw image directly without background fill
+      // (white background was causing issues with JPEGs)
       ctx.drawImage(img, 0, 0, width, height);
 
       // Convert to blob
@@ -70,6 +76,13 @@ export async function compressImage(
           const compressedFile = new File([blob], file.name, {
             type: opts.mimeType,
             lastModified: file.lastModified,
+          });
+
+          console.log('Image compressed successfully:', {
+            originalSize: file.size,
+            compressedSize: compressedFile.size,
+            reduction: `${Math.round((1 - compressedFile.size / file.size) * 100)}%`,
+            dimensions: `${width}x${height}`
           });
 
           // Clean up

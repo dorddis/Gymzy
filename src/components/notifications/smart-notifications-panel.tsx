@@ -198,12 +198,12 @@ export function SmartNotificationsPanel({
               size="sm"
               onClick={handleGenerateNew}
               disabled={isLoading || isGenerating}
-              className="h-8 w-8 p-0"
+              className="h-8 w-8 p-0 hover:bg-blue-100"
             >
               {isGenerating ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
               ) : (
-                <RefreshCw className="h-4 w-4" />
+                <RefreshCw className="h-4 w-4 text-blue-600" />
               )}
             </Button>
           </div>
@@ -225,6 +225,7 @@ export function SmartNotificationsPanel({
               size="sm"
               onClick={handleGenerateNew}
               disabled={isGenerating}
+              className="bg-white border-2 border-blue-400 text-blue-600 hover:bg-blue-50 hover:border-blue-500 active:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-all duration-200"
             >
               {isGenerating ? (
                 <>

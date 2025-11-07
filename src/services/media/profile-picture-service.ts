@@ -79,6 +79,25 @@ export class ProfilePictureService {
       );
 
       // Create profile picture record
+      const cameraInfo = this.extractCameraInfo(originalFile);
+      const metadata: ProfilePicture['metadata'] = {
+        filters: []
+      };
+
+      // Only include camera info if it exists (Firestore doesn't allow undefined)
+      if (cameraInfo) {
+        metadata.camera = cameraInfo;
+      }
+
+      // Log Cloudinary response for debugging
+      console.log('Cloudinary upload successful:', {
+        url: cloudinaryResponse.secure_url,
+        public_id: cloudinaryResponse.public_id,
+        width: cloudinaryResponse.width,
+        height: cloudinaryResponse.height,
+        format: cloudinaryResponse.format
+      });
+
       const profilePicture: ProfilePicture = {
         id: pictureId,
         userId,
@@ -93,11 +112,13 @@ export class ProfilePictureService {
         isActive: false, // Will be set to active separately
         uploadedAt: Timestamp.now(),
         cloudinaryPublicId: cloudinaryResponse.public_id,
-        metadata: {
-          camera: this.extractCameraInfo(originalFile),
-          filters: []
-        }
+        metadata
       };
+
+      console.log('Profile picture record created:');
+      console.log('  ID:', profilePicture.id);
+      console.log('  URL:', profilePicture.url);
+      console.log('  Thumbnail:', profilePicture.thumbnailUrl);
 
       // Save to Firestore
       await setDoc(
@@ -136,10 +157,17 @@ export class ProfilePictureService {
       // Update user profile with new picture URL
       const activeProfile = await this.getProfilePicture(pictureId);
       if (activeProfile) {
+        console.log('Updating user_profiles with new picture:');
+        console.log('  User ID:', userId);
+        console.log('  Picture ID:', pictureId);
+        console.log('  New URL:', activeProfile.url);
         await updateDoc(doc(db, 'user_profiles', userId), {
           profilePicture: activeProfile.url,
           updatedAt: Timestamp.now()
         });
+        console.log('✅ user_profiles updated successfully');
+      } else {
+        console.error('❌ Failed to get active profile picture for ID:', pictureId);
       }
     } catch (error) {
       console.error('Error setting active profile picture:', error);
@@ -250,9 +278,22 @@ export class ProfilePictureService {
         const formData = new FormData();
         formData.append('file', compressedFile);
         formData.append('upload_preset', 'gymzy_profiles'); // Different preset for profiles
-        formData.append('cloud_name', process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!);
+        // Note: cloud_name is in the URL, not in form data
+
+        // Only add folder and public_id if the upload preset allows them
+        // If your preset doesn't allow these, comment them out or configure the preset
+        // to allow "folder" and "public_id" overrides
         formData.append('folder', `users/${userId}/profile`);
         formData.append('public_id', pictureId);
+
+        // Log what we're sending for debugging
+        console.log('Cloudinary upload attempt:', {
+          preset: 'gymzy_profiles',
+          folder: `users/${userId}/profile`,
+          public_id: pictureId,
+          fileSize: compressedFile.size,
+          fileType: compressedFile.type
+        });
 
         // Create XMLHttpRequest for progress tracking
         const xhr = new XMLHttpRequest();
@@ -278,7 +319,26 @@ export class ProfilePictureService {
                 reject(new Error('Invalid response from Cloudinary'));
               }
             } else {
-              reject(new Error(`Upload failed with status ${xhr.status}`));
+              // Log detailed error information
+              console.error('Cloudinary upload failed:', {
+                status: xhr.status,
+                statusText: xhr.statusText,
+                response: xhr.responseText,
+                headers: xhr.getAllResponseHeaders()
+              });
+              let errorMessage = `Upload failed with status ${xhr.status}`;
+              try {
+                const errorResponse = JSON.parse(xhr.responseText);
+                if (errorResponse.error?.message) {
+                  errorMessage += `: ${errorResponse.error.message}`;
+                }
+              } catch (e) {
+                // Response not JSON, use status text
+                if (xhr.statusText) {
+                  errorMessage += `: ${xhr.statusText}`;
+                }
+              }
+              reject(new Error(errorMessage));
             }
           };
 

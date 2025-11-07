@@ -265,7 +265,7 @@ export function QuickWorkoutTemplates() {
         <Button
           size="sm"
           onClick={() => router.push('/templates')}
-          className="bg-secondary text-white hover:bg-secondary/90 text-sm px-2 py-1 h-auto font-medium rounded-md"
+          className="bg-secondary text-white hover:bg-secondary/80 hover:shadow-md text-sm px-3 py-2 h-auto font-medium rounded-md transition-all duration-200"
         >
           View All
         </Button>
@@ -293,7 +293,7 @@ export function QuickWorkoutTemplates() {
                     variant="ghost"
                     size="sm"
                     onClick={() => viewTemplate(template)}
-                    className="p-1 h-auto text-secondary hover:text-secondary/80 hover:bg-transparent"
+                    className="p-2 h-auto text-secondary hover:text-secondary/70 hover:bg-secondary/10 rounded-md transition-all duration-200"
                   >
                     {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                   </Button>
@@ -360,7 +360,7 @@ export function QuickWorkoutTemplates() {
 
                 <Button
                   onClick={() => startWorkout(template)}
-                  className="w-full bg-primary text-white py-2 rounded-lg font-medium hover:opacity-95 flex items-center justify-center gap-2"
+                  className="w-full bg-primary text-white py-2.5 rounded-lg font-medium hover:bg-primary/90 hover:shadow-md flex items-center justify-center gap-2 transition-all duration-200"
                 >
                   <Play className="h-4 w-4" />
                   Start Workout
@@ -375,7 +375,7 @@ export function QuickWorkoutTemplates() {
         <Button
           variant="outline"
           onClick={() => router.push('/templates')}
-          className="w-full py-3 text-green-600 border-green-400 hover:border-green-600 hover:bg-green-50 font-medium"
+          className="w-full py-3 text-green-600 border-2 border-green-400 hover:border-green-500 hover:bg-green-50 hover:shadow-sm active:bg-green-100 active:text-green-700 font-medium rounded-lg transition-all duration-200"
         >
           Browse All Templates
         </Button>

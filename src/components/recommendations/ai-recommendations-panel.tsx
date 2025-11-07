@@ -153,12 +153,12 @@ export function AIRecommendationsPanel({
               size="sm"
               onClick={handleGenerateNew}
               disabled={isLoading || isGenerating}
-              className="h-8 w-8 p-0"
+              className="h-8 w-8 p-0 hover:bg-purple-100"
             >
               {isGenerating ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin text-purple-600" />
               ) : (
-                <RefreshCw className="h-4 w-4" />
+                <RefreshCw className="h-4 w-4 text-purple-600" />
               )}
             </Button>
           </div>
@@ -176,10 +176,9 @@ export function AIRecommendationsPanel({
             <Brain className="h-12 w-12 text-gray-400 mx-auto mb-3" />
             <p className="text-sm text-gray-600 mb-3">No recommendations available</p>
             <Button
-              variant="outline"
-              size="sm"
               onClick={handleGenerateNew}
               disabled={isGenerating}
+              className="bg-purple-600 hover:bg-purple-700 text-white font-medium px-6 py-2 h-auto text-sm"
             >
               {isGenerating ? (
                 <>

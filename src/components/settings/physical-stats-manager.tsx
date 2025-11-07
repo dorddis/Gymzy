@@ -18,6 +18,7 @@ import {
   Info
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { OnboardingContextService, OnboardingContext } from '@/services/data/onboarding-context-service';
 
 interface PhysicalStats {
   age: number;
@@ -38,7 +39,8 @@ interface PhysicalStats {
 }
 
 interface PhysicalStatsManagerProps {
-  onUpdate?: (stats: PhysicalStats) => void;
+  context?: OnboardingContext | null;
+  onUpdate?: (context: OnboardingContext | null) => void;
 }
 
 const GENDER_OPTIONS = [
@@ -81,10 +83,10 @@ const ACTIVITY_LEVELS = [
   }
 ];
 
-export function PhysicalStatsManager({ onUpdate }: PhysicalStatsManagerProps) {
+export function PhysicalStatsManager({ context, onUpdate }: PhysicalStatsManagerProps) {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [stats, setStats] = useState<PhysicalStats>({
+  const [stats, setStats] = useState<PhysicalStats>(context?.physicalStats || {
     age: 25,
     height: {
       value: 170,
@@ -138,17 +140,23 @@ export function PhysicalStatsManager({ onUpdate }: PhysicalStatsManagerProps) {
     return Math.round(bmr * multiplier);
   };
 
-  // Update calculations when stats change
+  // Update calculations when relevant stats change
   useEffect(() => {
-    const bmr = calculateBMR(stats);
-    const tdee = calculateTDEE(bmr, stats.activityLevel);
-    
-    setStats(prev => ({
-      ...prev,
-      bmr,
-      tdee
-    }));
-  }, [stats.age, stats.height, stats.weight, stats.gender, stats.activityLevel]);
+    const newBmr = calculateBMR(stats);
+    const newTdee = calculateTDEE(newBmr, stats.activityLevel);
+
+    // Only update if BMR or TDEE actually changed (prevents infinite loop)
+    setStats(prev => {
+      if (prev.bmr === newBmr && prev.tdee === newTdee) {
+        return prev; // No change, return same reference
+      }
+      return {
+        ...prev,
+        bmr: newBmr,
+        tdee: newTdee
+      };
+    });
+  }, [stats.age, stats.height.value, stats.height.unit, stats.height.feet, stats.height.inches, stats.weight.value, stats.weight.unit, stats.gender, stats.activityLevel]);
 
   const handleHeightChange = (value: number, unit?: 'cm' | 'ft_in') => {
     setStats(prev => ({
@@ -188,9 +196,13 @@ export function PhysicalStatsManager({ onUpdate }: PhysicalStatsManagerProps) {
 
     try {
       setIsLoading(true);
-      // Here you would save to your user profile or physical stats collection
-      // await savePhysicalStats(user.uid, stats);
-      onUpdate?.(stats);
+
+      // Save to OnboardingContext in Firestore
+      const updatedContext = await OnboardingContextService.updatePhysicalStats(user.uid, stats);
+
+      // Notify parent component
+      onUpdate?.(updatedContext);
+
       console.log('Physical stats saved:', stats);
     } catch (error) {
       console.error('Error saving physical stats:', error);

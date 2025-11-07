@@ -49,6 +49,8 @@ export async function POST(request: NextRequest) {
 
             // Extract workout data from function calls if present
             let workoutData = null;
+            let navigationTarget = null;
+
             if (response.functionCalls && response.functionCalls.length > 0) {
               const workoutCall = response.functionCalls.find((call: any) => call.name === 'generateWorkout');
               if (workoutCall && workoutCall.result?.success && workoutCall.result?.workout) {
@@ -59,12 +61,28 @@ export async function POST(request: NextRequest) {
                   notes: workoutCall.result.workout.notes
                 };
               }
+
+              // Check for navigation target from any function call
+              for (const call of response.functionCalls) {
+                if (call.result?.navigationTarget) {
+                  navigationTarget = call.result.navigationTarget;
+                  console.log('🧭 Navigation target detected:', navigationTarget);
+                  break;
+                }
+              }
             }
 
             // Send workout data if available
             if (workoutData) {
               controller.enqueue(
                 encoder.encode(`data: ${JSON.stringify({ workoutData })}\n\n`)
+              );
+            }
+
+            // Send navigation target if available
+            if (navigationTarget) {
+              controller.enqueue(
+                encoder.encode(`data: ${JSON.stringify({ navigationTarget })}\n\n`)
               );
             }
 

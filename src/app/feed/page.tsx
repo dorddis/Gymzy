@@ -7,19 +7,19 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Heart, 
-  MessageCircle, 
-  Share2, 
-  TrendingUp, 
-  Users, 
+import {
+  Heart,
+  MessageCircle,
+  Share2,
+  TrendingUp,
+  Users,
   Sparkles,
   Clock,
   Dumbbell,
   Loader2,
-  ChevronLeft,
   Search
 } from 'lucide-react';
+import { BackButton } from '@/components/layout/back-button';
 import { FeedPostSkeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
 import {
@@ -297,14 +297,7 @@ export default function FeedPage() {
       {/* Header with Back Button */}
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.back()}
-            className="p-2 hover:bg-gray-100 rounded-full"
-          >
-            <ChevronLeft className="h-5 w-5 text-gray-700" />
-          </Button>
+          <BackButton />
           <div className="flex-1">
             <h1 className="text-2xl font-bold text-gray-900 mb-2">Gymzy Community</h1>
             <div className="flex items-center justify-between">

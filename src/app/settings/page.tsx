@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ProfilePictureUpload } from '@/components/profile/profile-picture-upload';
 import { ProfilePictureService } from '@/services/media/profile-picture-service';
@@ -16,26 +16,29 @@ import { HealthInfoManager } from '@/components/settings/health-info-manager';
 import { PhysicalStatsManager } from '@/components/settings/physical-stats-manager';
 import { AICoachSettings } from '@/components/settings/ai-coach-settings';
 import { PrivacySecurityDashboard } from '@/components/settings/privacy-security-dashboard';
-import { 
-  ArrowLeft, 
-  User, 
-  Target, 
-  Dumbbell, 
-  Calendar, 
-  Heart, 
+import {
+  User,
+  Target,
+  Dumbbell,
+  Calendar,
+  Heart,
   Settings as SettingsIcon,
   Shield,
   Bell,
   Palette,
-  Loader2
+  Loader2,
+  Smartphone
 } from 'lucide-react';
+import { BackButton } from '@/components/layout/back-button';
+import { AppPreferences } from '@/components/settings/app-preferences';
 
 export default function SettingsPage() {
-  const { user } = useAuth();
+  const { user, refreshUserProfile } = useAuth();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [onboardingContext, setOnboardingContext] = useState<OnboardingContext | null>(null);
-  const [activeTab, setActiveTab] = useState('profile');
+  const [activeTab, setActiveTab] = useState('account');
+  const [fitnessSubTab, setFitnessSubTab] = useState('physical');
 
   useEffect(() => {
     if (user?.uid) {
@@ -72,8 +75,10 @@ export default function SettingsPage() {
 
       await ProfilePictureService.setActiveProfilePicture(user.uid, profilePicture.id);
 
-      // Refresh user data or show success message
-      console.log('Profile picture updated successfully');
+      // Refresh user profile to show new picture
+      console.log('Profile picture updated successfully, refreshing user profile...');
+      await refreshUserProfile();
+      console.log('User profile refreshed');
     } catch (error) {
       console.error('Error uploading profile picture:', error);
     } finally {
@@ -89,6 +94,9 @@ export default function SettingsPage() {
       const activeProfile = await ProfilePictureService.getActiveProfilePicture(user.uid);
       if (activeProfile) {
         await ProfilePictureService.deleteProfilePicture(activeProfile.id);
+        // Refresh user profile to clear removed picture
+        await refreshUserProfile();
+        console.log('Profile picture removed and user profile refreshed');
       }
     } catch (error) {
       console.error('Error removing profile picture:', error);
@@ -112,62 +120,47 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <main className="flex-1 overflow-y-auto p-4 md:p-6 pb-20">
+      <main className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8 pb-20 max-w-4xl mx-auto">
         {/* Header with Back Button */}
-        <div className="mb-6">
-          <div className="flex items-center gap-3 mb-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.back()}
-              className="p-2 hover:bg-gray-100 rounded-full"
-            >
-              <ArrowLeft className="h-5 w-5 text-gray-700" />
-            </Button>
-            <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
+        <div className="mb-4 sm:mb-6">
+          <div className="flex items-center gap-2 sm:gap-3 mb-4">
+            <BackButton />
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Settings</h1>
           </div>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
-            <TabsTrigger value="profile" className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              <span className="hidden sm:inline">Profile</span>
-            </TabsTrigger>
-            <TabsTrigger value="physical" className="flex items-center gap-2">
-              <SettingsIcon className="h-4 w-4" />
-              <span className="hidden sm:inline">Physical</span>
-            </TabsTrigger>
-            <TabsTrigger value="goals" className="flex items-center gap-2">
-              <Target className="h-4 w-4" />
-              <span className="hidden sm:inline">Goals</span>
-            </TabsTrigger>
-            <TabsTrigger value="equipment" className="flex items-center gap-2">
-              <Dumbbell className="h-4 w-4" />
-              <span className="hidden sm:inline">Equipment</span>
-            </TabsTrigger>
-            <TabsTrigger value="schedule" className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              <span className="hidden sm:inline">Schedule</span>
-            </TabsTrigger>
-            <TabsTrigger value="health" className="flex items-center gap-2">
-              <Heart className="h-4 w-4" />
-              <span className="hidden sm:inline">Health</span>
-            </TabsTrigger>
-            <TabsTrigger value="ai" className="flex items-center gap-2">
-              <SettingsIcon className="h-4 w-4" />
-              <span className="hidden sm:inline">AI Coach</span>
-            </TabsTrigger>
-            <TabsTrigger value="privacy" className="flex items-center gap-2">
-              <SettingsIcon className="h-4 w-4" />
-              <span className="hidden sm:inline">Privacy</span>
-            </TabsTrigger>
-          </TabsList>
+          <div className="w-full overflow-x-auto scrollbar-hide">
+            <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-3 lg:grid-cols-5 gap-1">
+              <TabsTrigger value="account" className="flex items-center gap-2 flex-shrink-0 px-4">
+                <User className="h-4 w-4" />
+                <span>Account</span>
+              </TabsTrigger>
+              <TabsTrigger value="fitness" className="flex items-center gap-2 flex-shrink-0 px-4">
+                <Target className="h-4 w-4" />
+                <span>Fitness</span>
+              </TabsTrigger>
+              <TabsTrigger value="app" className="flex items-center gap-2 flex-shrink-0 px-4">
+                <Smartphone className="h-4 w-4" />
+                <span>App</span>
+              </TabsTrigger>
+              <TabsTrigger value="ai" className="flex items-center gap-2 flex-shrink-0 px-4">
+                <SettingsIcon className="h-4 w-4" />
+                <span>AI</span>
+              </TabsTrigger>
+              <TabsTrigger value="privacy" className="flex items-center gap-2 flex-shrink-0 px-4">
+                <Shield className="h-4 w-4" />
+                <span>Privacy</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
-          <TabsContent value="profile" className="space-y-6">
+          {/* Account Tab - Basic Profile Info */}
+          <TabsContent value="account" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle>Profile Picture</CardTitle>
+                <CardDescription>Update your profile photo</CardDescription>
               </CardHeader>
               <CardContent>
                 <ProfilePictureUpload
@@ -182,6 +175,7 @@ export default function SettingsPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Personal Information</CardTitle>
+                <CardDescription>Manage your account details</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
@@ -222,36 +216,78 @@ export default function SettingsPage() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="goals" className="space-y-6">
-            <FitnessGoalsEditor
-              context={onboardingContext}
-              onUpdate={setOnboardingContext}
-            />
-          </TabsContent>
+          {/* Fitness Profile Tab - Nested Tabs for Clean Navigation */}
+          <TabsContent value="fitness" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Your Fitness Profile</CardTitle>
+                <CardDescription>
+                  These settings help Gymzy personalize your experience and provide better AI recommendations
+                </CardDescription>
+              </CardHeader>
+            </Card>
 
-          <TabsContent value="equipment" className="space-y-6">
-            <EquipmentManager
-              context={onboardingContext}
-              onUpdate={setOnboardingContext}
-            />
-          </TabsContent>
+            <Tabs value={fitnessSubTab} onValueChange={setFitnessSubTab} className="w-full">
+              <div className="w-full overflow-x-auto scrollbar-hide">
+                <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-1">
+                  <TabsTrigger value="physical" className="flex items-center gap-2 flex-shrink-0 px-3">
+                    <SettingsIcon className="h-4 w-4" />
+                    <span>Physical</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="goals" className="flex items-center gap-2 flex-shrink-0 px-3">
+                    <Target className="h-4 w-4" />
+                    <span>Goals</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="equipment" className="flex items-center gap-2 flex-shrink-0 px-3">
+                    <Dumbbell className="h-4 w-4" />
+                    <span>Equipment</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="schedule" className="flex items-center gap-2 flex-shrink-0 px-3">
+                    <Calendar className="h-4 w-4" />
+                    <span>Schedule</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="health" className="flex items-center gap-2 flex-shrink-0 px-3">
+                    <Heart className="h-4 w-4" />
+                    <span>Health</span>
+                  </TabsTrigger>
+                </TabsList>
+              </div>
 
-          <TabsContent value="physical" className="space-y-6">
-            <PhysicalStatsManager />
-          </TabsContent>
+              <TabsContent value="physical" className="space-y-4">
+                <PhysicalStatsManager
+                  context={onboardingContext}
+                  onUpdate={setOnboardingContext}
+                />
+              </TabsContent>
 
-          <TabsContent value="schedule" className="space-y-6">
-            <ScheduleBuilder
-              context={onboardingContext}
-              onUpdate={setOnboardingContext}
-            />
-          </TabsContent>
+              <TabsContent value="goals" className="space-y-4">
+                <FitnessGoalsEditor
+                  context={onboardingContext}
+                  onUpdate={setOnboardingContext}
+                />
+              </TabsContent>
 
-          <TabsContent value="health" className="space-y-6">
-            <HealthInfoManager
-              context={onboardingContext}
-              onUpdate={setOnboardingContext}
-            />
+              <TabsContent value="equipment" className="space-y-4">
+                <EquipmentManager
+                  context={onboardingContext}
+                  onUpdate={setOnboardingContext}
+                />
+              </TabsContent>
+
+              <TabsContent value="schedule" className="space-y-4">
+                <ScheduleBuilder
+                  context={onboardingContext}
+                  onUpdate={setOnboardingContext}
+                />
+              </TabsContent>
+
+              <TabsContent value="health" className="space-y-4">
+                <HealthInfoManager
+                  context={onboardingContext}
+                  onUpdate={setOnboardingContext}
+                />
+              </TabsContent>
+            </Tabs>
           </TabsContent>
 
           <TabsContent value="ai" className="space-y-6">
@@ -266,18 +302,7 @@ export default function SettingsPage() {
           </TabsContent>
 
           <TabsContent value="app" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>App Preferences</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-gray-500">
-                  <SettingsIcon className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                  <p>App settings coming soon!</p>
-                  <p className="text-sm">You&apos;ll be able to customize app preferences here.</p>
-                </div>
-              </CardContent>
-            </Card>
+            <AppPreferences />
           </TabsContent>
         </Tabs>
       </main>

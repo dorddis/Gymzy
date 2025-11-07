@@ -275,24 +275,24 @@ export function CommunityFeed() {
               </div>
             </div>
 
-            <div className="flex justify-between text-sm text-gray-500">
+            <div className="flex items-center gap-1 text-sm">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => handleLike(post.id)}
-                className="flex items-center p-1 h-auto text-green-600 hover:text-green-600"
+                className="flex items-center gap-1 px-3 py-2 h-auto text-gray-600 hover:text-green-600 hover:bg-green-50 transition-colors rounded-lg"
               >
-                <Heart className={`mr-1 w-4 h-4 ${likedPosts[post.id] ? 'fill-current text-green-600' : ''}`} />
-                {(isWorkoutPost ? post.likesCount : (post as any).likes) + (likedPosts[post.id] ? 1 : 0)}
+                <Heart className={`w-4 h-4 ${likedPosts[post.id] ? 'fill-current text-green-600' : ''}`} />
+                <span className="font-medium">{(isWorkoutPost ? post.likesCount : (post as any).likes) + (likedPosts[post.id] ? 1 : 0)}</span>
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => router.push(`/feed?post=${post.id}`)}
-                className="flex items-center p-1 h-auto text-green-600 hover:text-green-600"
+                className="flex items-center gap-1 px-3 py-2 h-auto text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-colors rounded-lg"
               >
-                <MessageSquare className="mr-1 w-4 h-4" />
-                {isWorkoutPost ? post.commentsCount : (post as any).comments}
+                <MessageSquare className="w-4 h-4" />
+                <span className="font-medium">{isWorkoutPost ? post.commentsCount : (post as any).comments}</span>
               </Button>
               <Button
                 variant="ghost"
@@ -309,9 +309,10 @@ export function CommunityFeed() {
                     navigator.clipboard.writeText(window.location.href);
                   }
                 }}
-                className="flex items-center p-1 h-auto text-green-600 hover:text-green-600"
+                className="flex items-center gap-1 px-3 py-2 h-auto text-gray-600 hover:text-purple-600 hover:bg-purple-50 transition-colors rounded-lg"
               >
                 <Share2 className="w-4 h-4" />
+                <span className="font-medium">Share</span>
               </Button>
             </div>
           </Card>

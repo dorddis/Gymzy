@@ -5,20 +5,20 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { 
-  Dumbbell, 
-  Clock, 
-  Zap, 
-  Target, 
+import {
+  Dumbbell,
+  Clock,
+  Zap,
+  Target,
   Play,
   Heart,
   Flame,
   Activity,
-  ChevronLeft,
   Search,
   Filter
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { BackButton } from '@/components/layout/back-button';
 import { useWorkout } from '@/contexts/WorkoutContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { EXERCISES } from '@/lib/constants';
@@ -288,14 +288,7 @@ export default function TemplatesPage() {
       {/* Header */}
       <div className="sticky top-0 z-10 bg-background border-b border-gray-200 px-4 py-3">
         <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.back()}
-            className="p-2"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </Button>
+          <BackButton />
           <h1 className="text-xl font-semibold">Workout Templates</h1>
         </div>
       </div>

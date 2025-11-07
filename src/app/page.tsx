@@ -66,7 +66,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-background flex flex-col">
       <StatusBar />
       <main className="flex-1 overflow-y-auto">
-        <div className="container mx-auto px-4 py-6 space-y-6 pb-24">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8 space-y-6 pb-24 max-w-4xl">
           {/* AI Welcome Message */}
           <AIWelcomeMessage />
 
@@ -90,7 +90,7 @@ export default function HomePage() {
               <DialogTrigger asChild>
                 <Button
                   variant="outline"
-                  className="flex items-center gap-2 px-6 py-3 text-purple-600 border-purple-400 hover:border-purple-600 hover:bg-purple-50 font-medium rounded-lg"
+                  className="flex items-center gap-2 px-6 py-3 text-purple-600 border-2 border-purple-400 hover:border-purple-500 hover:bg-purple-50 hover:shadow-sm active:bg-purple-100 active:text-purple-700 font-medium rounded-lg transition-all duration-200"
                 >
                   <Heart className="h-4 w-4" />
                   Daily Check-in

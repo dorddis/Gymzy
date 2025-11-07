@@ -187,16 +187,20 @@ export function NotificationsDropdown() {
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-6 w-6 relative">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-full relative hover:bg-gray-100 active:bg-gray-200"
+        >
           {unreadCount > 0 ? (
-            <BellRing className="h-3 w-3" />
+            <BellRing className="h-5 w-5 text-gray-700" />
           ) : (
-            <Bell className="h-3 w-3" />
+            <Bell className="h-5 w-5 text-gray-700" />
           )}
           {unreadCount > 0 && (
-            <Badge 
-              variant="destructive" 
-              className="absolute -top-1 -right-1 h-4 w-4 p-0 text-xs flex items-center justify-center"
+            <Badge
+              variant="destructive"
+              className="absolute -top-1 -right-1 h-5 w-5 p-0 text-[10px] flex items-center justify-center font-semibold"
             >
               {unreadCount > 9 ? '9+' : unreadCount}
             </Badge>
@@ -211,7 +215,7 @@ export function NotificationsDropdown() {
               variant="ghost"
               size="sm"
               onClick={markAllAsRead}
-              className="text-xs h-auto p-1"
+              className="text-xs h-auto p-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium"
             >
               Mark all read
             </Button>
@@ -284,11 +288,14 @@ export function NotificationsDropdown() {
         {notifications.length > 0 && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="justify-center">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="w-full text-center"
+            <DropdownMenuItem
+              className="justify-center p-0 focus:bg-transparent"
+              onSelect={(e) => e.preventDefault()}
+            >
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full text-center text-blue-600 hover:text-blue-700 hover:bg-blue-50 active:bg-blue-100 font-medium transition-colors duration-200"
                 onClick={() => {
                   window.location.href = '/notifications';
                   setIsOpen(false);

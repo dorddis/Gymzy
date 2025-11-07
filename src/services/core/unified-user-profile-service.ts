@@ -78,7 +78,10 @@ export class UnifiedUserProfileService {
       
       if (profileSnap.exists()) {
         const profile = profileSnap.data() as UserProfile;
-        console.log('✅ UnifiedUserProfileService: Profile loaded successfully');
+        console.log('✅ UnifiedUserProfileService: Profile loaded successfully', {
+          profilePicture: profile.profilePicture,
+          displayName: profile.displayName
+        });
         return profile;
       } else {
         console.log('📭 UnifiedUserProfileService: No profile found');

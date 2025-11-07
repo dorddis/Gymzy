@@ -8,7 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Users, UserPlus, UserCheck, Loader2, ArrowLeft } from 'lucide-react';
+import { Search, Users, UserPlus, UserCheck, Loader2 } from 'lucide-react';
+import { BackButton } from '@/components/layout/back-button';
 import {
   searchUsers,
   getSuggestedUsers,
@@ -147,7 +148,7 @@ export default function DiscoverPage() {
             </div>
             
             <Button
-              variant={isFollowingUser ? "outline" : "default"}
+              variant={isFollowingUser ? "secondary" : "default"}
               size="sm"
               onClick={() => handleFollowToggle(targetUser.uid)}
               disabled={isLoading}
@@ -199,18 +200,11 @@ export default function DiscoverPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-4xl">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8 max-w-3xl">
       {/* Header with Back Button */}
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.back()}
-            className="p-2 hover:bg-gray-100 rounded-full"
-          >
-            <ArrowLeft className="h-5 w-5 text-gray-700" />
-          </Button>
+          <BackButton />
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Discover People</h1>
             <p className="text-gray-600 text-sm">

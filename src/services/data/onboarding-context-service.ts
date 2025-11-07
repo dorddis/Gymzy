@@ -90,7 +90,26 @@ export interface OnboardingContext {
     nutritionTracking: boolean;
     sleepTracking: boolean;
   };
-  
+
+  // Physical Stats (for nutrition calculations and AI personalization)
+  physicalStats?: {
+    age: number;
+    height: {
+      value: number;
+      unit: 'cm' | 'ft_in';
+      feet?: number;
+      inches?: number;
+    };
+    weight: {
+      value: number;
+      unit: 'kg' | 'lbs';
+    };
+    gender: 'male' | 'female' | 'other' | 'prefer_not_to_say';
+    activityLevel: 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active' | 'extremely_active';
+    bmr: number;
+    tdee: number;
+  };
+
   lastUpdated: Timestamp;
   version: number; // for tracking context evolution
 }
@@ -227,18 +246,29 @@ export class OnboardingContextService {
     }
   }
 
+  /**
+   * Get or create onboarding context
+   * Auto-creates with defaults if missing
+   */
+  private static async getOrCreateContext(userId: string): Promise<OnboardingContext> {
+    let context = await this.getOnboardingContext(userId);
+
+    if (!context) {
+      console.log('⚠️ No onboarding context found, creating with defaults for user:', userId);
+      context = await this.createOnboardingContext(userId, {});
+    }
+
+    return context;
+  }
+
   static async updateFitnessGoals(
     userId: string,
     goals: Partial<OnboardingContext['fitnessGoals']>
-  ): Promise<void> {
+  ): Promise<OnboardingContext> {
     try {
-      const context = await this.getOnboardingContext(userId);
-      if (!context) {
-        throw new Error('Onboarding context not found');
-      }
-
+      const context = await this.getOrCreateContext(userId);
       const updatedGoals = { ...context.fitnessGoals, ...goals };
-      await this.updateOnboardingContext(userId, { fitnessGoals: updatedGoals });
+      return await this.updateOnboardingContext(userId, { fitnessGoals: updatedGoals });
     } catch (error) {
       console.error('Error updating fitness goals:', error);
       throw new Error('Failed to update fitness goals');
@@ -248,15 +278,11 @@ export class OnboardingContextService {
   static async updateExperienceLevel(
     userId: string,
     experience: Partial<OnboardingContext['experienceLevel']>
-  ): Promise<void> {
+  ): Promise<OnboardingContext> {
     try {
-      const context = await this.getOnboardingContext(userId);
-      if (!context) {
-        throw new Error('Onboarding context not found');
-      }
-
+      const context = await this.getOrCreateContext(userId);
       const updatedExperience = { ...context.experienceLevel, ...experience };
-      await this.updateOnboardingContext(userId, { experienceLevel: updatedExperience });
+      return await this.updateOnboardingContext(userId, { experienceLevel: updatedExperience });
     } catch (error) {
       console.error('Error updating experience level:', error);
       throw new Error('Failed to update experience level');
@@ -266,15 +292,11 @@ export class OnboardingContextService {
   static async updateEquipment(
     userId: string,
     equipment: Partial<OnboardingContext['equipment']>
-  ): Promise<void> {
+  ): Promise<OnboardingContext> {
     try {
-      const context = await this.getOnboardingContext(userId);
-      if (!context) {
-        throw new Error('Onboarding context not found');
-      }
-
+      const context = await this.getOrCreateContext(userId);
       const updatedEquipment = { ...context.equipment, ...equipment };
-      await this.updateOnboardingContext(userId, { equipment: updatedEquipment });
+      return await this.updateOnboardingContext(userId, { equipment: updatedEquipment });
     } catch (error) {
       console.error('Error updating equipment:', error);
       throw new Error('Failed to update equipment');
@@ -284,15 +306,11 @@ export class OnboardingContextService {
   static async updateSchedule(
     userId: string,
     schedule: Partial<OnboardingContext['schedule']>
-  ): Promise<void> {
+  ): Promise<OnboardingContext> {
     try {
-      const context = await this.getOnboardingContext(userId);
-      if (!context) {
-        throw new Error('Onboarding context not found');
-      }
-
+      const context = await this.getOrCreateContext(userId);
       const updatedSchedule = { ...context.schedule, ...schedule };
-      await this.updateOnboardingContext(userId, { schedule: updatedSchedule });
+      return await this.updateOnboardingContext(userId, { schedule: updatedSchedule });
     } catch (error) {
       console.error('Error updating schedule:', error);
       throw new Error('Failed to update schedule');
@@ -302,15 +320,11 @@ export class OnboardingContextService {
   static async updatePreferences(
     userId: string,
     preferences: Partial<OnboardingContext['preferences']>
-  ): Promise<void> {
+  ): Promise<OnboardingContext> {
     try {
-      const context = await this.getOnboardingContext(userId);
-      if (!context) {
-        throw new Error('Onboarding context not found');
-      }
-
+      const context = await this.getOrCreateContext(userId);
       const updatedPreferences = { ...context.preferences, ...preferences };
-      await this.updateOnboardingContext(userId, { preferences: updatedPreferences });
+      return await this.updateOnboardingContext(userId, { preferences: updatedPreferences });
     } catch (error) {
       console.error('Error updating preferences:', error);
       throw new Error('Failed to update preferences');
@@ -320,18 +334,27 @@ export class OnboardingContextService {
   static async updateHealthInfo(
     userId: string,
     healthInfo: Partial<OnboardingContext['healthInfo']>
-  ): Promise<void> {
+  ): Promise<OnboardingContext> {
     try {
-      const context = await this.getOnboardingContext(userId);
-      if (!context) {
-        throw new Error('Onboarding context not found');
-      }
-
+      const context = await this.getOrCreateContext(userId);
       const updatedHealthInfo = { ...context.healthInfo, ...healthInfo };
-      await this.updateOnboardingContext(userId, { healthInfo: updatedHealthInfo });
+      return await this.updateOnboardingContext(userId, { healthInfo: updatedHealthInfo });
     } catch (error) {
       console.error('Error updating health info:', error);
       throw new Error('Failed to update health info');
+    }
+  }
+
+  static async updatePhysicalStats(
+    userId: string,
+    physicalStats: OnboardingContext['physicalStats']
+  ): Promise<OnboardingContext> {
+    try {
+      const context = await this.getOrCreateContext(userId);
+      return await this.updateOnboardingContext(userId, { physicalStats });
+    } catch (error) {
+      console.error('Error updating physical stats:', error);
+      throw new Error('Failed to update physical stats');
     }
   }
 }

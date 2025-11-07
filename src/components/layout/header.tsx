@@ -11,8 +11,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User, Settings, LogOut, HelpCircle, Bell } from 'lucide-react';
+import { User, Settings, LogOut, Activity } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { NotificationsDropdown } from './notifications-dropdown';
 
 export function StatusBar() {
   const { user, signOut } = useAuth();
@@ -46,9 +47,7 @@ export function StatusBar() {
       <h1 className="text-xl font-semibold text-primary font-inter">Gymzy</h1>
 
       <div className="flex items-center space-x-3">
-        <Button variant="ghost" size="icon" className="rounded-full">
-          <Bell className="h-5 w-5" />
-        </Button>
+        <NotificationsDropdown />
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -77,9 +76,9 @@ export function StatusBar() {
               <Settings className="mr-2 h-4 w-4" />
               <span>Settings</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => router.push('/help')}>
-              <HelpCircle className="mr-2 h-4 w-4" />
-              <span>Help & Support</span>
+            <DropdownMenuItem onClick={() => router.push('/stats')}>
+              <Activity className="mr-2 h-4 w-4" />
+              <span>Stats</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem

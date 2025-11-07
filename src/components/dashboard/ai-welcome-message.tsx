@@ -283,7 +283,7 @@ export function AIWelcomeMessage() {
         </div>
         
         <div
-          className="ai-message-clickable mb-3 cursor-pointer hover:bg-primary/5 rounded-lg p-2 -m-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+          className="ai-message-clickable mb-3 cursor-pointer hover:bg-primary/5 rounded-lg p-2 -m-2 transition-all duration-200"
           onClick={handleMessageClick}
         >
           {isLoading ? (

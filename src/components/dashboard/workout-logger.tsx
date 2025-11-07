@@ -168,7 +168,7 @@ export function WorkoutLogger() {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col items-stretch p-4 pt-2">
-            <Button type="submit" className="w-full transition-all duration-150 ease-in-out hover:shadow-lg active:scale-95">
+            <Button type="submit" className="w-full transition-all duration-150 ease-in-out hover:shadow-lg">
               <Dumbbell className="mr-2 h-5 w-5" /> Log Exercise
             </Button>
             <div className={cn("mt-3 text-sm text-center p-2 rounded-md bg-accent/10 text-accent-foreground transition-opacity duration-500 ease-in-out", showFeedback ? "opacity-100 max-h-40" : "opacity-0 max-h-0 overflow-hidden")}>

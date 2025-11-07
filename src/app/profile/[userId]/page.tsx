@@ -16,9 +16,9 @@ import {
   Target,
   TrendingUp,
   Loader2,
-  Settings,
-  ArrowLeft
+  Settings
 } from 'lucide-react';
+import { BackButton } from '@/components/layout/back-button';
 import {
   followUser,
   unfollowUser,
@@ -187,23 +187,16 @@ export default function UserProfilePage() {
   const isOwnProfile = currentUser?.uid === userId;
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-4xl">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8 max-w-3xl">
       {/* Back Button */}
       <div className="mb-4">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => router.back()}
-          className="p-2 hover:bg-gray-100 rounded-full"
-        >
-          <ArrowLeft className="h-5 w-5 text-gray-700" />
-        </Button>
+        <BackButton />
       </div>
 
       {/* Profile Header */}
       <Card className="mb-6">
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-6">
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
             <Avatar className="h-24 w-24">
               <AvatarImage src={userProfile.profilePicture} />
               <AvatarFallback className="text-2xl">
@@ -250,7 +243,7 @@ export default function UserProfilePage() {
                 </Button>
               ) : (
                 <Button
-                  variant={isFollowingUser ? "outline" : "default"}
+                  variant={isFollowingUser ? "secondary" : "default"}
                   onClick={handleFollowToggle}
                   disabled={isFollowLoading}
                 >
@@ -271,7 +264,7 @@ export default function UserProfilePage() {
 
       {/* Profile Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="workouts">Workouts</TabsTrigger>
           <TabsTrigger value="followers">Followers</TabsTrigger>
@@ -279,7 +272,7 @@ export default function UserProfilePage() {
         </TabsList>
         
         <TabsContent value="overview" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">

@@ -1,6 +1,8 @@
 "use client";
 
 import React from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Button } from '@/components/ui/button';
 import { Play } from 'lucide-react';
 
@@ -17,64 +19,6 @@ interface ChatBubbleProps {
 export function ChatBubble({ role, content, workoutData, onStartWorkout }: ChatBubbleProps) {
   const isUser = role === 'user';
 
-  // Format content with basic markdown-like formatting
-  const formatContent = (text: string) => {
-    // Split by double newlines for paragraphs
-    const paragraphs = text.split('\n\n');
-
-    return paragraphs.map((paragraph, index) => {
-      // Handle bullet points
-      if (paragraph.includes('•') || paragraph.includes('-')) {
-        const lines = paragraph.split('\n');
-        return (
-          <div key={index} className={index > 0 ? 'mt-3' : ''}>
-            {lines.map((line, lineIndex) => {
-              if (line.trim().startsWith('•') || line.trim().startsWith('-')) {
-                return (
-                  <div key={lineIndex} className="flex items-start mb-1">
-                    <span className="mr-2 mt-1">•</span>
-                    <span>{line.replace(/^[•-]\s*/, '')}</span>
-                  </div>
-                );
-              }
-              return <div key={lineIndex} className="mb-1">{line}</div>;
-            })}
-          </div>
-        );
-      }
-
-      // Handle numbered lists
-      if (/^\d+\./.test(paragraph.trim())) {
-        const lines = paragraph.split('\n');
-        return (
-          <div key={index} className={index > 0 ? 'mt-3' : ''}>
-            {lines.map((line, lineIndex) => {
-              if (/^\d+\./.test(line.trim())) {
-                return (
-                  <div key={lineIndex} className="mb-1">
-                    {line}
-                  </div>
-                );
-              }
-              return <div key={lineIndex} className="mb-1 ml-4">{line}</div>;
-            })}
-          </div>
-        );
-      }
-
-      // Regular paragraphs
-      return (
-        <div key={index} className={index > 0 ? 'mt-3' : ''}>
-          {paragraph.split('\n').map((line, lineIndex) => (
-            <div key={lineIndex} className={lineIndex > 0 ? 'mt-1' : ''}>
-              {line}
-            </div>
-          ))}
-        </div>
-      );
-    });
-  };
-
   return (
     <div
       className={`p-3 rounded-xl max-w-[75%] leading-relaxed
@@ -84,7 +28,15 @@ export function ChatBubble({ role, content, workoutData, onStartWorkout }: ChatB
             : 'bg-gray-100 text-gray-800 self-start mr-auto rounded-bl-none'
         }`}
     >
-      {isUser ? content : formatContent(content)}
+      {isUser ? (
+        <div className="whitespace-pre-wrap">{content}</div>
+      ) : (
+        <div className="prose prose-sm max-w-none prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-1">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {content}
+          </ReactMarkdown>
+        </div>
+      )}
 
       {/* Workout Start Button */}
       {!isUser && workoutData && onStartWorkout && (

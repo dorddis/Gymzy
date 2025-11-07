@@ -47,7 +47,7 @@ export async function uploadMedia(
       const formData = new FormData();
       formData.append('file', compressedFile);
       formData.append('upload_preset', 'gymzy_workouts');
-      formData.append('cloud_name', process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!);
+      // Note: cloud_name is in the URL, not in form data (causes 400 error if included)
       formData.append('folder', `users/${userId}/workouts/${workoutId}`);
 
       // Create XMLHttpRequest for progress tracking
