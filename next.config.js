@@ -6,6 +6,17 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true, // ⚠️ Temporarily disabled due to Next.js 15 circular structure bug
   },
+
+  // Performance optimizations
+  reactStrictMode: true,
+  productionBrowserSourceMaps: false, // Disable source maps in production for smaller bundles
+  compress: true, // Enable gzip compression
+
+  // Optimize package imports to reduce bundle size
+  experimental: {
+    optimizePackageImports: ['lucide-react', 'recharts', '@/components/ui'],
+  },
+
   images: {
     remotePatterns: [
       {
@@ -15,6 +26,7 @@ const nextConfig = {
         pathname: '/**',
       },
     ],
+    formats: ['image/avif', 'image/webp'], // Use modern image formats
   },
   webpack(config) {
     // ─── Step A: Remove Next.js’s default “.svg → file-loader/asset” rule ───

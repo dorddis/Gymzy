@@ -1,0 +1,63 @@
+08:33:04.538 Running build in Washington, D.C., USA (East) – iad1
+08:33:04.539 Build machine configuration: 2 cores, 8 GB
+08:33:04.549 Cloning github.com/dorddis/Gymzy (Branch: master, Commit: 29f6709)
+08:33:04.550 Skipping build cache, deployment was triggered without cache.
+08:33:05.086 Cloning completed: 537.000ms
+08:33:05.602 Running "vercel build"
+08:33:06.010 Vercel CLI 48.8.2
+08:33:06.390 Running "install" command: `npm ci`...
+08:33:12.010 npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+08:33:13.865 npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+08:33:14.062 npm warn deprecated google-p12-pem@4.0.1: Package is no longer maintained
+08:33:15.655 npm warn deprecated @types/handlebars@4.1.0: This is a stub types definition. handlebars provides its own type definitions, so you do not need this installed.
+08:33:18.499 npm warn deprecated three-mesh-bvh@0.7.8: Deprecated due to three.js version incompatibility. Please use v0.8.0, instead.
+08:33:18.990 npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+08:33:19.111 npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+08:34:46.105 
+08:34:46.106 added 1524 packages, and audited 1525 packages in 2m
+08:34:46.107 
+08:34:46.107 234 packages are looking for funding
+08:34:46.107   run `npm fund` for details
+08:34:46.175 
+08:34:46.176 13 vulnerabilities (5 low, 3 moderate, 4 high, 1 critical)
+08:34:46.176 
+08:34:46.176 To address issues that do not require attention, run:
+08:34:46.177   npm audit fix
+08:34:46.177 
+08:34:46.177 To address all issues (including breaking changes), run:
+08:34:46.177   npm audit fix --force
+08:34:46.177 
+08:34:46.178 Run `npm audit` for details.
+08:34:46.222 Detected Next.js version: 15.2.3
+08:34:46.222 Running "npm run build"
+08:34:46.336 
+08:34:46.337 > nextn@0.1.0 build
+08:34:46.337 > next build
+08:34:46.337 
+08:34:46.982    ▲ Next.js 15.2.3
+08:34:46.983 
+08:34:46.996    Creating an optimized production build ...
+08:35:30.926  ⚠ Compiled with warnings
+08:35:30.926 
+08:35:30.927 ./src/services/ai/gemini-chat-service.ts
+08:35:30.927 Attempted import error: 'getWorkouts' is not exported from '@/services/core/workout-service' (imported as 'getWorkouts').
+08:35:30.927 
+08:35:30.927 Import trace for requested module:
+08:35:30.927 ./src/services/ai/gemini-chat-service.ts
+08:35:30.927 ./src/app/api/ai/gemini-chat/route.ts
+08:35:30.927 
+08:35:30.930    Linting and checking validity of types ...
+08:35:31.118  ⨯ ESLint must be installed in order to run during builds: npm install --save-dev eslint
+08:35:50.943 Failed to compile.
+08:35:50.943 
+08:35:50.943 ./archive/ai-old/agent.ts:2:34
+08:35:50.943 Type error: Module '"@langchain/langgraph"' has no exported member 'CompiledGraph'.
+08:35:50.943 
+08:35:50.943 [0m [90m 1 |[39m [90m// Core LangChain and LangGraph imports[39m[0m
+08:35:50.945 [0m[31m[1m>[22m[39m[90m 2 |[39m [36mimport[39m { [33mStateGraph[39m[33m,[39m [33mEND[39m[33m,[39m [33mSTART[39m[33m,[39m [33mCompiledGraph[39m } [36mfrom[39m [32m'@langchain/langgraph'[39m[33m;[39m[0m
+08:35:50.945 [0m [90m   |[39m                                  [31m[1m^[22m[39m[0m
+08:35:50.945 [0m [90m 3 |[39m [36mimport[39m { [33mTool[39m } [36mfrom[39m [32m'@langchain/core/tools'[39m[33m;[39m[0m
+08:35:50.945 [0m [90m 4 |[39m [36mimport[39m { [33mRunnableLambda[39m[33m,[39m [33mTypedValue[39m } [36mfrom[39m [32m'@langchain/core/runnables'[39m[33m;[39m [90m// TypedValue might not be directly used for state definition but good to know[39m[0m
+08:35:50.945 [0m [90m 5 |[39m [36mimport[39m { [33mMessagesPlaceholder[39m[33m,[39m [33mChatPromptTemplate[39m[33m,[39m [33mPromptTemplate[39m } [36mfrom[39m [32m'@langchain/core/prompts'[39m[33m;[39m[0m
+08:35:51.014 Next.js build worker exited with code: 1 and signal: null
+08:35:51.084 Error: Command "npm run build" exited with 1

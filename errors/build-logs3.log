@@ -1,0 +1,52 @@
+09:04:20.615 Running build in Washington, D.C., USA (East) – iad1
+09:04:20.616 Build machine configuration: 2 cores, 8 GB
+09:04:20.752 Cloning github.com/dorddis/Gymzy (Branch: master, Commit: d1938d0)
+09:04:20.753 Previous build caches not available.
+09:04:21.247 Cloning completed: 495.000ms
+09:04:21.698 Running "vercel build"
+09:04:22.090 Vercel CLI 48.8.2
+09:04:22.461 Running "install" command: `npm ci`...
+09:04:27.934 npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+09:04:30.051 npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+09:04:30.442 npm warn deprecated google-p12-pem@4.0.1: Package is no longer maintained
+09:04:32.298 npm warn deprecated @types/handlebars@4.1.0: This is a stub types definition. handlebars provides its own type definitions, so you do not need this installed.
+09:04:35.126 npm warn deprecated three-mesh-bvh@0.7.8: Deprecated due to three.js version incompatibility. Please use v0.8.0, instead.
+09:04:35.875 npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+09:04:36.010 npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+09:06:04.461 
+09:06:04.462 added 1764 packages, and audited 1765 packages in 2m
+09:06:04.462 
+09:06:04.463 346 packages are looking for funding
+09:06:04.463   run `npm fund` for details
+09:06:04.529 
+09:06:04.530 13 vulnerabilities (5 low, 3 moderate, 4 high, 1 critical)
+09:06:04.530 
+09:06:04.530 To address issues that do not require attention, run:
+09:06:04.531   npm audit fix
+09:06:04.531 
+09:06:04.531 To address all issues (including breaking changes), run:
+09:06:04.531   npm audit fix --force
+09:06:04.531 
+09:06:04.532 Run `npm audit` for details.
+09:06:04.574 Detected Next.js version: 15.2.3
+09:06:04.575 Running "npm run build"
+09:06:04.682 
+09:06:04.682 > nextn@0.1.0 build
+09:06:04.683 > next build
+09:06:04.683 
+09:06:05.311    ▲ Next.js 15.2.3
+09:06:05.312 
+09:06:05.326    Creating an optimized production build ...
+09:06:30.688 Failed to compile.
+09:06:30.688 
+09:06:30.689 ./src/services/ai/gemini-chat-service.ts
+09:06:30.689 Module not found: Can't resolve '@/services/agents/function-registry'
+09:06:30.689 
+09:06:30.689 https://nextjs.org/docs/messages/module-not-found
+09:06:30.689 
+09:06:30.689 Import trace for requested module:
+09:06:30.689 ./src/app/api/ai/gemini-chat/route.ts
+09:06:30.690 
+09:06:30.690 
+09:06:30.690 > Build failed because of webpack errors
+09:06:30.752 Error: Command "npm run build" exited with 1

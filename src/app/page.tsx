@@ -1,20 +1,34 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { StatusBar } from "@/components/layout/header";
 import { HeatmapCard } from "@/components/dashboard/heatmap-card";
 import { StatsCardsRow } from "@/components/dashboard/stats-cards-row";
 import { RecentWorkoutsCarousel } from "@/components/dashboard/recent-workouts-carousel";
-import { CommunityFeed } from "@/components/dashboard/community-feed";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { AIWelcomeMessage } from "@/components/dashboard/ai-welcome-message";
-import { QuickWorkoutTemplates } from "@/components/dashboard/quick-workout-templates";
 import { useWorkout } from "@/contexts/WorkoutContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2, Heart } from "lucide-react";
-import { LifestyleTracker } from "@/components/lifestyle/lifestyle-tracker";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+
+// Dynamic imports for heavy non-critical components
+const CommunityFeed = dynamic(() => import("@/components/dashboard/community-feed").then(mod => ({ default: mod.CommunityFeed })), {
+  loading: () => <div className="animate-pulse bg-gray-200 h-48 rounded-lg" />,
+  ssr: false
+});
+
+const QuickWorkoutTemplates = dynamic(() => import("@/components/dashboard/quick-workout-templates").then(mod => ({ default: mod.QuickWorkoutTemplates })), {
+  loading: () => <div className="animate-pulse bg-gray-200 h-32 rounded-lg" />,
+  ssr: false
+});
+
+const LifestyleTracker = dynamic(() => import("@/components/lifestyle/lifestyle-tracker").then(mod => ({ default: mod.LifestyleTracker })), {
+  loading: () => <div className="flex items-center justify-center p-8"><Loader2 className="animate-spin" /></div>,
+  ssr: false
+});
 
 
 export default function HomePage() {
