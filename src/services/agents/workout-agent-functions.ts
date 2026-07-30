@@ -68,12 +68,22 @@ export class WorkoutAgentFunctions {
         totalVolume: w.totalVolume || 0
       }));
 
+      // Create a more user-friendly message with recent workouts
+      const recentWorkoutsList = limited
+        .slice(0, 3) // Show top 3
+        .map(w => `• ${w.title} (${new Date(w.date).toLocaleDateString()})`)
+        .join('\n');
+
+      const message = workouts.length <= 3
+        ? `Here are your ${workouts.length} workout${workouts.length === 1 ? '' : 's'}:\n\n${recentWorkoutsList}`
+        : `You have ${workouts.length} total workouts. Here are your most recent:\n\n${recentWorkoutsList}\n\n...and ${workouts.length - 3} more`;
+
       return {
         success: true,
-        message: `Found ${workouts.length} workout${workouts.length === 1 ? '' : 's'}`,
+        message,
         workouts: workoutSummaries,
         total: workouts.length,
-        navigationTarget: '/workout'
+        navigationTarget: '/' // Navigate to home page where recent workouts are displayed
       };
     } catch (error) {
       logger.error('[WorkoutAgentFunctions] Failed to fetch workout history', 'workout', error instanceof Error ? error : undefined, {
@@ -206,8 +216,8 @@ export class WorkoutAgentFunctions {
 
     return {
       success: true,
-      navigationTarget: '/log-workout/new',
-      message: `Starting new ${workoutType} workout session...`
+      navigationTarget: '/workout', // Navigate to workout tracking page
+      message: `Ready to start your ${workoutType} workout! Add exercises to begin.`
     };
   }
 
