@@ -14,7 +14,6 @@ process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET = 'test-project.appspot.com';
 process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID = '123456789';
 process.env.NEXT_PUBLIC_FIREBASE_APP_ID = 'test-app-id';
 process.env.NEXT_PUBLIC_GOOGLE_AI_API_KEY = 'test-google-ai-key';
-process.env.GROQ_API_KEY = 'test-groq-key';
 process.env.NEXT_PUBLIC_APP_URL = 'http://localhost:3000';
 process.env.NEXT_PUBLIC_API_URL = 'http://localhost:3000/api';
 
